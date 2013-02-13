@@ -1,11 +1,11 @@
 """
-Unpacks and deploys to a location
+Generates a file in a target location from a template
 """
 
 from sprinter.recipebase import RecipeBase
 
 
-class UnpackRecipe(RecipeBase):
+class TemplateRecipe(RecipeBase):
 
     def setup(self, config):
         pass

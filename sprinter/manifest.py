@@ -19,6 +19,13 @@ specific_version = 2.10
 recipe = sprinter.recipes.unpack
 version = 5
 specific_version = 1.8.4
+
+[mysql]
+recipe = sprinter.recipes.package
+version = 4
+apt-get = libmysqlclient
+          libmysqlclient-dev
+brew = mysql
 """
 
 test_new_version = """
@@ -31,6 +38,10 @@ specific_version = 3.0.4
 recipe = sprinter.recipes.unpack
 version = 5
 specific_version = 1.8.4
+
+[myrc]
+recipe = sprinter.recipes.template
+version = 1
 """
 
 
@@ -55,21 +66,48 @@ class Manifest(object):
             else:
                 self.source_manifest.readfp(source_manifest)
 
-    def diff(self):
+    def setups(self):
+        """
+        Return a dictionary with all the features that need to be setup.
+        >>> m.setups()
+        {'myrc': {'target': {'version': '1', 'recipe': 'sprinter.recipes.template'}}}
+        """
+        new_sections = {}
+        for s in self.target_manifest.sections():
+            if not self.source_manifest.has_section(s):
+                new_sections[s] = {"target": dict(self.target_manifest.items(s))}
+        return new_sections
+
+    def updates(self):
         """
         Return a dictionary with all the features that need to be
         updated.
-        >>> m.diff()
-        {'maven': {'target': {'version': '3', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
+        >>> m.updates()
+        {'maven': {'source': {'version': '2', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'version': '3', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
         """
         different_sections = {}
         for s in self.target_manifest.sections():
-            target_version = self.target_manifest.get(s, 'version')
-            source_version = (self.source_manifest.get(s, 'version') if
-                self.source_manifest.has_section(s) else 0)
-            if target_version != source_version:
-                different_sections[s] = {"target": dict(self.target_manifest.items(s))}
+            if self.source_manifest.has_section(s):
+                target_version = self.target_manifest.get(s, 'version')
+                source_version = self.source_manifest.get(s, 'version')
+                if target_version != source_version:
+                    different_sections[s] = {"source": dict(self.source_manifest.items(s)),
+                                             "target": dict(self.target_manifest.items(s))}
         return different_sections
+
+    def destroys(self):
+        """
+        Return a dictionary with all the features that need to be
+        destroyed.
+        >>> m.destroys()
+        {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'version': '4', 'recipe': 'sprinter.recipes.package'}}}
+        """
+        missing_sections = {}
+        for s in self.source_manifest.sections():
+            if not self.target_manifest.has_section(s):
+                missing_sections[s] = {"source": dict(self.source_manifest.items(s))}
+        return missing_sections
+
 
 if __name__ == '__main__':
     import doctest

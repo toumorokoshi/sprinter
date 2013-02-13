@@ -1,11 +1,12 @@
 """
-Unpacks and deploys to a location
+Installs a package from whatever the native package manager is
+(apt-get for debian-based, brew for OS X)
 """
 
 from sprinter.recipebase import RecipeBase
 
 
-class UnpackRecipe(RecipeBase):
+class PackageRecipe(RecipeBase):
 
     def setup(self, config):
         pass
