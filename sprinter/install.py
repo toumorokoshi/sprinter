@@ -3,6 +3,7 @@ The install script for a sprinter-based setup script.
 """
 import sys
 import argparse
+from sprinter.manifest import Manifest
 
 description = \
 """
@@ -16,7 +17,16 @@ parser.add_argument('--namespace', dest='namespace', help="Namespace to check en
 
 def main():
     args = parser.parse_args()
-    pass
+    m = Manifest(args.target)
+    # perform setups
+    for feature in m.setups():
+        pass
+    # perform updates
+    for feature in m.updates():
+        pass
+    # perform setups
+    for feature in m.destroys():
+        pass
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':
