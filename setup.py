@@ -7,5 +7,5 @@ setup(name='sprinter',
       description='a utility library to help environment bootstrapping scripts',
       author='Yusuke Tsutsumi',
       author_email='yusuke@yusuketsutsumi.com',
-      packages=['sprinter'],
+      packages=['sprinter', 'sprinter.recipes'],
      )

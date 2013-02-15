@@ -7,7 +7,7 @@ from sprinter.recipebase import RecipeBase
 
 class UnpackRecipe(RecipeBase):
 
-    def setup(self, config):
+    def setup(self, directory, config):
         pass
 
     def update(self, config):
