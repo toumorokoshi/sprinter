@@ -26,6 +26,12 @@ class Directory(object):
         """
         self.__symlink_dir("lib", name, path)
 
+    def install_directory(self, feature_name):
+        """
+        return a path to the install directory that the feature should install to.
+        """
+        pass
+
     def __generate_dir(self, root_dir):
         """ Generate the root directory root if it doesn't already exist """
         if not os.path.exists(self.root_dir):

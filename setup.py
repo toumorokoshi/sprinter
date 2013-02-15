@@ -8,4 +8,9 @@ setup(name='sprinter',
       author='Yusuke Tsutsumi',
       author_email='yusuke@yusuketsutsumi.com',
       packages=['sprinter', 'sprinter.recipes'],
+      entry_points={
+        'console_scripts': [
+            'sprinter = sprinter.install:main'
+        ]
+      }
      )
