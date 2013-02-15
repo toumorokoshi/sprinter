@@ -30,7 +30,7 @@ class Directory(object):
         """
         return a path to the install directory that the feature should install to.
         """
-        pass
+        return os.path.join(self.root_dir, "features", feature_name)
 
     def __generate_dir(self, root_dir):
         """ Generate the root directory root if it doesn't already exist """

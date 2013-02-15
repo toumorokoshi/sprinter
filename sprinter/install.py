@@ -20,9 +20,9 @@ parser.add_argument('--namespace', dest='namespace', default=None,
 
 def main():
     args = parser.parse_args()
-    m = Manifest(args.target)
+    m = Manifest(args.target[0])
     recipe_dict = {}  # a dictionary of recipe objects to perform operations with
-    d = Directory(namespace=parser.namespace)
+    d = Directory(namespace=args.namespace)
     # perform setups
     [__setup(d, name, config, recipe_dict) for name, config in m.setups().items()]
     # perform updates
@@ -42,18 +42,18 @@ def __get_recipe_instance(recipe_dict, recipe):
 
 
 def __setup(directory, name, config, recipe_dict):
-    recipe_instance = __get_recipe_instance(recipe_dict, config['target'])
-    recipe_instance.setup(directory, name, config)
+    recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
+    recipe_instance.setup(directory, name, config['target'])
 
 
 def __update(directory, name, config, recipe_dict):
-    recipe_instance = __get_recipe_instance(recipe_dict, config['target'])
+    recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
     recipe_instance.update(directory, name, config)
 
 
 def __destroy(directory, name, config, recipe_dict):
-    recipe_instance = __get_recipe_instance(recipe_dict, config['source'])
-    recipe_instance.destroy(directory, name, config)
+    recipe_instance = __get_recipe_instance(recipe_dict, config['source']['recipe'])
+    recipe_instance.destroy(directory, name, config['source'])
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':
