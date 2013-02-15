@@ -108,6 +108,11 @@ class Manifest(object):
                 missing_sections[s] = {"source": dict(self.source_manifest.items(s))}
         return missing_sections
 
+    def validate(self):
+        """
+        Checks validity of manifest files.
+        """
+        pass
 
 if __name__ == '__main__':
     import doctest
