@@ -4,6 +4,7 @@ The install script for a sprinter-based setup script.
 import sys
 import argparse
 from sprinter.manifest import Manifest
+from sprinter.directory import Directory
 
 description = \
 """
@@ -12,12 +13,14 @@ Install an environment as specified in a sprinter config file
 
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('target', metavar='T', nargs=1, help="The path to the manifest file to install")
-parser.add_argument('--namespace', dest='namespace', help="Namespace to check environment against")
+parser.add_argument('--namespace', dest='namespace', default=None,
+                    help="Namespace to check environment against")
 
 
 def main():
     args = parser.parse_args()
     m = Manifest(args.target)
+    d = Directory(namespace=parser.namespace)
     # perform setups
     for feature in m.setups():
         pass
