@@ -5,6 +5,10 @@ packages to different locations.
 """
 import os
 
+rc_template = \
+""" 
+export PATH=%s:$PATH
+"""
 
 class Directory(object):
 
@@ -57,7 +61,8 @@ class Directory(object):
         """ get the filepath and filehandle to the rc file for the environment """
         rc_path = os.path.join(root_dir, '.rc')
         if not os.path.exists(rc_path):
-            open(rc_path, "w+").close()
+            fh = open(rc_path, "w+")
+            fh.write(rc_template % os.path.join(root_dir, "bin"))
         return (rc_path, open(rc_path, "w+"))
 
     def __symlink_dir(self, dir_name, name, path):
