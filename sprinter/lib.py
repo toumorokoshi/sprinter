@@ -61,7 +61,7 @@ def inject(install_filename, inject_string, condition=None, namespace=None):
 
 def install_sprinter(environment):
     path = ". %s" % environment.rc_path()
-    install_file = "~/.bash_profile" if environment.isOSX() else "~/.bashrc"
+    install_file = "~/.bash_profile"
     inject(install_file, path, namespace=environment.namespace)
 
 

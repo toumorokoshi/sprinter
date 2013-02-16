@@ -6,9 +6,10 @@ packages to different locations.
 import os
 
 rc_template = \
-""" 
+"""
 export PATH=%s:$PATH
 """
+
 
 class Directory(object):
 
