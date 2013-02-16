@@ -13,6 +13,11 @@ class Directory(object):
         suffix = ("" if not namespace else "-%s" % namespace)
         self.root_dir = os.path.expanduser(os.path.join("~", ".sprinter%s" % suffix))
         self.__generate_dir(self.root_dir)
+        self.rc_file = self.__get_rc_handle(self.root_dir)
+
+    def __del__(self):
+        if self.rc_file:
+            self.rc_file.close()
 
     def symlink_to_bin(self, name, path):
         """
@@ -32,6 +37,18 @@ class Directory(object):
         """
         return os.path.join(self.root_dir, "features", feature_name)
 
+    def add_to_rc(self, content):
+        """
+        add content to the rc script.
+        """
+        self.rc_file.write(content)
+
+    def rc_path(self):
+        """
+        return the rc path
+        """
+        return self.rc_file.abspath
+
     def __generate_dir(self, root_dir):
         """ Generate the root directory root if it doesn't already exist """
         if not os.path.exists(self.root_dir):
@@ -41,6 +58,13 @@ class Directory(object):
             target_path = os.path.join(root_dir, d)
             if not os.path.exists(target_path):
                 os.makedirs(target_path)
+
+    def __get_rc_handle(self, root_dir):
+        """ get the filehandle to the rc file for the environment """
+        rc_path = os.path.join(root_dir, '.rc')
+        if not os.path.exists(rc_path):
+            open(rc_path, "w+").close()
+        return open(rc_path, "w+")
 
     def __symlink_dir(self, dir_name, name, path):
         """

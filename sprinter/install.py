@@ -4,8 +4,7 @@ The install script for a sprinter-based setup script.
 import sys
 import argparse
 from sprinter.lib import get_recipe_class
-from sprinter.manifest import Manifest
-from sprinter.directory import Directory
+from sprinter.environment import Environment
 
 description = \
 """
@@ -13,6 +12,8 @@ Install an environment as specified in a sprinter config file
 """
 
 parser = argparse.ArgumentParser(description=description)
+parser.add_argument('command', metavar='C', nargs=1,
+                    help="The operation that sprinter should run (install, deactivate, activate, switch)")
 parser.add_argument('target', metavar='T', nargs=1, help="The path to the manifest file to install")
 parser.add_argument('--namespace', dest='namespace', default=None,
                     help="Namespace to check environment against")
@@ -20,15 +21,20 @@ parser.add_argument('--namespace', dest='namespace', default=None,
 
 def main():
     args = parser.parse_args()
-    m = Manifest(args.target[0])
+    command = args.command[0].lower()
+    if command == "install":
+        e = Environment(args.target[0], namespace=args.namespace)
+        __install(e)
+
+
+def __install(environment):
     recipe_dict = {}  # a dictionary of recipe objects to perform operations with
-    d = Directory(namespace=args.namespace)
     # perform setups
-    [__setup(d, name, config, recipe_dict) for name, config in m.setups().items()]
+    [__setup(environment, name, config, recipe_dict) for name, config in environment.setups().items()]
     # perform updates
-    [__update(d, name, config, recipe_dict) for name, config in m.updates().items()]
+    [__update(environment, name, config, recipe_dict) for name, config in environment.updates().items()]
     # perform destroys
-    [__destroy(d, name, config, recipe_dict) for name, config in m.destroys().items()]
+    [__destroy(environment, name, config, recipe_dict) for name, config in environment.destroys().items()]
 
 
 def __get_recipe_instance(recipe_dict, recipe):
@@ -41,19 +47,19 @@ def __get_recipe_instance(recipe_dict, recipe):
     return recipe_dict[recipe]
 
 
-def __setup(directory, name, config, recipe_dict):
+def __setup(environment, name, config, recipe_dict):
     recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
-    recipe_instance.setup(directory, name, config['target'])
+    recipe_instance.setup(environment, name, config['target'])
 
 
-def __update(directory, name, config, recipe_dict):
+def __update(environment, name, config, recipe_dict):
     recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
-    recipe_instance.update(directory, name, config)
+    recipe_instance.update(environment, name, config)
 
 
-def __destroy(directory, name, config, recipe_dict):
+def __destroy(environment, name, config, recipe_dict):
     recipe_instance = __get_recipe_instance(recipe_dict, config['source']['recipe'])
-    recipe_instance.destroy(directory, name, config['source'])
+    recipe_instance.destroy(environment, name, config['source'])
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':

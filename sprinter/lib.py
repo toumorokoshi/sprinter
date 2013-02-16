@@ -5,6 +5,8 @@ features of the library.
 """
 import inspect
 import imp
+import os
+import re
 
 from sprinter.recipebase import RecipeBase
 
@@ -28,6 +30,38 @@ def get_recipe_class(recipe):
         raise Exception("No recipe %s exists in classpath!" % recipe)
     except ImportError as e:
         raise e
+
+
+def inject(install_filename, inject_string, condition=None, namespace=None):
+    """
+    Inject inject_string into a file, wrapped with
+    #SPRINTER_{{NAMESPACE}} comments if condition lambda is not
+    satisfied or is None. Remove old instances of injects if they
+    exist.
+    """
+    namespace_string = "SPRINTER%s" % ("_%s" % namespace if namespace else "")
+    if not os.path.exists(install_filename):
+        open(install_filename, "w+").close()
+    install_file = open(install_filename, "r+")
+    content = re.sub("#%s.*#%s" % (namespace_string, namespace_string),
+                     install_file.read(), re.DOTALL)
+    if condition is not None and condition(content):
+        return
+    content += """
+#%s
+%s
+#%s
+    """ % (namespace_string, inject_string, namespace_string)
+    install_file.close()
+    install_file = open(install_filename, "w+")
+    install_file.write(content)
+    install_file.close()
+
+
+def install_sprinter(directory, namespace):
+    path = ". %s" % directory.rc_path()
+    inject(directory.rc_path(), namespace=namespace)
+    pass
 
 
 def __recursive_import(module_name):

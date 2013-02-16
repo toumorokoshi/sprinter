@@ -10,18 +10,18 @@ class RecipeBase:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def setup(self, directory, feature_name, config):
+    def setup(self, environment, feature_name, config):
         """ Setup performs the setup required, with the config
         specified """
         pass
 
     @abstractmethod
-    def update(self, directory, feature_name, old_config):
+    def update(self, environment, feature_name, old_config):
         """ Setup performs the setup required, and works with the old
         config is destruction is required """
         pass
 
     @abstractmethod
-    def destroy(self, directory, feature_name, old_config):
+    def destroy(self, environment, feature_name, old_config):
         """ Destroys an old feature if it is no longer required """
         pass
