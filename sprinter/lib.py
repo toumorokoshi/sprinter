@@ -40,11 +40,12 @@ def inject(install_filename, inject_string, condition=None, namespace=None):
     exist.
     """
     namespace_string = "SPRINTER%s" % ("_%s" % namespace if namespace else "")
+    install_filename = os.path.expanduser(install_filename)
     if not os.path.exists(install_filename):
         open(install_filename, "w+").close()
     install_file = open(install_filename, "r+")
     content = re.sub("#%s.*#%s" % (namespace_string, namespace_string),
-                     install_file.read(), re.DOTALL)
+                     "", install_file.read(), re.DOTALL)
     if condition is not None and condition(content):
         return
     content += """
@@ -58,10 +59,10 @@ def inject(install_filename, inject_string, condition=None, namespace=None):
     install_file.close()
 
 
-def install_sprinter(directory, namespace):
-    path = ". %s" % directory.rc_path()
-    inject(directory.rc_path(), namespace=namespace)
-    pass
+def install_sprinter(environment):
+    path = ". %s" % environment.rc_path()
+    install_file = "~/.bash_profile" if environment.isOSX() else "~/.bashrc"
+    inject(install_file, path, namespace=environment.namespace)
 
 
 def __recursive_import(module_name):

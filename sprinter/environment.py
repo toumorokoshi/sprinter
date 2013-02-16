@@ -14,21 +14,16 @@ class Environment(object):
         self.namespace = namespace
         self.manifest = Manifest(target_manifest, source_manifest=source_manifest)
         self.directory = Directory(namespace=namespace)
-        self.environment = self.__initialize_environment()
-
-    def __initialize_environment(self):
-        """
-        Return an environment dict with various information about the
-        environment
-
-        e.g.
-        """
-        environment_dict = {}
         (system, node, release, version, machine, processor) = platform.uname()
-        environment_dict['system'] = system
-        environment_dict['node'] = node
-        environment_dict['processor'] = processor
-        return environment_dict
+        self.system = system
+        self.node = node
+        self.processor = processor
+
+    def isOSX(self):
+        return self.system == "darwin"
+
+    def isLinux(self):
+        return self.system == "Linux"
 
     # wrapper for manifest methods
     def setups(self):
@@ -57,4 +52,4 @@ class Environment(object):
         return self.directory.add_to_rc(content)
 
     def rc_path(self):
-        return self.directory.rc_path()
+        return self.directory.rc_path

@@ -3,7 +3,7 @@ The install script for a sprinter-based setup script.
 """
 import sys
 import argparse
-from sprinter.lib import get_recipe_class
+from sprinter.lib import get_recipe_class, install_sprinter
 from sprinter.environment import Environment
 
 description = \
@@ -25,6 +25,7 @@ def main():
     if command == "install":
         e = Environment(args.target[0], namespace=args.namespace)
         __install(e)
+        install_sprinter(e)
 
 
 def __install(environment):
