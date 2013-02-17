@@ -1,12 +1,9 @@
 """
-Unpacks and deploys to a location
+Creates a git repository and places it at the install location.
 """
 
-import gzip
-import os
-import tarfile
-import urllib
-from StringIO import StringIO
+import subprocess
+import shutil
 
 from sprinter.recipebase import RecipeBase
 
@@ -14,11 +11,14 @@ from sprinter.recipebase import RecipeBase
 class GitRecipe(RecipeBase):
     """ A sprinter recipe for git"""
 
-    def setup(self, directory, feature_name, config):
+    def setup(self, feature_name, config):
+        subprocess.call("git clone %s %s" % (config['url'], self.environment.install_directory(feature_name)))
         pass
 
-    def update(self, directory, feature_name, old_config):
+    def update(self, feature_name, config):
+        shutil.rmtree(self.environment.install_directory(feature_name))
+        subprocess.call("git clone %s %s" % (config['target']['url'], self.environment.install_directory(feature_name)))
         pass
 
-    def destroy(self, directory, feature_name, old_config):
-        pass
+    def destroy(self, feature_name, old_config):
+        shutil.rmtree(self.environment.install_directory(feature_name))

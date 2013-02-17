@@ -50,6 +50,7 @@ class Manifest(object):
 
     source_manifest = ConfigParser.ConfigParser()
     target_manifest = ConfigParser.ConfigParser()
+    config = {}
 
     def __init__(self, target_manifest, source_manifest=None):
         """
@@ -113,6 +114,22 @@ class Manifest(object):
         Checks validity of manifest files.
         """
         pass
+
+    def get_config(self, param_name, default=None):
+        """
+        grabs a config from the user space; if it doesn't exist, it will prompt for it.
+        """
+        if param_name not in self.config:
+            self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default)
+        return self.config[param_name]
+
+    def __prompt(prompt_string, default=None):
+        """
+        Prompt user for a string, with a default value
+        """
+        prompt_string += (" (default %s):" % default if default else ":")
+        val = raw_input(prompt_string)
+        return (val if val else default)
 
 if __name__ == '__main__':
     import doctest
