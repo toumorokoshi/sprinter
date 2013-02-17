@@ -3,14 +3,16 @@ A module that completely encapsulates a class. This should be a
 complete object representing any data needed by recipes.
 """
 
+import logging
 import platform
+import sys
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
 
 
 class Environment(object):
 
-    def __init__(self, target_manifest, source_manifest=None, namespace=None):
+    def __init__(self, target_manifest, source_manifest=None, namespace=None, logger=None, logging_level=logging.INFO):
         self.namespace = namespace
         self.manifest = Manifest(target_manifest, source_manifest=source_manifest)
         self.directory = Directory(namespace=namespace)
@@ -18,6 +20,18 @@ class Environment(object):
         self.system = system
         self.node = node
         self.processor = processor
+        self.logger = self.__build_logger(logger=logger, level=logging_level)
+
+    def __build_logger(self, logger=None, level=logging.INFO):
+        """ return a logger. if logger is none, generate a logger from stdout """
+        if not logger:
+            logger = logging.getLogger('sprinter')
+            out_hdlr = logging.StreamHandler(sys.stdout)
+            out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+            out_hdlr.setLevel(level)
+            logger.addHandler(out_hdlr)
+        logger.setLevel(level)
+        return logger
 
     def isOSX(self):
         return self.system == "darwin"

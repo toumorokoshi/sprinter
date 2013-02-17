@@ -24,6 +24,7 @@ def main():
     command = args.command[0].lower()
     if command == "install":
         e = Environment(args.target[0], namespace=args.namespace)
+        e.logger.info("Installing %s environment..." % args.namespace)
         __install(e)
         install_sprinter(e)
 
@@ -49,16 +50,19 @@ def __get_recipe_instance(recipe_dict, recipe):
 
 
 def __setup(environment, name, config, recipe_dict):
+    environment.logger.info("Setting up %s..." % name)
     recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
     recipe_instance.setup(environment, name, config['target'])
 
 
 def __update(environment, name, config, recipe_dict):
+    environment.logger.info("Updating %s..." % name)
     recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
     recipe_instance.update(environment, name, config)
 
 
 def __destroy(environment, name, config, recipe_dict):
+    environment.logger.info("Destroying %s..." % name)
     recipe_instance = __get_recipe_instance(recipe_dict, config['source']['recipe'])
     recipe_instance.destroy(environment, name, config['source'])
 

@@ -16,6 +16,7 @@ class UnpackRecipe(RecipeBase):
 
     def setup(self, environment, feature_name, config):
         if config['type'] == "tar.gz":
+            self.environment.logger.debug("Extracting package at %s" % config['url'])
             self.__extract_targz(config['url'], environment.install_directory(feature_name))
         if 'executable' in config:
             symlink_target = config['symlink'] if 'symlink' in config else config['executable']
