@@ -5,9 +5,13 @@ complete object representing any data needed by recipes.
 
 import logging
 import platform
+import re
 import sys
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
+
+debian_match = re.compile(".*(Ubuntu|Debian).*")
+fedora_match = re.compile(".*(RHEL).*")
 
 
 class Environment(object):
@@ -38,6 +42,12 @@ class Environment(object):
 
     def isLinux(self):
         return self.system == "Linux"
+
+    def isDebianBased(self):
+        return debian_match.match(self.node) is not None
+
+    def isFedoraBased(self):
+        return fedora_match.match(self.node) is not None
 
     # wrapper for manifest methods
     def setups(self):
