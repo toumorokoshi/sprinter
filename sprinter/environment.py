@@ -49,6 +49,17 @@ class Environment(object):
     def isFedoraBased(self):
         return fedora_match.match(self.node) is not None
 
+    def finalize(self):
+        """ command to run at the end of sprinter's run """
+        self.manifest.write(self.directory.config_handle())
+
+    def context(self):
+        """ get a context dictionary to replace content """
+        context_dict = self.manifest.get_context_dict()
+        for s in self.manifest.target_sections():
+            context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+        return context_dict
+
     # wrapper for manifest methods
     def setups(self):
         return self.manifest.setups()
@@ -73,7 +84,7 @@ class Environment(object):
         return self.directory.install_directory(feature_name)
 
     def add_to_rc(self, content):
-        return self.directory.add_to_rc(content)
+        return self.directory.add_to_rc(content % self.context())
 
     def rc_path(self):
         return self.directory.rc_path

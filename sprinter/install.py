@@ -27,6 +27,7 @@ def main():
         e.logger.info("Installing %s environment..." % args.namespace)
         __install(e)
         install_sprinter(e)
+        e.finalize()
 
 
 def __install(environment):

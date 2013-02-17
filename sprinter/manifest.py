@@ -48,8 +48,8 @@ version = 1
 class Manifest(object):
     """ Class to represent a manifest object """
 
-    source_manifest = ConfigParser.ConfigParser()
-    target_manifest = ConfigParser.ConfigParser()
+    source_manifest = ConfigParser.RawConfigParser()
+    target_manifest = ConfigParser.RawConfigParser()
     config = {}
 
     def __init__(self, target_manifest, source_manifest=None):
@@ -115,6 +115,12 @@ class Manifest(object):
         """
         pass
 
+    def write(self, file_handle):
+        """
+        write the current state to a file manifest
+        """
+        self.target_manifest.write(file_handle)
+
     def get_config(self, param_name, default=None):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
@@ -122,6 +128,19 @@ class Manifest(object):
         if param_name not in self.config:
             self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default)
         return self.config[param_name]
+
+    def get_context_dict(self):
+        """
+        return a context dict of the desired state
+        """
+        context_dict = {}
+        for s in self.target_manifest.sections():
+            for k, v in self.target_manifest.items(s):
+                context_dict["%s:%s" % (s, k)] = v
+        return context_dict
+
+    def target_sections(self):
+        return self.target_manifest.sections()
 
     def __prompt(prompt_string, default=None):
         """

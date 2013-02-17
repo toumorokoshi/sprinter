@@ -7,6 +7,7 @@ import inspect
 import imp
 import os
 import re
+import subprocess
 
 from sprinter.recipebase import RecipeBase
 
@@ -63,6 +64,11 @@ def install_sprinter(environment):
     path = ". %s" % environment.rc_path()
     install_file = "~/.bash_profile"
     inject(install_file, path, namespace=environment.namespace)
+
+
+def call(command):
+    args = command.split(" ")
+    subprocess.call(args)
 
 
 def __recursive_import(module_name):
