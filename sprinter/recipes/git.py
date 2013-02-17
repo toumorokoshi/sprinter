@@ -12,20 +12,19 @@ class GitRecipe(RecipeBase):
     """ A sprinter recipe for git"""
 
     def setup(self, feature_name, config):
+        super(GitRecipe, self).setup(feature_name, config)
         branch = (config['branch'] if 'branch' in config else None)
         self.__clone_repo(config['url'], self.environment.install_directory(feature_name), branch=branch)
-        if 'rc' in config:
-            self.environment.add_to_rc(config['rc'])
 
     def update(self, feature_name, config):
+        super(GitRecipe, self).update(feature_name, config)
         shutil.rmtree(self.environment.install_directory(feature_name))
         branch = (config['branch'] if 'branch' in config else None)
         self.__clone_repo(config['target']['url'], self.environment.install_directory(feature_name),
                           branch=branch)
-        if 'rc' in config:
-            self.environment.add_to_rc(config['rc'])
 
-    def destroy(self, feature_name, old_config):
+    def destroy(self, feature_name, config):
+        super(GitRecipe, self).destroy(feature_name, config)
         shutil.rmtree(self.environment.install_directory(feature_name))
 
     def __clone_repo(self, repo_url, target_directory, branch=None):

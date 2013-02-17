@@ -28,6 +28,8 @@ def main():
         __install(e)
         install_sprinter(e)
         e.finalize()
+    """if command == "remove":
+        environment = args.target[0]"""
 
 
 def __install(environment):
