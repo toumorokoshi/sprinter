@@ -39,32 +39,38 @@ def __install(environment):
     [__destroy(environment, name, config, recipe_dict) for name, config in environment.destroys().items()]
 
 
-def __get_recipe_instance(recipe_dict, recipe):
+def __get_recipe_instance(recipe_dict, recipe, environment):
     """
     get an instance of the recipe object object if it exists, else
     create one, add it to the dict, and pass return it.
     """
     if recipe not in recipe_dict:
-        recipe_dict[recipe] = get_recipe_class(recipe)
+        recipe_dict[recipe] = get_recipe_class(recipe, environment)
     return recipe_dict[recipe]
 
 
 def __setup(environment, name, config, recipe_dict):
     environment.logger.info("Setting up %s..." % name)
-    recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
-    recipe_instance.setup(environment, name, config['target'])
+    recipe_instance = __get_recipe_instance(recipe_dict,
+                                            config['target']['recipe'],
+                                            environment)
+    recipe_instance.setup(name, config['target'])
 
 
 def __update(environment, name, config, recipe_dict):
     environment.logger.info("Updating %s..." % name)
-    recipe_instance = __get_recipe_instance(recipe_dict, config['target']['recipe'])
-    recipe_instance.update(environment, name, config)
+    recipe_instance = __get_recipe_instance(recipe_dict,
+                                            config['target']['recipe'],
+                                            environment)
+    recipe_instance.update(name, config)
 
 
 def __destroy(environment, name, config, recipe_dict):
     environment.logger.info("Destroying %s..." % name)
-    recipe_instance = __get_recipe_instance(recipe_dict, config['source']['recipe'])
-    recipe_instance.destroy(environment, name, config['source'])
+    recipe_instance = __get_recipe_instance(recipe_dict,
+                                            config['source']['recipe'],
+                                            environment)
+    recipe_instance.destroy(name, config['source'])
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':

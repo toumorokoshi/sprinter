@@ -11,7 +11,7 @@ import re
 from sprinter.recipebase import RecipeBase
 
 
-def get_recipe_class(recipe):
+def get_recipe_class(recipe, environment):
     """
     Get the recipe name and return an instance The recipe path is a
     path to the module. get_recipe_class performs reflection to find
@@ -26,7 +26,7 @@ def get_recipe_class(recipe):
         member_dict = dict(inspect.getmembers(r))
         for v in member_dict.values():
             if inspect.isclass(v) and issubclass(v, RecipeBase) and v != RecipeBase:
-                return v()
+                return v(environment)
         raise Exception("No recipe %s exists in classpath!" % recipe)
     except ImportError as e:
         raise e
