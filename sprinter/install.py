@@ -22,9 +22,9 @@ parser.add_argument('--namespace', dest='namespace', default=None,
 
 def main():
     args = parser.parse_args()
-    command = args.command[0].lower()
+    command = args.command.lower()
     if command == "install":
-        e = Environment(args.target[0], namespace=args.namespace)
+        e = Environment(args.target, namespace=args.namespace)
         e.logger.info("Installing %s environment..." % args.namespace)
         __install(e)
         install_sprinter(e)

@@ -64,7 +64,7 @@ class Directory(object):
             if not os.path.exists(target_path):
                 os.makedirs(target_path)
         if not os.path.exists(self.config_path()):
-            open(self.config_path, "w+").close()
+            open(self.config_path(), "w+").close()
 
     def __get_rc_handle(self, root_dir):
         """ get the filepath and filehandle to the rc file for the environment """

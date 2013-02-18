@@ -156,6 +156,8 @@ class Manifest(object):
         """
         write the current state to a file manifest
         """
+        if not self.target_manifest.has_section('config'):
+            self.target_manifest.add_section('config')
         self.target_manifest.set('config', 'namespace', self.namespace)
         self.target_manifest.write(file_handle)
 
