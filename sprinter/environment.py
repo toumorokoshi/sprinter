@@ -9,6 +9,7 @@ import re
 import sys
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
+from sprinter.injections import Injections
 
 debian_match = re.compile(".*(Ubuntu|Debian).*")
 fedora_match = re.compile(".*(RHEL).*")
@@ -32,6 +33,7 @@ class Environment(object):
         self.directory = Directory(namespace=self.namespace)
         if not source_manifest:
             self.manifest.load_source(self.directory.config_path())
+        self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
 
     def load_namespace(self, namespace=None):
         if namespace:
@@ -39,6 +41,7 @@ class Environment(object):
         self.directory = Directory(namespace=self.namespace)
         self.manifest = Manifest(source_manifest=self.directory.config_path(),
                                  namespace=self.namespace)
+        self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
 
     def __build_logger(self, logger=None, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
@@ -66,6 +69,7 @@ class Environment(object):
     def finalize(self):
         """ command to run at the end of sprinter's run """
         self.manifest.write(open(self.directory.config_path(), "w+"))
+        self.injections.commit()
 
     def context(self):
         """ get a context dictionary to replace content """
@@ -73,6 +77,16 @@ class Environment(object):
         for s in self.manifest.target_sections():
             context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
         return context_dict
+
+    # wrapper for injections methods
+    def inject(self, filename, content):
+        return self.injections.inject(filename, content)
+
+    def clear(self, filename):
+        return self.injections.clear(filename)
+
+    def commit_injections(self, filename, content):
+        return self.injections.commit()
 
     # wrapper for manifest methods
     def load_target_implicit(self):

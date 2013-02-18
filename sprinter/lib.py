@@ -33,39 +33,6 @@ def get_recipe_class(recipe, environment):
         raise e
 
 
-def inject(install_filename, inject_string, condition=None, namespace=None):
-    """
-    Inject inject_string into a file, wrapped with
-    #SPRINTER_{{NAMESPACE}} comments if condition lambda is not
-    satisfied or is None. Remove old instances of injects if they
-    exist.
-    """
-    namespace_string = "SPRINTER%s" % ("_%s" % namespace if namespace else "")
-    install_filename = os.path.expanduser(install_filename)
-    if not os.path.exists(install_filename):
-        open(install_filename, "w+").close()
-    install_file = open(install_filename, "r+")
-    content = re.sub("#%s.*#%s" % (namespace_string, namespace_string),
-                     "", install_file.read(), re.DOTALL)
-    if condition is not None and condition(content):
-        return
-    content += """
-#%s
-%s
-#%s
-    """ % (namespace_string, inject_string, namespace_string)
-    install_file.close()
-    install_file = open(install_filename, "w+")
-    install_file.write(content)
-    install_file.close()
-
-
-def install_sprinter(environment):
-    path = ". %s" % environment.rc_path()
-    install_file = "~/.bash_profile"
-    inject(install_file, path, namespace=environment.namespace)
-
-
 def call(command):
     args = command.split(" ")
     subprocess.call(args)

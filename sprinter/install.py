@@ -4,7 +4,7 @@ The install script for a sprinter-based setup script.
 import shutil
 import sys
 import argparse
-from sprinter.lib import get_recipe_class, install_sprinter
+from sprinter.lib import get_recipe_class
 from sprinter.environment import Environment
 
 description = \
@@ -123,6 +123,11 @@ def __reload(environment, name, config, recipe_dict):
                                             config['source']['recipe'],
                                             environment)
     recipe_instance.reload(name, config['source'])
+
+
+def install_sprinter(environment):
+    environment.inject("~/.bash_profile",
+       "[[ -s '%s' ]] && source %s" % (environment.rc_path(), environment.rc_path()))
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':
