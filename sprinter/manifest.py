@@ -166,7 +166,7 @@ class Manifest(object):
         """
         missing_sections = {}
         for s in self.source_sections():
-            if not self.target_manifest.has_section(s):
+            if not self.target_manifest or not self.target_manifest.has_section(s):
                 missing_sections[s] = {"source": dict(self.source_manifest.items(s))}
         return missing_sections
 

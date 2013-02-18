@@ -37,7 +37,10 @@ def main():
     elif command == "switch":
         pass
     elif command == "remove":
-        pass
+        e = Environment(namespace=args.namespace)
+        e.load_namespace(args.target)
+        e.logger.info("Completely removing %s..." % e.namespace)
+        __remove(e)
     elif command == "reload":
         e = Environment(namespace=args.namespace)
         e.load_namespace(args.target)
@@ -68,6 +71,7 @@ def __activate(environment):
 def __remove(environment):
     recipe_dict = {}  # a dictionary of recipe objects to perform operations with
     [__destroy(environment, name, config, recipe_dict) for name, config in environment.destroys().items()]
+    environment.logger.info("Completely removing %s directory" % environment.namespace)
     shutil.rmtree(environment.directory.root_dir)
 
 
