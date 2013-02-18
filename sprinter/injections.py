@@ -57,8 +57,8 @@ class Injections(object):
         if not os.path.exists(install_filename):
             open(install_filename, "w+").close()
         install_file = open(install_filename, "r+")
-        content = re.sub("%s.*%s" % (wrapper, wrapper),
-                         "", install_file.read(), re.DOTALL)
+        wrapper_match = re.compile("\n%s.*%s" % (wrapper, wrapper), re.DOTALL)
+        content = wrapper_match.sub("", install_file.read())
         content += """
 %s
 %s
