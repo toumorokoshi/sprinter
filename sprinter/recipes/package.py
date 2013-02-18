@@ -4,6 +4,7 @@ Installs a package from whatever the native package manager is
 """
 
 from sprinter.recipestandard import RecipeStandard
+from sprinter import lib
 
 
 class PackageRecipe(RecipeStandard):
@@ -13,12 +14,7 @@ class PackageRecipe(RecipeStandard):
         self.package_manager = self.__get_package_manager()
 
     def setup(self, feature_name, config):
-        pass
-
-    def update(self, feature_name, config):
-        pass
-
-    def destroy(self, feature_name, config):
+        call("sudo %s install %s")
         pass
 
     def __get_package_manager(self):
