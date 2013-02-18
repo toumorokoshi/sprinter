@@ -75,6 +75,9 @@ class Environment(object):
         return context_dict
 
     # wrapper for manifest methods
+    def load_target_implicit(self):
+        return self.manifest.load_target_implicit()
+
     def setups(self):
         return self.manifest.setups()
 

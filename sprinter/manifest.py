@@ -93,24 +93,44 @@ class Manifest(object):
     def load_target(self, target_manifest):
         """ reload the source manifest """
         self.target_manifest = ConfigParser.RawConfigParser()
+        if not self.target_manifest.has_section('config'):
+            self.target_manifest.add_section('config')
         if type(target_manifest) == str:
             if target_manifest.startswith("http"):
                 manifest_file_handler = StringIO(urllib.urlopen(target_manifest).read())
                 self.target_manifest.readfp(manifest_file_handler)
             else:
                 self.target_manifest.read(target_manifest)
+            self.target_manifest.set('config', 'source', str(target_manifest))
         else:
             self.target_manifest.readfp(target_manifest)
+
+    def load_target_implicit(self):
+        """
+        Attempt an implicit load of a target file. An implicit load
+        involves looking at source manifest's config:source parameter
+        and attempting to load from there. If that's not possible,
+        false is returned.
+        """
+        if self.source_manifest.has_section('config') and \
+           self.source_manifest.has_option('config', 'source'):
+            self.load_target(self.source_manifest.get('config', 'source'))
+            return True
+        return False
 
     def load_source(self, source_manifest):
         """ reload the source manifest """
         self.source_manifest = ConfigParser.RawConfigParser()
+        if not self.source_manifest.has_section('config'):
+            self.source_manifest.add_section('config')
         if type(source_manifest) == str:
             if source_manifest.startswith("http"):
                 manifest_file_handler = StringIO(urllib.urlopen(source_manifest).read())
                 self.source_manifest.readfp(manifest_file_handler)
             else:
                 self.source_manifest.read(source_manifest)
+            if not self.source_manifest.has_option('config', 'source'):
+                self.source_manifest.set('config', 'source', str(source_manifest))
         else:
             self.source_manifest.readfp(source_manifest)
 

@@ -41,6 +41,14 @@ def main():
         e.load_namespace(args.target)
         e.logger.info("Completely removing %s..." % e.namespace)
         __remove(e)
+    elif command == "update":
+        e = Environment(namespace=args.namespace)
+        e.load_namespace(args.target)
+        if e.load_target_implicit():
+            e.logger.info("Updating %s" % e.namespace)
+            __install(e)
+            install_sprinter(e)
+            e.finalize()
     elif command == "reload":
         e = Environment(namespace=args.namespace)
         e.load_namespace(args.target)
