@@ -9,6 +9,7 @@ version = {{ manifest_version }}
 
 import ConfigParser
 import urllib
+from StringIO import StringIO
 
 test_old_version = """
 [config]
@@ -94,7 +95,8 @@ class Manifest(object):
         self.target_manifest = ConfigParser.RawConfigParser()
         if type(target_manifest) == str:
             if target_manifest.startswith("http"):
-                self.target_manifest.readfp(urllib.urlopen(target_manifest))
+                manifest_file_handler = StringIO(urllib.urlopen(target_manifest).read())
+                self.target_manifest.readfp(manifest_file_handler)
             else:
                 self.target_manifest.read(target_manifest)
         else:
@@ -105,7 +107,8 @@ class Manifest(object):
         self.source_manifest = ConfigParser.RawConfigParser()
         if type(source_manifest) == str:
             if source_manifest.startswith("http"):
-                self.source_manifest.readfp(urllib.urlopen(source_manifest))
+                manifest_file_handler = StringIO(urllib.urlopen(source_manifest).read())
+                self.source_manifest.readfp(manifest_file_handler)
             else:
                 self.source_manifest.read(source_manifest)
         else:
@@ -245,7 +248,6 @@ class Manifest(object):
 
 if __name__ == '__main__':
     import doctest
-    from StringIO import StringIO
     doctest.testmod(extraglobs={
         'm': Manifest(target_manifest=StringIO(test_new_version), source_manifest=StringIO(test_old_version)),
         'm_new_only': Manifest(target_manifest=StringIO(test_new_version)),
