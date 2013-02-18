@@ -52,7 +52,7 @@ class Manifest(object):
     target_manifest = ConfigParser.RawConfigParser()
     config = {}
 
-    def __init__(self, target_manifest, source_manifest=None):
+    def __init__(self, target_manifest, source_manifest=None, namespace=None):
         """
         If a manifest already exists, it should be passed in as the source manifest.
         target_manifest_path is the path to the desired manifest file.
@@ -62,10 +62,14 @@ class Manifest(object):
         else:
             self.target_manifest.readfp(target_manifest)
         if source_manifest:
-            if type(source_manifest) == str:
-                self.source_manifest.read(source_manifest)
-            else:
-                self.source_manifest.readfp(source_manifest)
+            self.load_source(source_manifest)
+
+    def load_source(self, source_manifest):
+        """ reload the source manifest """
+        if type(source_manifest) == str:
+            self.source_manifest.read(source_manifest)
+        else:
+            self.source_manifest.readfp(source_manifest)
 
     def setups(self):
         """

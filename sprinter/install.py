@@ -1,6 +1,7 @@
 """
 The install script for a sprinter-based setup script.
 """
+import shutil
 import sys
 import argparse
 from sprinter.lib import get_recipe_class, install_sprinter
@@ -12,9 +13,9 @@ Install an environment as specified in a sprinter config file
 """
 
 parser = argparse.ArgumentParser(description=description)
-parser.add_argument('command', metavar='C', nargs=1,
+parser.add_argument('command', metavar='C',
                     help="The operation that sprinter should run (install, deactivate, activate, switch)")
-parser.add_argument('target', metavar='T', nargs=1, help="The path to the manifest file to install")
+parser.add_argument('target', metavar='T', help="The path to the manifest file to install")
 parser.add_argument('--namespace', dest='namespace', default=None,
                     help="Namespace to check environment against")
 
@@ -28,8 +29,15 @@ def main():
         __install(e)
         install_sprinter(e)
         e.finalize()
-    """if command == "remove":
-        environment = args.target[0]"""
+    elif command == "deactivate":
+        pass
+    elif command == "activate":
+        pass
+    elif command == "switch":
+        pass
+    elif command == "remove":
+        # delete the environment
+        shutil.rmtree()
 
 
 def __install(environment):
