@@ -2,10 +2,10 @@
 Runs a command
 """
 
-from sprinter.recipebase import RecipeBase
+from sprinter.recipestandard import RecipeStandard
 
 
-class CommandRecipe(RecipeBase):
+class CommandRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         super(CommandRecipe, self).setup(feature_name, config)

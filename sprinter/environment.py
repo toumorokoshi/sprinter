@@ -17,9 +17,11 @@ fedora_match = re.compile(".*(RHEL).*")
 class Environment(object):
 
     def __init__(self, target_manifest, source_manifest=None, namespace=None, logger=None, logging_level=logging.INFO):
-        self.namespace = namespace
-        self.manifest = Manifest(target_manifest, source_manifest=source_manifest)
-        self.directory = Directory(namespace=namespace)
+        self.manifest = Manifest(target_manifest, source_manifest=source_manifest, namespace=namespace)
+        self.namespace = self.manifest.namespace
+        self.directory = Directory(namespace=self.namespace)
+        if not source_manifest:
+            self.manifest.load_source(self.directory.config_path())
         (system, node, release, version, machine, processor) = platform.uname()
         self.system = system
         self.node = node
@@ -51,7 +53,7 @@ class Environment(object):
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
-        self.manifest.write(self.directory.config_handle())
+        self.manifest.write(open(self.directory.config_path(), "w+"))
 
     def context(self):
         """ get a context dictionary to replace content """

@@ -3,10 +3,10 @@ Installs a package from whatever the native package manager is
 (apt-get for debian-based, brew for OS X)
 """
 
-from sprinter.recipebase import RecipeBase
+from sprinter.recipestandard import RecipeStandard
 
 
-class PackageRecipe(RecipeBase):
+class PackageRecipe(RecipeStandard):
 
     def __init__(self, environment):
         super(PackageRecipe, self).__init__(environment)
@@ -21,7 +21,7 @@ class PackageRecipe(RecipeBase):
     def destroy(self, feature_name, config):
         pass
 
-    def __get_package_manager():
+    def __get_package_manager(self):
         if self.environment.isOSX():
             return "brew"
         elif self.environment.isDebianBased():

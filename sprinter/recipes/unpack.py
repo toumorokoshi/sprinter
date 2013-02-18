@@ -8,10 +8,10 @@ import tarfile
 import urllib
 from StringIO import StringIO
 
-from sprinter.recipebase import RecipeBase
+from sprinter.recipestandard import RecipeStandard
 
 
-class UnpackRecipe(RecipeBase):
+class UnpackRecipe(RecipeStandard):
     """ A sprinter recipe for unpacking a compressed package and extracting it"""
 
     def setup(self, feature_name, config):

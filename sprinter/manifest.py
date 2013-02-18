@@ -8,8 +8,12 @@ version = {{ manifest_version }}
 """
 
 import ConfigParser
+import urllib
 
 test_old_version = """
+[config]
+namespace = sprinter
+
 [maven]
 recipe = sprinter.recipes.unpack
 version = 2
@@ -29,6 +33,9 @@ brew = mysql
 """
 
 test_new_version = """
+[config]
+namespace = sprinter
+
 [maven]
 recipe = sprinter.recipes.unpack
 version = 3
@@ -46,7 +53,11 @@ version = 1
 
 
 class Manifest(object):
-    """ Class to represent a manifest object """
+    """ Class to represent a manifest object
+
+    >>> m.namespace
+    'sprinter'
+    """
 
     source_manifest = ConfigParser.RawConfigParser()
     target_manifest = ConfigParser.RawConfigParser()
@@ -56,18 +67,40 @@ class Manifest(object):
         """
         If a manifest already exists, it should be passed in as the source manifest.
         target_manifest_path is the path to the desired manifest file.
+
+        a manifest can be one of the following:
+        * a string, either a url or a filepath
+        * a file-like object
+
+        If the namespace is not passed, it will be pulled from the
+        global config object in the target_manifest, or assumed from
+        the string representation of the target_manifest object
+
         """
-        if type(target_manifest) == str:
-            self.target_manifest.read(target_manifest)
-        else:
-            self.target_manifest.readfp(target_manifest)
+        self.load_target(target_manifest)
         if source_manifest:
             self.load_source(source_manifest)
+        if not namespace:
+            namespace = self.__detect_namespace(target_manifest)
+        self.namespace = namespace
+
+    def load_target(self, target_manifest):
+        """ reload the source manifest """
+        if type(target_manifest) == str:
+            if target_manifest.startswith("http"):
+                self.target_manifest.readfp(urllib.urlopen(target_manifest))
+            else:
+                self.target_manifest.read(target_manifest)
+        else:
+            self.target_manifest.readfp(target_manifest)
 
     def load_source(self, source_manifest):
         """ reload the source manifest """
         if type(source_manifest) == str:
-            self.source_manifest.read(source_manifest)
+            if source_manifest.startswith("http"):
+                self.source_manifest.readfp(urllib.urlopen(source_manifest))
+            else:
+                self.source_manifest.read(source_manifest)
         else:
             self.source_manifest.readfp(source_manifest)
 
@@ -78,7 +111,7 @@ class Manifest(object):
         {'myrc': {'target': {'version': '1', 'recipe': 'sprinter.recipes.template'}}}
         """
         new_sections = {}
-        for s in self.target_manifest.sections():
+        for s in self.target_sections():
             if not self.source_manifest.has_section(s):
                 new_sections[s] = {"target": dict(self.target_manifest.items(s))}
         return new_sections
@@ -91,7 +124,7 @@ class Manifest(object):
         {'maven': {'source': {'version': '2', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'version': '3', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
         """
         different_sections = {}
-        for s in self.target_manifest.sections():
+        for s in self.target_sections():
             if self.source_manifest.has_section(s):
                 target_version = self.target_manifest.get(s, 'version')
                 source_version = self.source_manifest.get(s, 'version')
@@ -108,7 +141,7 @@ class Manifest(object):
         {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'version': '4', 'recipe': 'sprinter.recipes.package'}}}
         """
         missing_sections = {}
-        for s in self.source_manifest.sections():
+        for s in self.source_sections():
             if not self.target_manifest.has_section(s):
                 missing_sections[s] = {"source": dict(self.source_manifest.items(s))}
         return missing_sections
@@ -123,6 +156,7 @@ class Manifest(object):
         """
         write the current state to a file manifest
         """
+        self.target_manifest.set('config', 'namespace', self.namespace)
         self.target_manifest.write(file_handle)
 
     def get_config(self, param_name, default=None):
@@ -143,8 +177,17 @@ class Manifest(object):
                 context_dict["%s:%s" % (s, k)] = v
         return context_dict
 
+    def source_sections(self):
+        """
+        return all source sections except for reserved ones
+        """
+        return [s for s in self.source_manifest.sections() if s != "config"]
+
     def target_sections(self):
-        return self.target_manifest.sections()
+        """
+        return all target sections except for reserved ones
+        """
+        return [s for s in self.target_manifest.sections() if s != "config"]
 
     def __prompt(prompt_string, default=None):
         """
@@ -153,6 +196,24 @@ class Manifest(object):
         prompt_string += (" (default %s):" % default if default else ":")
         val = raw_input(prompt_string)
         return (val if val else default)
+
+    def __detect_namespace(self, manifest_object):
+        """
+        Find a manifest object
+        """
+        namespace = ""
+        if self.target_manifest.has_section('config') and \
+          self.target_manifest.has_option('config', 'namespace'):
+            namespace = self.target_manifest.get('config', 'namespace')
+        else:
+            s = str(manifest_object)
+            if s.endswith(".cfg"):
+                s = s[:-4]
+            if s.startswith("http"):
+                s = s.split("/")[-1]
+            namespace = s
+        return namespace
+
 
 if __name__ == '__main__':
     import doctest

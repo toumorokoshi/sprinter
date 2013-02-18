@@ -4,11 +4,11 @@ Creates a git repository and places it at the install location.
 import os
 import shutil
 
-from sprinter.recipebase import RecipeBase
+from sprinter.recipestandard import RecipeStandard
 from sprinter.lib import call
 
 
-class GitRecipe(RecipeBase):
+class GitRecipe(RecipeStandard):
     """ A sprinter recipe for git"""
 
     def setup(self, feature_name, config):

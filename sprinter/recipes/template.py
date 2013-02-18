@@ -4,10 +4,10 @@ Generates a file in a target location from a template
 import os
 import urllib
 
-from sprinter.recipebase import RecipeBase
+from sprinter.recipestandard import RecipeStandard
 
 
-class TemplateRecipe(RecipeBase):
+class TemplateRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         super(TemplateRecipe, self).setup(feature_name, config)

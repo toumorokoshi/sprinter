@@ -48,11 +48,11 @@ class Directory(object):
         """
         self.rc_file.write(content)
 
-    def config_handle(self):
+    def config_path(self):
         """
         return writable handle to config file
         """
-        return open(os.path.join(self.root_dir, "config.cfg"), "w+")
+        return os.path.join(self.root_dir, "config.cfg")
 
     def __generate_dir(self, root_dir):
         """ Generate the root directory root if it doesn't already exist """
@@ -63,6 +63,8 @@ class Directory(object):
             target_path = os.path.join(root_dir, d)
             if not os.path.exists(target_path):
                 os.makedirs(target_path)
+        if not os.path.exists(self.config_path()):
+            open(self.config_path, "w+").close()
 
     def __get_rc_handle(self, root_dir):
         """ get the filepath and filehandle to the rc file for the environment """
