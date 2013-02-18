@@ -16,17 +16,29 @@ fedora_match = re.compile(".*(RHEL).*")
 
 class Environment(object):
 
-    def __init__(self, target_manifest, source_manifest=None, namespace=None, logger=None, logging_level=logging.INFO):
-        self.manifest = Manifest(target_manifest, source_manifest=source_manifest, namespace=namespace)
-        self.namespace = self.manifest.namespace
-        self.directory = Directory(namespace=self.namespace)
-        if not source_manifest:
-            self.manifest.load_source(self.directory.config_path())
+    def __init__(self, namespace=None, logger=None, logging_level=logging.INFO):
+        self.namespace = namespace
         (system, node, release, version, machine, processor) = platform.uname()
         self.system = system
         self.node = node
         self.processor = processor
         self.logger = self.__build_logger(logger=logger, level=logging_level)
+
+    def load_manifest(self, target_manifest, source_manifest=None):
+        self.manifest = Manifest(target_manifest,
+                                 source_manifest=source_manifest,
+                                 namespace=self.namespace)
+        self.namespace = self.manifest.namespace
+        self.directory = Directory(namespace=self.namespace)
+        if not source_manifest:
+            self.manifest.load_source(self.directory.config_path())
+
+    def load_namespace(self, namespace=None):
+        if namespace:
+            self.namespace = namespace
+        self.directory = Directory(namespace=self.namespace)
+        self.manifest = Manifest(source_manifest=self.directory.config_path(),
+                                 namespace=self.namespace)
 
     def __build_logger(self, logger=None, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
@@ -71,6 +83,9 @@ class Environment(object):
 
     def destroys(self):
         return self.manifest.destroys()
+
+    def reloads(self):
+        return self.manifest.reloads()
 
     def validate(self):
         return self.manifest.validate()

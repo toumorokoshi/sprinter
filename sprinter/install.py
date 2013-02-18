@@ -24,8 +24,9 @@ def main():
     args = parser.parse_args()
     command = args.command.lower()
     if command == "install":
-        e = Environment(args.target, namespace=args.namespace)
-        e.logger.info("Installing %s environment..." % args.namespace)
+        e = Environment(namespace=args.namespace)
+        e.load_manifest(args.target)
+        e.logger.info("Installing %s environment..." % e.namespace)
         __install(e)
         install_sprinter(e)
         e.finalize()
@@ -36,8 +37,14 @@ def main():
     elif command == "switch":
         pass
     elif command == "remove":
-        # delete the environment
-        shutil.rmtree()
+        pass
+    elif command == "reload":
+        e = Environment(namespace=args.namespace)
+        e.load_namespace(args.target)
+        e.logger.info("Reloading %s" % e.namespace)
+        recipe_dict = {}
+        [__reload(e, name, config, recipe_dict) for name, config in e.reloads().items()]
+        e.finalize()
 
 
 def __install(environment):
@@ -48,6 +55,20 @@ def __install(environment):
     [__update(environment, name, config, recipe_dict) for name, config in environment.updates().items()]
     # perform destroys
     [__destroy(environment, name, config, recipe_dict) for name, config in environment.destroys().items()]
+
+
+def __deactivate(environment):
+    pass
+
+
+def __activate(environment):
+    pass
+
+
+def __remove(environment):
+    recipe_dict = {}  # a dictionary of recipe objects to perform operations with
+    [__destroy(environment, name, config, recipe_dict) for name, config in environment.destroys().items()]
+    shutil.rmtree(environment.directory.root_dir)
 
 
 def __get_recipe_instance(recipe_dict, recipe, environment):
@@ -82,6 +103,14 @@ def __destroy(environment, name, config, recipe_dict):
                                             config['source']['recipe'],
                                             environment)
     recipe_instance.destroy(name, config['source'])
+
+
+def __reload(environment, name, config, recipe_dict):
+    environment.logger.info("Reloading %s..." % name)
+    recipe_instance = __get_recipe_instance(recipe_dict,
+                                            config['source']['recipe'],
+                                            environment)
+    recipe_instance.reload(name, config['source'])
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':

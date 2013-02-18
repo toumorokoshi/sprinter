@@ -52,6 +52,10 @@ version = 1
 """
 
 
+class ManifestError(Exception):
+    pass
+
+
 class Manifest(object):
     """ Class to represent a manifest object
 
@@ -60,10 +64,10 @@ class Manifest(object):
     """
 
     source_manifest = ConfigParser.RawConfigParser()
-    target_manifest = ConfigParser.RawConfigParser()
+    target_manifest = None
     config = {}
 
-    def __init__(self, target_manifest, source_manifest=None, namespace=None):
+    def __init__(self, target_manifest=None, source_manifest=None, namespace=None):
         """
         If a manifest already exists, it should be passed in as the source manifest.
         target_manifest_path is the path to the desired manifest file.
@@ -77,7 +81,8 @@ class Manifest(object):
         the string representation of the target_manifest object
 
         """
-        self.load_target(target_manifest)
+        if target_manifest:
+            self.load_target(target_manifest)
         if source_manifest:
             self.load_source(source_manifest)
         if not namespace:
@@ -86,6 +91,7 @@ class Manifest(object):
 
     def load_target(self, target_manifest):
         """ reload the source manifest """
+        self.target_manifest = ConfigParser.RawConfigParser()
         if type(target_manifest) == str:
             if target_manifest.startswith("http"):
                 self.target_manifest.readfp(urllib.urlopen(target_manifest))
@@ -96,6 +102,7 @@ class Manifest(object):
 
     def load_source(self, source_manifest):
         """ reload the source manifest """
+        self.source_manifest = ConfigParser.RawConfigParser()
         if type(source_manifest) == str:
             if source_manifest.startswith("http"):
                 self.source_manifest.readfp(urllib.urlopen(source_manifest))
@@ -116,13 +123,30 @@ class Manifest(object):
                 new_sections[s] = {"target": dict(self.target_manifest.items(s))}
         return new_sections
 
+    def reloads(self):
+        """
+        return reload dictionaries
+        """
+        reload_sections = {}
+        for s in self.source_sections():
+                reload_sections[s] = {"source": dict(self.source_manifest.items(s))}
+        return reload_sections
+
     def updates(self):
         """
         Return a dictionary with all the features that need to be
         updated.
+
         >>> m.updates()
         {'maven': {'source': {'version': '2', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'version': '3', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
+
+        >>> m_old_only.updates()
+        Traceback (most recent call last):
+          File "<stdin>", line 1, in ?
+        ManifestError: Update method requires a target manifest!
         """
+        if not self.target_manifest:
+            raise ManifestError("Update method requires a target manifest!")
         different_sections = {}
         for s in self.target_sections():
             if self.source_manifest.has_section(s):
@@ -156,6 +180,8 @@ class Manifest(object):
         """
         write the current state to a file manifest
         """
+        if not self.target_manifest:
+            self.target_manifest = self.source_manifest
         if not self.target_manifest.has_section('config'):
             self.target_manifest.add_section('config')
         self.target_manifest.set('config', 'namespace', self.namespace)
@@ -204,9 +230,9 @@ class Manifest(object):
         Find a manifest object
         """
         namespace = ""
-        if self.target_manifest.has_section('config') and \
-          self.target_manifest.has_option('config', 'namespace'):
-            namespace = self.target_manifest.get('config', 'namespace')
+        if self.target_manifest and self.target_manifest.has_section('config') and \
+              self.target_manifest.has_option('config', 'namespace'):
+                namespace = self.target_manifest.get('config', 'namespace')
         else:
             s = str(manifest_object)
             if s.endswith(".cfg"):
@@ -220,4 +246,7 @@ class Manifest(object):
 if __name__ == '__main__':
     import doctest
     from StringIO import StringIO
-    doctest.testmod(extraglobs={'m': Manifest(StringIO(test_new_version), StringIO(test_old_version))})
+    doctest.testmod(extraglobs={
+        'm': Manifest(target_manifest=StringIO(test_new_version), source_manifest=StringIO(test_old_version)),
+        'm_new_only': Manifest(target_manifest=StringIO(test_new_version)),
+        'm_old_only': Manifest(source_manifest=StringIO(test_old_version))})
