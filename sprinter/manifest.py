@@ -17,17 +17,14 @@ namespace = sprinter
 
 [maven]
 recipe = sprinter.recipes.unpack
-version = 2
 specific_version = 2.10
 
 [ant]
 recipe = sprinter.recipes.unpack
-version = 5
 specific_version = 1.8.4
 
 [mysql]
 recipe = sprinter.recipes.package
-version = 4
 apt-get = libmysqlclient
           libmysqlclient-dev
 brew = mysql
@@ -39,17 +36,14 @@ namespace = sprinter
 
 [maven]
 recipe = sprinter.recipes.unpack
-version = 3
 specific_version = 3.0.4
 
 [ant]
 recipe = sprinter.recipes.unpack
-version = 5
 specific_version = 1.8.4
 
 [myrc]
 recipe = sprinter.recipes.template
-version = 1
 """
 
 
@@ -138,7 +132,7 @@ class Manifest(object):
         """
         Return a dictionary with all the features that need to be setup.
         >>> m.setups()
-        {'myrc': {'target': {'version': '1', 'recipe': 'sprinter.recipes.template'}}}
+        {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
         """
         new_sections = {}
         for s in self.target_sections():
@@ -161,7 +155,7 @@ class Manifest(object):
         updated.
 
         >>> m.updates()
-        {'maven': {'source': {'version': '2', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'version': '3', 'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
 
         >>> m_old_only.updates()
         Traceback (most recent call last):
@@ -173,11 +167,11 @@ class Manifest(object):
         different_sections = {}
         for s in self.target_sections():
             if self.source_manifest.has_section(s):
-                target_version = self.target_manifest.get(s, 'version')
-                source_version = self.source_manifest.get(s, 'version')
-                if target_version != source_version:
-                    different_sections[s] = {"source": dict(self.source_manifest.items(s)),
-                                             "target": dict(self.target_manifest.items(s))}
+                target_dict = dict(self.target_manifest.items(s))
+                source_dict = dict(self.source_manifest.items(s))
+                if self.__update_needed(source_dict, target_dict):
+                    different_sections[s] = {"source": source_dict,
+                                             "target": target_dict}
         return different_sections
 
     def destroys(self):
@@ -185,7 +179,7 @@ class Manifest(object):
         Return a dictionary with all the features that need to be
         destroyed.
         >>> m.destroys()
-        {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'version': '4', 'recipe': 'sprinter.recipes.package'}}}
+        {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         missing_sections = {}
         for s in self.source_sections():
@@ -265,6 +259,28 @@ class Manifest(object):
             namespace = s
         return namespace
 
+    def __update_needed(self, source_dict, target_dict):
+        """
+        checks if an update is neede if there is a diff between the items provided
+
+        >>> m._Manifest__update_needed({"a": "b", "c": "d"}, {"a": "b", "c": "e"})
+        True
+
+        >>> m._Manifest__update_needed({"a": "b"}, {"a": "b", "c": "e"})
+        True
+
+        >>> m._Manifest__update_needed({"a": "b", "c": "d"}, {"a": "b"})
+        True
+
+        >>> m._Manifest__update_needed({"a": "b", "c": "d", "e": "f"}, {"a": "b", "c": "d", "e": "f"})
+        False
+        """
+        if len(source_dict) != len(target_dict):
+            return True
+        for k in source_dict:
+            if k not in target_dict or source_dict[k] != target_dict[k]:
+                return True
+        return False
 
 if __name__ == '__main__':
     import doctest
