@@ -120,6 +120,8 @@ class Manifest(object):
         self.source_manifest = ConfigParser.RawConfigParser()
         if not self.source_manifest.has_section('config'):
             self.source_manifest.add_section('config')
+        else:
+            self.config = dict(self.source_manifest.items('config'))
         if type(source_manifest) == str:
             if source_manifest.startswith("http"):
                 manifest_file_handler = StringIO(urllib.urlopen(source_manifest).read())
