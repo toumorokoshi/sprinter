@@ -60,6 +60,9 @@ class Manifest(object):
 
     source_manifest = ConfigParser.RawConfigParser()
     target_manifest = None
+    # a list of values to not save into the config.
+    # e.g. passwords
+    temporary_sections = []
     config = {}
 
     def __init__(self, target_manifest=None, source_manifest=None, namespace=None):
@@ -201,15 +204,20 @@ class Manifest(object):
             self.target_manifest = self.source_manifest
         if not self.target_manifest.has_section('config'):
             self.target_manifest.add_section('config')
+        for k, v in self.config.items():
+            if k not in self.temporary_sections:
+                self.target_manifest.set('config', k, v)
         self.target_manifest.set('config', 'namespace', self.namespace)
         self.target_manifest.write(file_handle)
 
-    def get_config(self, param_name, default=None):
+    def get_config(self, param_name, default=None, temporary=False):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
         """
         if param_name not in self.config:
             self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default)
+        if temporary:
+            self.temporary_sections.append(param_name)
         return self.config[param_name]
 
     def get_context_dict(self):
