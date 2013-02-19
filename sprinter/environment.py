@@ -14,6 +14,8 @@ from sprinter.injections import Injections
 debian_match = re.compile(".*(Ubuntu|Debian).*")
 fedora_match = re.compile(".*(RHEL).*")
 
+config_substitute_match = re.compile("%\(config:([^\)]+)\)")
+
 
 class Environment(object):
 
@@ -78,6 +80,13 @@ class Environment(object):
             context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
         return context_dict
 
+    def validate_context(self, content):
+        """ check if all the config variables desired exist, and prompt them if not """
+        values = config_substitute_match.findall(content)
+        for v in values:
+            if v not in self.manifest.config:
+                self.get_config(v, default=None, temporary=False)
+
     # wrapper for injections methods
     def inject(self, filename, content):
         return self.injections.inject(filename, content)
@@ -89,6 +98,9 @@ class Environment(object):
         return self.injections.commit()
 
     # wrapper for manifest methods
+    def get_config(self, param_name, default=None, temporary=False):
+        return self.manifest.get_config(param_name, default, temporary)
+
     def load_target_implicit(self):
         return self.manifest.load_target_implicit()
 
@@ -118,6 +130,7 @@ class Environment(object):
         return self.directory.install_directory(feature_name)
 
     def add_to_rc(self, content):
+        self.validate_context(content)
         return self.directory.add_to_rc(content % self.context())
 
     def rc_path(self):
