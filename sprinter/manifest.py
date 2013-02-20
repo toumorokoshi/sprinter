@@ -132,8 +132,6 @@ class Manifest(object):
         self.source_manifest = ConfigParser.RawConfigParser()
         if not self.source_manifest.has_section('config'):
             self.source_manifest.add_section('config')
-        else:
-            self.config = dict(self.source_manifest.items('config'))
         if type(source_manifest) == str:
             if source_manifest.startswith("http"):
                 manifest_file_handler = StringIO(urllib.urlopen(source_manifest).read())
@@ -144,6 +142,7 @@ class Manifest(object):
                 self.source_manifest.set('config', 'source', str(source_manifest))
         else:
             self.source_manifest.readfp(source_manifest)
+        self.config = dict(self.source_manifest.items('config'))
 
     def grab_inputs(self):
         """
@@ -156,7 +155,7 @@ class Manifest(object):
                   self.__parse_input_string(self.target_manifest.get(s, 'inputs')):
                     default = (attributes['default'] if 'default' in attributes else None)
                     secret = (attributes['secret'] if 'secret' in attributes else False)
-                    self.__prompt(param, default=default, secret=secret)
+                    self.get_config(param, default=default, secret=secret)
 
     def setups(self):
         """
@@ -237,13 +236,13 @@ class Manifest(object):
         self.target_manifest.set('config', 'namespace', self.namespace)
         self.target_manifest.write(file_handle)
 
-    def get_config(self, param_name, default=None, temporary=False):
+    def get_config(self, param_name, default=None, secret=False):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
         """
         if param_name not in self.config:
-            self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default)
-        if temporary:
+            self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default, secret=secret)
+        if secret:
             self.temporary_sections.append(param_name)
         return self.config[param_name]
 
