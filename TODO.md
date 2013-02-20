@@ -1,6 +1,4 @@
 highest to lowest priority
-
-* add in sourcing of bin directory to path
 * command
 * ssh key to stash (probably covered by command)
 * perforce (probably custom)

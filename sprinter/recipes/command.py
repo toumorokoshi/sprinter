@@ -1,5 +1,7 @@
 """
 Runs a command
+[ssh]
+command = cd ~/.ssh/ && ssh-keygen -f 'zillow' -t rsa -P
 """
 
 from sprinter.recipestandard import RecipeStandard

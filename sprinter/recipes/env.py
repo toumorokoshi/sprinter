@@ -4,14 +4,11 @@ Queries the user for a specific environment
 [env]
 recipe = sprinter.recipes.env
 stash = %(config:stash)
-_default_stash = ~/stash
 user = %(config:user)
+MAVEN_HOME = %(maven:root_dir)
+M2_PATH = ~/.m2/
 """
-import os
-import shutil
-
 from sprinter.recipestandard import RecipeStandard
-from sprinter.lib import call
 
 
 class EnvRecipe(RecipeStandard):
@@ -19,14 +16,13 @@ class EnvRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         super(EnvRecipe, self).setup(feature_name, config)
-        for c in config:
-            if c != 'recipe' and not c.startswith("_default"):
-                #self.environment.add_to_rc("export %s=%s" % (c
-                pass
+        [self.environment.add_to_rc('export %s=%s' % (c, config[c])) \
+             for c in config if c != 'recipe']
 
     def update(self, feature_name, config):
         super(EnvRecipe, self).update(feature_name, config)
-        pass
+        [self.environment.add_to_rc('export %s=%s' % (c, config[c])) \
+             for c in config if c != 'recipe']
 
     def destroy(self, feature_name, config):
         super(EnvRecipe, self).destroy(feature_name, config)
