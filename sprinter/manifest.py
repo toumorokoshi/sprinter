@@ -47,6 +47,9 @@ recipe = sprinter.recipes.template
 """
 
 
+CONFIG_RESERVED = ['source', 'inputs']
+
+
 class ManifestError(Exception):
     pass
 
