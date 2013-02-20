@@ -72,6 +72,7 @@ class Environment(object):
     def finalize(self):
         """ command to run at the end of sprinter's run """
         self.manifest.write(open(self.directory.config_path(), "w+"))
+        self.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
         self.injections.commit()
 
     def context(self):

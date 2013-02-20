@@ -4,6 +4,7 @@ packages to different locations.
 
 """
 import os
+import stat
 
 rc_template = \
 """
@@ -29,12 +30,21 @@ class Directory(object):
         Symlink an object at path to name in the bin folder. remove it if it already exists.
         """
         self.__symlink_dir("bin", name, path)
+        os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR)
 
     def symlink_to_lib(self, name, path):
         """
         Symlink an object at path to name in the lib folder. remove it if it already exists.
         """
         self.__symlink_dir("lib", name, path)
+
+    def bin_path(self):
+        """ return the bin directory path """
+        return os.path.join(self.root_dir, "bin")
+
+    def lib_path(self):
+        """ return the lib directory path """
+        return os.path.join(self.root_dir, "bin")
 
     def install_directory(self, feature_name):
         """
@@ -46,7 +56,7 @@ class Directory(object):
         """
         add content to the rc script.
         """
-        self.rc_file.write(content)
+        self.rc_file.write(content + '\n')
 
     def config_path(self):
         """
