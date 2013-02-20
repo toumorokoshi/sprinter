@@ -2,6 +2,8 @@
 Recipe base is an abstract base class outlining the method required
 and some documentation on what they should provide.
 """
+import logging
+
 from sprinter import lib
 from sprinter.recipebase import RecipeBase
 
@@ -10,6 +12,7 @@ class RecipeStandard(RecipeBase):
 
     def __init__(self, environment):
         self.environment = environment
+        self.logger = logging.getLogger('sprinter')
 
     def setup(self, feature_name, config):
         """ Setup performs the setup required, with the config

@@ -36,6 +36,7 @@ class Environment(object):
         if not source_manifest:
             self.manifest.load_source(self.directory.config_path())
         self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
+        self.grab_inputs()
 
     def load_namespace(self, namespace=None):
         if namespace:
@@ -98,6 +99,9 @@ class Environment(object):
         return self.injections.commit()
 
     # wrapper for manifest methods
+    def grab_inputs(self):
+        return self.manifest.grab_inputs()
+
     def get_config(self, param_name, default=None, temporary=False):
         return self.manifest.get_config(param_name, default, temporary)
 

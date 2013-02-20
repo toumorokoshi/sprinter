@@ -13,7 +13,7 @@ import urllib
 from sprinter.recipestandard import RecipeStandard
 from sprinter.lib import call
 
-url_template = "http://filehost.perforce.com/perforce/%s/%s/p4",
+url_template = "http://filehost.perforce.com/perforce/%s/%s/p4"
 exec_dict = {"r10.1": {"mac": "bin.macosx104u",
                        "linux": "bin.linux26x86_64"}}
 
@@ -23,7 +23,7 @@ class PerforceRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         super(PerforceRecipe, self).setup(feature_name, config)
-        self.__install_perforce(self, feature_name, config)
+        self.__install_perforce(feature_name, config)
 
     def update(self, feature_name, config):
         if config['source']['version'] != config['target']['version']:
@@ -40,8 +40,8 @@ class PerforceRecipe(RecipeStandard):
         exec_dir = exec_dict[config['version']]['mac'] if self.environment.isOSX() else \
                    exec_dict[config['version']]['linux']
         url = url_template % (config['version'], exec_dir)
-        d = self.environment.install_directory
-        os.mkdirs(d)
+        d = self.environment.install_directory(feature_name)
+        os.makedirs(d)
         self.logger.info("Downloading p4 executable...")
         urllib.urlretrieve(url, os.path.join(d, "p4"))
         self.environment.symlink_to_bin("p4", os.path.join(d, "p4"))

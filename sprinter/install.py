@@ -45,6 +45,7 @@ def main():
         e = Environment(namespace=args.namespace)
         e.load_namespace(args.target)
         if e.load_target_implicit():
+            e.grab_inputs()
             e.logger.info("Updating %s" % e.namespace)
             __install(e)
             install_sprinter(e)

@@ -9,6 +9,7 @@ version = {{ manifest_version }}
 
 import ConfigParser
 import urllib
+from getpass import getpass
 from StringIO import StringIO
 
 test_old_version = """
@@ -44,6 +45,14 @@ specific_version = 1.8.4
 
 [myrc]
 recipe = sprinter.recipes.template
+"""
+
+test_input_string = \
+"""
+gitroot==~/workspace
+username
+password?
+main_branch==comp_main
 """
 
 
@@ -135,6 +144,19 @@ class Manifest(object):
                 self.source_manifest.set('config', 'source', str(source_manifest))
         else:
             self.source_manifest.readfp(source_manifest)
+
+    def grab_inputs(self):
+        """
+        Look for any inputs not already asked accounted for, and
+        query the user for them.
+        """
+        for s in self.target_manifest.sections():
+            if self.target_manifest.has_option(s, 'inputs'):
+                for param, attributes in \
+                  self.__parse_input_string(self.target_manifest.get(s, 'inputs')):
+                    default = (attributes['default'] if 'default' in attributes else None)
+                    secret = (attributes['secret'] if 'secret' in attributes else False)
+                    self.__prompt(param, default=default, secret=secret)
 
     def setups(self):
         """
@@ -247,12 +269,15 @@ class Manifest(object):
         """
         return [s for s in self.target_manifest.sections() if s != "config"]
 
-    def __prompt(prompt_string, default=None):
+    def __prompt(self, prompt_string, default=None, secret=False):
         """
         Prompt user for a string, with a default value
         """
         prompt_string += (" (default %s):" % default if default else ":")
-        val = raw_input(prompt_string)
+        if secret:
+            val = getpass(prompt_string)
+        else:
+            val = raw_input(prompt_string)
         return (val if val else default)
 
     def __detect_namespace(self, manifest_object):
@@ -294,6 +319,53 @@ class Manifest(object):
             if k not in target_dict or source_dict[k] != target_dict[k]:
                 return True
         return False
+
+    def __parse_input_string(self, input_string):
+        """
+        parse an attribute in a given input string format:
+
+        e.g.:
+
+        inputs = gitroot==~/workspace
+                 username
+                 password?
+                 main_branch==comp_main
+
+        >>> m._Manifest__parse_input_string(test_input_string)
+        [('gitroot', {'default': '~/workspace'}), ('username', {}), ('password', {'secret': True}), ('main_branch', {'default': 'comp_main'})]
+        """
+        raw_params = input_string.split('\n')
+        return [self.__parse_param_line(rp) for rp in raw_params if len(rp.strip(' \t')) > 0]
+
+    def __parse_param_line(self, line):
+        """
+        Parse a single param line.
+
+        >>> m._Manifest__parse_param_line("username")
+        ('username', {})
+
+        >>> m._Manifest__parse_param_line("password?")
+        ('password', {'secret': True})
+
+        >>> m._Manifest__parse_param_line("main_branch==comp_main")
+        ('main_branch', {'default': 'comp_main'})
+
+        >>> m._Manifest__parse_param_line("main_branch?==comp_main")
+        ('main_branch', {'default': 'comp_main', 'secret': True})
+
+        >>> m._Manifest__parse_param_line("")
+        """
+        value = line.strip('\n \t')
+        if len(value) > 0:
+            attribute_dict = {}
+            if value.find('==') != -1:
+                value, default = line.split('==')
+                attribute_dict['default'] = default
+            if value.endswith('?'):
+                value = value[:-1]
+                attribute_dict['secret'] = True
+            return (value, attribute_dict)
+        return None
 
 if __name__ == '__main__':
     import doctest
