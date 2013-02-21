@@ -68,7 +68,7 @@ class Injections(object):
         install_file.write(content)
         install_file.close()
 
-    def __clear(install_filename, wrapper):
+    def __clear(self, install_filename, wrapper):
         """
         Inject inject_string into a file, wrapped with
         #SPRINTER_{{NAMESPACE}} comments if condition lambda is not
@@ -79,8 +79,8 @@ class Injections(object):
         if not os.path.exists(install_filename):
             open(install_filename, "w+").close()
         install_file = open(install_filename, "r+")
-        content = re.sub("%s.*%s" % (wrapper, wrapper),
-                         "", install_file.read(), re.DOTALL)
+        wrapper_match = re.compile("\n%s.*%s" % (wrapper, wrapper), re.DOTALL)
+        content = wrapper_match.sub("", install_file.read())
         install_file.close()
         install_file = open(install_filename, "w+")
         install_file.write(content)
