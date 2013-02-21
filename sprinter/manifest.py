@@ -122,7 +122,7 @@ class Manifest(object):
         false is returned.
         """
         if self.source_manifest.has_section('config') and \
-           self.source_manifest.has_option('config', 'source'):
+                self.source_manifest.has_option('config', 'source'):
             self.load_target(self.source_manifest.get('config', 'source'))
             return True
         return False
@@ -152,7 +152,7 @@ class Manifest(object):
         for s in self.target_manifest.sections():
             if self.target_manifest.has_option(s, 'inputs'):
                 for param, attributes in \
-                  self.__parse_input_string(self.target_manifest.get(s, 'inputs')):
+                        self.__parse_input_string(self.target_manifest.get(s, 'inputs')):
                     default = (attributes['default'] if 'default' in attributes else None)
                     secret = (attributes['secret'] if 'secret' in attributes else False)
                     self.get_config(param, default=default, secret=secret)
@@ -240,6 +240,9 @@ class Manifest(object):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
         """
+        prompt = "please enter your %s" % param_name
+        if default:
+            prompt += " (default %s)" % default
         if param_name not in self.config:
             self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default, secret=secret)
         if secret:
@@ -254,6 +257,8 @@ class Manifest(object):
         for s in self.target_manifest.sections():
             for k, v in self.target_manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
+        for k, v in self.config.items():
+                context_dict["config:%s" % k] = v
         return context_dict
 
     def source_sections(self):
@@ -285,7 +290,7 @@ class Manifest(object):
         """
         namespace = ""
         if self.target_manifest and self.target_manifest.has_section('config') and \
-              self.target_manifest.has_option('config', 'namespace'):
+                self.target_manifest.has_option('config', 'namespace'):
                 namespace = self.target_manifest.get('config', 'namespace')
         else:
             s = str(manifest_object)

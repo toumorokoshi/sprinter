@@ -2,7 +2,7 @@
 Creates a git repository and places it at the install location.
 
 [perforce]
-recipe = sprinter.recipe.perforce
+recipe = sprinter.recipes.perforce
 version = r10.1
 default_path = ~/p4/
 """
@@ -38,7 +38,7 @@ class PerforceRecipe(RecipeStandard):
 
     def __install_perforce(self, feature_name, config):
         exec_dir = exec_dict[config['version']]['mac'] if self.environment.isOSX() else \
-                   exec_dict[config['version']]['linux']
+            exec_dict[config['version']]['linux']
         url = url_template % (config['version'], exec_dir)
         d = self.environment.install_directory(feature_name)
         os.makedirs(d)

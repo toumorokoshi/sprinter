@@ -89,6 +89,15 @@ class Environment(object):
             if v not in self.manifest.config:
                 self.get_config(v, default=None, temporary=False)
 
+    def deactivate(self):
+        """ remove environment specific injections """
+        self.injections.clear("~/.bash_profile")
+
+    def activate(self):
+        """ add environment specific injections """
+        self.injections.inject("~/.bash_profile",
+                               "[[ -s '%s' ]] && source %s" % (self.rc_path(), self.rc_path()))
+
     # wrapper for injections methods
     def inject(self, filename, content):
         return self.injections.inject(filename, content)
@@ -136,6 +145,7 @@ class Environment(object):
 
     def add_to_rc(self, content):
         self.validate_context(content)
+        self.logger.debug("adding %s to rc" % content)
         return self.directory.add_to_rc(content % self.context())
 
     def rc_path(self):

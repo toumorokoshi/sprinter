@@ -1,9 +1,10 @@
 """
 The install script for a sprinter-based setup script.
 """
+import argparse
+import logging
 import shutil
 import sys
-import argparse
 from sprinter.lib import get_recipe_class
 from sprinter.environment import Environment
 
@@ -18,17 +19,20 @@ parser.add_argument('command', metavar='C',
 parser.add_argument('target', metavar='T', help="The path to the manifest file to install")
 parser.add_argument('--namespace', dest='namespace', default=None,
                     help="Namespace to check environment against")
+parser.add_argument('-v', dest='verbose', action='store_true', help="Make output verbose")
 
 
 def main():
     args = parser.parse_args()
     command = args.command.lower()
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
     if command == "install":
-        e = Environment(namespace=args.namespace)
+        e = Environment(namespace=args.namespace, logging_level=logging_level)
         e.load_manifest(args.target)
+        e.grab_inputs()
         e.logger.info("Installing %s environment..." % e.namespace)
         __install(e)
-        install_sprinter(e)
+        e.activate()
         e.finalize()
     elif command == "deactivate":
         pass
@@ -37,21 +41,23 @@ def main():
     elif command == "switch":
         pass
     elif command == "remove":
-        e = Environment(namespace=args.namespace)
+        e = Environment(namespace=args.namespace, logging_level=logging_level)
         e.load_namespace(args.target)
+        e.deactivate()
         e.logger.info("Completely removing %s..." % e.namespace)
+        e.finalize()
         __remove(e)
     elif command == "update":
-        e = Environment(namespace=args.namespace)
+        e = Environment(namespace=args.namespace, logging_level=logging_level)
         e.load_namespace(args.target)
         if e.load_target_implicit():
             e.grab_inputs()
             e.logger.info("Updating %s" % e.namespace)
             __install(e)
-            install_sprinter(e)
+            e.activate()
             e.finalize()
     elif command == "reload":
-        e = Environment(namespace=args.namespace)
+        e = Environment(namespace=args.namespace, logging_level=logging_level)
         e.load_namespace(args.target)
         e.logger.info("Reloading %s" % e.namespace)
         recipe_dict = {}
@@ -125,10 +131,6 @@ def __reload(environment, name, config, recipe_dict):
                                             environment)
     recipe_instance.reload(name, config['source'])
 
-
-def install_sprinter(environment):
-    environment.inject("~/.bash_profile",
-       "[[ -s '%s' ]] && source %s" % (environment.rc_path(), environment.rc_path()))
 
 if __name__ == '__main__':
     if len(sys.argv) > 0 and sys.argv[1] == 'doctest':
