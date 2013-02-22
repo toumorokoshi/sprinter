@@ -11,6 +11,7 @@ import ConfigParser
 import urllib
 from getpass import getpass
 from StringIO import StringIO
+from sprinter import lib
 
 test_old_version = """
 [config]
@@ -244,7 +245,7 @@ class Manifest(object):
         if default:
             prompt += " (default %s)" % default
         if param_name not in self.config:
-            self.config[param_name] = self.__prompt("please enter your %s" % param_name, default=default, secret=secret)
+            self.config[param_name] = lib.prompt("please enter your %s" % param_name, default=default, secret=secret)
         if secret:
             self.temporary_sections.append(param_name)
         return self.config[param_name]
@@ -272,17 +273,6 @@ class Manifest(object):
         return all target sections except for reserved ones
         """
         return [s for s in self.target_manifest.sections() if s != "config"]
-
-    def __prompt(self, prompt_string, default=None, secret=False):
-        """
-        Prompt user for a string, with a default value
-        """
-        prompt_string += (" (default %s):" % default if default else ":")
-        if secret:
-            val = getpass(prompt_string)
-        else:
-            val = raw_input(prompt_string)
-        return (val if val else default)
 
     def __detect_namespace(self, manifest_object):
         """

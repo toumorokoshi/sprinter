@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 
+from getpass import getpass
 from sprinter.recipebase import RecipeBase
 
 
@@ -36,6 +37,18 @@ def get_recipe_class(recipe, environment):
 def call(command):
     args = command.split(" ")
     subprocess.call(args)
+
+
+def prompt(prompt_string, default=None, secret=False):
+    """
+    Prompt user for a string, with a default value
+    """
+    prompt_string += (" (default %s):" % default if default else ":")
+    if secret:
+        val = getpass(prompt_string)
+    else:
+        val = raw_input(prompt_string)
+    return (val if val else default)
 
 
 def __recursive_import(module_name):
