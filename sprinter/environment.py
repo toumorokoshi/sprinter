@@ -10,6 +10,7 @@ import sys
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
 from sprinter.injections import Injections
+from sprinter.lib import get_recipe_class
 
 debian_match = re.compile(".*(Ubuntu|Debian).*")
 fedora_match = re.compile(".*(RHEL).*")
@@ -18,6 +19,8 @@ config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
 
 class Environment(object):
+
+    recipe_dict = {}
 
     def __init__(self, namespace=None, logger=None, logging_level=logging.INFO):
         self.namespace = namespace
@@ -90,13 +93,29 @@ class Environment(object):
                 self.get_config(v, default=None, temporary=False)
 
     def deactivate(self):
-        """ remove environment specific injections """
+        """ deactivate environments """
+        for name, config in self.manifest.deactivations.items():
+            self.logger.info("Setting up %s..." % name)
+            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
+            recipe_instance.deactivate(name, config['source'])
         self.injections.clear("~/.bash_profile")
 
     def activate(self):
-        """ add environment specific injections """
-        self.injections.inject("~/.bash_profile",
-                               "[[ -s '%s' ]] && source %s" % (self.rc_path(), self.rc_path()))
+        """ activate environment specific injections """
+        for name, config in self.manifest.activations.items():
+            self.logger.info("Setting up %s..." % name)
+            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
+            recipe_instance.activate(name, config['source'])
+        self.injections.clear("~/.bash_profile")
+
+    def __get_recipe_instance(self, recipe, environment):
+        """
+        get an instance of the recipe object object if it exists, else
+        create one, add it to the dict, and pass return it.
+        """
+        if recipe not in self.recipe_dict:
+            self.recipe_dict[recipe] = get_recipe_class(recipe, environment)
+        return self.recipe_dict[recipe]
 
     # wrapper for injections methods
     def inject(self, filename, content):

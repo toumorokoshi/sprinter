@@ -158,6 +158,30 @@ class Manifest(object):
                     secret = (attributes['secret'] if 'secret' in attributes else False)
                     self.get_config(param, default=default, secret=secret)
 
+    def activations(self):
+        """
+        Return a dictionary of activation recipes.
+
+        >>> m.activations()
+        {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
+        """
+        activation_sections = {}
+        for s in self.source_sections():
+            activation_sections[s] = {"source": dict(self.source_manifest.items(s))}
+        return activation_sections
+
+    def deactivations(self):
+        """
+        Return a dictionary of activation recipes.
+
+        >>> m.activations()
+        {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
+        """
+        deactivation_sections = {}
+        for s in self.source_sections():
+            deactivation_sections[s] = {"source": dict(self.source_manifest.items(s))}
+        return deactivation_sections
+
     def setups(self):
         """
         Return a dictionary with all the features that need to be setup.
