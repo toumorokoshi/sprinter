@@ -4,7 +4,8 @@ cd docs
 make html
 git checkout gh-pages
 cd ..
-mv -f docs/build/html/* .
+rm -rf _*
+mv docs/build/html/* .
 git add .
 git commit -am "build $(date)"
 git push origin gh-pages
