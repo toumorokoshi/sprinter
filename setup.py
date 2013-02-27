@@ -10,7 +10,7 @@ setup(name='sprinter',
       description='a utility library to help environment bootstrapping scripts',
       author='Yusuke Tsutsumi',
       author_email='yusuke@yusuketsutsumi.com',
-      url='https://github.com/Toumorokoshi/sprinter',
+      url='https://toumorokoshi.github.com/sprinter',
       packages=['sprinter', 'sprinter.recipes'],
       classifiers=[
         'Development Status :: 4 - Beta',
