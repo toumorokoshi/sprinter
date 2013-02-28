@@ -1,6 +1,10 @@
 """
 Installs a package from whatever the native package manager is
 (apt-get for debian-based, brew for OS X)
+[env]
+recipe = sprinter.recipes.package
+debian = git
+brew = git
 """
 
 from sprinter.recipestandard import RecipeStandard
@@ -14,8 +18,10 @@ class PackageRecipe(RecipeStandard):
         self.package_manager = self.__get_package_manager()
 
     def setup(self, feature_name, config):
-        call("sudo %s install %s")
-        pass
+        if self.package_manager in config:
+            package = config[self.package_manager]
+            self.logger.info("Installing %s..." % package)
+            lib.call("sudo %s install %s" % (self.package_manager, package))
 
     def __get_package_manager(self):
         if self.environment.isOSX():
