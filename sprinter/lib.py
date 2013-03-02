@@ -8,6 +8,8 @@ import imp
 import os
 import re
 import subprocess
+import urllib2
+import base64
 
 from getpass import getpass
 from sprinter.recipebase import RecipeBase
@@ -37,6 +39,17 @@ def get_recipe_class(recipe, environment):
 def call(command):
     args = command.split(" ")
     subprocess.call(args)
+
+
+def authenticated_get(username, password, url):
+    """
+    Perform an authorized query to the url, and return the result
+    """
+    request = urllib2.Request(url)
+    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+    request.add_header("Authorization", "Basic %s" % base64string)   
+    result = urllib2.urlopen(request)
+    return result.read()
 
 
 def prompt(prompt_string, default=None, secret=False):
