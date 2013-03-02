@@ -94,27 +94,27 @@ class Environment(object):
 
     def deactivate(self):
         """ deactivate environments """
-        for name, config in self.manifest.deactivations.items():
-            self.logger.info("Setting up %s..." % name)
+        for name, config in self.manifest.deactivations().items():
+            self.logger.info("Deactivating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.deactivate(name, config['source'])
         self.injections.clear("~/.bash_profile")
 
     def activate(self):
         """ activate environment specific injections """
-        for name, config in self.manifest.activations.items():
-            self.logger.info("Setting up %s..." % name)
+        for name, config in self.manifest.activations().items():
+            self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.activate(name, config['source'])
         self.injections.clear("~/.bash_profile")
 
-    def __get_recipe_instance(self, recipe, environment):
+    def __get_recipe_instance(self, recipe):
         """
         get an instance of the recipe object object if it exists, else
         create one, add it to the dict, and pass return it.
         """
         if recipe not in self.recipe_dict:
-            self.recipe_dict[recipe] = get_recipe_class(recipe, environment)
+            self.recipe_dict[recipe] = get_recipe_class(recipe, self)
         return self.recipe_dict[recipe]
 
     # wrapper for injections methods

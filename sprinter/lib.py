@@ -47,7 +47,7 @@ def authenticated_get(username, password, url):
     """
     request = urllib2.Request(url)
     base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-    request.add_header("Authorization", "Basic %s" % base64string)   
+    request.add_header("Authorization", "Basic %s" % base64string)
     result = urllib2.urlopen(request)
     return result.read()
 

@@ -3,8 +3,8 @@ Runs a command
 [ssh]
 recipe = sprinter.recipes.command
 hideoutput=true
-setup=echo 'setting up'
-update=echo 'updating'
+setup=echo 'setting up...'
+update=echo 'updating...'
 destroy=echo 'destroying...'
 """
 
