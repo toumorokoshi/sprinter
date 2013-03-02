@@ -12,8 +12,8 @@ from sprinter.directory import Directory
 from sprinter.injections import Injections
 from sprinter.lib import get_recipe_class
 
-debian_match = re.compile(".*(Ubuntu|Debian).*")
-fedora_match = re.compile(".*(RHEL).*")
+debian_match = re.compile(".*(ubuntu|debian).*", re.IGNORECASE)
+fedora_match = re.compile(".*(RHEL).*", re.IGNORECASE)
 
 config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
