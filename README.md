@@ -1,7 +1,7 @@
 sprinter
 ========
 
-A cross-platform environment bootstrapping framework
+A cross-platform environment bootstrapping framework!
 
 Sprinter is a framework designed to making bootstrapping and deployment across machines easier. There are three main components to a usable sprinter script:
 * This python egg, to fully utilize the framework
