@@ -27,6 +27,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   tutorial
+   recipes
+
 
 
 Indices and tables
