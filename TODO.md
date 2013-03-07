@@ -4,5 +4,6 @@ highest to lowest priority
 * perforce (probably custom)
 * add reconfigure command to re-choose values
 * add activate, deactivate, switch
+* add ability to source recipes dynamically
 * refactor manifest. very messy right now.
 * catch incomplete format errors
