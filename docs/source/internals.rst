@@ -6,9 +6,7 @@ This page discusses what constitutes a sprinter environment.
 Environment activation/deactivation
 ===================================
 
-The main tool that environments are activated and deactivated is through "injections" of text into various configuration files on a client machine. A common injections that occurs is injecting the .rc file for an environment into a .bashrc/.bash_profile like so:
-
-.. code :: python
+The main tool that environments are activated and deactivated is through "injections" of text into various configuration files on a client machine. A common injections that occurs is injecting the .rc file for an environment into a .bashrc/.bash_profile like so::
 
    #sprinter-ENVIRONMENT
    inject environment
@@ -28,6 +26,11 @@ The .rc file
 ------------
 
 Every sprinter environment has a .rc file at it's core. Identical in concept to a .bashrc or .bash_profile, this .rc file contains a majority of the configuration of the setup for an environment.
+
+The .sprinter-ENVIRONMENT directory
+-----------------------------------
+
+A majority of the files required for a sprinter environment are stored in a .sprinter-ENVIRONMENT directory within 
 
 Services
 --------

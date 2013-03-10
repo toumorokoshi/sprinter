@@ -5,7 +5,7 @@ Sprinter Tutorial
 
 In this tutorial, you will learn:
 
-* How to write a sprinter configuration file
+* How to write a sprinter :term:`manifest` file
 * How to ask for user input (username, password, etc)
 
 Build a sprinter configuration file

@@ -29,6 +29,8 @@ Contents:
 
    tutorial
    recipes
+   internals
+   glossary
 
 
 
