@@ -30,6 +30,7 @@ Contents:
    tutorial
    recipes
    internals
+   sprinter
    glossary
 
 
