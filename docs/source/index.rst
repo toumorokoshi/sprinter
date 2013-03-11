@@ -16,9 +16,9 @@ Sprinter was designed with modularity, and adaption in mind. Some of the feature
 
 To Install: ::
 
-  easy_install sprinter
+  $ (sudo) easy_install sprinter
 
-
+In your console
 
 Contents:
 

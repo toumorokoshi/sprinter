@@ -11,7 +11,7 @@ The following sections have a special meaning in a manifest:
 config
 ######
 
-The config section is where all user variables are stored. in addition, it can also house the name of the environment, and
+The config section is where all user variables are stored. in addition, it can also house the name of the environment, input variables, and any standard confguration you need in your environment.
 
 
 Variable substitution
