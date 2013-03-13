@@ -14,12 +14,13 @@ export PATH=%s:$PATH
 
 class Directory(object):
 
-    def __init__(self, namespace=None):
+    def __init__(self, namespace, rewrite_rc=True):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
-        suffix = ("" if not namespace else "-%s" % namespace)
-        self.root_dir = os.path.expanduser(os.path.join("~", ".sprinter%s" % suffix))
+        self.root_dir = os.path.expanduser(os.path.join("~", ".sprinter", namespace))
         self.__generate_dir(self.root_dir)
-        self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
+        self.rewrite_rc = rewrite_rc
+        if self.rewrite_rc:
+            self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
 
     def __del__(self):
         if self.rc_file:
@@ -56,6 +57,8 @@ class Directory(object):
         """
         add content to the rc script.
         """
+        if not self.rewrite_rc:
+            raise("Error! Directory was not intialized w/ rewrite_rc.")
         self.rc_file.write(content + '\n')
 
     def config_path(self):

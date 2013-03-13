@@ -35,15 +35,18 @@ def main():
         e.activate()
         e.finalize()
     elif command == "deactivate":
-        e = Environment(namespace=args.namespace, logging_level=logging_level)
+        e = Environment(namespace=args.target, logging_level=logging_level,
+                        rewrite_rc=False)
+        e.load_namespace()
         e.deactivate()
         e.finalize()
         pass
     elif command == "activate":
-        e = Environment(namespace=args.namespace, logging_level=logging_level)
+        e = Environment(namespace=args.target, logging_level=logging_level,
+                        rewrite_rc=False)
+        e.load_namespace()
         e.activate()
         e.finalize()
-        pass
         pass
     elif command == "switch":
         pass
