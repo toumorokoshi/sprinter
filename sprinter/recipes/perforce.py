@@ -7,9 +7,10 @@ inputs = p4username
          p4password?
 version = r10.1
 root_path = ~/p4/
-username = %(config:p4username)
-password = %(config:p4password)
+username = %(config:p4username)s
+password = %(config:p4password)s
 port = perforce.local:1666
+client = %(config:node)s
 """
 import os
 import shutil
@@ -62,7 +63,7 @@ class PerforceRecipe(RecipeStandard):
         super(PerforceRecipe, self).setup(feature_name, config)
         self.__install_perforce(feature_name, config)
         self.__write_p4settings(config)
-        self.__configure_client()
+        self.__configure_client(config)
         self.__sync_perforce(config)
         self.__add_p4_port(config)
 

@@ -86,6 +86,8 @@ class Environment(object):
         context_dict = self.manifest.get_context_dict()
         for s in self.manifest.target_sections():
             context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+        # add environment information
+        context_dict['config:node'] = self.node
         return context_dict
 
     def validate_context(self, content):
