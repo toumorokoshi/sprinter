@@ -101,7 +101,7 @@ class PerforceRecipe(RecipeStandard):
         out_content = p4settings_template % config
         if os.path.exists(p4settings_path) and out_content != open(p4settings_path, "r+").read():
             overwrite = lib.prompt("p4settings already exists at %s. Overwrite?" % root_dir, default="no")
-            if overwrite.lower().startswith('y'):
+            if overwrite.lower().starts_with('y'):
                 self.logger.info("Overwriting existing p4settings...")
                 os.remove(p4settings_path)
             else:
@@ -117,7 +117,7 @@ class PerforceRecipe(RecipeStandard):
     def __sync_perforce(self, config):
         """ prompt and sync perforce """
         sync = lib.prompt("would you like to sync your perforce root?", default="yes")
-        if sync.lower.startswith('y'):
+        if sync.lower().startswith('y'):
             self.logger.info("Syncing perforce root...")
             os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
             lib.call("p4 -u %(username)s -p %(password)s sync" % (config['username'],

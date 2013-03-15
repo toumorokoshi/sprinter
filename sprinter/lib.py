@@ -9,7 +9,7 @@ import os
 import re
 import subprocess
 import urllib2
-import base64
+from base64 import b64encode
 
 from getpass import getpass
 from sprinter.recipebase import RecipeBase
@@ -45,8 +45,9 @@ def authenticated_get(username, password, url):
     """
     Perform an authorized query to the url, and return the result
     """
+    import pdb; pdb.set_trace()
     request = urllib2.Request(url)
-    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+    base64string = b64encode((b"%s:%s" % (username, password)).decode("ascii"))
     request.add_header("Authorization", "Basic %s" % base64string)
     result = urllib2.urlopen(request)
     return result.read()
