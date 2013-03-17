@@ -72,6 +72,8 @@ class Manifest(object):
 
     source_manifest = ConfigParser.RawConfigParser()
     target_manifest = None
+    source_dict = {}  # source is manipulated as dict until deserialized as a config file
+    target_dict = {}  # target is manipulated as dict until deserialized as a config file
     # a list of values to not save into the config.
     # e.g. passwords
     temporary_sections = []
@@ -196,6 +198,8 @@ class Manifest(object):
     def reloads(self):
         """
         return reload dictionaries
+        >>> m.reloads()
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         reload_sections = {}
         for s in self.source_sections():

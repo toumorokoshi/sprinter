@@ -1,19 +1,16 @@
 """
-A module that completely encapsulates a class. This should be a
+A module that completely encapsulates a sprinter environment. This should be a
 complete object representing any data needed by recipes.
 """
 
 import logging
-import platform
 import re
 import sys
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
 from sprinter.injections import Injections
+from sprinter.system import System
 from sprinter.lib import get_recipe_class
-
-debian_match = re.compile(".*(ubuntu|debian).*", re.IGNORECASE)
-fedora_match = re.compile(".*(RHEL).*", re.IGNORECASE)
 
 config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
@@ -24,10 +21,7 @@ class Environment(object):
 
     def __init__(self, namespace=None, logger=None, logging_level=logging.INFO):
         self.namespace = namespace
-        (system, node, release, version, machine, processor) = platform.uname()
-        self.system = system
-        self.node = node
-        self.processor = processor
+        self.system = System()
         self.logger = self.__build_logger(logger=logger, level=logging_level)
 
     def load_manifest(self, target_manifest, source_manifest=None):
@@ -59,18 +53,6 @@ class Environment(object):
             logger.addHandler(out_hdlr)
         logger.setLevel(level)
         return logger
-
-    def isOSX(self):
-        return self.system == "darwin"
-
-    def isLinux(self):
-        return self.system == "Linux"
-
-    def isDebianBased(self):
-        return debian_match.match(self.node) is not None
-
-    def isFedoraBased(self):
-        return fedora_match.match(self.node) is not None
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
@@ -117,6 +99,7 @@ class Environment(object):
             self.recipe_dict[recipe] = get_recipe_class(recipe, self)
         return self.recipe_dict[recipe]
 
+    """
     # wrapper for injections methods
     def inject(self, filename, content):
         return self.injections.inject(filename, content)
@@ -169,3 +152,4 @@ class Environment(object):
 
     def rc_path(self):
         return self.directory.rc_path
+    """

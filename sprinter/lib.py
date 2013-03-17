@@ -22,7 +22,7 @@ def get_recipe_class(recipe, environment):
     the first class that extends recipebase, and that is the class
     that an instance of it gets returned.
 
-    >>> issubclass(get_recipe_class("sprinter.recipes.unpack").__class__, RecipeBase)
+    >>> issubclass(get_recipe_class("sprinter.recipes.unpack", None).__class__, RecipeBase)
     True
     """
     try:
