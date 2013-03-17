@@ -25,5 +25,6 @@ setup(name='sprinter',
         'console_scripts': [
             'sprinter = sprinter.install:main'
         ]
-      }
+      },
+      test_suite='tests'
      )

@@ -9,7 +9,6 @@ version = {{ manifest_version }}
 
 import ConfigParser
 import urllib
-from getpass import getpass
 from StringIO import StringIO
 from sprinter import lib
 
@@ -163,7 +162,7 @@ class Manifest(object):
         Return a dictionary of activation recipes.
 
         >>> m.activations()
-        {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         activation_sections = {}
         for s in self.source_sections():
@@ -175,7 +174,7 @@ class Manifest(object):
         Return a dictionary of activation recipes.
 
         >>> m.activations()
-        {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         deactivation_sections = {}
         for s in self.source_sections():

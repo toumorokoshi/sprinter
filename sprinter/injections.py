@@ -8,6 +8,8 @@ import logging
 import os
 import re
 
+test_injection = """a0.9i0a9deienatd"""
+
 
 class Injections(object):
     """
@@ -21,8 +23,8 @@ class Injections(object):
     inject_dict = {}  # dictionary holding the injection object
     clear_dict = set()  # list holding the filenames to clear injection from
 
-    def __init__(self, wrapper):
-        self.logger = logging.getLogger('sprinter')
+    def __init__(self, wrapper, logger='sprinter'):
+        self.logger = logging.getLogger(logger)
         self.wrapper = wrapper
 
     def inject(self, filename, content):
