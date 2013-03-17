@@ -103,18 +103,7 @@ class Manifest(object):
 
     def load_target(self, target_manifest):
         """ reload the source manifest """
-        self.target_manifest = ConfigParser.RawConfigParser()
-        if not self.target_manifest.has_section('config'):
-            self.target_manifest.add_section('config')
-        if type(target_manifest) == str:
-            if target_manifest.startswith("http"):
-                manifest_file_handler = StringIO(urllib.urlopen(target_manifest).read())
-                self.target_manifest.readfp(manifest_file_handler)
-            else:
-                self.target_manifest.read(target_manifest)
-            self.target_manifest.set('config', 'source', str(target_manifest))
-        else:
-            self.target_manifest.readfp(target_manifest)
+        self.target_manifest = self.__load_manifest(target_manifest)
 
     def load_target_implicit(self):
         """
@@ -131,20 +120,7 @@ class Manifest(object):
 
     def load_source(self, source_manifest):
         """ reload the source manifest """
-        self.source_manifest = ConfigParser.RawConfigParser()
-        if not self.source_manifest.has_section('config'):
-            self.source_manifest.add_section('config')
-        if type(source_manifest) == str:
-            if source_manifest.startswith("http"):
-                manifest_file_handler = StringIO(urllib.urlopen(source_manifest).read())
-                self.source_manifest.readfp(manifest_file_handler)
-            else:
-                self.source_manifest.read(source_manifest)
-            if not self.source_manifest.has_option('config', 'source'):
-                self.source_manifest.set('config', 'source', str(source_manifest))
-        else:
-            self.source_manifest.readfp(source_manifest)
-        self.config = dict(self.source_manifest.items('config'))
+        self.source_manifest = self.__load_manifest(source_manifest)
 
     def grab_inputs(self):
         """
@@ -387,6 +363,21 @@ class Manifest(object):
                 attribute_dict['secret'] = True
             return (value, attribute_dict)
         return None
+
+    def __load_manifest(self, manifest):
+        manifest_config = ConfigParser.RawConfigParser()
+        manifest_config.add_section('config')
+        if type(manifest) == str:
+            if manifest.startswith("http"):
+                manifest_file_handler = StringIO(urllib.urlopen(manifest).read())
+                manifest_config.readfp(manifest_file_handler)
+            else:
+                manifest_config.read(manifest)
+            manifest_config.set('config', 'source', str(manifest))
+        else:
+            manifest_config.readfp(target_manifest)
+        return manifest_config
+
 
 if __name__ == '__main__':
     import doctest

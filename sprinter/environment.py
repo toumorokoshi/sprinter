@@ -19,10 +19,12 @@ class Environment(object):
 
     recipe_dict = {}
 
-    def __init__(self, namespace=None, logger=None, logging_level=logging.INFO):
+    def __init__(self, namespace=None, logger=None, logging_level=logging.INFO,
+            rewrite_rc=True):
         self.namespace = namespace
         self.system = System()
         self.logger = self.__build_logger(logger=logger, level=logging_level)
+        self.rewrite_rc = rewrite_rc
 
     def load_manifest(self, target_manifest, source_manifest=None):
         self.manifest = Manifest(target_manifest,
@@ -40,6 +42,7 @@ class Environment(object):
             self.namespace = namespace
         self.directory = Directory(namespace=self.namespace)
         self.manifest = Manifest(source_manifest=self.directory.config_path(),
+                                 target_manifest=self.directory.config_path(),
                                  namespace=self.namespace)
         self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
 
@@ -65,6 +68,8 @@ class Environment(object):
         context_dict = self.manifest.get_context_dict()
         for s in self.manifest.target_sections():
             context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+        # add environment information
+        context_dict['config:node'] = self.node
         return context_dict
 
     def validate_context(self, content):
@@ -88,7 +93,8 @@ class Environment(object):
             self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.activate(name, config['source'])
-        self.injections.clear("~/.bash_profile")
+        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" % 
+                (self.directory.root_dir, self.directory.root_dir))
 
     def __get_recipe_instance(self, recipe):
         """
