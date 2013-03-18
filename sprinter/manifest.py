@@ -172,6 +172,8 @@ class Config(object):
                 self.namespace = source.namespace
         else:
             self.namespace = namespace
+        if self.source:
+            self.__load_configs(self.source)
 
     def grab_inputs(self):
         """
@@ -299,18 +301,24 @@ class Config(object):
             self.temporary_sections.append(param_name)
         return self.config[param_name]
 
-    def get_context_dict(self):
+    def get_context_dict(self, kind='target'):
         """
         return a context dict of the desired state
         """
         context_dict = {}
-        if self.target:
-            for s in self.target.recipe_sections():
-                for k, v in self.target.items(s):
+        manifest = self.target if kind == 'target' else self.source
+        if manifest:
+            for s in manifest.recipe_sections():
+                for k, v in manifest.items(s):
                     context_dict["%s:%s" % (s, k)] = v
-            for k, v in self.config.items():
-                    context_dict["config:%s" % k] = v
+        for k, v in self.config.items():
+                context_dict["config:%s" % k] = v
         return context_dict
+
+    def __load_configs(self, config):
+        if config.has_section('config'):
+            for k, v in config.items('config'):
+                self.config[k] = v
 
     def __detect_namespace(self, manifest_object):
         """

@@ -69,7 +69,7 @@ class Directory(object):
         add content to the rc script.
         """
         if not self.rewrite_rc:
-            raise("Error! Directory was not intialized w/ rewrite_rc.")
+            raise Exception("Error! Directory was not intialized w/ rewrite_rc.")
         self.rc_file.write(content + '\n')
 
     def __generate_dir(self, root_dir):

@@ -120,13 +120,15 @@ class Environment(object):
         self.directory.initialize()
         self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
         self.config.grab_inputs()
-        self.context_dict = self.__generate_context_dict()
+        kind = 'target' if target_manifest else 'source'
+        self.context_dict = self.__generate_context_dict(kind=kind)
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
         if os.path.exists(self.directory.manifest_path):
             self.config.write(open(self.directory.manifest_path, "w+"))
-        self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
+        if self.directory.rewrite_rc:
+            self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
         self.injections.commit()
 
     def context(self):
@@ -174,7 +176,7 @@ class Environment(object):
         """
         Remove an environment defined by a source_manifest
         """
-        self.initialize(source_manifest=source_manifest)
+        self.initialize(source_manifest=source_manifest, directory=directory)
         self._run_deactivates()
         self.injections.clear("~/.bash_profile")
         self.finalize()
@@ -183,7 +185,7 @@ class Environment(object):
         """
         Remove an environment defined by a source_manifest
         """
-        self.initialize(source_manifest=source_manifest)
+        self.initialize(source_manifest=source_manifest, directory=directory)
         self._run_activates()
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                 (self.directory.root_dir, self.directory.root_dir))
@@ -214,15 +216,15 @@ class Environment(object):
         for name, config in self.config.activations().items():
             self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            specialized_config = self.__substitute_objects(config['source'])
-            recipe_instance.activate(name, specialized_config)
+            #specialized_config = self.__substitute_objects(config['source'])
+            recipe_instance.activate(name, config['source'])
 
     def _run_deactivates(self):
         for name, config in self.config.deactivations().items():
             self.logger.info("Deactivating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            specialized_config = self.__substitute_objects(config['source'])
-            recipe_instance.deactivate(name, specialized_config)
+            #specialized_config = self.__substitute_objects(config['source'])
+            recipe_instance.deactivate(name, config['source'])
 
     def _run_reloads(self):
         for name, config in self.config.reloads().items():
@@ -251,10 +253,11 @@ class Environment(object):
             self.recipe_dict[recipe] = get_recipe_class(recipe, self)
         return self.recipe_dict[recipe]
 
-    def __generate_context_dict(self):
-        context_dict = self.config.get_context_dict()
-        if self.config.target:
-            for s in self.config.target.recipe_sections():
+    def __generate_context_dict(self, kind='target'):
+        context_dict = self.config.get_context_dict(kind=kind)
+        manifest = self.config.target if kind == 'target' else self.config.source
+        if manifest:
+            for s in manifest.recipe_sections():
                 context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
             # add environment information
             context_dict['config:node'] = self.system.node
