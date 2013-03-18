@@ -24,9 +24,9 @@ class PackageRecipe(RecipeStandard):
             lib.call("sudo %s install %s" % (self.package_manager, package))
 
     def __get_package_manager(self):
-        if self.environment.isOSX():
+        if self.system.isOSX():
             return "brew"
-        elif self.environment.isDebianBased():
+        elif self.system.isDebianBased():
             return "apt-get"
-        elif self.environment.isFedoraBased():
+        elif self.system.isFedoraBased():
             return "yum"

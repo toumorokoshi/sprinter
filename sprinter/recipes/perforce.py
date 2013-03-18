@@ -69,7 +69,7 @@ class PerforceRecipe(RecipeStandard):
 
     def update(self, feature_name, config):
         if config['source']['version'] != config['target']['version']:
-            os.remove(os.path.join(self.environment.install_directory(feature_name), 'p4'))
+            os.remove(os.path.join(self.directory.install_directory(feature_name), 'p4'))
             self.__install_perforce(self, feature_name, config['target'])
         self.__write_p4settings(config)
         self.__sync_perforce(config)
@@ -84,14 +84,14 @@ class PerforceRecipe(RecipeStandard):
 
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """
-        exec_dir = exec_dict[config['version']]['mac'] if self.environment.isOSX() else \
+        exec_dir = exec_dict[config['version']]['mac'] if self.system.isOSX() else \
             exec_dict[config['version']]['linux']
         url = url_template % (config['version'], exec_dir)
-        d = self.environment.install_directory(feature_name)
+        d = self.directory.install_directory(feature_name)
         os.makedirs(d)
         self.logger.info("Downloading p4 executable...")
         urllib.urlretrieve(url, os.path.join(d, "p4"))
-        self.environment.symlink_to_bin("p4", os.path.join(d, "p4"))
+        self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
 
     def __write_p4settings(self, config):
         """ write perforce settings """
@@ -124,7 +124,7 @@ class PerforceRecipe(RecipeStandard):
                                                                   re.escape(config['password'])))
 
     def __add_p4_port(self, config):
-        self.environment.add_to_rc('export P4PORT=%s' % config['port'])
+        self.directory.add_to_rc('export P4PORT=%s' % config['port'])
 
     def __destroy_perforce(self, config):
         """ destroy the perforce root """

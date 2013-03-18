@@ -16,12 +16,12 @@ class EnvRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         super(EnvRecipe, self).setup(feature_name, config)
-        [self.environment.add_to_rc('export %s=%s' % (c, config[c])) \
+        [self.directory.add_to_rc('export %s=%s' % (c, config[c])) \
              for c in config if c != 'recipe']
 
     def update(self, feature_name, config):
         super(EnvRecipe, self).update(feature_name, config)
-        [self.environment.add_to_rc('export %s=%s' % (c, config[c])) \
+        [self.directory.add_to_rc('export %s=%s' % (c, config[c])) \
              for c in config if c != 'recipe']
 
     def destroy(self, feature_name, config):

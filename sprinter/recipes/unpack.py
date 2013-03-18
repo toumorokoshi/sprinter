@@ -16,7 +16,7 @@ class UnpackRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         if config['type'] == "tar.gz":
-            self.__extract_targz(config['url'], self.environment.install_directory(feature_name))
+            self.__extract_targz(config['url'], self.directory.install_directory(feature_name))
         if 'executable' in config:
             symlink_target = config['symlink'] if 'symlink' in config else config['executable']
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
@@ -37,7 +37,7 @@ class UnpackRecipe(RecipeStandard):
         tf.extractall(path=target_dir)
 
     def __symlink_executable(self, feature_name, source, target):
-        source_path = os.path.join(self.environment.install_directory(feature_name), source)
-        self.environment.logger.debug("Symlinking executable at %s to bin/%s" %
+        source_path = os.path.join(self.directory.install_directory(feature_name), source)
+        self.logger.debug("Symlinking executable at %s to bin/%s" %
                                       (source_path, target))
-        self.environment.symlink_to_bin(target, source_path)
+        self.directory.symlink_to_bin(target, source_path)

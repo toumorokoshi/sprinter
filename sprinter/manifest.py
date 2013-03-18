@@ -173,13 +173,14 @@ class Config(object):
         Look for any inputs not already asked accounted for, and
         query the user for them.
         """
-        for s in self.target.recipe_sections():
-            if self.target.has_option(s, 'inputs'):
-                for param, attributes in \
-                        self.__parse_input_string(self.target.get(s, 'inputs')):
-                    default = (attributes['default'] if 'default' in attributes else None)
-                    secret = (attributes['secret'] if 'secret' in attributes else False)
-                    self.get_config(param, default=default, secret=secret)
+        if self.target:
+            for s in self.target.recipe_sections():
+                if self.target.has_option(s, 'inputs'):
+                    for param, attributes in \
+                            self.__parse_input_string(self.target.get(s, 'inputs')):
+                        default = (attributes['default'] if 'default' in attributes else None)
+                        secret = (attributes['secret'] if 'secret' in attributes else False)
+                        self.get_config(param, default=default, secret=secret)
 
     def setups(self):
         """

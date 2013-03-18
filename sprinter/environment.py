@@ -4,7 +4,9 @@ complete object representing any data needed by recipes.
 """
 
 import logging
+import os
 import re
+import shutil
 import sys
 from sprinter.manifest import Config, Manifest
 from sprinter.directory import Directory
@@ -120,14 +122,15 @@ class Environment(object):
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
-        self.manifest.write(open(self.directory.config_path(), "w+"))
-        self.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
+        if os.path.exists(self.directory.manifest_path):
+            self.config.write(open(self.directory.manifest_path, "w+"))
+        self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
         self.injections.commit()
 
     def context(self):
         """ get a context dictionary to replace content """
-        context_dict = self.manifest.get_context_dict()
-        for s in self.manifest.target_sections():
+        context_dict = self.config.get_context_dict()
+        for s in self.config.target_sections():
             context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
         # add environment information
         context_dict['config:node'] = self.node
@@ -167,6 +170,7 @@ class Environment(object):
         self.initialize(source_manifest=source_manifest)
         self._run_destroys()
         self.injections.clear("~/.bash_profile")
+        shutil.rmtree(self.directory.root_dir)
         self.finalize()
 
     def _deactivate(self, source_manifest, directory=None):
@@ -204,25 +208,25 @@ class Environment(object):
         for name, config in self.config.destroys().items():
             self.logger.info("Removing %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            recipe_instance.update(name, config)
+            recipe_instance.destroy(name, config)
 
     def _run_activates(self):
         for name, config in self.config.activations().items():
             self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            recipe_instance.update(name, config)
+            recipe_instance.activate(name, config)
 
     def _run_deactivates(self):
         for name, config in self.config.deactivations().items():
             self.logger.info("Deactivating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            recipe_instance.update(name, config)
+            recipe_instance.deactivate(name, config)
 
     def _run_reloads(self):
         for name, config in self.config.reloads().items():
             self.logger.info("Reloading %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'], self)
-            recipe_instance.update(name, config)
+            recipe_instance.reload(name, config)
 
     def __build_logger(self, logger=None, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
