@@ -33,7 +33,7 @@ class Environment(object):
         """
         target_manifest = Manifest(raw_target_manifest, namespace=namespace)
         directory = Directory(target_manifest.namespace)
-        if not self.directory.new:
+        if not directory.new:
             self.logger.info("Namespace %s already exists, updating..." % \
                              target_manifest.namespace)
             self._update(Manifest(directory.manifest_path),
@@ -41,14 +41,14 @@ class Environment(object):
                          directory=directory)
         else:
             self.logger.info("Installing environment %s..." % target_manifest.namespace)
-            self._install(target_manifest, directory=directory)
+            self._install(target_manifest)
 
     def update(self, namespace):
         """
         Update a namespace
         """
         directory = Directory(namespace)
-        if self.directory.new:
+        if directory.new:
             self.logger.error("Namespace %s is not yet installed!" % namespace)
             return
         source_manifest = Manifest(directory.manifest_path)
@@ -58,14 +58,14 @@ class Environment(object):
             return
         target_manifest = Manifest(source, namespace=namespace)
         self.logger.info("Updating environment %s..." % target_manifest.namespace)
-        self._update(source_manifest, target_manifest, directory=directory)
+        self._update(source_manifest, target_manifest)
 
     def remove(self, namespace):
         """
         Remove an environment namespace
         """
         directory = Directory(namespace)
-        if self.directory.new:
+        if directory.new:
             self.logger.error("Namespace %s does not exist!" % namespace)
             return
         source_manifest = Manifest(directory.manifest_path)
@@ -76,8 +76,8 @@ class Environment(object):
         """
         Deactivate an environment namespace
         """
-        directory = Directory(namespace)
-        if self.directory.new:
+        directory = Directory(namespace, rewrite_rc=False)
+        if directory.new:
             self.logger.error("Namespace %s does not exist!" % namespace)
             return
         source_manifest = Manifest(directory.manifest_path)
@@ -88,8 +88,8 @@ class Environment(object):
         """
         Activate an environment namespace
         """
-        directory = Directory(namespace)
-        if self.directory.new:
+        directory = Directory(namespace, rewrite_rc=False)
+        if directory.new:
             self.logger.error("Namespace %s does not exist!" % namespace)
             return
         source_manifest = Manifest(directory.manifest_path)
@@ -100,8 +100,8 @@ class Environment(object):
         """
         Activate an environment namespace
         """
-        directory = Directory(namespace)
-        if self.directory.new:
+        directory = Directory(namespace, rewrite_rc=False)
+        if directory.new:
             self.logger.error("Namespace %s does not exist!" % namespace)
             return
         source_manifest = Manifest(directory.manifest_path)
@@ -114,7 +114,8 @@ class Environment(object):
         """
         self.config = Config(source=source_manifest, target=target_manifest)
         self.directory = directory if directory else Directory(self.config.namespace)
-        self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
+        self.directory.initialize()
+        self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
         self.config.grab_inputs()
 
     def finalize(self):
@@ -190,31 +191,31 @@ class Environment(object):
     def _run_setups(self):
         for name, config in self.config.setups().items():
             self.logger.info("Setting up %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['target']['recipe'], self)
+            recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
             recipe_instance.setup(name, config['target'])
 
     def _run_updates(self):
         for name, config in self.config.updates().items():
             self.logger.info("Updating %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['target']['recipe'], self)
+            recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
             recipe_instance.update(name, config)
 
     def _run_destroys(self):
         for name, config in self.config.destroys().items():
             self.logger.info("Removing %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'], self)
+            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.update(name, config)
 
     def _run_activates(self):
         for name, config in self.config.activations().items():
             self.logger.info("Activating %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'], self)
+            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.update(name, config)
 
     def _run_deactivates(self):
         for name, config in self.config.deactivations().items():
             self.logger.info("Deactivating %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'], self)
+            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.update(name, config)
 
     def _run_reloads(self):

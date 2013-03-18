@@ -100,8 +100,8 @@ class Manifest(object):
                 manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
                 manifest.readfp(manifest_file_handler)
             else:
-                self.read(raw_manifest)
-            self.set('config', 'source', str(raw_manifest))
+                manifest.read(raw_manifest)
+            manifest.set('config', 'source', str(raw_manifest))
         elif raw_manifest.__class__ == RawConfigParser:
             return raw_manifest
         else:

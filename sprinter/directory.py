@@ -19,20 +19,23 @@ class Directory(object):
     new = False  # determines if the directory is for a new environment or not
     rewrite_rc = True  # if set to false, the existing rc file will be
                        # preserved, and will not be modifiable
+    rc_file = None  # file handler for rc file
 
     def __init__(self, namespace, rewrite_rc=True):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = os.path.expanduser(os.path.join("~", ".sprinter", namespace))
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
-        self.__generate_dir(self.root_dir)
         self.rewrite_rc = rewrite_rc
-        if self.rewrite_rc:
-            self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
 
     def __del__(self):
         if self.rc_file:
             self.rc_file.close()
+
+    def initialize(self):
+        self.__generate_dir(self.root_dir)
+        if self.rewrite_rc:
+            self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
 
     def symlink_to_bin(self, name, path):
         """
@@ -78,8 +81,8 @@ class Directory(object):
             target_path = os.path.join(root_dir, d)
             if not os.path.exists(target_path):
                 os.makedirs(target_path)
-        if not os.path.exists(self.config_path()):
-            open(self.config_path(), "w+").close()
+        if not os.path.exists(self.manifest_path):
+            open(self.manifest_path, "w+").close()
 
     def __get_rc_handle(self, root_dir):
         """ get the filepath and filehandle to the rc file for the environment """
