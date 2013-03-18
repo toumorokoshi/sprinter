@@ -67,7 +67,7 @@ class ManifestError(Exception):
     pass
 
 
-class Manifest(RawConfigParser):
+class Manifest(object):
     """
     A representation of a manifest object
 
@@ -82,8 +82,8 @@ class Manifest(RawConfigParser):
 
     def __init__(self, raw_manifest, namespace=None, logger='sprinter'):
         self.logger = logging.getLogger(logger)
-        self._load_manifest(raw_manifest)
-        self.namespace = namespace if namespace else self._parse_namespace()
+        self.manifest = self.__load_manifest(raw_manifest)
+        self.namespace = namespace if namespace else self.__parse_namespace()
 
     def source(self):
         """
@@ -92,26 +92,30 @@ class Manifest(RawConfigParser):
         return self.get('config', 'source') if \
             self.has_option('config', 'source') else None
 
-    def _load_manifest(self, manifest):
-        self.add_section('config')
-        if type(manifest) == str:
-            if manifest.startswith("http"):
-                manifest_file_handler = StringIO(urllib.urlopen(manifest).read())
-                self.readfp(manifest_file_handler)
+    def __load_manifest(self, raw_manifest):
+        manifest = RawConfigParser()
+        manifest.add_section('config')
+        if type(raw_manifest) == str:
+            if raw_manifest.startswith("http"):
+                manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
+                manifest.readfp(manifest_file_handler)
             else:
-                self.read(manifest)
-            self.set('config', 'source', str(manifest))
+                self.read(raw_manifest)
+            self.set('config', 'source', str(raw_manifest))
+        elif raw_manifest.__class__ == RawConfigParser:
+            return raw_manifest
         else:
-            self.readfp(manifest)
+            manifest.readfp(raw_manifest)
+        return manifest
 
-    def _parse_namespace(self):
+    def __parse_namespace(self):
         """
         Parse the namespace from various sources
         """
-        if self.has_option('config', 'namespace'):
-            return self.get('config', 'namespace')
-        elif self.has_option('config', 'source'):
-            return NAMESPACE_REGEX.search(self.get('config', 'source')).groups()[0]
+        if self.manifest.has_option('config', 'namespace'):
+            return self.manifest.get('config', 'namespace')
+        elif self.manifest.has_option('config', 'source'):
+            return NAMESPACE_REGEX.search(self.manifest.get('config', 'source')).groups()[0]
         else:
             self.logger.error('Could not parse namespace implicitely!')
             return None
@@ -120,7 +124,7 @@ class Manifest(RawConfigParser):
         """
         Return all sections related to a recipe.
         """
-        return [s for s in self.sections() if s != "config"]
+        return [s for s in self.manifest.sections() if s != "config"]
 
     def valid(self):
         """
@@ -129,12 +133,16 @@ class Manifest(RawConfigParser):
         """
         return True
 
+    # act like a configparser if asking for a non-existent method.
+    def __getattr__(self, name):
+        return getattr(self.manifest, name)
+
 
 class Config(object):
     """
     Class to reconcile manifests
 
-    >>> m.namespace
+    >>> c.namespace
     'sprinter'
     """
 
@@ -176,12 +184,12 @@ class Config(object):
     def setups(self):
         """
         Return a dictionary with all the features that need to be setup.
-        >>> m.setups()
+        >>> c.setups()
         {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
         """
         new_sections = {}
         for s in self.target.recipe_sections():
-            if not self.source or self.source.has_section(s):
+            if not self.source or not self.source.has_section(s):
                 new_sections[s] = {"target": dict(self.target.items(s))}
         return new_sections
 
@@ -190,10 +198,10 @@ class Config(object):
         Return a dictionary with all the features that need to be
         updated.
 
-        >>> m.updates()
+        >>> c.updates()
         {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
 
-        >>> old_manifest.updates()
+        >>> config_old_only.updates()
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         ManifestError: Update method requires a target manifest!
@@ -214,7 +222,7 @@ class Config(object):
         """
         Return a dictionary with all the features that need to be
         destroyed.
-        >>> m.destroys()
+        >>> c.destroys()
         {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         missing_sections = {}
@@ -227,7 +235,7 @@ class Config(object):
         """
         Return a dictionary of activation recipes.
 
-        >>> m.activations()
+        >>> c.activations()
         {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         deactivation_sections = {}
@@ -239,7 +247,7 @@ class Config(object):
         """
         Return a dictionary of activation recipes.
 
-        >>> m.activations()
+        >>> c.activations()
         {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         activation_sections = {}
@@ -250,7 +258,7 @@ class Config(object):
     def reloads(self):
         """
         return reload dictionaries
-        >>> m.reloads()
+        >>> c.reloads()
         {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         reload_sections = {}
@@ -316,18 +324,18 @@ class Config(object):
 
     def __update_needed(self, source_dict, target_dict):
         """
-        checks if an update is neede if there is a diff between the items provided
+        checks if an update is needed if there is a diff between the items provided
 
-        >>> m._Manifest__update_needed({"a": "b", "c": "d"}, {"a": "b", "c": "e"})
+        >>> c._Config__update_needed({"a": "b", "c": "d"}, {"a": "b", "c": "e"})
         True
 
-        >>> m._Manifest__update_needed({"a": "b"}, {"a": "b", "c": "e"})
+        >>> c._Config__update_needed({"a": "b"}, {"a": "b", "c": "e"})
         True
 
-        >>> m._Manifest__update_needed({"a": "b", "c": "d"}, {"a": "b"})
+        >>> c._Config__update_needed({"a": "b", "c": "d"}, {"a": "b"})
         True
 
-        >>> m._Manifest__update_needed({"a": "b", "c": "d", "e": "f"}, {"a": "b", "c": "d", "e": "f"})
+        >>> c._Config__update_needed({"a": "b", "c": "d", "e": "f"}, {"a": "b", "c": "d", "e": "f"})
         False
         """
         if len(source_dict) != len(target_dict):
@@ -348,7 +356,7 @@ class Config(object):
                  password?
                  main_branch==comp_main
 
-        >>> m._Manifest__parse_input_string(test_input_string)
+        >>> c._Config__parse_input_string(test_input_string)
         [('gitroot', {'default': '~/workspace'}), ('username', {}), ('password', {'secret': True}), ('main_branch', {'default': 'comp_main'})]
         """
         raw_params = input_string.split('\n')
@@ -358,19 +366,19 @@ class Config(object):
         """
         Parse a single param line.
 
-        >>> m._Manifest__parse_param_line("username")
+        >>> c._Config__parse_param_line("username")
         ('username', {})
 
-        >>> m._Manifest__parse_param_line("password?")
+        >>> c._Config__parse_param_line("password?")
         ('password', {'secret': True})
 
-        >>> m._Manifest__parse_param_line("main_branch==comp_main")
+        >>> c._Config__parse_param_line("main_branch==comp_main")
         ('main_branch', {'default': 'comp_main'})
 
-        >>> m._Manifest__parse_param_line("main_branch?==comp_main")
+        >>> c._Config__parse_param_line("main_branch?==comp_main")
         ('main_branch', {'default': 'comp_main', 'secret': True})
 
-        >>> m._Manifest__parse_param_line("")
+        >>> c._Config__parse_param_line("")
         """
         value = line.strip('\n \t')
         if len(value) > 0:
@@ -384,13 +392,11 @@ class Config(object):
             return (value, attribute_dict)
         return None
 
-    def _create_config_dict(config):
+    def __create_config_dict(config):
         """
         Convert a ConfigParser to a config_dictionary object
-        >>> config = ConfigParser.RawConfigParser()
+        >>> config = RawConfigParser()
         >>> config.readfp(StringIO(test_old_version))
-        >>> m._config_to_dict(config)
-        {}
         """
         pass
 
@@ -399,6 +405,8 @@ if __name__ == '__main__':
     old_manifest = Manifest(StringIO(test_old_version))
     new_manifest = Manifest(StringIO(test_new_version))
     config = Config(source=old_manifest, target=new_manifest)
+    config_new_only = Config(target=new_manifest)
+    config_old_only = Config(source=old_manifest)
     doctest.testmod(extraglobs={'c': config,
-                                'new_manifest': new_manifest,
-                                'old_manifest': old_manifest})
+                                'config_new_only': config_new_only,
+                                'config_old_only': config_old_only})
