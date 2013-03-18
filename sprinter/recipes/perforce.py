@@ -129,6 +129,6 @@ class PerforceRecipe(RecipeStandard):
     def __destroy_perforce(self, config):
         """ destroy the perforce root """
         sync = lib.prompt("would you like to completely remove the perforce root?", default="no")
-        if sync.lower.startswith('y'):
+        if sync.lower().startswith('y'):
             self.logger.info("Removing %s..." % config['root_path'])
             shutil.rmtree(os.path.expanduser(config['root_path'] % self.environment.context()))
