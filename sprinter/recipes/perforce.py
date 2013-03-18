@@ -80,7 +80,6 @@ class PerforceRecipe(RecipeStandard):
 
     def reload(self, feature_name, config):
         self.__sync_perforce(config)
-        self.__add_p4_port(config)
 
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """

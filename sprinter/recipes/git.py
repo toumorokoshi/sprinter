@@ -30,7 +30,7 @@ class GitRecipe(RecipeStandard):
     def reload(self, feature_name, config):
         super(GitRecipe, self).reload(feature_name, config)
         os.chdir(self.directory.install_directory(feature_name))
-        call("git pull origin %s" % config['branch'] if 'branch' in config else 'master')
+        call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
 
     def __clone_repo(self, repo_url, target_directory, branch=None):
         call("git clone %s %s" % (repo_url, target_directory))

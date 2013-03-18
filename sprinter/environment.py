@@ -119,7 +119,7 @@ class Environment(object):
         self.directory = directory if directory else Directory(self.config.namespace)
         self.directory.initialize()
         self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
-        self.config.grab_inputs()
+        self.config.grab_inputs(target_manifest if target_manifest else source_manifest)
         kind = 'target' if target_manifest else 'source'
         self.context_dict = self.__generate_context_dict(kind=kind)
 
@@ -156,7 +156,9 @@ class Environment(object):
         """
         Intall an environment from a target manifest Manifest
         """
-        self.initialize(target_manifest=target_manifest, directory=directory)
+        self.initialize(source_manifest=source_manifest, 
+                        target_manifest=target_manifest, 
+                        directory=directory)
         self._run_setups()
         self._run_updates()
         self._run_destroys()
@@ -189,6 +191,14 @@ class Environment(object):
         self._run_activates()
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                 (self.directory.root_dir, self.directory.root_dir))
+        self.finalize()
+
+    def _reload(self, source_manifest, directory=None):
+        """
+        Reload an environment defined by a source_manifest
+        """
+        self.initialize(source_manifest=source_manifest, directory=directory)
+        self._run_reloads()
         self.finalize()
 
     def _run_setups(self):
@@ -229,7 +239,7 @@ class Environment(object):
     def _run_reloads(self):
         for name, config in self.config.reloads().items():
             self.logger.info("Reloading %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'], self)
+            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             specialized_config = self.__substitute_objects(config['source'])
             recipe_instance.reload(name, specialized_config)
 

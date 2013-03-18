@@ -175,16 +175,16 @@ class Config(object):
         if self.source:
             self.__load_configs(self.source)
 
-    def grab_inputs(self):
+    def grab_inputs(self, manifest):
         """
-        Look for any inputs not already asked accounted for, and
+        Look for any inputs not already asked accounted for in the manifest, and
         query the user for them.
         """
-        if self.target:
-            for s in self.target.sections():
-                if self.target.has_option(s, 'inputs'):
+        if manifest:
+            for s in manifest.sections():
+                if manifest.has_option(s, 'inputs'):
                     for param, attributes in \
-                            self.__parse_input_string(self.target.get(s, 'inputs')):
+                            self.__parse_input_string(manifest.get(s, 'inputs')):
                         default = (attributes['default'] if 'default' in attributes else None)
                         secret = (attributes['secret'] if 'secret' in attributes else False)
                         self.get_config(param, default=default, secret=secret)
