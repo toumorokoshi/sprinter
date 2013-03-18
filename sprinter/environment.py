@@ -6,7 +6,7 @@ complete object representing any data needed by recipes.
 import logging
 import re
 import sys
-from sprinter.manifest import Manifest
+from sprinter.manifest import Config, Manifest
 from sprinter.directory import Directory
 from sprinter.injections import Injections
 from sprinter.system import System
@@ -18,44 +18,54 @@ config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 class Environment(object):
 
     recipe_dict = {}
+    config = None  # handles the configuration, and manifests
+    system = None  # stores system information
+    injections = None  # handles injections
+    directory = None  # handles interactions with the environment directory
 
-    def __init__(self, namespace=None, logger=None, logging_level=logging.INFO,
-            rewrite_rc=True):
-        self.namespace = namespace
+    def __init__(self, logger=None, logging_level=logging.INFO):
         self.system = System()
         self.logger = self.__build_logger(logger=logger, level=logging_level)
-        self.rewrite_rc = rewrite_rc
 
-    def load_manifest(self, target_manifest, source_manifest=None):
-        self.manifest = Manifest(target_manifest,
-                                 source_manifest=source_manifest,
-                                 namespace=self.namespace)
-        self.namespace = self.manifest.namespace
-        self.directory = Directory(namespace=self.namespace)
-        if not source_manifest:
-            self.manifest.load_source(self.directory.config_path())
+    def install(self, raw_target_manifest, namespace=None):
+        """
+        Install an environment based on the target manifest passed
+        """
+        target_manifest = Manifest(raw_target_manifest, namespace=namespace)
+        directory = Directory(target_manifest.namespace)
+        if not self.directory.new:
+            self.logger.info("Namespace %s already exists, updating..." % \
+                             target_manifest.namespace)
+            self._update(Manifest(directory.manifest_path),
+                         target_manifest,
+                         directory=directory)
+        else:
+            self._install(target_manifest, directory=directory)
+
+    def update(self, namespace):
+        """
+        Update a namespace
+        """
+        directory = Directory(namespace)
+        if self.directory.new:
+            self.logger.error("Namespace %s is not yet installed!" % namespace)
+            return
+        source_manifest = Manifest(directory.manifest_path)
+        source = source_manifest.source()
+        if not source:
+            self.logger.error("Installed manifest for %s has no source!" % namespace)
+            return
+        target_manifest = Manifest(source, namespace=namespace)
+        self._update(source_manifest, target_manifest, directory=directory)
+
+    def initialize(self, source_manifest=None, target_manifest=None, directory=None):
+        """
+        Initialize the environment for a sprinter action
+        """
+        self.config = Config(source=source_manifest, target=target_manifest)
+        self.directory = directory if directory else Directory(self.config.namespace)
         self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
-        self.grab_inputs()
-
-    def load_namespace(self, namespace=None):
-        if namespace:
-            self.namespace = namespace
-        self.directory = Directory(namespace=self.namespace)
-        self.manifest = Manifest(source_manifest=self.directory.config_path(),
-                                 target_manifest=self.directory.config_path(),
-                                 namespace=self.namespace)
-        self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
-
-    def __build_logger(self, logger=None, level=logging.INFO):
-        """ return a logger. if logger is none, generate a logger from stdout """
-        if not logger:
-            logger = logging.getLogger('sprinter')
-            out_hdlr = logging.StreamHandler(sys.stdout)
-            out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-            out_hdlr.setLevel(level)
-            logger.addHandler(out_hdlr)
-        logger.setLevel(level)
-        return logger
+        self.config.grab_inputs()
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
@@ -93,8 +103,33 @@ class Environment(object):
             self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             recipe_instance.activate(name, config['source'])
-        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" % 
+
+    def _install(self, target_manifest, directory=None):
+        """
+        Intall an environment from a target manifest Manifest
+        """
+        self.initialize(target_manifest=target_manifest, directory=directory)
+        self._run_setups()
+        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                 (self.directory.root_dir, self.directory.root_dir))
+        self.finalize()
+
+    def _run_setups(self):
+        for name, config in self.config.setups().items():
+            self.logger.info("Setting up %s..." % name)
+            recipe_instance = self.__get_recipe_instance(config['target']['recipe'], self)
+            recipe_instance.setup(name, config['target'])
+
+    def __build_logger(self, logger=None, level=logging.INFO):
+        """ return a logger. if logger is none, generate a logger from stdout """
+        if not logger:
+            logger = logging.getLogger('sprinter')
+            out_hdlr = logging.StreamHandler(sys.stdout)
+            out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+            out_hdlr.setLevel(level)
+            logger.addHandler(out_hdlr)
+        logger.setLevel(level)
+        return logger
 
     def __get_recipe_instance(self, recipe):
         """
@@ -104,58 +139,3 @@ class Environment(object):
         if recipe not in self.recipe_dict:
             self.recipe_dict[recipe] = get_recipe_class(recipe, self)
         return self.recipe_dict[recipe]
-
-    """
-    # wrapper for injections methods
-    def inject(self, filename, content):
-        return self.injections.inject(filename, content)
-
-    def clear(self, filename):
-        return self.injections.clear(filename)
-
-    def commit_injections(self, filename, content):
-        return self.injections.commit()
-
-    # wrapper for manifest methods
-    def grab_inputs(self):
-        return self.manifest.grab_inputs()
-
-    def get_config(self, param_name, default=None, temporary=False):
-        return self.manifest.get_config(param_name, default, temporary)
-
-    def load_target_implicit(self):
-        return self.manifest.load_target_implicit()
-
-    def setups(self):
-        return self.manifest.setups()
-
-    def updates(self):
-        return self.manifest.updates()
-
-    def destroys(self):
-        return self.manifest.destroys()
-
-    def reloads(self):
-        return self.manifest.reloads()
-
-    def validate(self):
-        return self.manifest.validate()
-
-    # these methods wrap directory methods
-    def symlink_to_bin(self, name, path):
-        return self.directory.symlink_to_bin(name, path)
-
-    def symlink_to_lib(self, name, path):
-        return self.directory.symlink_to_lib(name, path)
-
-    def install_directory(self, feature_name):
-        return self.directory.install_directory(feature_name)
-
-    def add_to_rc(self, content):
-        self.validate_context(content)
-        self.logger.debug("adding %s to rc" % content)
-        return self.directory.add_to_rc(content % self.context())
-
-    def rc_path(self):
-        return self.directory.rc_path
-    """

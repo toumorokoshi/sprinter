@@ -14,9 +14,17 @@ export PATH=%s:$PATH
 
 class Directory(object):
 
+    root_dir = None  # path to the root directory
+    manifest_path = None  # path to the manifest file
+    new = False  # determines if the directory is for a new environment or not
+    rewrite_rc = True  # if set to false, the existing rc file will be
+                       # preserved, and will not be modifiable
+
     def __init__(self, namespace, rewrite_rc=True):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = os.path.expanduser(os.path.join("~", ".sprinter", namespace))
+        self.new = not os.path.exists(self.root_dir)
+        self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
         self.__generate_dir(self.root_dir)
         self.rewrite_rc = rewrite_rc
         if self.rewrite_rc:
@@ -60,12 +68,6 @@ class Directory(object):
         if not self.rewrite_rc:
             raise("Error! Directory was not intialized w/ rewrite_rc.")
         self.rc_file.write(content + '\n')
-
-    def config_path(self):
-        """
-        return writable handle to config file
-        """
-        return os.path.join(self.root_dir, "config.cfg")
 
     def __generate_dir(self, root_dir):
         """ Generate the root directory root if it doesn't already exist """

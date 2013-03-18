@@ -7,9 +7,12 @@ version = {{ manifest_version }}
 {{ configuration vars }}
 """
 
-import ConfigParser
+from ConfigParser import RawConfigParser
+import logging
+import re
 import urllib
 from StringIO import StringIO
+
 from sprinter import lib
 
 test_old_version = """
@@ -57,107 +60,118 @@ main_branch==comp_main
 
 
 CONFIG_RESERVED = ['source', 'inputs']
+NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
 
 
 class ManifestError(Exception):
     pass
 
 
-class Manifest(object):
-    """ Class to represent a manifest object
+class Manifest(RawConfigParser):
+    """
+    A representation of a manifest object
+
+    a manifest can be one of the following:
+    * a string, either a url or a filepath
+    * a file-like object
+
+    If the namespace is not passed, it will be pulled from the
+    global config object in the target, or assumed from
+    the string representation of the target object
+    """
+
+    def __init__(self, raw_manifest, namespace=None, logger='sprinter'):
+        self.logger = logging.getLogger(logger)
+        self._load_manifest(raw_manifest)
+        self.namespace = namespace if namespace else self._parse_namespace()
+
+    def source(self):
+        """
+        Return the manifest source
+        """
+        return self.get('config', 'source') if \
+            self.has_option('config', 'source') else None
+
+    def _load_manifest(self, manifest):
+        self.add_section('config')
+        if type(manifest) == str:
+            if manifest.startswith("http"):
+                manifest_file_handler = StringIO(urllib.urlopen(manifest).read())
+                self.readfp(manifest_file_handler)
+            else:
+                self.read(manifest)
+            self.set('config', 'source', str(manifest))
+        else:
+            self.readfp(manifest)
+
+    def _parse_namespace(self):
+        """
+        Parse the namespace from various sources
+        """
+        if self.has_option('config', 'namespace'):
+            return self.get('config', 'namespace')
+        elif self.has_option('config', 'source'):
+            return NAMESPACE_REGEX.search(self.get('config', 'source')).groups()[0]
+        else:
+            self.logger.error('Could not parse namespace implicitely!')
+            return None
+
+    def recipe_sections(self):
+        """
+        Return all sections related to a recipe.
+        """
+        return [s for s in self.sections() if s != "config"]
+
+    def valid(self):
+        """
+        Validate the configuration, ensure that the configuration is
+        properly formatted.
+        """
+        return True
+
+
+class Config(object):
+    """
+    Class to reconcile manifests
 
     >>> m.namespace
     'sprinter'
     """
 
-    source_manifest = ConfigParser.RawConfigParser()
-    target_manifest = None
-    source_dict = {}  # source is manipulated as dict until deserialized as a config file
-    target_dict = {}  # target is manipulated as dict until deserialized as a config file
+    #source_dict = {}  # source is manipulated as dict until deserialized as a config file
+    #target_dict = {}  # target is manipulated as dict until deserialized as a config file
     # a list of values to not save into the config.
     # e.g. passwords
     temporary_sections = []
     config = {}
 
-    def __init__(self, target_manifest=None, source_manifest=None, namespace=None):
+    def __init__(self, source=None, target=None, namespace=None):
         """
-        If a manifest already exists, it should be passed in as the source manifest.
-        target_manifest_path is the path to the desired manifest file.
-
-        a manifest can be one of the following:
-        * a string, either a url or a filepath
-        * a file-like object
-
-        If the namespace is not passed, it will be pulled from the
-        global config object in the target_manifest, or assumed from
-        the string representation of the target_manifest object
-
+        Takes in a source and target Manifest object, with a namespace
+        to override if it is desired.
         """
-        if target_manifest:
-            self.load_target(target_manifest)
-        if source_manifest:
-            self.load_source(source_manifest)
+        self.source = source
+        self.target = target
         if not namespace:
-            namespace = self.__detect_namespace(target_manifest)
-        self.namespace = namespace
-
-    def load_target(self, target_manifest):
-        """ reload the source manifest """
-        self.target_manifest = self.__load_manifest(target_manifest)
-
-    def load_target_implicit(self):
-        """
-        Attempt an implicit load of a target file. An implicit load
-        involves looking at source manifest's config:source parameter
-        and attempting to load from there. If that's not possible,
-        false is returned.
-        """
-        if self.source_manifest.has_section('config') and \
-                self.source_manifest.has_option('config', 'source'):
-            self.load_target(self.source_manifest.get('config', 'source'))
-            return True
-        return False
-
-    def load_source(self, source_manifest):
-        """ reload the source manifest """
-        self.source_manifest = self.__load_manifest(source_manifest)
+            if target and target.namespace:
+                self.namespace = target.namespace
+            elif source and source.namespace:
+                self.namespace = source.namespace
+        else:
+            self.namespace = namespace
 
     def grab_inputs(self):
         """
         Look for any inputs not already asked accounted for, and
         query the user for them.
         """
-        for s in self.target_manifest.sections():
-            if self.target_manifest.has_option(s, 'inputs'):
+        for s in self.target.recipe_sections():
+            if self.target.has_option(s, 'inputs'):
                 for param, attributes in \
-                        self.__parse_input_string(self.target_manifest.get(s, 'inputs')):
+                        self.__parse_input_string(self.target.get(s, 'inputs')):
                     default = (attributes['default'] if 'default' in attributes else None)
                     secret = (attributes['secret'] if 'secret' in attributes else False)
                     self.get_config(param, default=default, secret=secret)
-
-    def activations(self):
-        """
-        Return a dictionary of activation recipes.
-
-        >>> m.activations()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
-        """
-        activation_sections = {}
-        for s in self.source_sections():
-            activation_sections[s] = {"source": dict(self.source_manifest.items(s))}
-        return activation_sections
-
-    def deactivations(self):
-        """
-        Return a dictionary of activation recipes.
-
-        >>> m.activations()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
-        """
-        deactivation_sections = {}
-        for s in self.source_sections():
-            deactivation_sections[s] = {"source": dict(self.source_manifest.items(s))}
-        return deactivation_sections
 
     def setups(self):
         """
@@ -166,21 +180,10 @@ class Manifest(object):
         {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
         """
         new_sections = {}
-        for s in self.target_sections():
-            if not self.source_manifest.has_section(s):
-                new_sections[s] = {"target": dict(self.target_manifest.items(s))}
+        for s in self.target.recipe_sections():
+            if not self.source or self.source.has_section(s):
+                new_sections[s] = {"target": dict(self.target.items(s))}
         return new_sections
-
-    def reloads(self):
-        """
-        return reload dictionaries
-        >>> m.reloads()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
-        """
-        reload_sections = {}
-        for s in self.source_sections():
-                reload_sections[s] = {"source": dict(self.source_manifest.items(s))}
-        return reload_sections
 
     def updates(self):
         """
@@ -190,18 +193,18 @@ class Manifest(object):
         >>> m.updates()
         {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
 
-        >>> m_old_only.updates()
+        >>> old_manifest.updates()
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         ManifestError: Update method requires a target manifest!
         """
-        if not self.target_manifest:
+        if not self.target:
             raise ManifestError("Update method requires a target manifest!")
         different_sections = {}
-        for s in self.target_sections():
-            if self.source_manifest.has_section(s):
-                target_dict = dict(self.target_manifest.items(s))
-                source_dict = dict(self.source_manifest.items(s))
+        for s in self.target.recipe_sections():
+            if self.source.has_section(s):
+                target_dict = dict(self.target.items(s))
+                source_dict = dict(self.source.items(s))
                 if self.__update_needed(source_dict, target_dict):
                     different_sections[s] = {"source": source_dict,
                                              "target": target_dict}
@@ -215,30 +218,59 @@ class Manifest(object):
         {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
         missing_sections = {}
-        for s in self.source_sections():
-            if not self.target_manifest or not self.target_manifest.has_section(s):
-                missing_sections[s] = {"source": dict(self.source_manifest.items(s))}
+        for s in self.source.recipe_sections():
+            if not self.target or not self.target.has_section(s):
+                missing_sections[s] = {"source": dict(self.source.items(s))}
         return missing_sections
 
-    def validate(self):
+    def deactivations(self):
         """
-        Checks validity of manifest files.
+        Return a dictionary of activation recipes.
+
+        >>> m.activations()
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
-        pass
+        deactivation_sections = {}
+        for s in self.source.recipe_sections():
+            deactivation_sections[s] = {"source": dict(self.source.items(s))}
+        return deactivation_sections
+
+    def activations(self):
+        """
+        Return a dictionary of activation recipes.
+
+        >>> m.activations()
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
+        """
+        activation_sections = {}
+        for s in self.source.recipe_sections():
+            activation_sections[s] = {"source": dict(self.source.items(s))}
+        return activation_sections
+
+    def reloads(self):
+        """
+        return reload dictionaries
+        >>> m.reloads()
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
+        """
+        reload_sections = {}
+        for s in self.source.recipe_sections():
+                reload_sections[s] = {"source": dict(self.source.items(s))}
+        return reload_sections
 
     def write(self, file_handle):
         """
         write the current state to a file manifest
         """
-        if not self.target_manifest:
-            self.target_manifest = self.source_manifest
-        if not self.target_manifest.has_section('config'):
-            self.target_manifest.add_section('config')
+        if not self.target:
+            self.target = self.source
+        if not self.target.has_section('config'):
+            self.target.add_section('config')
         for k, v in self.config.items():
             if k not in self.temporary_sections:
-                self.target_manifest.set('config', k, v)
-        self.target_manifest.set('config', 'namespace', self.namespace)
-        self.target_manifest.write(file_handle)
+                self.target.set('config', k, v)
+        self.target.set('config', 'namespace', self.namespace)
+        self.target.write(file_handle)
 
     def get_config(self, param_name, default=None, secret=False):
         """
@@ -258,33 +290,21 @@ class Manifest(object):
         return a context dict of the desired state
         """
         context_dict = {}
-        for s in self.target_manifest.sections():
-            for k, v in self.target_manifest.items(s):
+        for s in self.target.sections():
+            for k, v in self.target.items(s):
                 context_dict["%s:%s" % (s, k)] = v
         for k, v in self.config.items():
                 context_dict["config:%s" % k] = v
         return context_dict
-
-    def source_sections(self):
-        """
-        return all source sections except for reserved ones
-        """
-        return [s for s in self.source_manifest.sections() if s != "config"]
-
-    def target_sections(self):
-        """
-        return all target sections except for reserved ones
-        """
-        return [s for s in self.target_manifest.sections() if s != "config"]
 
     def __detect_namespace(self, manifest_object):
         """
         Find a manifest object
         """
         namespace = ""
-        if self.target_manifest and self.target_manifest.has_section('config') and \
-                self.target_manifest.has_option('config', 'namespace'):
-                namespace = self.target_manifest.get('config', 'namespace')
+        if self.target and self.target.has_section('config') and \
+                self.target.has_option('config', 'namespace'):
+                namespace = self.target.get('config', 'namespace')
         else:
             s = str(manifest_object)
             if s.endswith(".cfg"):
@@ -364,24 +384,21 @@ class Manifest(object):
             return (value, attribute_dict)
         return None
 
-    def __load_manifest(self, manifest):
-        manifest_config = ConfigParser.RawConfigParser()
-        manifest_config.add_section('config')
-        if type(manifest) == str:
-            if manifest.startswith("http"):
-                manifest_file_handler = StringIO(urllib.urlopen(manifest).read())
-                manifest_config.readfp(manifest_file_handler)
-            else:
-                manifest_config.read(manifest)
-            manifest_config.set('config', 'source', str(manifest))
-        else:
-            manifest_config.readfp(target_manifest)
-        return manifest_config
-
+    def _create_config_dict(config):
+        """
+        Convert a ConfigParser to a config_dictionary object
+        >>> config = ConfigParser.RawConfigParser()
+        >>> config.readfp(StringIO(test_old_version))
+        >>> m._config_to_dict(config)
+        {}
+        """
+        pass
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod(extraglobs={
-        'm': Manifest(target_manifest=StringIO(test_new_version), source_manifest=StringIO(test_old_version)),
-        'm_new_only': Manifest(target_manifest=StringIO(test_new_version)),
-        'm_old_only': Manifest(source_manifest=StringIO(test_old_version))})
+    old_manifest = Manifest(StringIO(test_old_version))
+    new_manifest = Manifest(StringIO(test_new_version))
+    config = Config(source=old_manifest, target=new_manifest)
+    doctest.testmod(extraglobs={'c': config,
+                                'new_manifest': new_manifest,
+                                'old_manifest': old_manifest})
