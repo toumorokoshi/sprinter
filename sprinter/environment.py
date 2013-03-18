@@ -24,6 +24,7 @@ class Environment(object):
     system = None  # stores system information
     injections = None  # handles injections
     directory = None  # handles interactions with the environment directory
+    context_dict = {}
 
     def __init__(self, logger=None, logging_level=logging.INFO):
         self.system = System()
@@ -119,6 +120,7 @@ class Environment(object):
         self.directory.initialize()
         self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
         self.config.grab_inputs()
+        self.context_dict = self.__generate_context_dict()
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
@@ -129,12 +131,7 @@ class Environment(object):
 
     def context(self):
         """ get a context dictionary to replace content """
-        context_dict = self.config.get_context_dict()
-        for s in self.config.target_sections():
-            context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
-        # add environment information
-        context_dict['config:node'] = self.node
-        return context_dict
+        return self.context_dict
 
     def validate_context(self, content):
         """ check if all the config variables desired exist, and prompt them if not """
@@ -196,37 +193,43 @@ class Environment(object):
         for name, config in self.config.setups().items():
             self.logger.info("Setting up %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
-            recipe_instance.setup(name, config['target'])
+            specialized_config = self.__substitute_objects(config['target'])
+            recipe_instance.setup(name, specialized_config)
 
     def _run_updates(self):
         for name, config in self.config.updates().items():
             self.logger.info("Updating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
-            recipe_instance.update(name, config)
+            specialized_config = self.__substitute_objects(config)
+            recipe_instance.update(name, specialized_config)
 
     def _run_destroys(self):
         for name, config in self.config.destroys().items():
             self.logger.info("Removing %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            recipe_instance.destroy(name, config)
+            #specialized_config = self.__substitute_objects(config['source'])
+            recipe_instance.destroy(name, config['source'])
 
     def _run_activates(self):
         for name, config in self.config.activations().items():
             self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            recipe_instance.activate(name, config)
+            specialized_config = self.__substitute_objects(config['source'])
+            recipe_instance.activate(name, specialized_config)
 
     def _run_deactivates(self):
         for name, config in self.config.deactivations().items():
             self.logger.info("Deactivating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
-            recipe_instance.deactivate(name, config)
+            specialized_config = self.__substitute_objects(config['source'])
+            recipe_instance.deactivate(name, specialized_config)
 
     def _run_reloads(self):
         for name, config in self.config.reloads().items():
             self.logger.info("Reloading %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'], self)
-            recipe_instance.reload(name, config)
+            specialized_config = self.__substitute_objects(config['source'])
+            recipe_instance.reload(name, specialized_config)
 
     def __build_logger(self, logger=None, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
@@ -247,3 +250,23 @@ class Environment(object):
         if recipe not in self.recipe_dict:
             self.recipe_dict[recipe] = get_recipe_class(recipe, self)
         return self.recipe_dict[recipe]
+
+    def __generate_context_dict(self):
+        context_dict = self.config.get_context_dict()
+        if self.config.target:
+            for s in self.config.target.recipe_sections():
+                context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+            # add environment information
+            context_dict['config:node'] = self.system.node
+        return context_dict
+
+    def __substitute_objects(self, value):
+        """
+        recursively substitute value with the context_dict
+        """
+        if type(value) == dict:
+            return dict([(k, self.__substitute_objects(v)) for k, v in value.items()])
+        elif type(value) == str:
+            return value % self.context_dict
+        else:
+            return value

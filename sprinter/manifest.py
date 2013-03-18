@@ -160,6 +160,9 @@ class Config(object):
         """
         self.source = source
         self.target = target
+        # store raws to use on write
+        self.source_raw = source
+        self.target_raw = target
         if not namespace:
             if target and target.namespace:
                 self.namespace = target.namespace
@@ -299,11 +302,12 @@ class Config(object):
         return a context dict of the desired state
         """
         context_dict = {}
-        for s in self.target.sections():
-            for k, v in self.target.items(s):
-                context_dict["%s:%s" % (s, k)] = v
-        for k, v in self.config.items():
-                context_dict["config:%s" % k] = v
+        if self.target:
+            for s in self.target.recipe_sections():
+                for k, v in self.target.items(s):
+                    context_dict["%s:%s" % (s, k)] = v
+            for k, v in self.config.items():
+                    context_dict["config:%s" % k] = v
         return context_dict
 
     def __detect_namespace(self, manifest_object):
@@ -392,14 +396,6 @@ class Config(object):
                 attribute_dict['secret'] = True
             return (value, attribute_dict)
         return None
-
-    def __create_config_dict(config):
-        """
-        Convert a ConfigParser to a config_dictionary object
-        >>> config = RawConfigParser()
-        >>> config.readfp(StringIO(test_old_version))
-        """
-        pass
 
 if __name__ == '__main__':
     import doctest
