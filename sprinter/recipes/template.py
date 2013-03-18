@@ -19,12 +19,12 @@ from sprinter import lib
 class TemplateRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
-        super(TemplateRecipe, self).setup(feature_name, config)
         self.__install_file(config['source'], config['target'], config)
+        super(TemplateRecipe, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        super(TemplateRecipe, self).update(feature_name, config)
         self.__install_file(config['source'], config['target'], config)
+        super(TemplateRecipe, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
         super(TemplateRecipe, self).destroy(feature_name, config)
@@ -40,4 +40,7 @@ class TemplateRecipe(RecipeStandard):
                 source_content = urllib.urlopen(source).read()
         else:
             source_content = open(os.path.expanduser(source)).read()
+        parent_directory = os.path.dirname(os.path.expanduser(target_file))
+        if not os.path.exists(parent_directory):
+            os.makedirs(parent_directory)
         open(os.path.expanduser(target_file), "w+").write(source_content)

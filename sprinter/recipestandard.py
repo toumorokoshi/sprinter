@@ -24,7 +24,7 @@ class RecipeStandard(RecipeBase):
         if 'rc' in config:
             self.directory.add_to_rc(config['rc'])
         if 'command' in config:
-            lib.call(config['command'].split(','))
+            lib.call(config['command'])
 
     def update(self, feature_name, config):
         """ Setup performs the setup required, and works with the old
@@ -32,7 +32,7 @@ class RecipeStandard(RecipeBase):
         if 'rc' in config:
             self.directory.add_to_rc(config['rc'])
         if 'command' in config:
-            lib.call(config['command'].split(','))
+            lib.call(config['command'])
 
     def destroy(self, feature_name, config):
         """ Destroys an old feature if it is no longer required """

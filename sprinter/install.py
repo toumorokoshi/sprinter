@@ -5,6 +5,7 @@ import argparse
 import logging
 import os
 import shutil
+import signal
 import sys
 from sprinter.lib import get_recipe_class
 from sprinter.environment import Environment
@@ -22,8 +23,13 @@ parser.add_argument('--namespace', dest='namespace', default=None,
                     help="Namespace to check environment against")
 parser.add_argument('-v', dest='verbose', action='store_true', help="Make output verbose")
 
+def signal_handler(signal, frame):
+    print "Shutting down sprinter..."
+    sys.exit(0)
+
 
 def main():
+    signal.signal(signal.SIGINT, signal_handler)
     args = parser.parse_args()
     command = args.command.lower()
     logging_level = logging.DEBUG if args.verbose else logging.INFO

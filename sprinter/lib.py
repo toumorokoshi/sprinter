@@ -22,7 +22,7 @@ def get_recipe_class(recipe, environment):
     the first class that extends recipebase, and that is the class
     that an instance of it gets returned.
 
-    >>> issubclass(get_recipe_class("sprinter.recipes.unpack", None).__class__, RecipeBase)
+    >>> issubclass(get_recipe_class("sprinter.recipes.unpack").__class__, RecipeBase)
     True
     """
     try:
@@ -45,7 +45,6 @@ def authenticated_get(username, password, url):
     """
     Perform an authorized query to the url, and return the result
     """
-    import pdb; pdb.set_trace()
     request = urllib2.Request(url)
     base64string = b64encode((b"%s:%s" % (username, password)).decode("ascii"))
     request.add_header("Authorization", "Basic %s" % base64string)
@@ -57,7 +56,7 @@ def prompt(prompt_string, default=None, secret=False):
     """
     Prompt user for a string, with a default value
     """
-    prompt_string += (" (default %s):" % default if default else ":")
+    prompt_string += (" (default %s): " % default if default else ": ")
     if secret:
         val = getpass(prompt_string)
     else:

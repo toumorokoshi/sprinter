@@ -101,7 +101,7 @@ class PerforceRecipe(RecipeStandard):
         out_content = p4settings_template % config
         if os.path.exists(p4settings_path) and out_content != open(p4settings_path, "r+").read():
             overwrite = lib.prompt("p4settings already exists at %s. Overwrite?" % root_dir, default="no")
-            if overwrite.lower().starts_with('y'):
+            if overwrite.lower().startswith('y'):
                 self.logger.info("Overwriting existing p4settings...")
                 os.remove(p4settings_path)
             else:

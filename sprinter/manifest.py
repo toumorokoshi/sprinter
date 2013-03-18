@@ -5,6 +5,8 @@ example manifest sections look like:
 [FEATURE]
 version = {{ manifest_version }}
 {{ configuration vars }}
+
+The manifest can take a source and/or a target manifest
 """
 
 from ConfigParser import RawConfigParser
@@ -177,7 +179,7 @@ class Config(object):
         query the user for them.
         """
         if self.target:
-            for s in self.target.recipe_sections():
+            for s in self.target.sections():
                 if self.target.has_option(s, 'inputs'):
                     for param, attributes in \
                             self.__parse_input_string(self.target.get(s, 'inputs')):
