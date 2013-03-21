@@ -22,6 +22,7 @@ class PackageRecipe(RecipeStandard):
             package = config[self.package_manager]
             self.logger.info("Installing %s..." % package)
             lib.call("sudo %s install %s" % (self.package_manager, package))
+        super(PackageRecipe, self).setup(feature_name, config)
 
     def __get_package_manager(self):
         if self.system.isOSX():
