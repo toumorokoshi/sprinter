@@ -30,7 +30,7 @@ class System(object):
         return fedora_match.match(self.node) is not None
 
     def isOSX(self):
-        return self.system == "darwin"
+        return self.system.lower() == "darwin"
 
     def isLinux(self):
-        return self.system == "Linux"
+        return self.system.lower() == "linux"

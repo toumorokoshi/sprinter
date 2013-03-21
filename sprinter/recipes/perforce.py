@@ -119,7 +119,7 @@ class PerforceRecipe(RecipeStandard):
         if sync.lower().startswith('y'):
             self.logger.info("Syncing perforce root...")
             os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
-            lib.call("p4 -u %(username)s -p %(password)s sync" % (config['username'],
+            lib.call("p4 -u \"%s\" -p \"%s\" sync" % (config['username'],
                                                                   re.escape(config['password'])))
 
     def __add_p4_port(self, config):
