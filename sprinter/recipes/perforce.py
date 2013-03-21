@@ -45,7 +45,7 @@ Host:	%(hostname)s
 Description:
         Created by %(username)s
 
-Root:	%(root)s
+Root:	%(root_path)s
 
 Options:	noallwrite noclobber nocompress unlocked nomodtime normdir
 
@@ -61,11 +61,15 @@ class PerforceRecipe(RecipeStandard):
 
     def setup(self, feature_name, config):
         super(PerforceRecipe, self).setup(feature_name, config)
+        self.p4environ = dict(os.environ.items() + [('P4USER', config['username']),
+                                                    ('P4PASSWD', config['password'])])
         self.__install_perforce(feature_name, config)
+        if not os.path.exists(os.path.expanduser(config['root_path'])):
+            os.makedirs(os.path.expanduser(config['root_path']))
         self.__write_p4settings(config)
         self.__configure_client(config)
         self.__sync_perforce(config)
-        self.__add_p4_port(config)
+        self.__add_p4_env(config)
 
     def update(self, feature_name, config):
         if config['source']['version'] != config['target']['version']:
@@ -73,7 +77,7 @@ class PerforceRecipe(RecipeStandard):
             self.__install_perforce(self, feature_name, config['target'])
         self.__write_p4settings(config)
         self.__sync_perforce(config)
-        self.__add_p4_port(config)
+        self.__add_p4_env(config)
 
     def destroy(self, feature_name, config):
         self.__destroy_perforce(config)
@@ -91,6 +95,7 @@ class PerforceRecipe(RecipeStandard):
         self.logger.info("Downloading p4 executable...")
         urllib.urlretrieve(url, os.path.join(d, "p4"))
         self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
+        self.p4_command = os.path.join(d, "p4")
 
     def __write_p4settings(self, config):
         """ write perforce settings """
@@ -111,19 +116,31 @@ class PerforceRecipe(RecipeStandard):
 
     def __configure_client(self, config):
         """ write the perforce client """
-        pass
+        self.logger.info("Configuring p4 client...")
+        os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
+        config['root_path'] = os.path.expanduser(config['root_path'])
+        config['hostname'] = self.system.node
+        config['p4view'] = config['p4view'] % self.environment.context()
+        client = re.sub('//depot', '    //depot', p4client_template % config)
+        cwd = os.path.expanduser(config['root_path'] % self.environment.context())
+        self.logger.info(lib.call("%s client -i" % self.p4_command, 
+                                  stdin=client, 
+                                  env=self.p4environ,
+                                  cwd=cwd))
 
     def __sync_perforce(self, config):
         """ prompt and sync perforce """
         sync = lib.prompt("would you like to sync your perforce root?", default="yes")
         if sync.lower().startswith('y'):
-            self.logger.info("Syncing perforce root...")
-            os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
-            lib.call("p4 -u \"%s\" -p \"%s\" sync" % (config['username'],
-                                                                  re.escape(config['password'])))
+            self.logger.info("Syncing perforce root... (this can take a while).")
+            cwd = os.path.expanduser(config['root_path'] % self.environment.context())
+            self.logger.info(lib.call("%s sync" % self.p4_command, 
+                             env=self.p4environ, 
+                             cwd=cwd))
 
-    def __add_p4_port(self, config):
+    def __add_p4_env(self, config):
         self.directory.add_to_rc('export P4PORT=%s' % config['port'])
+        self.directory.add_to_rc('export P4CONFIG=.p4settings')
 
     def __destroy_perforce(self, config):
         """ destroy the perforce root """

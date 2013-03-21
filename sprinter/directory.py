@@ -43,6 +43,7 @@ class Directory(object):
         """
         self.__symlink_dir("bin", name, path)
         os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR)
+        os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR | stat.S_IRUSR)
 
     def symlink_to_lib(self, name, path):
         """

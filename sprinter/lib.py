@@ -12,6 +12,8 @@ import urllib2
 from base64 import b64encode
 
 from getpass import getpass
+from subprocess import PIPE, STDOUT
+
 from sprinter.recipebase import RecipeBase
 
 
@@ -36,9 +38,10 @@ def get_recipe_class(recipe, environment):
         raise e
 
 
-def call(command):
+def call(command, stdin=None, env=None, cwd=None):
     args = command.split(" ")
-    subprocess.call(args)
+    p = subprocess.Popen(args, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
+    return p.communicate(input=stdin)[0]
 
 
 def authenticated_get(username, password, url):
