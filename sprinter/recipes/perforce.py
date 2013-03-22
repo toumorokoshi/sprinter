@@ -83,6 +83,10 @@ class PerforceRecipe(RecipeStandard):
         self.__destroy_perforce(config)
 
     def reload(self, feature_name, config):
+        self.p4environ = dict(os.environ.items() + [('P4USER', config['username']),
+                                                    ('P4PASSWD', config['password']),
+                                                    ('P4CLIENT', config['client'])])
+        self.p4_command = os.path.join(self.directory.install_directory(feature_name), "p4")
         self.__sync_perforce(config)
 
     def __install_perforce(self, feature_name, config):
