@@ -33,8 +33,8 @@ class GitRecipe(RecipeStandard):
         call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
 
     def __clone_repo(self, repo_url, target_directory, branch=None):
-        call("git clone %s %s" % (repo_url, target_directory))
+        self.logger.info(call("git clone %s %s" % (repo_url, target_directory)))
         if branch:
             os.chdir(target_directory)
-            call("git fetch origin %s" % branch)
-            call("git checkout %s" % branch)
+            self.logger.info(call("git fetch origin %s" % branch))
+            self.logger.info(call("git checkout %s" % branch))
