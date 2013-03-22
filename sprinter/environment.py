@@ -149,15 +149,17 @@ class Environment(object):
         self.initialize(target_manifest=target_manifest, directory=directory)
         self._run_setups()
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
-                (self.directory.root_dir, self.directory.root_dir))
+                               (self.directory.root_dir, self.directory.root_dir))
+        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
         self.finalize()
 
     def _update(self, source_manifest, target_manifest, directory=None):
         """
         Intall an environment from a target manifest Manifest
         """
-        self.initialize(source_manifest=source_manifest, 
-                        target_manifest=target_manifest, 
+        self.initialize(source_manifest=source_manifest,
+                        target_manifest=target_manifest,
                         directory=directory)
         self._run_setups()
         self._run_updates()
@@ -190,7 +192,9 @@ class Environment(object):
         self.initialize(source_manifest=source_manifest, directory=directory)
         self._run_activates()
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
-                (self.directory.root_dir, self.directory.root_dir))
+                               (self.directory.root_dir, self.directory.root_dir))
+        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
         self.finalize()
 
     def _reload(self, source_manifest, directory=None):
