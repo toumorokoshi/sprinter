@@ -6,26 +6,31 @@
 Welcome to Sprinter's documentation!
 ====================================
 
-Sprinter is a framework to help create environment bootstrapping scripts for developer environments.
+Sprinter is a tool to help create environment bootstrapping scripts for developer environments.
 
 Sprinter was designed with modularity, and adaption in mind. Some of the features of sprinter include:
 
-* Installing environments from configs stored remotely url
+* Installing environments directly from configs on the web
 * Updating existing environments
 * Managing several environments, activating and deactiviting as needed
 
-To Install:
+To Install: ::
 
-.. code:: bash
+  $ (sudo) easy_install sprinter
 
-  easy_install sprinter
-
-
+In your console
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   tutorial
+   recipes
+   manifests
+   internal
+   sprinter
+   glossary
 
 
 

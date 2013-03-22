@@ -1,0 +1,3 @@
+"""
+manifest.py is a utility class to help determine version differences in sprinter apps.
+"""

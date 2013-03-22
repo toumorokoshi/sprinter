@@ -1,0 +1,148 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Manifests &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" />
+    <link rel="next" title="sprinter Package" href="sprinter.html" />
+    <link rel="prev" title="Sprinter Recipes" href="recipes.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sprinter.html" title="sprinter Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="recipes.html" title="Sprinter Recipes"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="manifests">
+<h1>Manifests<a class="headerlink" href="#manifests" title="Permalink to this headline">¶</a></h1>
+<p>This covers the configuration required for a manifest, and the advanced aspects involved.</p>
+<div class="section" id="special-sections">
+<h2>Special Sections<a class="headerlink" href="#special-sections" title="Permalink to this headline">¶</a></h2>
+<p>The following sections have a special meaning in a manifest:</p>
+<div class="section" id="config">
+<h3>config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h3>
+<p>The config section is where all user variables are stored. in addition, it can also house the name of the environment, input variables, and any standard confguration you need in your environment.</p>
+</div>
+</div>
+<div class="section" id="variable-substitution">
+<h2>Variable substitution<a class="headerlink" href="#variable-substitution" title="Permalink to this headline">¶</a></h2>
+<p>Feature configurations in a manifest have the ability to reference each other: specifically, they utilized the following format:</p>
+<div class="highlight-python"><pre>%(FEATURE:PROPERTY)s</pre>
+</div>
+<p>E.G. something like <cite>%(git:configpath)s</cite> will reference the &#8216;configpath&#8217; property of the &#8216;git&#8217; feature. In addition to other features, it is also possible to reference the config sections as well, with:</p>
+<blockquote>
+<div>%(config:PROPERTY)</div></blockquote>
+<p>Common usage examples for this include having a single username variable in the input, then resolving it into subsequent features with: <cite>%(config:username)s</cite></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Manifests</a><ul>
+<li><a class="reference internal" href="#special-sections">Special Sections</a><ul>
+<li><a class="reference internal" href="#config">config</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#variable-substitution">Variable substitution</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="recipes.html"
+                        title="previous chapter">Sprinter Recipes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sprinter.html"
+                        title="next chapter">sprinter Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/manifests.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sprinter.html" title="sprinter Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="recipes.html" title="Sprinter Recipes"
+             >previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

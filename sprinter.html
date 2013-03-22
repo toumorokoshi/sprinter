@@ -1,0 +1,682 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sprinter Package &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sprinter-package">
+<h1>sprinter Package<a class="headerlink" href="#sprinter-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sprinter.directory">
+<span id="directory-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">directory</span></tt> Module<a class="headerlink" href="#module-sprinter.directory" title="Permalink to this headline">¶</a></h2>
+<p>directory.py stores methodology to install various files and
+packages to different locations.</p>
+<dl class="class">
+<dt id="sprinter.directory.Directory">
+<em class="property">class </em><tt class="descclassname">sprinter.directory.</tt><tt class="descname">Directory</tt><big>(</big><em>namespace=None</em><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="sprinter.directory.Directory.add_to_rc">
+<tt class="descname">add_to_rc</tt><big>(</big><em>content</em><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.add_to_rc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.add_to_rc" title="Permalink to this definition">¶</a></dt>
+<dd><p>add content to the rc script.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.directory.Directory.bin_path">
+<tt class="descname">bin_path</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.bin_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.bin_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the bin directory path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.directory.Directory.config_path">
+<tt class="descname">config_path</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.config_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.config_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>return writable handle to config file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.directory.Directory.install_directory">
+<tt class="descname">install_directory</tt><big>(</big><em>feature_name</em><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.install_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.install_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a path to the install directory that the feature should install to.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.directory.Directory.lib_path">
+<tt class="descname">lib_path</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.lib_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.lib_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the lib directory path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.directory.Directory.symlink_to_bin">
+<tt class="descname">symlink_to_bin</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.symlink_to_bin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.symlink_to_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symlink an object at path to name in the bin folder. remove it if it already exists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.directory.Directory.symlink_to_lib">
+<tt class="descname">symlink_to_lib</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/sprinter/directory.html#Directory.symlink_to_lib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.directory.Directory.symlink_to_lib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symlink an object at path to name in the lib folder. remove it if it already exists.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.environment">
+<span id="environment-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">environment</span></tt> Module<a class="headerlink" href="#module-sprinter.environment" title="Permalink to this headline">¶</a></h2>
+<p>A module that completely encapsulates a class. This should be a
+complete object representing any data needed by recipes.</p>
+<dl class="class">
+<dt id="sprinter.environment.Environment">
+<em class="property">class </em><tt class="descclassname">sprinter.environment.</tt><tt class="descname">Environment</tt><big>(</big><em>namespace=None</em>, <em>logger=None</em>, <em>logging_level=20</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="sprinter.environment.Environment.activate">
+<tt class="descname">activate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>activate environment specific injections</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.add_to_rc">
+<tt class="descname">add_to_rc</tt><big>(</big><em>content</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.add_to_rc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.add_to_rc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.clear">
+<tt class="descname">clear</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.commit_injections">
+<tt class="descname">commit_injections</tt><big>(</big><em>filename</em>, <em>content</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.commit_injections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.commit_injections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.context">
+<tt class="descname">context</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a context dictionary to replace content</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.deactivate">
+<tt class="descname">deactivate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>deactivate environments</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.destroys">
+<tt class="descname">destroys</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.destroys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.destroys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.finalize">
+<tt class="descname">finalize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.finalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>command to run at the end of sprinter&#8217;s run</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.get_config">
+<tt class="descname">get_config</tt><big>(</big><em>param_name</em>, <em>default=None</em>, <em>temporary=False</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.get_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.grab_inputs">
+<tt class="descname">grab_inputs</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.grab_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.grab_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.inject">
+<tt class="descname">inject</tt><big>(</big><em>filename</em>, <em>content</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.inject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.inject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.install_directory">
+<tt class="descname">install_directory</tt><big>(</big><em>feature_name</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.install_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.install_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.isDebianBased">
+<tt class="descname">isDebianBased</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.isDebianBased"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.isDebianBased" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.isFedoraBased">
+<tt class="descname">isFedoraBased</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.isFedoraBased"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.isFedoraBased" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.isLinux">
+<tt class="descname">isLinux</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.isLinux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.isLinux" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.isOSX">
+<tt class="descname">isOSX</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.isOSX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.isOSX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.load_manifest">
+<tt class="descname">load_manifest</tt><big>(</big><em>target_manifest</em>, <em>source_manifest=None</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.load_manifest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.load_manifest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.load_namespace">
+<tt class="descname">load_namespace</tt><big>(</big><em>namespace=None</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.load_namespace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.load_namespace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.load_target_implicit">
+<tt class="descname">load_target_implicit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.load_target_implicit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.load_target_implicit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.rc_path">
+<tt class="descname">rc_path</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.rc_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.rc_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.environment.Environment.recipe_dict">
+<tt class="descname">recipe_dict</tt><em class="property"> = {}</em><a class="headerlink" href="#sprinter.environment.Environment.recipe_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.reloads">
+<tt class="descname">reloads</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.reloads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.reloads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.setups">
+<tt class="descname">setups</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.setups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.setups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.symlink_to_bin">
+<tt class="descname">symlink_to_bin</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.symlink_to_bin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.symlink_to_bin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.symlink_to_lib">
+<tt class="descname">symlink_to_lib</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.symlink_to_lib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.symlink_to_lib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.updates">
+<tt class="descname">updates</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.updates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.updates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.validate">
+<tt class="descname">validate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.environment.Environment.validate_context">
+<tt class="descname">validate_context</tt><big>(</big><em>content</em><big>)</big><a class="reference internal" href="_modules/sprinter/environment.html#Environment.validate_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.environment.Environment.validate_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if all the config variables desired exist, and prompt them if not</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.injections">
+<span id="injections-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">injections</span></tt> Module<a class="headerlink" href="#module-sprinter.injections" title="Permalink to this headline">¶</a></h2>
+<p>Injections.py handles injections into various configuration files
+throughout files on the file system. These operations are batched and
+applied together.</p>
+<dl class="class">
+<dt id="sprinter.injections.Injections">
+<em class="property">class </em><tt class="descclassname">sprinter.injections.</tt><tt class="descname">Injections</tt><big>(</big><em>wrapper</em><big>)</big><a class="reference internal" href="_modules/sprinter/injections.html#Injections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.injections.Injections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Injections are staged until they are committed with the commit()
+method. This allow for aggregations until the commiting is ready
+to be performed.</p>
+<dl class="method">
+<dt id="sprinter.injections.Injections.clear">
+<tt class="descname">clear</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/sprinter/injections.html#Injections.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.injections.Injections.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>add the file to the list of files to clear</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.injections.Injections.clear_dict">
+<tt class="descname">clear_dict</tt><em class="property"> = set([])</em><a class="headerlink" href="#sprinter.injections.Injections.clear_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.injections.Injections.commit">
+<tt class="descname">commit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/injections.html#Injections.commit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.injections.Injections.commit" title="Permalink to this definition">¶</a></dt>
+<dd><p>commit the injections desired, overwriting any previous injections in the file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.injections.Injections.inject">
+<tt class="descname">inject</tt><big>(</big><em>filename</em>, <em>content</em><big>)</big><a class="reference internal" href="_modules/sprinter/injections.html#Injections.inject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.injections.Injections.inject" title="Permalink to this definition">¶</a></dt>
+<dd><p>add the injection content to the dictionary</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.injections.Injections.inject_dict">
+<tt class="descname">inject_dict</tt><em class="property"> = {}</em><a class="headerlink" href="#sprinter.injections.Injections.inject_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.injections.Injections.logger">
+<tt class="descname">logger</tt><em class="property"> = None</em><a class="headerlink" href="#sprinter.injections.Injections.logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.injections.Injections.wrapper">
+<tt class="descname">wrapper</tt><em class="property"> = None</em><a class="headerlink" href="#sprinter.injections.Injections.wrapper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.install">
+<span id="install-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">install</span></tt> Module<a class="headerlink" href="#module-sprinter.install" title="Permalink to this headline">¶</a></h2>
+<p>The install script for a sprinter-based setup script.</p>
+<dl class="function">
+<dt id="sprinter.install.main">
+<tt class="descclassname">sprinter.install.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/install.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.install.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.lib">
+<span id="lib-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">lib</span></tt> Module<a class="headerlink" href="#module-sprinter.lib" title="Permalink to this headline">¶</a></h2>
+<p>Library module for sprinter. To handle a lot of the typical
+features of the library.</p>
+<dl class="function">
+<dt id="sprinter.lib.call">
+<tt class="descclassname">sprinter.lib.</tt><tt class="descname">call</tt><big>(</big><em>command</em><big>)</big><a class="reference internal" href="_modules/sprinter/lib.html#call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.lib.call" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sprinter.lib.get_recipe_class">
+<tt class="descclassname">sprinter.lib.</tt><tt class="descname">get_recipe_class</tt><big>(</big><em>recipe</em>, <em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/lib.html#get_recipe_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.lib.get_recipe_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the recipe name and return an instance The recipe path is a
+path to the module. get_recipe_class performs reflection to find
+the first class that extends recipebase, and that is the class
+that an instance of it gets returned.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">issubclass</span><span class="p">(</span><span class="n">get_recipe_class</span><span class="p">(</span><span class="s">&quot;sprinter.recipes.unpack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">RecipeBase</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sprinter.lib.prompt">
+<tt class="descclassname">sprinter.lib.</tt><tt class="descname">prompt</tt><big>(</big><em>prompt_string</em>, <em>default=None</em>, <em>secret=False</em><big>)</big><a class="reference internal" href="_modules/sprinter/lib.html#prompt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.lib.prompt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prompt user for a string, with a default value</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.manifest">
+<span id="manifest-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">manifest</span></tt> Module<a class="headerlink" href="#module-sprinter.manifest" title="Permalink to this headline">¶</a></h2>
+<p>manifest.py is a utility class to help determine version differences in sprinter apps.</p>
+<p>example manifest sections look like:
+[FEATURE]
+version = {{ manifest_version }}
+{{ configuration vars }}</p>
+<dl class="class">
+<dt id="sprinter.manifest.Manifest">
+<em class="property">class </em><tt class="descclassname">sprinter.manifest.</tt><tt class="descname">Manifest</tt><big>(</big><em>target_manifest=None</em>, <em>source_manifest=None</em>, <em>namespace=None</em><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class to represent a manifest object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">namespace</span>
+<span class="go">&#39;sprinter&#39;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.activations">
+<tt class="descname">activations</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.activations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.activations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of activation recipes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">activations</span><span class="p">()</span>
+<span class="go">{&#39;myrc&#39;: {&#39;target&#39;: {&#39;recipe&#39;: &#39;sprinter.recipes.template&#39;}}}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.manifest.Manifest.config">
+<tt class="descname">config</tt><em class="property"> = {}</em><a class="headerlink" href="#sprinter.manifest.Manifest.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.deactivations">
+<tt class="descname">deactivations</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.deactivations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.deactivations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of activation recipes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">activations</span><span class="p">()</span>
+<span class="go">{&#39;myrc&#39;: {&#39;target&#39;: {&#39;recipe&#39;: &#39;sprinter.recipes.template&#39;}}}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.destroys">
+<tt class="descname">destroys</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.destroys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.destroys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary with all the features that need to be
+destroyed.
+&gt;&gt;&gt; m.destroys()
+{&#8216;mysql&#8217;: {&#8216;source&#8217;: {&#8216;brew&#8217;: &#8216;mysql&#8217;, &#8216;apt-get&#8217;: &#8216;libmysqlclientnlibmysqlclient-dev&#8217;, &#8216;recipe&#8217;: &#8216;sprinter.recipes.package&#8217;}}}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.get_config">
+<tt class="descname">get_config</tt><big>(</big><em>param_name</em>, <em>default=None</em>, <em>secret=False</em><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>grabs a config from the user space; if it doesn&#8217;t exist, it will prompt for it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.get_context_dict">
+<tt class="descname">get_context_dict</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.get_context_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.get_context_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a context dict of the desired state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.grab_inputs">
+<tt class="descname">grab_inputs</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.grab_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.grab_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look for any inputs not already asked accounted for, and
+query the user for them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.load_source">
+<tt class="descname">load_source</tt><big>(</big><em>source_manifest</em><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.load_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.load_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>reload the source manifest</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.load_target">
+<tt class="descname">load_target</tt><big>(</big><em>target_manifest</em><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.load_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.load_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>reload the source manifest</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.load_target_implicit">
+<tt class="descname">load_target_implicit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.load_target_implicit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.load_target_implicit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt an implicit load of a target file. An implicit load
+involves looking at source manifest&#8217;s config:source parameter
+and attempting to load from there. If that&#8217;s not possible,
+false is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.reloads">
+<tt class="descname">reloads</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.reloads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.reloads" title="Permalink to this definition">¶</a></dt>
+<dd><p>return reload dictionaries</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.setups">
+<tt class="descname">setups</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.setups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.setups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary with all the features that need to be setup.
+&gt;&gt;&gt; m.setups()
+{&#8216;myrc&#8217;: {&#8216;target&#8217;: {&#8216;recipe&#8217;: &#8216;sprinter.recipes.template&#8217;}}}</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.manifest.Manifest.source_manifest">
+<tt class="descname">source_manifest</tt><em class="property"> = &lt;ConfigParser.RawConfigParser instance at 0x10c8e9f38&gt;</em><a class="headerlink" href="#sprinter.manifest.Manifest.source_manifest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.source_sections">
+<tt class="descname">source_sections</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.source_sections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.source_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all source sections except for reserved ones</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.manifest.Manifest.target_manifest">
+<tt class="descname">target_manifest</tt><em class="property"> = None</em><a class="headerlink" href="#sprinter.manifest.Manifest.target_manifest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.target_sections">
+<tt class="descname">target_sections</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.target_sections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.target_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all target sections except for reserved ones</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sprinter.manifest.Manifest.temporary_sections">
+<tt class="descname">temporary_sections</tt><em class="property"> = []</em><a class="headerlink" href="#sprinter.manifest.Manifest.temporary_sections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.updates">
+<tt class="descname">updates</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.updates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.updates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary with all the features that need to be
+updated.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">updates</span><span class="p">()</span>
+<span class="go">{&#39;maven&#39;: {&#39;source&#39;: {&#39;recipe&#39;: &#39;sprinter.recipes.unpack&#39;, &#39;specific_version&#39;: &#39;2.10&#39;}, &#39;target&#39;: {&#39;recipe&#39;: &#39;sprinter.recipes.unpack&#39;, &#39;specific_version&#39;: &#39;3.0.4&#39;}}}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m_old_only</span><span class="o">.</span><span class="n">updates</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">?</span>
+<span class="gr">ManifestError</span>: <span class="n">Update method requires a target manifest!</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.validate">
+<tt class="descname">validate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks validity of manifest files.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.manifest.Manifest.write">
+<tt class="descname">write</tt><big>(</big><em>file_handle</em><big>)</big><a class="reference internal" href="_modules/sprinter/manifest.html#Manifest.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.Manifest.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>write the current state to a file manifest</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="sprinter.manifest.ManifestError">
+<em class="property">exception </em><tt class="descclassname">sprinter.manifest.</tt><tt class="descname">ManifestError</tt><a class="reference internal" href="_modules/sprinter/manifest.html#ManifestError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.manifest.ManifestError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipebase">
+<span id="recipebase-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">recipebase</span></tt> Module<a class="headerlink" href="#module-sprinter.recipebase" title="Permalink to this headline">¶</a></h2>
+<p>Recipe base is an abstract base class outlining the method required
+and some documentation on what they should provide.</p>
+<dl class="class">
+<dt id="sprinter.recipebase.RecipeBase">
+<em class="property">class </em><tt class="descclassname">sprinter.recipebase.</tt><tt class="descname">RecipeBase</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="sprinter.recipebase.RecipeBase.activate">
+<tt class="descname">activate</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to run when activating</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipebase.RecipeBase.deactivate">
+<tt class="descname">deactivate</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>tasks to run when deactivating</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipebase.RecipeBase.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>old_config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroys an old feature if it is no longer required</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipebase.RecipeBase.reload">
+<tt class="descname">reload</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase.reload" title="Permalink to this definition">¶</a></dt>
+<dd><p>tasks to call when reloading</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipebase.RecipeBase.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup performs the setup required, with the config
+specified</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipebase.RecipeBase.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipebase.html#RecipeBase.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipebase.RecipeBase.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup performs the setup required, and works with the old
+config is destruction is required</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipestandard">
+<span id="recipestandard-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">recipestandard</span></tt> Module<a class="headerlink" href="#module-sprinter.recipestandard" title="Permalink to this headline">¶</a></h2>
+<p>Recipe base is an abstract base class outlining the method required
+and some documentation on what they should provide.</p>
+<dl class="class">
+<dt id="sprinter.recipestandard.RecipeStandard">
+<em class="property">class </em><tt class="descclassname">sprinter.recipestandard.</tt><tt class="descname">RecipeStandard</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipestandard.html#RecipeStandard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipestandard.RecipeStandard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sprinter.recipebase.RecipeBase" title="sprinter.recipebase.RecipeBase"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipebase.RecipeBase</span></tt></a></p>
+<dl class="method">
+<dt id="sprinter.recipestandard.RecipeStandard.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipestandard.html#RecipeStandard.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipestandard.RecipeStandard.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroys an old feature if it is no longer required</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipestandard.RecipeStandard.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipestandard.html#RecipeStandard.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipestandard.RecipeStandard.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup performs the setup required, with the config
+specified</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipestandard.RecipeStandard.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipestandard.html#RecipeStandard.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipestandard.RecipeStandard.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup performs the setup required, and works with the old
+config is destruction is required</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sprinter.recipes.html">recipes Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.command"><tt class="docutils literal"><span class="pre">command</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.env"><tt class="docutils literal"><span class="pre">env</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.git"><tt class="docutils literal"><span class="pre">git</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.package"><tt class="docutils literal"><span class="pre">package</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.perforce"><tt class="docutils literal"><span class="pre">perforce</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.ssh"><tt class="docutils literal"><span class="pre">ssh</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.template"><tt class="docutils literal"><span class="pre">template</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.unpack"><tt class="docutils literal"><span class="pre">unpack</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sprinter Package</a><ul>
+<li><a class="reference internal" href="#module-sprinter.directory"><tt class="docutils literal"><span class="pre">directory</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.environment"><tt class="docutils literal"><span class="pre">environment</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.injections"><tt class="docutils literal"><span class="pre">injections</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.install"><tt class="docutils literal"><span class="pre">install</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.lib"><tt class="docutils literal"><span class="pre">lib</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.manifest"><tt class="docutils literal"><span class="pre">manifest</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipebase"><tt class="docutils literal"><span class="pre">recipebase</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipestandard"><tt class="docutils literal"><span class="pre">recipestandard</span></tt> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sprinter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

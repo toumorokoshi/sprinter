@@ -1,0 +1,4 @@
+Sprinter Recipes
+================
+
+Sprinter recipes are the building block of sprinter environments: they handle a specific piece of functionality of your environment, from cloning a git repository to install system packages.

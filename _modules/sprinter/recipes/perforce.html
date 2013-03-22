@@ -1,0 +1,226 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sprinter.recipes.perforce &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Sprinter 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for sprinter.recipes.perforce</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Creates a git repository and places it at the install location.</span>
+
+<span class="sd">[perforce]</span>
+<span class="sd">recipe = sprinter.recipes.perforce</span>
+<span class="sd">inputs = p4username</span>
+<span class="sd">         p4password?</span>
+<span class="sd">version = r10.1</span>
+<span class="sd">root_path = ~/p4/</span>
+<span class="sd">username = %(config:p4username)</span>
+<span class="sd">password = %(config:p4password)</span>
+<span class="sd">port = perforce.local:1666</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+<span class="kn">from</span> <span class="nn">sprinter.recipestandard</span> <span class="kn">import</span> <span class="n">RecipeStandard</span>
+<span class="kn">from</span> <span class="nn">sprinter</span> <span class="kn">import</span> <span class="n">lib</span>
+
+<span class="n">url_template</span> <span class="o">=</span> <span class="s">&quot;http://filehost.perforce.com/perforce/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/p4&quot;</span>
+<span class="n">exec_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;r10.1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;mac&quot;</span><span class="p">:</span> <span class="s">&quot;bin.macosx104u&quot;</span><span class="p">,</span>
+                       <span class="s">&quot;linux&quot;</span><span class="p">:</span> <span class="s">&quot;bin.linux26x86_64&quot;</span><span class="p">}}</span>
+
+<span class="n">p4settings_template</span> <span class="o">=</span> \
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">P4USER=%(username)s</span>
+<span class="sd">P4CLIENT=%(client)s</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">p4client_template</span> <span class="o">=</span> \
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Client:	%(client)s</span>
+
+<span class="sd">Update:	2012/12/03 00:16:24</span>
+
+<span class="sd">Access:	2012/12/03 00:16:24</span>
+
+<span class="sd">Owner:	%(username)s</span>
+
+<span class="sd">Host:	%(hostname)s</span>
+
+<span class="sd">Description:</span>
+<span class="sd">        Created by %(username)s</span>
+
+<span class="sd">Root:	%(root)s</span>
+
+<span class="sd">Options:	noallwrite noclobber nocompress unlocked nomodtime normdir</span>
+
+<span class="sd">LineEnd:	local</span>
+
+<span class="sd">View:</span>
+<span class="sd">%(p4view)s</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="PerforceRecipe"><a class="viewcode-back" href="../../../sprinter.recipes.html#sprinter.recipes.perforce.PerforceRecipe">[docs]</a><span class="k">class</span> <span class="nc">PerforceRecipe</span><span class="p">(</span><span class="n">RecipeStandard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A sprinter recipe for git&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PerforceRecipe.setup"><a class="viewcode-back" href="../../../sprinter.recipes.html#sprinter.recipes.perforce.PerforceRecipe.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PerforceRecipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__install_perforce</span><span class="p">(</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__write_p4settings</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__configure_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sync_perforce</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_p4_port</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PerforceRecipe.update"><a class="viewcode-back" href="../../../sprinter.recipes.html#sprinter.recipes.perforce.PerforceRecipe.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">install_directory</span><span class="p">(</span><span class="n">feature_name</span><span class="p">),</span> <span class="s">&#39;p4&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__install_perforce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__write_p4settings</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sync_perforce</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_p4_port</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PerforceRecipe.destroy"><a class="viewcode-back" href="../../../sprinter.recipes.html#sprinter.recipes.perforce.PerforceRecipe.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__destroy_perforce</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PerforceRecipe.reload"><a class="viewcode-back" href="../../../sprinter.recipes.html#sprinter.recipes.perforce.PerforceRecipe.reload">[docs]</a>    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sync_perforce</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_p4_port</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__install_perforce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; install perforce binary &quot;&quot;&quot;</span>
+        <span class="n">exec_dir</span> <span class="o">=</span> <span class="n">exec_dict</span><span class="p">[</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;version&#39;</span><span class="p">]][</span><span class="s">&#39;mac&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">isOSX</span><span class="p">()</span> <span class="k">else</span> \
+            <span class="n">exec_dict</span><span class="p">[</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;version&#39;</span><span class="p">]][</span><span class="s">&#39;linux&#39;</span><span class="p">]</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">url_template</span> <span class="o">%</span> <span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;version&#39;</span><span class="p">],</span> <span class="n">exec_dir</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">install_directory</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Downloading p4 executable...&quot;</span><span class="p">)</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;p4&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">symlink_to_bin</span><span class="p">(</span><span class="s">&quot;p4&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;p4&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__write_p4settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; write perforce settings &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Writing p4settings...&quot;</span><span class="p">)</span>
+        <span class="n">root_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;root_path&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">context</span><span class="p">())</span>
+        <span class="n">p4settings_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="s">&quot;.p4settings&quot;</span><span class="p">)</span>
+        <span class="n">out_content</span> <span class="o">=</span> <span class="n">p4settings_template</span> <span class="o">%</span> <span class="n">config</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p4settings_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">out_content</span> <span class="o">!=</span> <span class="nb">open</span><span class="p">(</span><span class="n">p4settings_path</span><span class="p">,</span> <span class="s">&quot;r+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">():</span>
+            <span class="n">overwrite</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="s">&quot;p4settings already exists at </span><span class="si">%s</span><span class="s">. Overwrite?&quot;</span> <span class="o">%</span> <span class="n">root_dir</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;no&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">overwrite</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Overwriting existing p4settings...&quot;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p4settings_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="n">p4settings_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">p4settings_path</span><span class="p">,</span> <span class="s">&quot;w+&quot;</span><span class="p">)</span>
+        <span class="n">p4settings_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">p4settings_template</span> <span class="o">%</span> <span class="n">config</span><span class="p">)</span>
+        <span class="n">p4settings_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__configure_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; write the perforce client &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__sync_perforce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; prompt and sync perforce &quot;&quot;&quot;</span>
+        <span class="n">sync</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="s">&quot;would you like to sync your perforce root?&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;yes&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sync</span><span class="o">.</span><span class="n">lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Syncing perforce root...&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;root_path&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">context</span><span class="p">()))</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;p4 -u </span><span class="si">%(username)s</span><span class="s"> -p </span><span class="si">%(password)s</span><span class="s"> sync&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">],</span>
+                                                                  <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;password&#39;</span><span class="p">])))</span>
+
+    <span class="k">def</span> <span class="nf">__add_p4_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">add_to_rc</span><span class="p">(</span><span class="s">&#39;export P4PORT=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;port&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__destroy_perforce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; destroy the perforce root &quot;&quot;&quot;</span>
+        <span class="n">sync</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="s">&quot;would you like to completely remove the perforce root?&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;no&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sync</span><span class="o">.</span><span class="n">lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Removing </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;root_path&#39;</span><span class="p">])</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;root_path&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">context</span><span class="p">()))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Sprinter 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

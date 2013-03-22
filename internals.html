@@ -1,0 +1,137 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sprinter Internals &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sprinter-internals">
+<h1>Sprinter Internals<a class="headerlink" href="#sprinter-internals" title="Permalink to this headline">¶</a></h1>
+<p>This page discusses the internals of a sprinter environment. Specifically, the building blocks that constitutes a sprinter environment.</p>
+</div>
+<div class="section" id="environment-activation-deactivation">
+<h1>Environment activation/deactivation<a class="headerlink" href="#environment-activation-deactivation" title="Permalink to this headline">¶</a></h1>
+<p>The main tool that environments are activated and deactivated is through &#8220;injections&#8221; of text into various configuration files on a client machine. A common injections that occurs is injecting the .rc file for an environment into a .bashrc/.bash_profile like so:</p>
+<div class="highlight-python"><pre>#sprinter-ENVIRONMENT
+inject environment
+#sprinter-ENVIRONMENT</pre>
+</div>
+<p>Injections can be performed on any set of files that exist with an environment. An example of common ones are:</p>
+<ul class="simple">
+<li>the .ssh/config file</li>
+<li>.pypirc for local repositories</li>
+<li>.vimrc for fim configuration</li>
+<li>.emacs for emacs configuration</li>
+</ul>
+<p>And more! Any file can have configuration injected, which should be removed in the activate/deactivate step.</p>
+<div class="section" id="the-rc-file">
+<h2>The .rc file<a class="headerlink" href="#the-rc-file" title="Permalink to this headline">¶</a></h2>
+<p>Every sprinter environment has a .rc file at it&#8217;s core. Identical in concept to a .bashrc or .bash_profile, this .rc file contains a majority of the configuration of the setup for an environment.</p>
+</div>
+<div class="section" id="the-sprinter-environment-directory">
+<h2>The .sprinter-ENVIRONMENT directory<a class="headerlink" href="#the-sprinter-environment-directory" title="Permalink to this headline">¶</a></h2>
+<p>A majority of the files required for a sprinter environment are stored in a .sprinter-ENVIRONMENT directory within</p>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>Each section in a sprinter configuration represents a &#8220;feature&#8221;, which exists in a particular state. Each service is dealt with separately, and is designed a service directory within the configuration root that it can use to place whatever it would like (clone a git repository, unpack a package, etc).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sprinter Internals</a></li>
+<li><a class="reference internal" href="#environment-activation-deactivation">Environment activation/deactivation</a><ul>
+<li><a class="reference internal" href="#the-rc-file">The .rc file</a></li>
+<li><a class="reference internal" href="#the-sprinter-environment-directory">The .sprinter-ENVIRONMENT directory</a></li>
+<li><a class="reference internal" href="#features">Features</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/internals.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

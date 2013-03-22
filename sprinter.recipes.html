@@ -1,0 +1,374 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>recipes Package &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="recipes-package">
+<h1>recipes Package<a class="headerlink" href="#recipes-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sprinter.recipes.command">
+<span id="command-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">command</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.command" title="Permalink to this headline">¶</a></h2>
+<p>Runs a command
+[ssh]
+recipe = sprinter.recipes.command
+hideoutput=true
+setup=echo &#8216;setting up&#8217;
+update=echo &#8216;updating&#8217;
+destroy=echo &#8216;destroying...&#8217;</p>
+<dl class="class">
+<dt id="sprinter.recipes.command.CommandRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.command.</tt><tt class="descname">CommandRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<dl class="method">
+<dt id="sprinter.recipes.command.CommandRecipe.activate">
+<tt class="descname">activate</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to run when activating</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.command.CommandRecipe.deactivate">
+<tt class="descname">deactivate</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>tasks to run when deactivating</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.command.CommandRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.command.CommandRecipe.reload">
+<tt class="descname">reload</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe.reload" title="Permalink to this definition">¶</a></dt>
+<dd><p>tasks to call when reloading</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.command.CommandRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.command.CommandRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/command.html#CommandRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.command.CommandRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.env">
+<span id="env-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">env</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.env" title="Permalink to this headline">¶</a></h2>
+<p>Queries the user for a specific environment</p>
+<p>[env]
+recipe = sprinter.recipes.env
+stash = %(config:stash)
+user = %(config:user)
+MAVEN_HOME = %(maven:root_dir)
+M2_PATH = ~/.m2/</p>
+<dl class="class">
+<dt id="sprinter.recipes.env.EnvRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.env.</tt><tt class="descname">EnvRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/env.html#EnvRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.env.EnvRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<p>A sprinter recipe for git</p>
+<dl class="method">
+<dt id="sprinter.recipes.env.EnvRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/env.html#EnvRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.env.EnvRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.env.EnvRecipe.reload">
+<tt class="descname">reload</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/env.html#EnvRecipe.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.env.EnvRecipe.reload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.env.EnvRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/env.html#EnvRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.env.EnvRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.env.EnvRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/env.html#EnvRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.env.EnvRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.git">
+<span id="git-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">git</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.git" title="Permalink to this headline">¶</a></h2>
+<p>Creates a git repository and places it at the install location.</p>
+<dl class="class">
+<dt id="sprinter.recipes.git.GitRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.git.</tt><tt class="descname">GitRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/git.html#GitRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.git.GitRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<p>A sprinter recipe for git</p>
+<dl class="method">
+<dt id="sprinter.recipes.git.GitRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/git.html#GitRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.git.GitRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.git.GitRecipe.reload">
+<tt class="descname">reload</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/git.html#GitRecipe.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.git.GitRecipe.reload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.git.GitRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/git.html#GitRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.git.GitRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.git.GitRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/git.html#GitRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.git.GitRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.package">
+<span id="package-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">package</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.package" title="Permalink to this headline">¶</a></h2>
+<p>Installs a package from whatever the native package manager is
+(apt-get for debian-based, brew for OS X)
+[env]
+recipe = sprinter.recipes.package
+debian = git
+brew = git</p>
+<dl class="class">
+<dt id="sprinter.recipes.package.PackageRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.package.</tt><tt class="descname">PackageRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/package.html#PackageRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.package.PackageRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<dl class="method">
+<dt id="sprinter.recipes.package.PackageRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/package.html#PackageRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.package.PackageRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.perforce">
+<span id="perforce-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">perforce</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.perforce" title="Permalink to this headline">¶</a></h2>
+<p>Creates a git repository and places it at the install location.</p>
+<p>[perforce]
+recipe = sprinter.recipes.perforce
+inputs = p4username</p>
+<blockquote>
+<div>p4password?</div></blockquote>
+<p>version = r10.1
+root_path = ~/p4/
+username = %(config:p4username)
+password = %(config:p4password)
+port = perforce.local:1666</p>
+<dl class="class">
+<dt id="sprinter.recipes.perforce.PerforceRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.perforce.</tt><tt class="descname">PerforceRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/perforce.html#PerforceRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.perforce.PerforceRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<p>A sprinter recipe for git</p>
+<dl class="method">
+<dt id="sprinter.recipes.perforce.PerforceRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/perforce.html#PerforceRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.perforce.PerforceRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.perforce.PerforceRecipe.reload">
+<tt class="descname">reload</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/perforce.html#PerforceRecipe.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.perforce.PerforceRecipe.reload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.perforce.PerforceRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/perforce.html#PerforceRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.perforce.PerforceRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.perforce.PerforceRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/perforce.html#PerforceRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.perforce.PerforceRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.ssh">
+<span id="ssh-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">ssh</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.ssh" title="Permalink to this headline">¶</a></h2>
+<p>Generates a ssh key if necessary, and adds a config to ~/.ssh/config
+if it doesn&#8217;t exist already.
+[ssh]
+recipe = sprinter.recipes.ssh
+name = zillow
+type = rsa
+host = test.local
+hostname = test
+user = %(config:username)</p>
+<dl class="class">
+<dt id="sprinter.recipes.ssh.SSHRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.ssh.</tt><tt class="descname">SSHRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/ssh.html#SSHRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.ssh.SSHRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<dl class="method">
+<dt id="sprinter.recipes.ssh.SSHRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/ssh.html#SSHRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.ssh.SSHRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.ssh.SSHRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/ssh.html#SSHRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.ssh.SSHRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.ssh.SSHRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/ssh.html#SSHRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.ssh.SSHRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.template">
+<span id="template-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">template</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.template" title="Permalink to this headline">¶</a></h2>
+<p>Generates a file in a target location from a template</p>
+<dl class="class">
+<dt id="sprinter.recipes.template.TemplateRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.template.</tt><tt class="descname">TemplateRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/template.html#TemplateRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.template.TemplateRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<dl class="method">
+<dt id="sprinter.recipes.template.TemplateRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/template.html#TemplateRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.template.TemplateRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.template.TemplateRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/template.html#TemplateRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.template.TemplateRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.template.TemplateRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/template.html#TemplateRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.template.TemplateRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sprinter.recipes.unpack">
+<span id="unpack-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">unpack</span></tt> Module<a class="headerlink" href="#module-sprinter.recipes.unpack" title="Permalink to this headline">¶</a></h2>
+<p>Unpacks and deploys to a location</p>
+<dl class="class">
+<dt id="sprinter.recipes.unpack.UnpackRecipe">
+<em class="property">class </em><tt class="descclassname">sprinter.recipes.unpack.</tt><tt class="descname">UnpackRecipe</tt><big>(</big><em>environment</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/unpack.html#UnpackRecipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.unpack.UnpackRecipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sprinter.html#sprinter.recipestandard.RecipeStandard" title="sprinter.recipestandard.RecipeStandard"><tt class="xref py py-class docutils literal"><span class="pre">sprinter.recipestandard.RecipeStandard</span></tt></a></p>
+<p>A sprinter recipe for unpacking a compressed package and extracting it</p>
+<dl class="method">
+<dt id="sprinter.recipes.unpack.UnpackRecipe.destroy">
+<tt class="descname">destroy</tt><big>(</big><em>eature_name</em>, <em>old_config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/unpack.html#UnpackRecipe.destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.unpack.UnpackRecipe.destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.unpack.UnpackRecipe.setup">
+<tt class="descname">setup</tt><big>(</big><em>feature_name</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/unpack.html#UnpackRecipe.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.unpack.UnpackRecipe.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sprinter.recipes.unpack.UnpackRecipe.update">
+<tt class="descname">update</tt><big>(</big><em>feature_name</em>, <em>old_config</em><big>)</big><a class="reference internal" href="_modules/sprinter/recipes/unpack.html#UnpackRecipe.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sprinter.recipes.unpack.UnpackRecipe.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">recipes Package</a><ul>
+<li><a class="reference internal" href="#module-sprinter.recipes.command"><tt class="docutils literal"><span class="pre">command</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.env"><tt class="docutils literal"><span class="pre">env</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.git"><tt class="docutils literal"><span class="pre">git</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.package"><tt class="docutils literal"><span class="pre">package</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.perforce"><tt class="docutils literal"><span class="pre">perforce</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.ssh"><tt class="docutils literal"><span class="pre">ssh</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.template"><tt class="docutils literal"><span class="pre">template</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-sprinter.recipes.unpack"><tt class="docutils literal"><span class="pre">unpack</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sprinter.recipes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

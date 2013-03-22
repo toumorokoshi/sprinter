@@ -1,0 +1,240 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sprinter.install &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Sprinter 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for sprinter.install</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The install script for a sprinter-based setup script.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">sprinter.lib</span> <span class="kn">import</span> <span class="n">get_recipe_class</span>
+<span class="kn">from</span> <span class="nn">sprinter.environment</span> <span class="kn">import</span> <span class="n">Environment</span>
+
+<span class="n">description</span> <span class="o">=</span> \
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Install an environment as specified in a sprinter config file</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;command&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;C&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s">&quot;The operation that sprinter should run (install, deactivate, activate, switch)&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;target&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;The path to the manifest file to install&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--namespace&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;namespace&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s">&quot;Namespace to check environment against&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-v&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Make output verbose&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../sprinter.html#sprinter.install.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+    <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;install&quot;</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">logging_level</span><span class="o">=</span><span class="n">logging_level</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">load_manifest</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">grab_inputs</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Installing </span><span class="si">%s</span><span class="s"> environment...&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">__install</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;deactivate&quot;</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">logging_level</span><span class="o">=</span><span class="n">logging_level</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">deactivate</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;activate&quot;</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">logging_level</span><span class="o">=</span><span class="n">logging_level</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+        <span class="k">pass</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;switch&quot;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;remove&quot;</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">logging_level</span><span class="o">=</span><span class="n">logging_level</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">load_namespace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">deactivate</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Completely removing </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+        <span class="n">__remove</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;update&quot;</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">logging_level</span><span class="o">=</span><span class="n">logging_level</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">load_namespace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">load_target_implicit</span><span class="p">():</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">grab_inputs</span><span class="p">()</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Updating </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">namespace</span><span class="p">)</span>
+            <span class="n">__install</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;reload&quot;</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">logging_level</span><span class="o">=</span><span class="n">logging_level</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">load_namespace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Reloading </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">recipe_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="p">[</span><span class="n">__reload</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">reloads</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+</div>
+<span class="k">def</span> <span class="nf">__install</span><span class="p">(</span><span class="n">environment</span><span class="p">):</span>
+    <span class="n">recipe_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># a dictionary of recipe objects to perform operations with</span>
+    <span class="c"># perform setups</span>
+    <span class="p">[</span><span class="n">__setup</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">environment</span><span class="o">.</span><span class="n">setups</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="c"># perform updates</span>
+    <span class="p">[</span><span class="n">__update</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">environment</span><span class="o">.</span><span class="n">updates</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="c"># perform destroys</span>
+    <span class="p">[</span><span class="n">__destroy</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">environment</span><span class="o">.</span><span class="n">destroys</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+
+
+<span class="k">def</span> <span class="nf">__deactivate</span><span class="p">(</span><span class="n">environment</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">__activate</span><span class="p">(</span><span class="n">environment</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">__remove</span><span class="p">(</span><span class="n">environment</span><span class="p">):</span>
+    <span class="n">recipe_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># a dictionary of recipe objects to perform operations with</span>
+    <span class="p">[</span><span class="n">__destroy</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">environment</span><span class="o">.</span><span class="n">destroys</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">environment</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Completely removing </span><span class="si">%s</span><span class="s"> directory&quot;</span> <span class="o">%</span> <span class="n">environment</span><span class="o">.</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">environment</span><span class="o">.</span><span class="n">directory</span><span class="o">.</span><span class="n">root_dir</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__get_recipe_instance</span><span class="p">(</span><span class="n">recipe_dict</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span> <span class="n">environment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    get an instance of the recipe object object if it exists, else</span>
+<span class="sd">    create one, add it to the dict, and pass return it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">recipe</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">recipe_dict</span><span class="p">:</span>
+        <span class="n">recipe_dict</span><span class="p">[</span><span class="n">recipe</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_recipe_class</span><span class="p">(</span><span class="n">recipe</span><span class="p">,</span> <span class="n">environment</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recipe_dict</span><span class="p">[</span><span class="n">recipe</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">__setup</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">):</span>
+    <span class="n">environment</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Setting up </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">recipe_instance</span> <span class="o">=</span> <span class="n">__get_recipe_instance</span><span class="p">(</span><span class="n">recipe_dict</span><span class="p">,</span>
+                                            <span class="n">config</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">][</span><span class="s">&#39;recipe&#39;</span><span class="p">],</span>
+                                            <span class="n">environment</span><span class="p">)</span>
+    <span class="n">recipe_instance</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">__update</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">):</span>
+    <span class="n">environment</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Updating </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">recipe_instance</span> <span class="o">=</span> <span class="n">__get_recipe_instance</span><span class="p">(</span><span class="n">recipe_dict</span><span class="p">,</span>
+                                            <span class="n">config</span><span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">][</span><span class="s">&#39;recipe&#39;</span><span class="p">],</span>
+                                            <span class="n">environment</span><span class="p">)</span>
+    <span class="n">recipe_instance</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__destroy</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">):</span>
+    <span class="n">environment</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Destroying </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">recipe_instance</span> <span class="o">=</span> <span class="n">__get_recipe_instance</span><span class="p">(</span><span class="n">recipe_dict</span><span class="p">,</span>
+                                            <span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">][</span><span class="s">&#39;recipe&#39;</span><span class="p">],</span>
+                                            <span class="n">environment</span><span class="p">)</span>
+    <span class="n">recipe_instance</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">__reload</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">recipe_dict</span><span class="p">):</span>
+    <span class="n">environment</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Reloading </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">recipe_instance</span> <span class="o">=</span> <span class="n">__get_recipe_instance</span><span class="p">(</span><span class="n">recipe_dict</span><span class="p">,</span>
+                                            <span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">][</span><span class="s">&#39;recipe&#39;</span><span class="p">],</span>
+                                            <span class="n">environment</span><span class="p">)</span>
+    <span class="n">recipe_instance</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">])</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;doctest&#39;</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">doctest</span>
+        <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Sprinter 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

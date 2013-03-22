@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Sprinter’s documentation! &mdash; Sprinter 0.1 documentation</title>
+    <title>sprinter &mdash; Sprinter 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,8 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Sprinter 0.1 documentation" href="#" />
-    <link rel="next" title="Sprinter Tutorial" href="tutorial.html" /> 
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,10 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="tutorial.html" title="Sprinter Tutorial"
-             accesskey="N">next</a> |</li>
-        <li><a href="#">Sprinter 0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -49,36 +45,10 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-sprinter-s-documentation">
-<h1>Welcome to Sprinter&#8217;s documentation!<a class="headerlink" href="#welcome-to-sprinter-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Sprinter is a tool to help create environment bootstrapping scripts for developer environments.</p>
-<p>Sprinter was designed with modularity, and adaption in mind. Some of the features of sprinter include:</p>
-<ul class="simple">
-<li>Installing environments directly from configs on the web</li>
-<li>Updating existing environments</li>
-<li>Managing several environments, activating and deactiviting as needed</li>
-</ul>
-<p>To Install:</p>
-<div class="highlight-python"><pre>$ (sudo) easy_install sprinter</pre>
-</div>
-<p>In your console</p>
-<p>Contents:</p>
+  <div class="section" id="sprinter">
+<h1>sprinter<a class="headerlink" href="#sprinter" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Sprinter Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#build-a-sprinter-configuration-file">Build a sprinter configuration file</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="recipes.html">Sprinter Recipes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="recipes.html#where-to-find-recipes">Where to find recipes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="recipes.html#standard-recipe-commands">Standard Recipe Commands</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="manifests.html">Manifests</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="manifests.html#special-sections">Special Sections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="manifests.html#variable-substitution">Variable substitution</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="sprinter.html">sprinter Package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="sprinter.html#module-sprinter.directory"><tt class="docutils literal"><span class="pre">directory</span></tt> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sprinter.html#module-sprinter.environment"><tt class="docutils literal"><span class="pre">environment</span></tt> Module</a></li>
@@ -88,20 +58,24 @@
 <li class="toctree-l2"><a class="reference internal" href="sprinter.html#module-sprinter.manifest"><tt class="docutils literal"><span class="pre">manifest</span></tt> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sprinter.html#module-sprinter.recipebase"><tt class="docutils literal"><span class="pre">recipebase</span></tt> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sprinter.html#module-sprinter.recipestandard"><tt class="docutils literal"><span class="pre">recipestandard</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sprinter.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sprinter.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sprinter.recipes.html">recipes Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.command"><tt class="docutils literal"><span class="pre">command</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.env"><tt class="docutils literal"><span class="pre">env</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.git"><tt class="docutils literal"><span class="pre">git</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.package"><tt class="docutils literal"><span class="pre">package</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.perforce"><tt class="docutils literal"><span class="pre">perforce</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.ssh"><tt class="docutils literal"><span class="pre">ssh</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.template"><tt class="docutils literal"><span class="pre">template</span></tt> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sprinter.recipes.html#module-sprinter.recipes.unpack"><tt class="docutils literal"><span class="pre">unpack</span></tt> Module</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
 </div>
 
 
@@ -110,20 +84,9 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Welcome to Sprinter&#8217;s documentation!</a><ul>
-</ul>
-</li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
-</ul>
-
-  <h4>Next topic</h4>
-  <p class="topless"><a href="tutorial.html"
-                        title="next chapter">Sprinter Tutorial</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
+    <li><a href="_sources/modules.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -152,10 +115,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="tutorial.html" title="Sprinter Tutorial"
-             >next</a> |</li>
-        <li><a href="#">Sprinter 0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

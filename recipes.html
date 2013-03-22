@@ -1,0 +1,161 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sprinter Recipes &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Sprinter Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Sprinter Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sprinter-recipes">
+<h1>Sprinter Recipes<a class="headerlink" href="#sprinter-recipes" title="Permalink to this headline">¶</a></h1>
+<p>Sprinter recipes are the building block of sprinter environments: they handle a specific piece of functionality of your environment, from cloning a git repository to install system packages.</p>
+<p>In your sprinter environment configuration, each section (aside from some reserved names) represents a configured recipe. Here is an example:</p>
+<div class="code python highlight-python"><pre>[sub]
+recipe = sprinter.recipes.git
+url = git://github.com/Toumorokoshi/sub.git
+branch = yusuke
+rc = temp=`pwd`; cd %(sub:root_dir)s/libexec &amp;&amp; . sub-init2 &amp;&amp; cd $tmp</pre>
+</div>
+<p>This section:</p>
+<ul class="simple">
+<li>utilizes the standard sprinter git recipe</li>
+<li>clones a git repo from the url specified</li>
+<li>checks out a specific branch yusuke</li>
+<li>adds the initialization command to the environment&#8217;s .rc script</li>
+</ul>
+<p>Configuration parameters vary from recipe to recipe, so look at the documentation to figure out which parameters are available to you.</p>
+<p>Now let&#8217;s talk more about recipes in detail.</p>
+<div class="section" id="where-to-find-recipes">
+<h2>Where to find recipes<a class="headerlink" href="#where-to-find-recipes" title="Permalink to this headline">¶</a></h2>
+<p>Currently, recipes can be found in one of two places:</p>
+<ol class="arabic">
+<li><p class="first">contained inside the standard sprinter library. Currently the recipes include:</p>
+<blockquote>
+<div><ul class="simple">
+<li>git, for git repo cloning</li>
+<li>unpack, to unpack tar.gz files</li>
+<li>command, to execute a commnd</li>
+<li>env, to add environment variables</li>
+<li>package, to install packages from the package manager of your environment</li>
+<li>perforce, to configure and install perforce</li>
+<li>ssh, to set up an ssh key</li>
+<li>template, to specialize a template and write it to a specified location</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">As a url to a file that contains a python module</p>
+</li>
+</ol>
+<p>e.g:</p>
+<div class="code python highlight-python"><pre>recipe = sprinter.recipe.git
+recipe = http://raw.github.com/toumorokoshi/spriter-recipes/git.py</pre>
+</div>
+</div>
+<div class="section" id="standard-recipe-commands">
+<h2>Standard Recipe Commands<a class="headerlink" href="#standard-recipe-commands" title="Permalink to this headline">¶</a></h2>
+<p>Sprinter recipes that extend off of the &#8220;RecipeStandard&#8221; class come with a series of default actions that can be utilized. These are:</p>
+<ul class="simple">
+<li>&#8216;rc&#8217;: this will add lines into the .rc of your environment, thereby being added to your environment if it&#8217;s activated. (for setup and updates)</li>
+<li>&#8216;command&#8217;: this will run the specified command after the recipe is finished (for setup and updates)</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sprinter Recipes</a><ul>
+<li><a class="reference internal" href="#where-to-find-recipes">Where to find recipes</a></li>
+<li><a class="reference internal" href="#standard-recipe-commands">Standard Recipe Commands</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Sprinter Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/recipes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Sprinter Tutorial"
+             >previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
