@@ -36,3 +36,5 @@ nosetests.xml
 
 # built docs
 docs/build
+\#*
+*~

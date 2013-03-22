@@ -23,9 +23,6 @@ def get_recipe_class(recipe, environment):
     path to the module. get_recipe_class performs reflection to find
     the first class that extends recipebase, and that is the class
     that an instance of it gets returned.
-
-    >>> issubclass(get_recipe_class("sprinter.recipes.unpack", ).__class__, RecipeBase)
-    True
     """
     try:
         r = __recursive_import(recipe)
