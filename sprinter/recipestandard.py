@@ -24,15 +24,15 @@ class RecipeStandard(RecipeBase):
         if 'rc' in config:
             self.directory.add_to_rc(config['rc'])
         if 'command' in config:
-            lib.call(config['command'])
+            self.logger.info(lib.call(config['command']))
 
     def update(self, feature_name, config):
         """ Setup performs the setup required, and works with the old
         config is destruction is required """
         if 'rc' in config:
             self.directory.add_to_rc(config['rc'])
-        if 'command' in config:
-            lib.call(config['command'])
+        if 'command' in config['target']:
+            self.logger.info(lib.call(config['target']['command']))
 
     def destroy(self, feature_name, config):
         """ Destroys an old feature if it is no longer required """

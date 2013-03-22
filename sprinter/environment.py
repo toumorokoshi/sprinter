@@ -54,7 +54,7 @@ class Environment(object):
         if directory.new:
             self.logger.error("Namespace %s is not yet installed!" % namespace)
             return
-        source_manifest = Manifest(directory.manifest_path)
+        source_manifest = Manifest(open(directory.manifest_path, 'r'))
         source = source_manifest.source()
         if not source:
             self.logger.error("Installed manifest for %s has no source!" % namespace)
