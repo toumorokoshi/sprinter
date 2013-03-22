@@ -24,7 +24,7 @@ def get_recipe_class(recipe, environment):
     the first class that extends recipebase, and that is the class
     that an instance of it gets returned.
 
-    >>> issubclass(get_recipe_class("sprinter.recipes.unpack").__class__, RecipeBase)
+    >>> issubclass(get_recipe_class("sprinter.recipes.unpack", ).__class__, RecipeBase)
     True
     """
     try:
@@ -38,10 +38,72 @@ def get_recipe_class(recipe, environment):
         raise e
 
 
-def call(command, stdin=None, env=None, cwd=None):
-    args = command.split(" ")
-    p = subprocess.Popen(args, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
-    return p.communicate(input=stdin)[0]
+def call(command, stdin=None, env=None, cwd=None, bash=False):
+    if not bash:
+        args = __whitespace_smart_split(command)
+        p = subprocess.Popen(args, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
+        return p.communicate(input=stdin)[0]
+    else:
+        command = " ".join([__process(arg) for arg in __whitespace_smart_split(command)])
+        subprocess.call(command, shell=True, executable='/bin/bash')
+
+def __escape_args(command):
+    """
+    Escape raw arguments for a bash shell
+    """
+    args = commands.split(" ")
+
+def __process(arg):
+    """
+    Process args for a bash shell
+    """
+    # assumes it's wrappen in quotes, or is a flag
+    if arg[0] in ["'", '"', '-']:
+        return arg
+    else:
+        return re.escape(arg)
+
+def __whitespace_smart_split(command):
+    """
+    Split a command by whitespace, taking care to not split on whitespace within quotes.
+
+    >>> __whitespace_smart_split("test this \\\"in here\\\" again")
+    ['test', 'this', '"in here"', 'again']
+    """
+    return_array = []
+    s = ""
+    in_double_quotes = False
+    escape = False
+    for c in command:
+        if c == '"':
+            if in_double_quotes:
+                if escape:
+                    s += c
+                    escape = False
+                else:
+                    s += c
+                    in_double_quotes = False
+            else:
+                in_double_quotes = True
+                s += c
+        else:
+            if in_double_quotes:
+                if c == '\\':
+                    escape = True
+                    s += c
+                else:
+                    escape = False
+                    s += c
+            else:
+                if c == ' ':
+                    return_array.append(s)
+                    s = ""
+                else:
+                    s += c
+    if s != "":
+        return_array.append(s)
+    return return_array
+
 
 
 def authenticated_get(username, password, url):
