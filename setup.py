@@ -6,11 +6,11 @@ except:
     from distutils.core import setup
 
 setup(name='sprinter',
-      version='0.3',
+      version='0.3.1',
       description='a utility library to help environment bootstrapping scripts',
       author='Yusuke Tsutsumi',
       author_email='yusuke@yusuketsutsumi.com',
-      url='https://toumorokoshi.github.com/sprinter',
+      url='http://toumorokoshi.github.com/sprinter',
       packages=['sprinter', 'sprinter.recipes'],
       classifiers=[
         'Development Status :: 4 - Beta',
