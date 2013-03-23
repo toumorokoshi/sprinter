@@ -226,9 +226,8 @@ class Config(object):
             if self.source.has_section(s):
                 target_dict = dict(self.target.items(s))
                 source_dict = dict(self.source.items(s))
-                if self.__update_needed(source_dict, target_dict):
-                    different_sections[s] = {"source": source_dict,
-                                             "target": target_dict}
+                different_sections[s] = {"source": source_dict,
+                                         "target": target_dict}
         return different_sections
 
     def destroys(self):

@@ -17,10 +17,16 @@ class GitRecipe(RecipeStandard):
         super(GitRecipe, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        shutil.rmtree(self.directory.install_directory(feature_name))
-        branch = (config['target']['branch'] if 'branch' in config['target'] else None)
-        self.__clone_repo(config['target']['url'], self.directory.install_directory(feature_name),
-                          branch=branch)
+        if config['target']['url'] != config['source']['url'] \
+          or not os.path.exists(self.directory.install_directory(feature_name)):
+            if os.path.exists(self.directory.install_directory(feature_name)):
+                shutil.rmtree(self.directory.install_directory(feature_name))
+            branch = (config['target']['branch'] if 'branch' in config['target'] else None)
+            self.__clone_repo(config['target']['url'], self.directory.install_directory(feature_name),
+                                  branch=branch)
+        else:
+            os.chdir(self.directory.install_directory(feature_name))
+            call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
         super(GitRecipe, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
