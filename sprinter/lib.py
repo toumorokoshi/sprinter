@@ -5,7 +5,6 @@ features of the library.
 """
 import inspect
 import imp
-import os
 import re
 import subprocess
 import urllib2
@@ -44,11 +43,6 @@ def call(command, stdin=None, env=None, cwd=None, bash=False):
         command = " ".join([__process(arg) for arg in __whitespace_smart_split(command)])
         subprocess.call(command, shell=True, executable='/bin/bash')
 
-def __escape_args(command):
-    """
-    Escape raw arguments for a bash shell
-    """
-    args = commands.split(" ")
 
 def __process(arg):
     """
@@ -59,6 +53,7 @@ def __process(arg):
         return arg
     else:
         return re.escape(arg)
+
 
 def __whitespace_smart_split(command):
     """
@@ -100,7 +95,6 @@ def __whitespace_smart_split(command):
     if s != "":
         return_array.append(s)
     return return_array
-
 
 
 def authenticated_get(username, password, url):

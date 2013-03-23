@@ -7,7 +7,7 @@ import os
 import shutil
 import signal
 import sys
-from sprinter.lib import get_recipe_class
+from sprinter import lib
 from sprinter.environment import Environment
 
 description = \
@@ -21,7 +21,12 @@ parser.add_argument('command', metavar='C',
 parser.add_argument('target', metavar='T', help="The path to the manifest file to install", nargs='?')
 parser.add_argument('--namespace', dest='namespace', default=None,
                     help="Namespace to check environment against")
+parser.add_argument('--username', dest='username', default=None,
+                    help="Username if the url requires authentication")
+parser.add_argument('--password', dest='password', default=None,
+                    help="Password if the url requires authentication")
 parser.add_argument('-v', dest='verbose', action='store_true', help="Make output verbose")
+
 
 def signal_handler(signal, frame):
     print "Shutting down sprinter..."
@@ -35,9 +40,15 @@ def main():
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     e = Environment(logging_level=logging_level)
     if command == "install":
-        e.install(args.target, namespace=args.namespace)
+        if args.username:
+            if not args.password:
+                args.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
+        e.install(args.target, namespace=args.namespace, username=args.username, password=args.password)
     elif command == "update":
-        e.update(args.target)
+        if args.username:
+            if not args.password:
+                args.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
+        e.update(args.target, username=args.username, password=args.password)
     elif command == "remove":
         e.remove(args.target)
     elif command == "deactivate":

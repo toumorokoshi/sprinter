@@ -30,14 +30,16 @@ class Environment(object):
         self.system = System()
         self.logger = self.__build_logger(logger=logger, level=logging_level)
 
-    def install(self, raw_target_manifest, namespace=None):
+    def install(self, raw_target_manifest, namespace=None, username=None, password=None):
         """
         Install an environment based on the target manifest passed
         """
+        if username or password:
+            assert (username and password), "both username and password required!!"
         target_manifest = Manifest(raw_target_manifest, namespace=namespace)
         directory = Directory(target_manifest.namespace)
         if not directory.new:
-            self.logger.info("Namespace %s already exists, updating..." % \
+            self.logger.info("Namespace %s already exists, updating..." %
                              target_manifest.namespace)
             self._update(Manifest(directory.manifest_path),
                          target_manifest,
@@ -46,10 +48,12 @@ class Environment(object):
             self.logger.info("Installing environment %s..." % target_manifest.namespace)
             self._install(target_manifest)
 
-    def update(self, namespace):
+    def update(self, namespace, username=None, password=None):
         """
         Update a namespace
         """
+        if username or password:
+            assert (username and password), "both username and password required!!"
         directory = Directory(namespace)
         if directory.new:
             self.logger.error("Namespace %s is not yet installed!" % namespace)

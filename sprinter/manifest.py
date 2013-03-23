@@ -94,12 +94,17 @@ class Manifest(object):
         return self.get('config', 'source') if \
             self.has_option('config', 'source') else None
 
-    def __load_manifest(self, raw_manifest):
+    def __load_manifest(self, raw_manifest, username=None, password=None):
         manifest = RawConfigParser()
         manifest.add_section('config')
         if type(raw_manifest) == str:
             if raw_manifest.startswith("http"):
-                manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
+                if username and password:
+                    manifest_file_handler = StringIO(lib.authenticated_get(username,
+                                                                           password,
+                                                                           raw_manifest))
+                else:
+                    manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
                 manifest.readfp(manifest_file_handler)
             else:
                 manifest.read(raw_manifest)
