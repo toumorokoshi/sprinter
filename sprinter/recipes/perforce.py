@@ -75,9 +75,10 @@ class PerforceRecipe(RecipeStandard):
         if config['source']['version'] != config['target']['version']:
             os.remove(os.path.join(self.directory.install_directory(feature_name), 'p4'))
             self.__install_perforce(self, feature_name, config['target'])
-        self.__write_p4settings(config)
-        self.__sync_perforce(config)
-        self.__add_p4_env(config)
+        if config['target'] != config['source']:
+            self.__write_p4settings(config['target'])
+            self.__sync_perforce(config['target'])
+        self.__add_p4_env(config['target'])
 
     def destroy(self, feature_name, config):
         self.__destroy_perforce(config)

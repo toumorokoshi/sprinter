@@ -153,6 +153,7 @@ class Config(object):
     # a list of values to not save into the config.
     # e.g. passwords
     temporary_sections = []
+    source_location = None
     config = {}
 
     def __init__(self, source=None, target=None, namespace=None):
@@ -162,7 +163,10 @@ class Config(object):
         """
         self.source = source
         self.target = target
-        self.source_location = self.target.source() or self.source.source()
+        if self.target:
+            self.source_location = self.target.source() 
+        if self.source and not self.source_location:
+            self.source.source()
         # store raws to use on write
         self.source_raw = source
         self.target_raw = target
@@ -222,9 +226,8 @@ class Config(object):
             if self.source.has_section(s):
                 target_dict = dict(self.target.items(s))
                 source_dict = dict(self.source.items(s))
-                if self.__update_needed(source_dict, target_dict):
-                    different_sections[s] = {"source": source_dict,
-                                             "target": target_dict}
+                different_sections[s] = {"source": source_dict,
+                                         "target": target_dict}
         return different_sections
 
     def destroys(self):
