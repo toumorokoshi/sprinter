@@ -44,14 +44,14 @@ def main():
     if command == "install":
         if args.username or args.auth:
             if not args.username:
-                args.username = lib.prompt("Please enter the username for the sprinter url...", secret=True)
+                args.username = lib.prompt("Please enter the username for the sprinter url...")
             if not args.password:
                 args.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
         e.install(args.target, namespace=args.namespace, username=args.username, password=args.password)
     elif command == "update":
         if args.username or args.auth:
             if not args.username:
-                args.username = lib.prompt("Please enter the username for the sprinter url...", secret=True)
+                args.username = lib.prompt("Please enter the username for the sprinter url...")
             if not args.password:
                 args.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
         e.update(args.target, username=args.username, password=args.password)
