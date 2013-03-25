@@ -36,7 +36,10 @@ class Environment(object):
         """
         if username or password:
             assert (username and password), "both username and password required!!"
-        target_manifest = Manifest(raw_target_manifest, namespace=namespace)
+        target_manifest = Manifest(raw_target_manifest,
+                                   namespace=namespace,
+                                   username=username,
+                                   password=password)
         directory = Directory(target_manifest.namespace)
         if not directory.new:
             self.logger.info("Namespace %s already exists, updating..." %
@@ -63,7 +66,7 @@ class Environment(object):
         if not source:
             self.logger.error("Installed manifest for %s has no source!" % namespace)
             return
-        target_manifest = Manifest(source, namespace=namespace)
+        target_manifest = Manifest(source, namespace=namespace, username=username, password=password)
         self.logger.info("Updating environment %s..." % target_manifest.namespace)
         self._update(source_manifest, target_manifest)
 

@@ -82,9 +82,12 @@ class Manifest(object):
     the string representation of the target object
     """
 
-    def __init__(self, raw_manifest, namespace=None, logger='sprinter'):
+    def __init__(self, raw_manifest, namespace=None, logger='sprinter',
+                 username=None, password=None):
         self.logger = logging.getLogger(logger)
-        self.manifest = self.__load_manifest(raw_manifest)
+        self.manifest = self.__load_manifest(raw_manifest,
+                                             username=username,
+                                             password=password)
         self.namespace = namespace if namespace else self.__parse_namespace()
 
     def source(self):

@@ -23,6 +23,8 @@ parser.add_argument('--namespace', dest='namespace', default=None,
                     help="Namespace to check environment against")
 parser.add_argument('--username', dest='username', default=None,
                     help="Username if the url requires authentication")
+parser.add_argument('--auth', dest='auth', action='store_true',
+                    help="Specifies authentication is required")
 parser.add_argument('--password', dest='password', default=None,
                     help="Password if the url requires authentication")
 parser.add_argument('-v', dest='verbose', action='store_true', help="Make output verbose")
@@ -40,12 +42,16 @@ def main():
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     e = Environment(logging_level=logging_level)
     if command == "install":
-        if args.username:
+        if args.username or args.auth:
+            if not args.username:
+                args.username = lib.prompt("Please enter the username for the sprinter url...", secret=True)
             if not args.password:
                 args.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
         e.install(args.target, namespace=args.namespace, username=args.username, password=args.password)
     elif command == "update":
-        if args.username:
+        if args.username or args.auth:
+            if not args.username:
+                args.username = lib.prompt("Please enter the username for the sprinter url...", secret=True)
             if not args.password:
                 args.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
         e.update(args.target, username=args.username, password=args.password)
