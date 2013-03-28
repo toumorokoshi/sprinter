@@ -56,6 +56,8 @@ class Injections(object):
         exist.
         """
         install_filename = os.path.expanduser(install_filename)
+        if not os.path.exists(os.path.dirname(install_filename)):
+            os.makedirs(os.path.dirname(install_filename))
         if not os.path.exists(install_filename):
             open(install_filename, "w+").close()
         install_file = open(install_filename, "r+")
