@@ -15,19 +15,47 @@ class PackageRecipe(RecipeStandard):
 
     def __init__(self, environment):
         super(PackageRecipe, self).__init__(environment)
-        self.package_manager = self.__get_package_manager()
+        self.package_manager, self.manager_installed = self.__get_package_manager()
+
 
     def setup(self, feature_name, config):
         if self.package_manager in config:
+            if not self.manager_installed:
+                if self.package_manager == "brew":
+                    if not self.__install_brew():
+                        self.logger.info("Unable to install package! skipping...")
+                        return
             package = config[self.package_manager]
             self.logger.info("Installing %s..." % package)
             lib.call("sudo %s install %s" % (self.package_manager, package))
         super(PackageRecipe, self).setup(feature_name, config)
 
     def __get_package_manager(self):
+        """
+        Installs and verifies package manager
+        """
+        package = ""
         if self.system.isOSX():
-            return "brew"
+            package = "brew"
         elif self.system.isDebianBased():
-            return "apt-get"
+            package = "apt-get"
         elif self.system.isFedoraBased():
-            return "yum"
+            package = "yum"
+        installed =  lib.which(package) is not None
+        if not installed:
+            self.logger.error("package manager %s is not installed!" % package)
+        return package, installed
+
+    def __install_brew():
+        """
+        install brew if possible
+        """
+        if lib.which(package) is None:
+            if not os.path.exists('/usr/bin/xcodebuild'):
+                self.logger.error("Unable to install brew! Please install xcode command line tools:")
+                self.logger.error("https://developer.apple.com/xcode/")
+                return False
+            else:
+                self.logger.info("Installing brew....")
+                lib.call('ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"')
+        return True
