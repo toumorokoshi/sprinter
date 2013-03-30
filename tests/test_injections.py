@@ -61,4 +61,4 @@ class TestInjections(unittest.TestCase):
         """ Test the override functionality """
         i = Injections("testinjection", override="OVERRIDE")
         c = i.inject_content(TEST_CONTENT, "injectme")
-        self.assertMultiLineEqual(c, TEST_OVERRIDE_CONTENT, "Override result is different from expected.")
+        self.assertEqual(c, TEST_OVERRIDE_CONTENT, "Override result is different from expected.")
