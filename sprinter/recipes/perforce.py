@@ -109,8 +109,10 @@ class PerforceRecipe(RecipeStandard):
         p4settings_path = os.path.join(root_dir, ".p4settings")
         out_content = p4settings_template % config
         if os.path.exists(p4settings_path) and out_content != open(p4settings_path, "r+").read():
-            overwrite = lib.prompt("p4settings already exists at %s. Overwrite?" % root_dir, default="no")
-            if overwrite.lower().startswith('y'):
+            overwrite = lib.prompt("p4settings already exists at %s. Overwrite?" % root_dir,
+                                   default="no",
+                                   boolean=True)
+            if overwrite:
                 self.logger.info("Overwriting existing p4settings...")
                 os.remove(p4settings_path)
             else:
@@ -121,27 +123,33 @@ class PerforceRecipe(RecipeStandard):
 
     def __configure_client(self, config):
         """ write the perforce client """
-        self.logger.info("Configuring p4 client...")
-        os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
-        config['root_path'] = os.path.expanduser(config['root_path'])
-        config['hostname'] = self.system.node
-        config['p4view'] = config['p4view'] % self.environment.context()
-        client = re.sub('//depot', '    //depot', p4client_template % config)
-        cwd = os.path.expanduser(config['root_path'] % self.environment.context())
-        self.logger.info(lib.call("%s client -i" % self.p4_command, 
-                                  stdin=client, 
-                                  env=self.p4environ,
-                                  cwd=cwd))
+        overwrite = lib.prompt("Would you like to overwrite the client workspace in perforce?",
+                               default="yes",
+                               boolean=True)
+        if overwrite:
+            self.logger.info("Configuring p4 client...")
+            os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
+            config['root_path'] = os.path.expanduser(config['root_path'])
+            config['hostname'] = self.system.node
+            config['p4view'] = config['p4view'] % self.environment.context()
+            client = re.sub('//depot', '    //depot', p4client_template % config)
+            cwd = os.path.expanduser(config['root_path'] % self.environment.context())
+            self.logger.info(lib.call("%s client -i" % self.p4_command,
+                                      stdin=client,
+                                      env=self.p4environ,
+                                      cwd=cwd))
 
     def __sync_perforce(self, config):
         """ prompt and sync perforce """
-        sync = lib.prompt("would you like to sync your perforce root?", default="yes")
-        if sync.lower().startswith('y'):
+        sync = lib.prompt("would you like to sync your perforce root?",
+                          default="yes",
+                          boolean=True)
+        if sync:
             self.logger.info("Syncing perforce root... (this can take a while).")
             cwd = os.path.expanduser(config['root_path'] % self.environment.context())
-            self.logger.info(lib.call("%s sync" % self.p4_command, 
-                             env=self.p4environ, 
-                             cwd=cwd))
+            self.logger.info(lib.call("%s sync" % self.p4_command,
+                                      env=self.p4environ,
+                                      cwd=cwd))
 
     def __add_p4_env(self, config):
         self.directory.add_to_rc('export P4PORT=%s' % config['port'])

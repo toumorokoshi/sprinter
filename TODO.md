@@ -8,7 +8,6 @@ General:
 
 Perforce Recipe:
 
-* Prompt for client modification for perforce recipe
 * perforce skipping needs to better
 
 SSH Recipe:

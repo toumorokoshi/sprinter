@@ -10,6 +10,11 @@ import re
 
 test_injection = """a0.9i0a9deienatd"""
 
+sprinter_override_string = "#_SPRINTER_OVERRIDES"
+sprinter_override_match = wrapper_match = re.compile("%s.*%s" % (sprinter_override_string,
+                                                                 sprinter_override_string
+                                                                ), re.DOTALL)
+
 
 class Injections(object):
     """
@@ -63,10 +68,17 @@ class Injections(object):
         install_file = open(install_filename, "r+")
         wrapper_match = re.compile("\n%s.*%s" % (wrapper, wrapper), re.DOTALL)
         content = wrapper_match.sub("", install_file.read())
+        sprinter_overrides = sprinter_override_match.search(content)
+        if sprinter_overrides:
+            content = sprinter_overrides.sub("", content)
+            sprinter_overrides = sprinter_overrides.groups()[0]
+        else:
+            sprinter_overrides = ""
         content += """
 %s
 %s
-%s""" % (wrapper, inject_string, wrapper)
+%s
+%s""" % (wrapper, inject_string, wrapper, sprinter_overrides)
         install_file.close()
         install_file = open(install_filename, "w+")
         install_file.write(content)

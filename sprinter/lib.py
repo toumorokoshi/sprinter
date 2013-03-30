@@ -109,16 +109,22 @@ def authenticated_get(username, password, url):
     return result.read()
 
 
-def prompt(prompt_string, default=None, secret=False):
+def prompt(prompt_string, default=None, secret=False, boolean=False):
     """
     Prompt user for a string, with a default value
+
+    * secret converts to password prompt
+    * boolean converts return value to boolean, checking for starting with a Y
     """
     prompt_string += (" (default %s): " % default if default else ": ")
     if secret:
         val = getpass(prompt_string)
     else:
         val = raw_input(prompt_string)
-    return (val if val else default)
+    val = (val if val else default)
+    if boolean:
+        val = val.lower().startswith('y')
+    return val
 
 
 def __recursive_import(module_name):

@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import unittest
 
-from sprinter.injections import Injections
+from sprinter.injections import Injections, sprinter_override_match
 
 
 class TestInjections(unittest.TestCase):
