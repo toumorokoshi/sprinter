@@ -148,11 +148,13 @@ def __recursive_import(module_name):
         module = imp.load_module(name, module_file, pathname, description)
     return module
 
+
 # From:
 # http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
 def is_exe(fpath):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-    
+
+
 def which(program):
     fpath, fname = os.path.split(program)
     if fpath:

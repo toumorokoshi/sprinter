@@ -1,5 +1,16 @@
 Highest to Lowest Priority
 
+modules that still need testing:
+
+* directory
+* environment
+* install
+* lib? (double check)
+* recipestandard
+* manifest? (double check)
+* system? (maybe, don't know how to test this)
+* recipes (no idea how to test these)
+
 General:
 
 * #_SPRINTER_OVERRIDES section that ensures that sprinter is injected before this
@@ -27,7 +38,6 @@ Low Priority:
 
 * Add validator
 * catch incomplete format errors
-* refactor manifest. very messy right now.
 * add ability to source recipes dynamically
 * add switch
 * add reconfigure command to re-choose values
