@@ -1,5 +1,6 @@
 sprinter
 ========
+[![Build Status](https://travis-ci.org/toumorokoshi/sprinter.png)](https://travis-ci.org/toumorokoshi/sprinter)
 
 A cross-platform environment bootstrapping framework!
 
