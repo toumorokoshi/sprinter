@@ -15,7 +15,7 @@ class PackageRecipe(RecipeStandard):
 
     def __init__(self, environment):
         super(PackageRecipe, self).__init__(environment)
-        self.package_manager, self.manager_installed = self.__get_package_manager()
+        self.package_manager, self.manager_installed, self.sudo_required = self.__get_package_manager()
 
 
     def setup(self, feature_name, config):
@@ -27,7 +27,10 @@ class PackageRecipe(RecipeStandard):
                         return
             package = config[self.package_manager]
             self.logger.info("Installing %s..." % package)
-            lib.call("sudo %s install %s" % (self.package_manager, package))
+            call_command = "%s install %s" % (self.package_manager, package)
+            if self.sudo_required:
+                call_command = "sudo " + call_command
+            self.logger.info(lib.call(call_command))
         super(PackageRecipe, self).setup(feature_name, config)
 
     def __get_package_manager(self):
@@ -35,8 +38,10 @@ class PackageRecipe(RecipeStandard):
         Installs and verifies package manager
         """
         package = ""
+        sudo_required = True
         if self.system.isOSX():
             package = "brew"
+            sudo_required = False
         elif self.system.isDebianBased():
             package = "apt-get"
         elif self.system.isFedoraBased():
@@ -44,7 +49,7 @@ class PackageRecipe(RecipeStandard):
         installed =  lib.which(package) is not None
         if not installed:
             self.logger.error("package manager %s is not installed!" % package)
-        return package, installed
+        return package, installed, sudo_required
 
     def __install_brew():
         """

@@ -13,13 +13,12 @@ Perforce Recipe:
 
 SSH Recipe:
 
-* ssh recipe doesn't make .ssh directory
+* ssh recipe doesn't make .ssh directory (can't repro)
 
 Package Recipe:
 
 * brew functionality (check if brew is functional, error if not)
 
-    * /usr/bin/xcodebuild
     * on update, if a package isn't installed, install it again
 
     
