@@ -1,19 +1,15 @@
 """
 Injections.py handles injections into various configuration files
-throughout files on the file system. These operations are batched and
-applied together.
+throughout files on the file system.
+
+These operations are batched and applied together with the commit
+command, or applied separately with the destructive_inject and
+destructive_clear..
 """
 
 import logging
 import os
 import re
-
-test_injection = """a0.9i0a9deienatd"""
-
-sprinter_override_string = "#_SPRINTER_OVERRIDES"
-sprinter_override_match = wrapper_match = re.compile("%s.*%s" % (sprinter_override_string,
-                                                                 sprinter_override_string
-                                                                ), re.DOTALL)
 
 
 class Injections(object):
@@ -28,9 +24,14 @@ class Injections(object):
     inject_dict = {}  # dictionary holding the injection object
     clear_dict = set()  # list holding the filenames to clear injection from
 
-    def __init__(self, wrapper, logger='sprinter'):
+    def __init__(self, wrapper, override=None, logger='sprinter'):
+        if override:
+            self.override_match = re.compile("(\n?#%s.*#%s)" % (override, override), re.DOTALL)
+        else:
+            self.override_match = None
+        self.wrapper = "#%s" % wrapper
+        self.wrapper_match = re.compile("\n?#%s.*#%s" % (wrapper, wrapper), re.DOTALL)
         self.logger = logging.getLogger(logger)
-        self.wrapper = wrapper
 
     def inject(self, filename, content):
         """ add the injection content to the dictionary """
@@ -45,59 +46,70 @@ class Injections(object):
 
     def commit(self):
         """ commit the injections desired, overwriting any previous injections in the file. """
-        wrapper = "#%s" % self.wrapper
         for filename, content in self.inject_dict.items():
             self.logger.info("Injecting values into %s..." % filename)
-            self.__inject(filename, wrapper, content)
+            self.destructive_inject(filename, content)
         for filename in self.clear_dict:
             self.logger.info("Clearing injection from %s..." % filename)
-            self.__clear(filename, wrapper)
+            self.__generate_file(filename)
+            self.destructive_clear(filename)
 
-    def __inject(self, install_filename, wrapper, inject_string):
+    def destructive_inject(self, filename, content):
         """
-        Inject inject_string into a file, wrapped with
-        #SPRINTER_{{NAMESPACE}} comments if condition lambda is not
+        Injects the injections desired immediately. This should
+        generally be run only during the commit phase, when no future
+        injections will be done.
+        """
+        full_path = self.__generate_file(filename)
+        with open(full_path, 'r') as f:
+            new_content = self.inject_content(f.read(), content)
+        with open(full_path, 'w+') as f:
+            f.write(new_content)
+
+    def destructive_clear(self, filename):
+        full_path = self.__generate_file(filename)
+        with open(full_path, 'r') as f:
+            new_content = self.clear_content(f.read())
+        with open(full_path, 'w+') as f:
+            f.write(new_content)
+
+    def __generate_file(self, file_path):
+        """
+        Generate the file at the file_path desired. Creates any needed
+        directories on the way. returns the absolute path of the file.
+        """
+        file_path = os.path.expanduser(file_path)
+        if not os.path.exists(os.path.dirname(file_path)):
+            os.makedirs(os.path.dirname(file_path))
+        if not os.path.exists(file_path):
+            open(file_path, "w+").close()
+        return file_path
+
+    def inject_content(self, content, inject_string):
+        """
+        Inject inject_string into a text buffer, wrapped with
+        #{{ wrapper }} comments if condition lambda is not
         satisfied or is None. Remove old instances of injects if they
         exist.
         """
-        install_filename = os.path.expanduser(install_filename)
-        if not os.path.exists(os.path.dirname(install_filename)):
-            os.makedirs(os.path.dirname(install_filename))
-        if not os.path.exists(install_filename):
-            open(install_filename, "w+").close()
-        install_file = open(install_filename, "r+")
-        wrapper_match = re.compile("\n%s.*%s" % (wrapper, wrapper), re.DOTALL)
-        content = wrapper_match.sub("", install_file.read())
-        sprinter_overrides = sprinter_override_match.search(content)
-        if sprinter_overrides:
-            content = sprinter_overrides.sub("", content)
-            sprinter_overrides = sprinter_overrides.groups()[0]
-        else:
-            sprinter_overrides = ""
+        content = self.wrapper_match.sub("", content)
+        if self.override_match:
+            sprinter_overrides = self.override_match.search(content)
+            if sprinter_overrides:
+                content = self.override_match.sub("", content)
+                sprinter_overrides = sprinter_overrides.groups()[0]
+            else:
+                sprinter_overrides = ""
         content += """
 %s
 %s
-%s
-%s""" % (wrapper, inject_string, wrapper, sprinter_overrides)
-        install_file.close()
-        install_file = open(install_filename, "w+")
-        install_file.write(content)
-        install_file.close()
+%s""" % (self.wrapper, inject_string, self.wrapper)
+        if self.override_match:
+            content += "\n" + sprinter_overrides
+        return content
 
-    def __clear(self, install_filename, wrapper):
+    def clear_content(self, content):
         """
-        Inject inject_string into a file, wrapped with
-        #SPRINTER_{{NAMESPACE}} comments if condition lambda is not
-        satisfied or is None. Remove old instances of injects if they
-        exist.
+        Clear the injected content from the content buffer, and return the results
         """
-        install_filename = os.path.expanduser(install_filename)
-        if not os.path.exists(install_filename):
-            open(install_filename, "w+").close()
-        install_file = open(install_filename, "r+")
-        wrapper_match = re.compile("\n%s.*%s" % (wrapper, wrapper), re.DOTALL)
-        content = wrapper_match.sub("", install_file.read())
-        install_file.close()
-        install_file = open(install_filename, "w+")
-        install_file.write(content)
-        install_file.close()
+        return self.wrapper_match.sub("", content)

@@ -220,7 +220,7 @@ class Config(object):
         updated.
 
         >>> c.updates()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}}
+        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}}
 
         >>> config_old_only.updates()
         Traceback (most recent call last):
