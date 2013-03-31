@@ -35,9 +35,13 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
-def main():
+def main(args):
     signal.signal(signal.SIGINT, signal_handler)
-    args = parser.parse_args()
+    parse_args(args)
+
+
+def parse_args(args):
+    args = parser.parse_args(args)
     command = args.command.lower()
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     e = Environment(logging_level=logging_level)
@@ -69,8 +73,4 @@ def main():
             print "%s" % env
 
 if __name__ == '__main__':
-    if len(sys.argv) > 0 and sys.argv[1] == 'doctest':
-        import doctest
-        doctest.testmod()
-    else:
-        main()
+    main(sys.argv)
