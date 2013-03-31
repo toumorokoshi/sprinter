@@ -40,7 +40,7 @@ def main(args):
     parse_args(args)
 
 
-def parse_args(args):
+def parse_args(args, Environment=Environment):
     args = parser.parse_args(args)
     command = args.command.lower()
     logging_level = logging.DEBUG if args.verbose else logging.INFO
