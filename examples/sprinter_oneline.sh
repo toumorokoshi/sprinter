@@ -13,7 +13,11 @@ recipe = zc.recipe.egg
 eggs = sprinter
 " > buildout.cfg
 # install buildout sandboxed
-wget http://downloads.buildout.org/2/bootstrap.py
+if [[ `uname` == 'Linux' ]]; then 
+    wget http://downloads.buildout.org/2/bootstrap.py
+elif [[ `uname` == 'Darwin' ]]; then
+    curl http://downloads.buildout.org/2/bootstrap.py
+fi
 python bootstrap.py
 bin/buildout
 
