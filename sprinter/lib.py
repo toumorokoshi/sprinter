@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import urllib2
+from StringIO import StringIO
 from base64 import b64encode
 
 from getpass import getpass
@@ -35,14 +36,14 @@ def get_recipe_class(recipe, environment):
         raise e
 
 
-def call(command, stdin=None, env=None, cwd=None, bash=False):
+def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
     if not bash:
         args = __whitespace_smart_split(command)
         p = subprocess.Popen(args, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
         return p.communicate(input=stdin)[0]
     else:
         command = " ".join([__process(arg) for arg in __whitespace_smart_split(command)])
-        subprocess.call(command, shell=True, executable='/bin/bash')
+        subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
 
 
 def __process(arg):
@@ -53,7 +54,20 @@ def __process(arg):
     if arg[0] in ["'", '"', '-']:
         return arg
     else:
-        return re.escape(arg)
+        return __escape(arg)
+
+
+def __escape(s):
+    """
+    Custom escape module for bash
+    """
+    buf = StringIO()
+    for c in s:
+        if c in ['(', ')', ':']:
+            buf.write("\\" + c)
+        else:
+            buf.write(c)
+    return buf.getvalue()
 
 
 def __whitespace_smart_split(command):

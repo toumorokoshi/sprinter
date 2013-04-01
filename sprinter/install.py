@@ -36,9 +36,9 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
-def main(args):
+def main():
     signal.signal(signal.SIGINT, signal_handler)
-    parse_args(args)
+    parse_args(sys.argv[1:])
 
 
 def parse_args(argv, Environment=Environment):
@@ -78,4 +78,4 @@ def parse_args(argv, Environment=Environment):
             print "%s" % env
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
