@@ -22,11 +22,11 @@ class UnpackRecipe(RecipeStandard):
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
         super(UnpackRecipe, self).setup(feature_name, config)
 
-    def update(self, feature_name, old_config):
+    def update(self, feature_name, config):
         super(UnpackRecipe, self).update(feature_name, config)
         pass
 
-    def destroy(self, eature_name, old_config):
+    def destroy(self, feature_name, config):
         super(UnpackRecipe, self).destroy(feature_name, config)
         pass
 
