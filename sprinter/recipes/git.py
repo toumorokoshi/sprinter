@@ -26,7 +26,7 @@ class GitRecipe(RecipeStandard):
                                   branch=branch)
         else:
             os.chdir(self.directory.install_directory(feature_name))
-            self.logger.info(call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master')))
+            self.logger.info(call("git pull origin %s" % (config['target']['branch'] if 'branch' in config['target'] else 'master')))
         super(GitRecipe, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
