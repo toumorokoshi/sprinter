@@ -93,7 +93,7 @@ class PerforceRecipe(RecipeStandard):
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """
         exec_dir = exec_dict[config['version']]['mac'] if self.system.isOSX() else \
-            exec_dict[confikg['version']]['linux']
+            exec_dict[config['version']]['linux']
         url = url_template % (config['version'], exec_dir)
         d = self.directory.install_directory(feature_name)
         if not os.path.exists(d):
