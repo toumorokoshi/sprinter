@@ -26,7 +26,7 @@ class GitRecipe(RecipeStandard):
                                   branch=branch)
         else:
             os.chdir(self.directory.install_directory(feature_name))
-            call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
+            self.logger.info(call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master')))
         super(GitRecipe, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
@@ -36,7 +36,7 @@ class GitRecipe(RecipeStandard):
     def reload(self, feature_name, config):
         super(GitRecipe, self).reload(feature_name, config)
         os.chdir(self.directory.install_directory(feature_name))
-        call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
+        self.logger.info(call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master')))
 
     def __clone_repo(self, repo_url, target_directory, branch=None):
         self.logger.info(call("git clone %s %s" % (repo_url, target_directory)))

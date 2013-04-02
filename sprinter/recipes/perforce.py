@@ -93,10 +93,11 @@ class PerforceRecipe(RecipeStandard):
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """
         exec_dir = exec_dict[config['version']]['mac'] if self.system.isOSX() else \
-            exec_dict[config['version']]['linux']
+            exec_dict[confikg['version']]['linux']
         url = url_template % (config['version'], exec_dir)
         d = self.directory.install_directory(feature_name)
-        os.makedirs(d)
+        if not os.path.exists(d):
+            os.makedirs(d)
         self.logger.info("Downloading p4 executable...")
         urllib.urlretrieve(url, os.path.join(d, "p4"))
         self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
