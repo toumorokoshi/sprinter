@@ -16,6 +16,7 @@ import urllib
 from StringIO import StringIO
 
 from sprinter import lib
+from sprinter.dependencytree import DependencyTree, DependencyTreeException
 
 test_old_version = """
 [config]
@@ -81,6 +82,8 @@ class Manifest(object):
     global config object in the target, or assumed from
     the string representation of the target object
     """
+    dtree = None  # dependency tree object to ascertain order
+    invalidations = []   # a list of the invalidation of the Manifest. Aggregated while parsing
 
     def __init__(self, raw_manifest, namespace=None, logger='sprinter',
                  username=None, password=None):
@@ -89,6 +92,7 @@ class Manifest(object):
                                              username=username,
                                              password=password)
         self.namespace = namespace if namespace else self.__parse_namespace()
+        self.dtree = self.__generate_dependency_tree()
 
     def source(self):
         """
@@ -130,11 +134,34 @@ class Manifest(object):
             self.logger.error('Could not parse namespace implicitely!')
             return None
 
+    def __generate_dependency_tree(self):
+        """
+        Generate the dependency tree object
+        """
+        dependency_dict = {}
+        for s in self.manifest.sections():
+            if s != "config":
+                if self.manifest.has_option(s, 'depends'):
+                    dependency_list = [d.strip() for d in self.manifest.get(s, 'depends').split("\n,")]
+                    dependency_dict[s] = dependency_list
+                else:
+                    dependency_dict[s] = []
+        try: 
+            return DependencyTree(dependency_dict)
+        except DependencyTreeException as dte:
+            self.logger.error("Dependency tree for manifest is invalid! %s" % str(dte))
+            self.invalidations.append("Issue with building dependency tree: %s" % str(dte))
+            return None
+
+
     def recipe_sections(self):
         """
-        Return all sections related to a recipe.
+        Return all sections related to a recipe, re-ordered according to the "depends" section.
         """
-        return [s for s in self.manifest.sections() if s != "config"]
+        if self.dtree != None:
+            return self.dtree.order
+        else:
+            return [s for s in self.manifest.sections() if s != "config"]
 
     def valid(self):
         """
