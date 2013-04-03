@@ -233,7 +233,7 @@ class Config(object):
         """
         Return a dictionary with all the features that need to be setup.
         >>> c.setups()
-        {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
+        [('myrc', {'target': {'recipe': 'sprinter.recipes.template'}})]
         """
         new_sections = []
         for s in self.target.recipe_sections():
@@ -247,7 +247,7 @@ class Config(object):
         updated.
 
         >>> c.updates()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}}
+        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}})]
 
         >>> config_old_only.updates()
         Traceback (most recent call last):
@@ -270,7 +270,7 @@ class Config(object):
         Return a dictionary with all the features that need to be
         destroyed.
         >>> c.destroys()
-        {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
+        [('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
         """
         missing_sections = [] 
         for s in self.source.recipe_sections():
@@ -282,8 +282,8 @@ class Config(object):
         """
         Return a dictionary of activation recipes.
 
-        >>> c.activations()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
+        >>> c.deactivations()
+        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
         """
         deactivation_sections = []
         for s in self.source.recipe_sections():
@@ -295,9 +295,9 @@ class Config(object):
         Return a dictionary of activation recipes.
 
         >>> c.activations()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
+        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
         """
-        activation_sections = {}
+        activation_sections = [] 
         for s in self.source.recipe_sections():
             activation_sections.append((s, {"source": dict(self.source.items(s))}))
         return activation_sections
@@ -306,9 +306,9 @@ class Config(object):
         """
         return reload dictionaries
         >>> c.reloads()
-        {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
+        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
         """
-        reload_sections = {}
+        reload_sections = []
         for s in self.source.recipe_sections():
                 reload_sections.append((s, {"source": dict(self.source.items(s))}))
         return reload_sections

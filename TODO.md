@@ -14,12 +14,13 @@ modules that still need testing:
 General:
 
 * add way to ask for prompts
-* cleanly closes bad installs
+* cleanly close bad installs
 * rename 'recipes' to 'formula'
 
 Perforce Recipe:
 
 * perforce skipping needs to better
+* perforce should install p4v
 * perforce should prompt for writing password to p4settings (if desired)
 
 SSH Recipe:
