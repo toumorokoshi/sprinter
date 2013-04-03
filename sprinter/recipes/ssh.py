@@ -23,6 +23,8 @@ Host %(keyname)s
   User %(user)s
 """
 
+ssh_file_path = os.path.expanduser('~/.ssh/config')
+
 
 class SSHRecipe(RecipeStandard):
 
@@ -37,6 +39,12 @@ class SSHRecipe(RecipeStandard):
         self.__install_ssh_config(config['target'], ssh_path)
         if 'command' in config['target']:
             self.__call_command(config['target']['command'], ssh_path)
+
+    def deactivate(self, feature_name, config):
+        self.__install_ssh_config(config, ssh_path)
+
+    def activate(self, feature_name, config):
+        self.__install_ssh_config(config, ssh_path)
 
     def destroy(self, feature_name, config):
         super(SSHRecipe, self).destroy(feature_name, config)
@@ -60,7 +68,17 @@ class SSHRecipe(RecipeStandard):
         """        
         config['ssh_path'] = ssh_path
         ssh_config_injection = ssh_config_template % config
-        self.injections.inject(os.path.expanduser("~/.ssh/config"), ssh_config_injection)
+        if os.path.exists(ssh_file_path):
+            ssh_contents =  open(ssh_file_path, "r+").read()
+            if ssh_contents.find(config['host']) != -1 and \
+              not self.injections.injected(ssh_file_path):
+                self.logger.info("SSH config for %s already exists! Override?")
+                self.logger.info("Your existing config will not be overwritten, simply inactive.")
+                overwrite = lib.prompt("Override?", boolean=True, default="no")
+                if overwrite:
+                    self.injections.inject(ssh_file_path, ssh_config_injection)
+            else:
+                self.injections.inject(ssh_file_path, ssh_config_injection)
         self.injections.commit()
 
     def __call_command(self, command, ssh_path):

@@ -54,6 +54,16 @@ class Injections(object):
             self.__generate_file(filename)
             self.destructive_clear(filename)
 
+    def injected(self, filename):
+        """ Return true if the file has already been injected before. """
+        full_path = os.path.expanduser(filename)
+        if not os.path.exists(full_path):
+            return False
+        with open(full_path, 'r+') as fh:
+            contents = fh.read()
+        return self.wrapper_match.search(contents) is not None
+
+
     def destructive_inject(self, filename, content):
         """
         Injects the injections desired immediately. This should

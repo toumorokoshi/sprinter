@@ -62,3 +62,12 @@ class TestInjections(unittest.TestCase):
         i = Injections("testinjection", override="OVERRIDE")
         c = i.inject_content(TEST_CONTENT, "injectme")
         self.assertEqual(c, TEST_OVERRIDE_CONTENT, "Override result is different from expected.")
+
+    def test_injected(self):
+        """ Test the injected method to determine if a file has already been injected..."""
+        i = Injections("testinjection")
+        self.assertFalse(i.injected(self.temp_file_path), "Injected check returned true when not injected yet.")
+        test_injection = "this should stay temporarily"
+        i.inject(self.temp_file_path, test_injection)
+        i.commit()
+        self.assertTrue(i.injected(self.temp_file_path), "Injected check returned false")
