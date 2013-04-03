@@ -13,13 +13,14 @@ modules that still need testing:
 
 General:
 
-* #_SPRINTER_OVERRIDES section that ensures that sprinter is injected before this
 * add way to ask for prompts
 * cleanly closes bad installs
+* rename 'recipes' to 'formula'
 
 Perforce Recipe:
 
 * perforce skipping needs to better
+* perforce should prompt for writing password to p4settings (if desired)
 
 SSH Recipe:
 
