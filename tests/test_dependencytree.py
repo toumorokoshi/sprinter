@@ -48,11 +48,15 @@ class TestInjections(unittest.TestCase):
             added_elements.append(el)
 
     def test_missing_entry_tree(self):
-        with self.assertRaises(DependencyTreeException):
+        try: 
              DependencyTree(MISSING_ENTRY_TREE)
-                               #"Missing entry tree did not raise an error!"):
+        except DependencyTreeException:
+            return
+        raise("Missing entry tree did not raise an error!")
 
     def test_cyclic_tree(self):
-        with self.assertRaises(DependencyTreeException):
-             DependencyTree(CYCLIC_TREE),
-
+        try: 
+             DependencyTree(CYCLIC_TREE)
+        except DependencyTreeException:
+            return
+        raise("Cyclic tree did not raise an error!")
