@@ -46,43 +46,42 @@ def parse_args(argv, Environment=Environment):
     command = args[0].lower()
     target = args[1] if len(args) > 1 else None        
     logging_level = logging.DEBUG if options.verbose else logging.INFO
-    e = Environment(logging_level=logging_level)
-    if command == "install":
+    env = Environment(logging_level=logging_level)
+
+    if command in ('remove', 'deactivate', 'activate', 'reload'):
+        getattr(env, command)(target)
+
+    elif command == "install":
         if options.username or options.auth:
             if not options.username:
                 options.username = lib.prompt("Please enter the username for the sprinter url...")
             if not options.password:
                 options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
-        e.install(target,
+        env.install(target,
                   namespace=options.namespace,
                   username=options.username,
                   password=options.password)
+
     elif command == "update":
         if options.username or options.auth:
             if not options.username:
                 options.username = lib.prompt("Please enter the username for the sprinter url...")
             if not options.password:
                 options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
-        e.update(target, username=options.username, password=options.password)
-    elif command == "remove":
-        e.remove(target)
-    elif command == "deactivate":
-        e.deactivate(target)
-    elif command == "activate":
-        e.activate(target)
-    elif command == "reload":
-        e.reload(target)
+        env.update(target, username=options.username, password=options.password)
+
     elif command == "environments":
         SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
         for env in os.listdir(SPRINTER_ROOT):
             print "%s" % env
+
     elif command == "validate":
         if options.username or options.auth:
             if not options.username:
                 options.username = lib.prompt("Please enter the username for the sprinter url...")
             if not options.password:
                 options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
-        errors = e.validate_manifest(target, username=options.username, password=options.password)
+        errors = env.validate_manifest(target, username=options.username, password=options.password)
         if len(errors) > 0:
             print "Manifest is invalid!"
             print "\n".join(errors)
