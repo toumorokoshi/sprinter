@@ -218,42 +218,42 @@ class Environment(object):
         self.finalize()
 
     def _run_setups(self):
-        for name, config in self.config.setups().items():
+        for name, config in self.config.setups():
             self.logger.info("Setting up %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
             specialized_config = self.__substitute_objects(config['target'])
             recipe_instance.setup(name, specialized_config)
 
     def _run_updates(self):
-        for name, config in self.config.updates().items():
+        for name, config in self.config.updates():
             self.logger.info("Updating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
             specialized_config = self.__substitute_objects(config)
             recipe_instance.update(name, specialized_config)
 
     def _run_destroys(self):
-        for name, config in self.config.destroys().items():
+        for name, config in self.config.destroys():
             self.logger.info("Removing %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             #specialized_config = self.__substitute_objects(config['source'])
             recipe_instance.destroy(name, config['source'])
 
     def _run_activates(self):
-        for name, config in self.config.activations().items():
+        for name, config in self.config.activations():
             self.logger.info("Activating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             #specialized_config = self.__substitute_objects(config['source'])
             recipe_instance.activate(name, config['source'])
 
     def _run_deactivates(self):
-        for name, config in self.config.deactivations().items():
+        for name, config in self.config.deactivations():
             self.logger.info("Deactivating %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             #specialized_config = self.__substitute_objects(config['source'])
             recipe_instance.deactivate(name, config['source'])
 
     def _run_reloads(self):
-        for name, config in self.config.reloads().items():
+        for name, config in self.config.reloads():
             self.logger.info("Reloading %s..." % name)
             recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
             specialized_config = self.__substitute_objects(config['source'])

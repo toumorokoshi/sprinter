@@ -235,10 +235,10 @@ class Config(object):
         >>> c.setups()
         {'myrc': {'target': {'recipe': 'sprinter.recipes.template'}}}
         """
-        new_sections = {}
+        new_sections = []
         for s in self.target.recipe_sections():
             if not self.source or not self.source.has_section(s):
-                new_sections[s] = {"target": dict(self.target.items(s))}
+                new_sections.append((s, {"target": dict(self.target.items(s))}))
         return new_sections
 
     def updates(self):
@@ -256,13 +256,13 @@ class Config(object):
         """
         if not self.target:
             raise ManifestError("Update method requires a target manifest!")
-        different_sections = {}
+        different_sections = [] 
         for s in self.target.recipe_sections():
             if self.source.has_section(s):
                 target_dict = dict(self.target.items(s))
                 source_dict = dict(self.source.items(s))
-                different_sections[s] = {"source": source_dict,
-                                         "target": target_dict}
+                different_sections.append((s, {"source": source_dict,
+                                               "target": target_dict}))
         return different_sections
 
     def destroys(self):
@@ -272,10 +272,10 @@ class Config(object):
         >>> c.destroys()
         {'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
-        missing_sections = {}
+        missing_sections = [] 
         for s in self.source.recipe_sections():
             if not self.target or not self.target.has_section(s):
-                missing_sections[s] = {"source": dict(self.source.items(s))}
+                missing_sections.append((s, {"source": dict(self.source.items(s))}))
         return missing_sections
 
     def deactivations(self):
@@ -285,9 +285,9 @@ class Config(object):
         >>> c.activations()
         {'maven': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}, 'ant': {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}, 'mysql': {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}}}
         """
-        deactivation_sections = {}
+        deactivation_sections = []
         for s in self.source.recipe_sections():
-            deactivation_sections[s] = {"source": dict(self.source.items(s))}
+            deactivation_sections.append((s, {"source": dict(self.source.items(s))}))
         return deactivation_sections
 
     def activations(self):
@@ -299,7 +299,7 @@ class Config(object):
         """
         activation_sections = {}
         for s in self.source.recipe_sections():
-            activation_sections[s] = {"source": dict(self.source.items(s))}
+            activation_sections.append((s, {"source": dict(self.source.items(s))}))
         return activation_sections
 
     def reloads(self):
@@ -310,7 +310,7 @@ class Config(object):
         """
         reload_sections = {}
         for s in self.source.recipe_sections():
-                reload_sections[s] = {"source": dict(self.source.items(s))}
+                reload_sections.append((s, {"source": dict(self.source.items(s))}))
         return reload_sections
 
     def write(self, file_handle):
