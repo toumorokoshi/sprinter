@@ -149,6 +149,11 @@ class Environment(object):
             if v not in self.manifest.config:
                 self.get_config(v, default=None, temporary=False)
 
+    def validate_manifest(self, manifest_path, username=None, password=None):
+        """ run a validation on a manifest, and return any errors"""
+        m = Manifest(manifest_path, username=username, password=password)
+        return m.invalidations
+
     def _install(self, target_manifest, directory=None):
         """
         Intall an environment from a target manifest Manifest

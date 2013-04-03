@@ -44,7 +44,7 @@ def main():
 def parse_args(argv, Environment=Environment):
     options, args = parser.parse_args(argv)
     command = args[0].lower()
-    target = args[1]
+    target = args[1] if len(args) > 1 else None        
     logging_level = logging.DEBUG if options.verbose else logging.INFO
     e = Environment(logging_level=logging_level)
     if command == "install":
@@ -76,6 +76,18 @@ def parse_args(argv, Environment=Environment):
         SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
         for env in os.listdir(SPRINTER_ROOT):
             print "%s" % env
+    elif command == "validate":
+        if options.username or options.auth:
+            if not options.username:
+                options.username = lib.prompt("Please enter the username for the sprinter url...")
+            if not options.password:
+                options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
+        errors = e.validate_manifest(target, username=options.username, password=options.password)
+        if len(errors) > 0:
+            print "Manifest is invalid!"
+            print "\n".join(errors)
+        else:
+            print "Manifest is valid!"
 
 if __name__ == '__main__':
     main()
