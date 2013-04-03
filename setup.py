@@ -6,7 +6,7 @@ except:
     from distutils.core import setup
 
 setup(name='sprinter',
-      version='0.3.6',
+      version='0.3.7',
       description='a utility library to help environment bootstrapping scripts',
       author='Yusuke Tsutsumi',
       author_email='yusuke@yusuketsutsumi.com',
