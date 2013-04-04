@@ -142,7 +142,7 @@ class Manifest(object):
         for s in self.manifest.sections():
             if s != "config":
                 if self.manifest.has_option(s, 'depends'):
-                    dependency_list = [d.strip() for d in self.manifest.get(s, 'depends').split("\n,")]
+                    dependency_list = [d.strip() for d in re.split('\n|,', self.manifest.get(s, 'depends'))]
                     dependency_dict[s] = dependency_list
                 else:
                     dependency_dict[s] = []
