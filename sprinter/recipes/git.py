@@ -20,18 +20,27 @@ class GitRecipe(RecipeStandard):
 
     def update(self, feature_name, config):
         target_directory = self.directory.install_directory(feature_name)
+        source_branch = (config['source']['branch'] if 'branch' in config['source'] 
+                         else "master")
+        target_branch = (config['target']['branch'] if 'branch' in config['target'] 
+                         else "master")
         if config['target']['url'] != config['source']['url'] or \
            not os.path.exists(target_directory):
             if os.path.exists(target_directory):
                 self.logger.debug("Old git repository Found. Deleting...")
                 shutil.rmtree(target_directory)
-            branch = (config['target']['branch'] if 'branch' in config['target'] else None)
-            self.__clone_repo(config['target']['url'], target_directory,
-                              branch=branch)
-        elif config['target']['branch'] != config['source']['branch']:
-            self.__checkout_branch(target_directory, config['target']['branch'])
+            self.__clone_repo(config['target']['url'],
+                              target_directory,
+                              branch=target_branch)
+        elif source_branch != target_branch:
+            self.__checkout_branch(target_directory, target_branch)
         else:
-            os.chdir(self.directory.install_directory(feature_name))
+            if not os.path.exists(target_directory):
+                self.logger.debug("No repository cloned. Re-cloning...")
+                self.__clone_repo(config['target']['url'],
+                                  target_directory,
+                                  branch=target_branch)
+            os.chdir(target_directory)
             self.logger.info(call("git pull origin %s" % (config['target']['branch'] if 'branch' in config['target'] else 'master')))
         super(GitRecipe, self).update(feature_name, config)
 
@@ -51,7 +60,7 @@ class GitRecipe(RecipeStandard):
         self.logger.info(call("git checkout %s" % branch))
 
     def __clone_repo(self, repo_url, target_directory, branch=None):
-        self.logger.debug("Cloning repository %s into %s..." (repo_url, target_directory))
+        self.logger.debug("Cloning repository %s into %s..." % (repo_url, target_directory))
         self.logger.info(call("git clone %s %s" % (repo_url, target_directory)))
         if branch:
-            self.__checkout_branch(repo_url, target_directory, branch)
+            self.__checkout_branch(target_directory, branch)
