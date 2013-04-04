@@ -23,7 +23,7 @@ class TemplateRecipe(RecipeStandard):
         super(TemplateRecipe, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        self.__install_file(config['target']['source'], config['target']['target'], config)
+        self.__install_file(config['target']['source'], config['target']['target'], config['target'])
         super(TemplateRecipe, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
