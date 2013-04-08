@@ -33,12 +33,14 @@ Package Recipe:
 
     * on update, if a package isn't installed, install it again
 
-    
+DMG Installation utility:
+Create a formula to install the contents of a dmg somewhere, since it seems that a lot of os x utilities use this mechanism.
 
+* Looks like this would help:
+	* http://osxdaily.com/2011/12/17/mount-a-dmg-from-the-command-line-in-mac-os-x/
 
 Low Priority:
 
-* Add validator
 * catch incomplete format errors
 * add ability to source recipes dynamically
 * add switch
