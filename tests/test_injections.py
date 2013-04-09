@@ -32,10 +32,11 @@ class TestInjections(unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.permenant_string = "this should stay no matter what."
+        self.permanent_string = "this should stay no matter what."
+        self.test_injection = "this should stay temporarily"
         self.temp_file_path = os.path.join(self.temp_dir, "test")
         fh = open(self.temp_file_path, 'w+')
-        fh.write(self.permenant_string)
+        fh.write(self.permanent_string)
         fh.close()
 
     def tearDown(self):
@@ -44,18 +45,17 @@ class TestInjections(unittest.TestCase):
     def test_injection(self):
         """ Test a complete injection workflow """
         i = Injections("testinjection")
-        test_injection = "this should stay temporarily"
-        i.inject(self.temp_file_path, test_injection)
+        i.inject(self.temp_file_path, self.test_injection)
         i.commit()
         l = open(self.temp_file_path, 'r').read()
-        self.assertTrue(l.count(test_injection) > 0, "Injection was not injected properly!")
-        self.assertTrue(l.count(test_injection) == 1, "Multiple injections were found!")
-        self.assertTrue(l.find(self.permenant_string) != -1, "Permanent string was removed on inject!")
+        self.assertTrue(l.count(self.test_injection) > 0, "Injection was not injected properly!")
+        self.assertTrue(l.count(self.test_injection) == 1, "Multiple injections were found!")
+        self.assertTrue(l.find(self.permanent_string) != -1, "Permanent string was removed on inject!")
         i.clear(self.temp_file_path)
         i.commit()
         l = open(self.temp_file_path, 'r').read()
-        self.assertTrue(l.find(test_injection) == -1, "Injection was not cleared properly!")
-        self.assertTrue(l.find(self.permenant_string) != -1, "Permanent string was removed on clear!")
+        self.assertTrue(l.find(self.test_injection) == -1, "Injection was not cleared properly!")
+        self.assertTrue(l.find(self.permanent_string) != -1, "Permanent string was removed on clear!")
 
     def test_override(self):
         """ Test the override functionality """
@@ -67,7 +67,15 @@ class TestInjections(unittest.TestCase):
         """ Test the injected method to determine if a file has already been injected..."""
         i = Injections("testinjection")
         self.assertFalse(i.injected(self.temp_file_path), "Injected check returned true when not injected yet.")
-        test_injection = "this should stay temporarily"
-        i.inject(self.temp_file_path, test_injection)
+        i.inject(self.temp_file_path, self.test_injection)
         i.commit()
         self.assertTrue(i.injected(self.temp_file_path), "Injected check returned false")
+
+    def test_created(self):
+        """ Test the injection creates a file if it does not exist """
+        test_injections = "this should stay"
+        i = Injections("testinjection")
+        new_file = os.path.join(self.temp_dir, "testcreated")
+        i.inject(new_file, self.test_injection)
+        i.commit()
+        self.assertTrue(os.path.exists(new_file), "File was not generated on injection!")
