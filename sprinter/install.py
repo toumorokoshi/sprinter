@@ -55,9 +55,9 @@ def parse_args(argv, Environment=Environment):
     elif command == "install":
         if options.username or options.auth:
             if not options.username:
-                options.username = lib.prompt("Please enter the username for %s..." % parse_url(target))
+                options.username = lib.prompt("Please enter the username for %s..." % parse_domain(target))
             if not options.password:
-                options.password = lib.prompt("Please enter the password for %s..." % parse_urs(target), secret=True)
+                options.password = lib.prompt("Please enter the password for %s..." % parse_domain(target), secret=True)
         env.install(target,
                   namespace=options.namespace,
                   username=options.username,
