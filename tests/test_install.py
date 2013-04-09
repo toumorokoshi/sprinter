@@ -8,7 +8,7 @@ import shutil
 import os
 from mock import call, Mock, patch
 
-from sprinter.install import parse_args
+from sprinter.install import parse_args, parse_domain
 from . import TEST_MANIFEST
 
 class TestInstall(unittest.TestCase):
@@ -45,3 +45,12 @@ class TestInstall(unittest.TestCase):
                                 password=None)]
         parse_args(args, Environment=environment)
         environment.assert_has_calls(calls)
+
+    def test_parse_domain(self):
+        match_tuples = [
+            ("http://github.com/antehuantuehton", "http://github.com/"),
+            ("https://github.com", "https://github.com")
+        ]
+        for in_string, out_string in match_tuples:
+            self.assertEqual(parse_domain(in_string), out_string, 
+                             "%s did not result in %s! Resulted in %s instead." % (in_string, out_string, parse_domain(in_string)))

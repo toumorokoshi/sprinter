@@ -17,6 +17,8 @@ from subprocess import PIPE, STDOUT
 
 from sprinter.recipebase import RecipeBase
 
+DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
+
 
 def get_recipe_class(recipe, environment):
     """

@@ -3,6 +3,7 @@ The install script for a sprinter-based setup script.
 """
 import logging
 import os
+import re
 import signal
 import sys
 from optparse import OptionParser
@@ -54,9 +55,9 @@ def parse_args(argv, Environment=Environment):
     elif command == "install":
         if options.username or options.auth:
             if not options.username:
-                options.username = lib.prompt("Please enter the username for the sprinter url...")
+                options.username = lib.prompt("Please enter the username for %s..." % parse_url(target))
             if not options.password:
-                options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
+                options.password = lib.prompt("Please enter the password for %s..." % parse_urs(target), secret=True)
         env.install(target,
                   namespace=options.namespace,
                   username=options.username,
@@ -65,9 +66,9 @@ def parse_args(argv, Environment=Environment):
     elif command == "update":
         if options.username or options.auth:
             if not options.username:
-                options.username = lib.prompt("Please enter the username for the sprinter url...")
+                options.username = lib.prompt("Please enter the username for %s..." % target)
             if not options.password:
-                options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
+                options.password = lib.prompt("Please enter the password for %s..." % target, secret=True)
         env.update(target, username=options.username, password=options.password)
 
     elif command == "environments":
@@ -87,6 +88,13 @@ def parse_args(argv, Environment=Environment):
             print "\n".join(errors)
         else:
             print "Manifest is valid!"
+
+
+def parse_domain(url):
+    """ parse the domain from the url """
+    domain_match = lib.DOMAIN_REGEX.match(url)
+    if domain_match:
+        return domain_match.group()
 
 if __name__ == '__main__':
     main()
