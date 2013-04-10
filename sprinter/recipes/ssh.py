@@ -84,6 +84,8 @@ class SSHRecipe(RecipeStandard):
                     self.injections.inject(ssh_config_path, ssh_config_injection)
             else:
                 self.injections.inject(ssh_config_path, ssh_config_injection)
+        else:
+            self.injections.inject(ssh_config_path, ssh_config_injection)
         self.injections.commit()
 
     def __call_command(self, command, ssh_path):
