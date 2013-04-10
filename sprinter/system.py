@@ -20,14 +20,16 @@ class System(object):
         self.system = system
         self.node = node
         self.processor = processor
+        self.version = version
+        self.processor = processor
 
     def isDebianBased(self):
         """ returns true if the system is debian based """
-        return debian_match.match(self.node) is not None
+        return debian_match.match(self.version) is not None
 
     def isFedoraBased(self):
         """ returns true if the system is fedora based """
-        return fedora_match.match(self.node) is not None
+        return fedora_match.match(self.version) is not None
 
     def isOSX(self):
         return self.system.lower() == "darwin"
