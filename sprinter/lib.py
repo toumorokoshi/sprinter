@@ -19,6 +19,12 @@ from sprinter.recipebase import RecipeBase
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 
+class CommandMissingException(Exception):
+    """ Return if command doesn't exist """
+
+    def __init__(self, command):
+        self.message = "Command %s does not exist in the current path!" % command
+
 
 def get_recipe_class(recipe, environment):
     """
@@ -41,11 +47,14 @@ def get_recipe_class(recipe, environment):
 def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
     if not bash:
         args = __whitespace_smart_split(command)
+        if not which(args[0]):
+            raise CommandMissingException(args[0])
         p = subprocess.Popen(args, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
-        return p.communicate(input=stdin)[0]
+        print p.communicate(input=stdin)[0]
+        return p.returncode
     else:
         command = " ".join([__process(arg) for arg in __whitespace_smart_split(command)])
-        subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
+        return subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
 
 
 def __process(arg):

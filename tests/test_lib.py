@@ -10,6 +10,7 @@ import unittest
 from sprinter.recipebase import RecipeBase
 from sprinter.environment import Environment
 from sprinter import lib
+from sprinter.lib import CommandMissingException
 
 class TestLib(unittest.TestCase):
 
@@ -19,3 +20,17 @@ class TestLib(unittest.TestCase):
 	def test_get_recipe_class(self):
 		class_instance = lib.get_recipe_class("sprinter.recipes.unpack", self.environment)
 		self.assertTrue(issubclass(class_instance.__class__, RecipeBase))
+
+        def test_lib_errorcode(self):
+            """ Verify a proper error code is returned """
+            self.assertEqual(lib.call("ls"), 0, "ls call returns a non-zero exit!")
+            self.assertEqual(lib.call("ls", bash=True), 0, "ls call returns a non-zero exit!")
+            self.assertEqual(lib.call("exit 1", bash=True), 1, "gibberish call returns a zero exit!")
+
+        def test_call_error(self):
+            """ Verify an exception is thrown for a non-existent command """
+            try:
+                lib.call("eahxanea0e0")
+            except CommandMissingException:
+                return
+            raise("Bogus command without proper shell doesn't return proper exception!")
