@@ -29,6 +29,8 @@ class Environment(object):
     def __init__(self, logger=None, logging_level=logging.INFO):
         self.system = System()
         self.logger = self.__build_logger(logger=logger, level=logging_level)
+        if logging_level == logging.DEBUG:
+            self.logger.debug("Starting in debug mode...")
 
     def install(self, raw_target_manifest, namespace=None, username=None, password=None):
         """

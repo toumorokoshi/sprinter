@@ -90,6 +90,7 @@ class Injections(object):
         """
         file_path = os.path.expanduser(file_path)
         if not os.path.exists(os.path.dirname(file_path)):
+            self.logger.debug("Directories missing! Creating directories for %s..." % file_path)
             os.makedirs(os.path.dirname(file_path))
         if not os.path.exists(file_path):
             open(file_path, "w+").close()
