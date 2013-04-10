@@ -118,9 +118,13 @@ class PerforceRecipe(RecipeStandard):
                 os.remove(p4settings_path)
             else:
                 return
-        p4settings_file = open(p4settings_path, "w+")
-        p4settings_file.write(p4settings_template % config)
-        p4settings_file.close()
+        with open(p4settings_path, "w+") as p4settings_file:
+            p4settings_file.write(p4settings_template % config)
+            add_p4passwd = lib.prompt("Also insert p4passwd? (password will be stored in plaintext in a file in your perforce root)", 
+                           default="no", 
+                           boolean=True)
+            if add_p4passwd:
+                p4settings_file.write("\nP4PASSWD=%s" % config['password'])
 
     def __configure_client(self, config):
         """ write the perforce client """
