@@ -46,6 +46,7 @@ class Injections(object):
 
     def commit(self):
         """ commit the injections desired, overwriting any previous injections in the file. """
+        self.logger.debug("Starting injections...")
         for filename, content in self.inject_dict.items():
             self.logger.info("Injecting values into %s..." % filename)
             self.destructive_inject(filename, content)

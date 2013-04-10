@@ -134,6 +134,7 @@ class Environment(object):
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
+        self.logger.debug("Finalizing...")
         if os.path.exists(self.directory.manifest_path):
             self.config.write(open(self.directory.manifest_path, "w+"))
         if self.directory.rewrite_rc:
