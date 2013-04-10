@@ -38,7 +38,7 @@ class PackageRecipe(RecipeStandard):
         Installs and verifies package manager
         """
         package = ""
-        args = "
+        args = ""
         sudo_required = True
         if self.system.isOSX():
             package = "brew"
