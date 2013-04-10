@@ -41,7 +41,7 @@ class GitRecipe(RecipeStandard):
                                   target_directory,
                                   branch=target_branch)
             os.chdir(target_directory)
-            error = call("git pull origin %s" % (config['target']['branch'] if 'branch' in config['target'] else 'master')))
+            error = call("git pull origin %s" % (config['target']['branch'] if 'branch' in config['target'] else 'master'))
             if error:
                 self.logger.error("An error occured! Exiting...")
                 return error
@@ -54,7 +54,7 @@ class GitRecipe(RecipeStandard):
     def reload(self, feature_name, config):
         super(GitRecipe, self).reload(feature_name, config)
         os.chdir(self.directory.install_directory(feature_name))
-        error = call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master')))
+        error = call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
@@ -66,7 +66,7 @@ class GitRecipe(RecipeStandard):
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
-        error = call("git checkout %s" % branch))
+        error = call("git checkout %s" % branch)
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
