@@ -49,8 +49,8 @@ def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
         args = __whitespace_smart_split(command)
         if not which(args[0]):
             raise CommandMissingException(args[0])
-        p = subprocess.Popen(args, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
-        print p.communicate(input=stdin)[0]
+        p = subprocess.Popen(args, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
+        p.communicate(input=stdin)[0]
         return p.returncode
     else:
         command = " ".join([__process(arg) for arg in __whitespace_smart_split(command)])

@@ -30,7 +30,8 @@ class PackageRecipe(RecipeStandard):
             call_command = "%s %s install %s" % (self.package_manager, self.args, package)
             if self.sudo_required:
                 call_command = "sudo " + call_command
-            self.logger.info(lib.call(call_command))
+            self.logger.debug("Calling command: %s" % call_command)
+            lib.call(call_command)
         super(PackageRecipe, self).setup(feature_name, config)
 
     def __get_package_manager(self):
