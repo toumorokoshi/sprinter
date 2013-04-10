@@ -22,7 +22,7 @@ class Injections(object):
     logger = None  # logging object
     wrapper = None  # the string to wrap around the content.
     inject_dict = {}  # dictionary holding the injection object
-    clear_dict = set()  # list holding the filenames to clear injection from
+    clear_set = set()  # list holding the filenames to clear injection from
 
     def __init__(self, wrapper, override=None, logger='sprinter'):
         if override:
@@ -42,15 +42,19 @@ class Injections(object):
 
     def clear(self, filename):
         """ add the file to the list of files to clear """
-        self.clear_dict.add(filename)
+        self.clear_set.add(filename)
 
     def commit(self):
         """ commit the injections desired, overwriting any previous injections in the file. """
         self.logger.debug("Starting injections...")
+        self.logger.debug("Injections dict is:")
+        self.logger.debug(self.inject_dict)
+        self.logger.debug("Clear list is:")
+        self.logger.debug(self.clear_set)
         for filename, content in self.inject_dict.items():
             self.logger.info("Injecting values into %s..." % filename)
             self.destructive_inject(filename, content)
-        for filename in self.clear_dict:
+        for filename in self.clear_set:
             self.logger.info("Clearing injection from %s..." % filename)
             self.__generate_file(filename)
             self.destructive_clear(filename)
