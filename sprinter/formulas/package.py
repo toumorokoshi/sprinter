@@ -23,7 +23,8 @@ class PackageFormula(FormulaStandard):
         super(PackageFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        if config['source']['formula'] != config['target']['formula']:
+        if 'formula' not in config['source'] or \
+                config['source']['formula'] != config['target']['formula']:
             self.__install_package(feature_name, config['target'])
         super(PackageFormula, self).update(feature_name, config)
 
