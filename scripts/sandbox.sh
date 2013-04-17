@@ -1,9 +1,8 @@
-# a one-liner to setup a sandboxed sprinter and perform a sprinter
-# command use this if you do not want to install sprinter globally,
-# and prefer a one-time use instead.
+# This is a sprinter sandboxed installation
+# This will install a sprinter to your command line using a sprinter environment.
 TMP="$(mktemp -d)"
 cd $TMP
-#write out the required buildout config file
+# write out the required buildout config file
 echo "
 [buildout]
 parts = python
@@ -24,6 +23,7 @@ bin/buildout
 
 # put your commands here. e.g.:
 # sprinter install https://raw.github.com/toumorokoshi/yt.rc/master/toumorokoshi.cfg
+sprinter install https://raw.github.com/toumorokoshi/yt.rc/master/toumorokoshi.cfg
 
 
 # finally, delete the temporary directory
