@@ -6,7 +6,7 @@ from StringIO import StringIO
 from sprinter.manifest import Manifest, Config, test_new_version, test_old_version
 
 TEST_MANIFEST = \
-"""
+    """
 [config]
 inputs = stashroot==~/p4
          username
@@ -29,6 +29,8 @@ username = %(config:username)
 password = %(config:p4passwd)
 client = perforce.local:1666
 """
+
+
 def load_tests(loader, tests, ignore):
     # globs for manifest
     old_manifest = Manifest(StringIO(test_old_version))

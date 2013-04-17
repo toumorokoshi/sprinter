@@ -1,11 +1,11 @@
 """
-Recipe base is an abstract base class outlining the method required
+Formula base is an abstract base class outlining the method required
 and some documentation on what they should provide.
 """
 import logging
 
 
-class RecipeBase(object):
+class FormulaBase(object):
 
     def __init__(self, environment):
         self.environment = environment

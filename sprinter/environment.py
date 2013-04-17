@@ -1,6 +1,6 @@
 """
 A module that completely encapsulates a sprinter environment. This should be a
-complete object representing any data needed by recipes.
+complete object representing any data needed by formulas.
 """
 
 import logging
@@ -12,14 +12,14 @@ from sprinter.manifest import Config, Manifest
 from sprinter.directory import Directory
 from sprinter.injections import Injections
 from sprinter.system import System
-from sprinter.lib import get_recipe_class
+from sprinter.lib import get_formula_class
 
 config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
 
 class Environment(object):
 
-    recipe_dict = {}
+    formula_dict = {}
     config = None  # handles the configuration, and manifests
     system = None  # stores system information
     injections = None  # handles injections
@@ -223,44 +223,44 @@ class Environment(object):
     def _run_setups(self):
         for name, config in self.config.setups():
             self.logger.info("Setting up %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
+            formula_instance = self.__get_formula_instance(config['target']['formula'])
             specialized_config = self.__substitute_objects(config['target'])
-            recipe_instance.setup(name, specialized_config)
+            formula_instance.setup(name, specialized_config)
 
     def _run_updates(self):
         for name, config in self.config.updates():
             self.logger.info("Updating %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['target']['recipe'])
+            formula_instance = self.__get_formula_instance(config['target']['formula'])
             specialized_config = self.__substitute_objects(config)
-            recipe_instance.update(name, specialized_config)
+            formula_instance.update(name, specialized_config)
 
     def _run_destroys(self):
         for name, config in self.config.destroys():
             self.logger.info("Removing %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
+            formula_instance = self.__get_formula_instance(config['source']['formula'])
             #specialized_config = self.__substitute_objects(config['source'])
-            recipe_instance.destroy(name, config['source'])
+            formula_instance.destroy(name, config['source'])
 
     def _run_activates(self):
         for name, config in self.config.activations():
             self.logger.info("Activating %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
+            formula_instance = self.__get_formula_instance(config['source']['formula'])
             #specialized_config = self.__substitute_objects(config['source'])
-            recipe_instance.activate(name, config['source'])
+            formula_instance.activate(name, config['source'])
 
     def _run_deactivates(self):
         for name, config in self.config.deactivations():
             self.logger.info("Deactivating %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
+            formula_instance = self.__get_formula_instance(config['source']['formula'])
             #specialized_config = self.__substitute_objects(config['source'])
-            recipe_instance.deactivate(name, config['source'])
+            formula_instance.deactivate(name, config['source'])
 
     def _run_reloads(self):
         for name, config in self.config.reloads():
             self.logger.info("Reloading %s..." % name)
-            recipe_instance = self.__get_recipe_instance(config['source']['recipe'])
+            formula_instance = self.__get_formula_instance(config['source']['formula'])
             specialized_config = self.__substitute_objects(config['source'])
-            recipe_instance.reload(name, specialized_config)
+            formula_instance.reload(name, specialized_config)
 
     def __build_logger(self, logger=None, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
@@ -273,20 +273,20 @@ class Environment(object):
         logger.setLevel(level)
         return logger
 
-    def __get_recipe_instance(self, recipe):
+    def __get_formula_instance(self, formula):
         """
-        get an instance of the recipe object object if it exists, else
+        get an instance of the formula object object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        if recipe not in self.recipe_dict:
-            self.recipe_dict[recipe] = get_recipe_class(recipe, self)
-        return self.recipe_dict[recipe]
+        if formula not in self.formula_dict:
+            self.formula_dict[formula] = get_formula_class(formula, self)
+        return self.formula_dict[formula]
 
     def __generate_context_dict(self, kind='target'):
         context_dict = self.config.get_context_dict(kind=kind)
         manifest = self.config.target if kind == 'target' else self.config.source
         if manifest:
-            for s in manifest.recipe_sections():
+            for s in manifest.formula_sections():
                 context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
             # add environment information
             context_dict['config:node'] = self.system.node

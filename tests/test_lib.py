@@ -2,24 +2,22 @@
 Tests for the library
 """
 
-import os
-import shutil
-import tempfile
 import unittest
 
-from sprinter.recipebase import RecipeBase
+from sprinter.formulabase import FormulaBase
 from sprinter.environment import Environment
 from sprinter import lib
 from sprinter.lib import CommandMissingException
 
+
 class TestLib(unittest.TestCase):
 
-	def setUp(self):
-		self.environment = Environment()
+        def setUp(self):
+                self.environment = Environment()
 
-	def test_get_recipe_class(self):
-		class_instance = lib.get_recipe_class("sprinter.recipes.unpack", self.environment)
-		self.assertTrue(issubclass(class_instance.__class__, RecipeBase))
+        def test_get_formula_class(self):
+                class_instance = lib.get_formula_class("sprinter.formulas.unpack", self.environment)
+                self.assertTrue(issubclass(class_instance.__class__, FormulaBase))
 
         def test_lib_errorcode(self):
             """ Verify a proper error code is returned """

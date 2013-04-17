@@ -2,7 +2,7 @@
 Creates a git repository and places it at the install location.
 
 [perforce]
-recipe = sprinter.recipes.perforce
+formula = sprinter.formulas.perforce
 inputs = p4username
          p4password?
 version = r10.1
@@ -17,7 +17,7 @@ import shutil
 import re
 import urllib
 
-from sprinter.recipestandard import RecipeStandard
+from sprinter.formulastandard import FormulaStandard
 from sprinter import lib
 
 url_template = "http://filehost.perforce.com/perforce/%s/%s/p4"
@@ -25,13 +25,13 @@ exec_dict = {"r10.1": {"mac": "bin.macosx104u",
                        "linux": "bin.linux26x86_64"}}
 
 p4settings_template = \
-"""
+    """
 P4USER=%(username)s
 P4CLIENT=%(client)s
 """
 
 p4client_template = \
-"""
+    """
 Client:	%(client)s
 
 Update:	2012/12/03 00:16:24
@@ -56,11 +56,11 @@ View:
 """
 
 
-class PerforceRecipe(RecipeStandard):
-    """ A sprinter recipe for git"""
+class PerforceFormula(FormulaStandard):
+    """ A sprinter formula for git"""
 
     def setup(self, feature_name, config):
-        super(PerforceRecipe, self).setup(feature_name, config)
+        super(PerforceFormula, self).setup(feature_name, config)
         self.p4environ = dict(os.environ.items() + [('P4USER', config['username']),
                                                     ('P4PASSWD', config['password'])])
         self.__install_perforce(feature_name, config)
@@ -120,9 +120,10 @@ class PerforceRecipe(RecipeStandard):
                 return
         with open(p4settings_path, "w+") as p4settings_file:
             p4settings_file.write(p4settings_template % config)
-            add_p4passwd = lib.prompt("Also insert p4passwd? (password will be stored in plaintext in a file in your perforce root)", 
-                           default="no", 
-                           boolean=True)
+            add_p4passwd = lib.prompt("Also insert p4passwd? " +
+                                      "(password will be stored in plaintext in a file in your perforce root)",
+                                      default="no",
+                                      boolean=True)
             if add_p4passwd:
                 p4settings_file.write("\nP4PASSWD=%s" % config['password'])
 

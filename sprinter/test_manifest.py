@@ -1,6 +1,3 @@
-import os
-import shutil
-import tempfile
 import unittest
 from StringIO import StringIO
 
@@ -11,28 +8,28 @@ manifest_old = """
 namespace = sprinter
 
 [maven]
-recipe = sprinter.recipes.unpack
+formula = sprinter.formulas.unpack
 specific_version = 2.10
 
 [ant]
-recipe = sprinter.recipes.unpack
+formula = sprinter.formulas.unpack
 specific_version = 1.8.4
 
 [sub]
-recipe = sprinter.recipes.git
+formula = sprinter.formulas.git
 depends = git
 url = git://github.com/Toumorokoshi/sub.git
 branch = yusuke
 rc = temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp
 
 [mysql]
-recipe = sprinter.recipes.package
+formula = sprinter.formulas.package
 apt-get = libmysqlclient
           libmysqlclient-dev
 brew = mysql
 
 [git]
-recipe = sprinter.recipes.package
+formula = sprinter.formulas.package
 apt-get = git-core
 brew = git
 """
@@ -42,9 +39,10 @@ manifest_incorrect_dependency = """
 namespace = sprinter
 
 [sub]
-recipe = sprinter.recipes.git
+formula = sprinter.formulas.git
 depends = sub
 """
+
 
 class TestManifest(unittest.TestCase):
     """
@@ -60,11 +58,9 @@ class TestManifest(unittest.TestCase):
 
     def test_dependency_order(self):
         """ Test whether a proper dependency tree generated the correct output. """
-        sections = self.manifest_old.recipe_sections()
+        sections = self.manifest_old.formula_sections()
         self.assertTrue(sections.index('git') < sections.index('sub'), "Dependency is out of order! git comes after sub")
 
     def test_incorrect_dependency(self):
         """ Test whether an incorrect dependency tree returns an error. """
         self.assertTrue(len(self.manifest_incorrect_dependency.invalidations) > 0, "No errors were produced with an incorrect manifest")
-
-

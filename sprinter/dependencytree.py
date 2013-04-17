@@ -1,5 +1,5 @@
 """
-dependencytree.py handles the dependency tree of sprinter recipes. It attempts to validate a dependency tree
+dependencytree.py handles the dependency tree of sprinter formulas. It attempts to validate a dependency tree
 """
 
 

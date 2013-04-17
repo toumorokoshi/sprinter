@@ -8,11 +8,11 @@ import tarfile
 import urllib
 from StringIO import StringIO
 
-from sprinter.recipestandard import RecipeStandard
+from sprinter.formulastandard import FormulaStandard
 
 
-class UnpackRecipe(RecipeStandard):
-    """ A sprinter recipe for unpacking a compressed package and extracting it"""
+class UnpackFormula(FormulaStandard):
+    """ A sprinter formula for unpacking a compressed package and extracting it"""
 
     def setup(self, feature_name, config):
         if config['type'] == "tar.gz":
@@ -20,14 +20,14 @@ class UnpackRecipe(RecipeStandard):
         if 'executable' in config:
             symlink_target = config['symlink'] if 'symlink' in config else config['executable']
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
-        super(UnpackRecipe, self).setup(feature_name, config)
+        super(UnpackFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        super(UnpackRecipe, self).update(feature_name, config)
+        super(UnpackFormula, self).update(feature_name, config)
         pass
 
     def destroy(self, feature_name, config):
-        super(UnpackRecipe, self).destroy(feature_name, config)
+        super(UnpackFormula, self).destroy(feature_name, config)
         pass
 
     def __extract_targz(self, url, target_dir):
@@ -42,5 +42,5 @@ class UnpackRecipe(RecipeStandard):
     def __symlink_executable(self, feature_name, source, target):
         source_path = os.path.join(self.directory.install_directory(feature_name), source)
         self.logger.debug("Symlinking executable at %s to bin/%s" %
-                                      (source_path, target))
+                          (source_path, target))
         self.directory.symlink_to_bin(target, source_path)

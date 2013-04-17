@@ -23,15 +23,15 @@ test_old_version = """
 namespace = sprinter
 
 [maven]
-recipe = sprinter.recipes.unpack
+formula = sprinter.formulas.unpack
 specific_version = 2.10
 
 [ant]
-recipe = sprinter.recipes.unpack
+formula = sprinter.formulas.unpack
 specific_version = 1.8.4
 
 [mysql]
-recipe = sprinter.recipes.package
+formula = sprinter.formulas.package
 apt-get = libmysqlclient
           libmysqlclient-dev
 brew = mysql
@@ -42,15 +42,15 @@ test_new_version = """
 namespace = sprinter
 
 [maven]
-recipe = sprinter.recipes.unpack
+formula = sprinter.formulas.unpack
 specific_version = 3.0.4
 
 [ant]
-recipe = sprinter.recipes.unpack
+formula = sprinter.formulas.unpack
 specific_version = 1.8.4
 
 [myrc]
-recipe = sprinter.recipes.template
+formula = sprinter.formulas.template
 """
 
 test_input_string = \
@@ -146,19 +146,18 @@ class Manifest(object):
                     dependency_dict[s] = dependency_list
                 else:
                     dependency_dict[s] = []
-        try: 
+        try:
             return DependencyTree(dependency_dict)
         except DependencyTreeException as dte:
             self.logger.error("Dependency tree for manifest is invalid! %s" % str(dte))
             self.invalidations.append("Issue with building dependency tree: %s" % str(dte))
             return None
 
-
-    def recipe_sections(self):
+    def formula_sections(self):
         """
-        Return all sections related to a recipe, re-ordered according to the "depends" section.
+        Return all sections related to a formula, re-ordered according to the "depends" section.
         """
-        if self.dtree != None:
+        if self.dtree is not None:
             return self.dtree.order
         else:
             return [s for s in self.manifest.sections() if s != "config"]
@@ -233,10 +232,10 @@ class Config(object):
         """
         Return a dictionary with all the features that need to be setup.
         >>> c.setups()
-        [('myrc', {'target': {'recipe': 'sprinter.recipes.template'}})]
+        [('myrc', {'target': {'formula': 'sprinter.formulas.template'}})]
         """
         new_sections = []
-        for s in self.target.recipe_sections():
+        for s in self.target.formula_sections():
             if not self.source or not self.source.has_section(s):
                 new_sections.append((s, {"target": dict(self.target.items(s))}))
         return new_sections
@@ -247,7 +246,7 @@ class Config(object):
         updated.
 
         >>> c.updates()
-        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '3.0.4'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}, 'target': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}})]
+        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}, 'target': {'formula': 'sprinter.formulas.unpack', 'specific_version': '3.0.4'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}, 'target': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}})]
 
         >>> config_old_only.updates()
         Traceback (most recent call last):
@@ -256,8 +255,8 @@ class Config(object):
         """
         if not self.target:
             raise ManifestError("Update method requires a target manifest!")
-        different_sections = [] 
-        for s in self.target.recipe_sections():
+        different_sections = []
+        for s in self.target.formula_sections():
             if self.source.has_section(s):
                 target_dict = dict(self.target.items(s))
                 source_dict = dict(self.source.items(s))
@@ -270,35 +269,35 @@ class Config(object):
         Return a dictionary with all the features that need to be
         destroyed.
         >>> c.destroys()
-        [('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
+        [('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
         """
-        missing_sections = [] 
-        for s in self.source.recipe_sections():
+        missing_sections = []
+        for s in self.source.formula_sections():
             if not self.target or not self.target.has_section(s):
                 missing_sections.append((s, {"source": dict(self.source.items(s))}))
         return missing_sections
 
     def deactivations(self):
         """
-        Return a dictionary of activation recipes.
+        Return a dictionary of activation formulas.
 
         >>> c.deactivations()
-        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
+        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
         """
         deactivation_sections = []
-        for s in self.source.recipe_sections():
+        for s in self.source.formula_sections():
             deactivation_sections.append((s, {"source": dict(self.source.items(s))}))
         return deactivation_sections
 
     def activations(self):
         """
-        Return a dictionary of activation recipes.
+        Return a dictionary of activation formulas.
 
         >>> c.activations()
-        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
+        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
         """
-        activation_sections = [] 
-        for s in self.source.recipe_sections():
+        activation_sections = []
+        for s in self.source.formula_sections():
             activation_sections.append((s, {"source": dict(self.source.items(s))}))
         return activation_sections
 
@@ -306,10 +305,10 @@ class Config(object):
         """
         return reload dictionaries
         >>> c.reloads()
-        [('maven', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'recipe': 'sprinter.recipes.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev', 'recipe': 'sprinter.recipes.package'}})]
+        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
         """
         reload_sections = []
-        for s in self.source.recipe_sections():
+        for s in self.source.formula_sections():
                 reload_sections.append((s, {"source": dict(self.source.items(s))}))
         return reload_sections
 
@@ -326,7 +325,7 @@ class Config(object):
                 self.target.set('config', k, v)
         self.target.set('config', 'namespace', self.namespace)
         if self.source_location:
-            self.target.set('config','source', self.source_location)
+            self.target.set('config', 'source', self.source_location)
         self.target.write(file_handle)
 
     def get_config(self, param_name, default=None, secret=False):
@@ -349,7 +348,7 @@ class Config(object):
         context_dict = {}
         manifest = self.target if kind == 'target' else self.source
         if manifest:
-            for s in manifest.recipe_sections():
+            for s in manifest.formula_sections():
                 for k, v in manifest.items(s):
                     context_dict["%s:%s" % (s, k)] = v
         for k, v in self.config.items():

@@ -15,9 +15,10 @@ from base64 import b64encode
 from getpass import getpass
 from subprocess import PIPE, STDOUT
 
-from sprinter.recipebase import RecipeBase
+from sprinter.formulabase import FormulaBase
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
+
 
 class CommandMissingException(Exception):
     """ Return if command doesn't exist """
@@ -26,20 +27,20 @@ class CommandMissingException(Exception):
         self.message = "Command %s does not exist in the current path!" % command
 
 
-def get_recipe_class(recipe, environment):
+def get_formula_class(formula, environment):
     """
-    Get the recipe name and return an instance The recipe path is a
-    path to the module. get_recipe_class performs reflection to find
-    the first class that extends recipebase, and that is the class
+    Get the formula name and return an instance The formula path is a
+    path to the module. get_formula_class performs reflection to find
+    the first class that extends formulabase, and that is the class
     that an instance of it gets returned.
     """
     try:
-        r = __recursive_import(recipe)
+        r = __recursive_import(formula)
         member_dict = dict(inspect.getmembers(r))
         for v in member_dict.values():
-            if inspect.isclass(v) and issubclass(v, RecipeBase) and v != RecipeBase:
+            if inspect.isclass(v) and issubclass(v, FormulaBase) and v != FormulaBase:
                 return v(environment)
-        raise Exception("No recipe %s exists in classpath!" % recipe)
+        raise Exception("No formula %s exists in classpath!" % formula)
     except ImportError as e:
         raise e
 
@@ -157,7 +158,7 @@ def __recursive_import(module_name):
     Recursively looks for and imports the names, returning the
     module desired
 
-    >>> __recursive_import("sprinter.recipes.unpack") # doctest: +ELLIPSIS
+    >>> __recursive_import("sprinter.formulas.unpack") # doctest: +ELLIPSIS
     <module 'unpack' from '...'>
 
     currently module with relative imports don't work.

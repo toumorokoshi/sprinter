@@ -4,25 +4,25 @@ Creates a git repository and places it at the install location.
 import os
 import shutil
 
-from sprinter.recipestandard import RecipeStandard
+from sprinter.formulastandard import FormulaStandard
 from sprinter.lib import call
 
 
-class GitRecipe(RecipeStandard):
-    """ A sprinter recipe for git"""
+class GitFormula(FormulaStandard):
+    """ A sprinter formula for git"""
 
     def setup(self, feature_name, config):
         branch = (config['branch'] if 'branch' in config else None)
         self.__clone_repo(config['url'],
                           self.directory.install_directory(feature_name),
                           branch=branch)
-        super(GitRecipe, self).setup(feature_name, config)
+        super(GitFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
         target_directory = self.directory.install_directory(feature_name)
-        source_branch = (config['source']['branch'] if 'branch' in config['source'] 
+        source_branch = (config['source']['branch'] if 'branch' in config['source']
                          else "master")
-        target_branch = (config['target']['branch'] if 'branch' in config['target'] 
+        target_branch = (config['target']['branch'] if 'branch' in config['target']
                          else "master")
         if config['target']['url'] != config['source']['url'] or \
            not os.path.exists(target_directory):
@@ -45,14 +45,14 @@ class GitRecipe(RecipeStandard):
             if error:
                 self.logger.error("An error occured! Exiting...")
                 return error
-        super(GitRecipe, self).update(feature_name, config)
+        super(GitFormula, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
-        super(GitRecipe, self).destroy(feature_name, config)
+        super(GitFormula, self).destroy(feature_name, config)
         shutil.rmtree(self.directory.install_directory(feature_name))
 
     def reload(self, feature_name, config):
-        super(GitRecipe, self).reload(feature_name, config)
+        super(GitFormula, self).reload(feature_name, config)
         os.chdir(self.directory.install_directory(feature_name))
         error = call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
         if error:

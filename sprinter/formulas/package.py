@@ -2,30 +2,30 @@
 Installs a package from whatever the native package manager is
 (apt-get for debian-based, brew for OS X)
 [env]
-recipe = sprinter.recipes.package
+formula = sprinter.formulas.package
 debian = git
 brew = git
 """
 import os
 
-from sprinter.recipestandard import RecipeStandard
+from sprinter.formulastandard import FormulaStandard
 from sprinter import lib
 
 
-class PackageRecipe(RecipeStandard):
+class PackageFormula(FormulaStandard):
 
     def __init__(self, environment):
-        super(PackageRecipe, self).__init__(environment)
+        super(PackageFormula, self).__init__(environment)
         self.package_manager, self.manager_installed, self.sudo_required, self.args = self.__get_package_manager()
 
     def setup(self, feature_name, config):
         self.__install_package(feature_name, config)
-        super(PackageRecipe, self).setup(feature_name, config)
+        super(PackageFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        if config['source']['recipe'] != config['target']['recipe']:
+        if config['source']['formula'] != config['target']['formula']:
             self.__install_package(feature_name, config['target'])
-        super(PackageRecipe, self).update(feature_name, config)
+        super(PackageFormula, self).update(feature_name, config)
 
     def __install_package(self, feature_name, config):
         if self.package_manager in config:

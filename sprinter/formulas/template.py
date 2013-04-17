@@ -3,7 +3,7 @@ Generates a file in a target location from a template
 [gitignore]
 inputs = username
          password
-recipe = sprinter.recipes.template
+formula = sprinter.formulas.template
 source = http://mywebsite.com/.gitignore
 target = ~/.gitignore
 username = %(config:username)s
@@ -12,22 +12,22 @@ password = %(config:mywebsitepassword)s
 import os
 import urllib
 
-from sprinter.recipestandard import RecipeStandard
+from sprinter.formulastandard import FormulaStandard
 from sprinter import lib
 
 
-class TemplateRecipe(RecipeStandard):
+class TemplateFormula(FormulaStandard):
 
     def setup(self, feature_name, config):
         self.__install_file(config['source'], config['target'], config)
-        super(TemplateRecipe, self).setup(feature_name, config)
+        super(TemplateFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
         self.__install_file(config['target']['source'], config['target']['target'], config['target'])
-        super(TemplateRecipe, self).update(feature_name, config)
+        super(TemplateFormula, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
-        super(TemplateRecipe, self).destroy(feature_name, config)
+        super(TemplateFormula, self).destroy(feature_name, config)
 
     def __install_file(self, source, target_file, config):
         source_content = None

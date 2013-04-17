@@ -1,15 +1,15 @@
 """
-Recipe base is an abstract base class outlining the method required
+Formula base is an abstract base class outlining the method required
 and some documentation on what they should provide.
 """
 import logging
 import os
 
 from sprinter import lib
-from sprinter.recipebase import RecipeBase
+from sprinter.formulabase import FormulaBase
 
 
-class RecipeStandard(RecipeBase):
+class FormulaStandard(FormulaBase):
 
     def __init__(self, environment):
         self.environment = environment

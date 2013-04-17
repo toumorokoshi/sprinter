@@ -11,20 +11,20 @@ setup(name='sprinter',
       author='Yusuke Tsutsumi',
       author_email='yusuke@yusuketsutsumi.com',
       url='http://toumorokoshi.github.io/sprinter',
-      packages=['sprinter', 'sprinter.recipes'],
+      packages=['sprinter', 'sprinter.formulas'],
       classifiers=[
-        'Development Status :: 4 - Beta',
-        'Operating System :: MacOS',
-        'Operating System :: POSIX :: Linux',
-        'Topic :: System :: Software Distribution',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
+          'Development Status :: 4 - Beta',
+          'Operating System :: MacOS',
+          'Operating System :: POSIX :: Linux',
+          'Topic :: System :: Software Distribution',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 2.6',
+          'Programming Language :: Python :: 2.7',
       ],
       entry_points={
-        'console_scripts': [
-            'sprinter = sprinter.install:main'
-        ]
+          'console_scripts': [
+              'sprinter = sprinter.install:main'
+          ]
       },
       test_suite='tests'
-     )
+      )
