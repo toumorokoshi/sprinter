@@ -225,42 +225,45 @@ class Environment(object):
             self.logger.info("Setting up %s..." % name)
             formula_instance = self.__get_formula_instance(config['target']['formula'])
             specialized_config = self.__substitute_objects(config['target'])
-            formula_instance.setup(name, specialized_config)
+            if self._phases(specialized_config, 'setup'):
+                formula_instance.setup(name, specialized_config)
 
     def _run_updates(self):
         for name, config in self.config.updates():
             self.logger.info("Updating %s..." % name)
             formula_instance = self.__get_formula_instance(config['target']['formula'])
             specialized_config = self.__substitute_objects(config)
-            formula_instance.update(name, specialized_config)
+            if self._phases(specialized_config['target'], 'update'):
+                formula_instance.update(name, specialized_config)
 
     def _run_destroys(self):
         for name, config in self.config.destroys():
             self.logger.info("Removing %s..." % name)
             formula_instance = self.__get_formula_instance(config['source']['formula'])
-            #specialized_config = self.__substitute_objects(config['source'])
-            formula_instance.destroy(name, config['source'])
+            if self._phases(config['source'], 'destroy'):
+                formula_instance.destroy(name, config['source'])
 
     def _run_activates(self):
         for name, config in self.config.activations():
             self.logger.info("Activating %s..." % name)
             formula_instance = self.__get_formula_instance(config['source']['formula'])
-            #specialized_config = self.__substitute_objects(config['source'])
-            formula_instance.activate(name, config['source'])
+            if self._phases(config['source'], 'activate'):
+                formula_instance.activate(name, config['source'])
 
     def _run_deactivates(self):
         for name, config in self.config.deactivations():
             self.logger.info("Deactivating %s..." % name)
             formula_instance = self.__get_formula_instance(config['source']['formula'])
-            #specialized_config = self.__substitute_objects(config['source'])
-            formula_instance.deactivate(name, config['source'])
+            if self._phases(config['source'], 'deactivate'):
+                formula_instance.deactivate(name, config['source'])
 
     def _run_reloads(self):
         for name, config in self.config.reloads():
             self.logger.info("Reloading %s..." % name)
             formula_instance = self.__get_formula_instance(config['source']['formula'])
             specialized_config = self.__substitute_objects(config['source'])
-            formula_instance.reload(name, specialized_config)
+            if self._phases(specialized_config['source'], 'reload'):
+                formula_instance.reload(name, specialized_config)
 
     def __build_logger(self, logger=None, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
@@ -302,3 +305,10 @@ class Environment(object):
             return value % self.context_dict
         else:
             return value
+
+    def _phases(self, config, phase_name):
+        """
+        Return true if the phase should be run. False otherwise.
+        """
+        return ('phases' not in config or
+                phase_name in [x.strip() for x in config['phases'].split(",")])

@@ -11,11 +11,14 @@ modules that still need testing:
 * system? (maybe, don't know how to test this)
 * recipes (no idea how to test these)
 
+Docs:
+
+* Add doc section for 'phases' and phases keyword in config
+
 General:
 
 * add way to ask for prompts
 * cleanly close bad installs
-* rename 'recipes' to 'formula'
 
 Perforce Recipe:
 
