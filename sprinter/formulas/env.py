@@ -15,14 +15,14 @@ class EnvFormula(FormulaStandard):
     """ A sprinter formula for git"""
 
     def setup(self, feature_name, config):
-        super(EnvFormula, self).setup(feature_name, config)
         [self.directory.add_to_rc('export %s=%s' % (c.upper(), config[c]))
          for c in config if c != 'formula']
+        super(EnvFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, config):
-        super(EnvFormula, self).update(feature_name, config)
         [self.directory.add_to_rc('export %s=%s' % (c.upper(), config['target'][c]))
          for c in config['target'] if c != 'formula']
+        super(EnvFormula, self).update(feature_name, config)
 
     def destroy(self, feature_name, config):
         super(EnvFormula, self).destroy(feature_name, config)
