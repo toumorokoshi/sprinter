@@ -16,7 +16,7 @@ from sprinter import lib
 
 ssh_config_template = \
     """
-Host %(keyname)s
+Host %(host)s
   HostName %(hostname)s
   IdentityFile %(ssh_path)s
   User %(user)s
