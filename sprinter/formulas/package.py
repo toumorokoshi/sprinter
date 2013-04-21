@@ -37,7 +37,7 @@ class PackageFormula(FormulaStandard):
                         return
             package = config[self.package_manager]
             self.logger.info("Installing %s..." % package)
-            call_command = "%s %s install %s" % (self.package_manager, self.args, package)
+            call_command = "%s%s install %s" % (self.package_manager, self.args, package)
             if self.sudo_required:
                 call_command = "sudo " + call_command
             self.logger.debug("Calling command: %s" % call_command)
@@ -55,7 +55,7 @@ class PackageFormula(FormulaStandard):
             sudo_required = False
         elif self.system.isDebianBased():
             package = "apt-get"
-            args = "-y"
+            args = " -y"
         elif self.system.isFedoraBased():
             package = "yum"
         installed = lib.which(package) is not None

@@ -39,6 +39,10 @@ Package Recipe:
 DMG Installation utility:
 Create a formula to install the contents of a dmg somewhere, since it seems that a lot of os x utilities use this mechanism.
 
+* Commands to run:
+    * hdiutil mount ~/Downloads/P4V.dmg 
+    * sudo cp -R /Volumes/P4V/p4v.app /Applications/
+
 * Looks like this would help:
 	* http://osxdaily.com/2011/12/17/mount-a-dmg-from-the-command-line-in-mac-os-x/
 
