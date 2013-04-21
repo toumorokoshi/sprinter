@@ -37,10 +37,15 @@ def get_formula_class(formula, environment):
     try:
         r = __recursive_import(formula)
         member_dict = dict(inspect.getmembers(r))
+        sprinter_class = None
         for v in member_dict.values():
             if inspect.isclass(v) and issubclass(v, FormulaBase) and v != FormulaBase:
-                return v(environment)
-        raise Exception("No formula %s exists in classpath!" % formula)
+                if (sprinter_class is None or
+                   str(sprinter_class) == "<class 'sprinter.formulastandard.FormulaStandard'>"):
+                    sprinter_class = v
+        if sprinter_class is None:
+            raise Exception("No formula %s exists in classpath!" % formula)
+        return sprinter_class(environment)
     except ImportError as e:
         raise e
 
