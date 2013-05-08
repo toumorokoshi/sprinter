@@ -18,9 +18,9 @@ class CommandFormula(FormulaStandard):
         self.__run_command('setup', config)
         super(CommandFormula, self).setup(feature_name, config)
 
-    def update(self, feature_name, config):
-        self.__run_command('update', config)
-        super(CommandFormula, self).update(feature_name, config)
+    def update(self, feature_name, source_config, target_config):
+        self.__run_command('update', target_config)
+        super(CommandFormula, self).update(feature_name, source_config, target_config)
 
     def destroy(self, feature_name, config):
         self.__run_command('destroy', config)

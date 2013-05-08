@@ -18,18 +18,16 @@ class GitFormula(FormulaStandard):
                           branch=branch)
         super(GitFormula, self).setup(feature_name, config)
 
-    def update(self, feature_name, config):
+    def update(self, feature_name, source_config, target_config):
         target_directory = self.directory.install_directory(feature_name)
-        source_branch = (config['source']['branch'] if 'branch' in config['source']
-                         else "master")
-        target_branch = (config['target']['branch'] if 'branch' in config['target']
-                         else "master")
-        if config['target']['url'] != config['source']['url'] or \
+        source_branch = (source_config['branch'] if 'branch' in source_config else "master")
+        target_branch = (target_config['branch'] if 'branch' in target_config else "master")
+        if target_config['url'] != source_config['url'] or \
            not os.path.exists(target_directory):
             if os.path.exists(target_directory):
                 self.logger.debug("Old git repository Found. Deleting...")
                 shutil.rmtree(target_directory)
-            self.__clone_repo(config['target']['url'],
+            self.__clone_repo(target_config['url'],
                               target_directory,
                               branch=target_branch)
         elif source_branch != target_branch:
@@ -37,15 +35,16 @@ class GitFormula(FormulaStandard):
         else:
             if not os.path.exists(target_directory):
                 self.logger.debug("No repository cloned. Re-cloning...")
-                self.__clone_repo(config['target']['url'],
+                self.__clone_repo(target_config['url'],
                                   target_directory,
                                   branch=target_branch)
             os.chdir(target_directory)
-            error = call("git pull origin %s" % (config['target']['branch'] if 'branch' in config['target'] else 'master'))
+            error = call("git pull origin %s" %
+                         (target_config['branch'] if 'branch' in target_config else 'master'))
             if error:
                 self.logger.error("An error occured! Exiting...")
                 return error
-        super(GitFormula, self).update(feature_name, config)
+        super(GitFormula, self).update(feature_name, source_config, target_config)
 
     def destroy(self, feature_name, config):
         super(GitFormula, self).destroy(feature_name, config)

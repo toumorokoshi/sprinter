@@ -33,11 +33,11 @@ class SSHFormula(FormulaStandard):
         if 'command' in config:
             self.__call_command(config['command'], ssh_path)
 
-    def update(self, feature_name, config):
-        ssh_path = self.__generate_key(feature_name, config['target'])
-        self.__install_ssh_config(config['target'], ssh_path)
-        if 'command' in config['target']:
-            self.__call_command(config['target']['command'], ssh_path)
+    def update(self, feature_name, source_config, target_config):
+        ssh_path = self.__generate_key(feature_name, target_config)
+        self.__install_ssh_config(target_config, ssh_path)
+        if 'command' in target_config:
+            self.__call_command(target_config['command'], ssh_path)
 
     def deactivate(self, feature_name, config):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),

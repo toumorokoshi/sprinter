@@ -3,7 +3,6 @@ The install script for a sprinter-based setup script.
 """
 import logging
 import os
-import re
 import signal
 import sys
 from optparse import OptionParser
@@ -45,7 +44,7 @@ def main():
 def parse_args(argv, Environment=Environment):
     options, args = parser.parse_args(argv)
     command = args[0].lower()
-    target = args[1] if len(args) > 1 else None        
+    target = args[1] if len(args) > 1 else None
     logging_level = logging.DEBUG if options.verbose else logging.INFO
     env = Environment(logging_level=logging_level)
 

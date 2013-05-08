@@ -234,7 +234,9 @@ class Environment(object):
             formula_instance = self.__get_formula_instance(config['target']['formula'])
             specialized_config = self.__substitute_objects(config)
             if self._phases(specialized_config['target'], 'update'):
-                formula_instance.update(name, specialized_config)
+                formula_instance.update(name,
+                                        specialized_config['source'],
+                                        specialized_config['target'])
 
     def _run_destroys(self):
         for name, config in self.config.destroys():

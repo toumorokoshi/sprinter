@@ -70,14 +70,14 @@ class PerforceFormula(FormulaStandard):
         self.__sync_perforce(config)
         self.__add_p4_env(config)
 
-    def update(self, feature_name, config):
-        if config['source']['version'] != config['target']['version']:
+    def update(self, feature_name, source_config, target_config):
+        if source_config['version'] != target_config['version']:
             os.remove(os.path.join(self.directory.install_directory(feature_name), 'p4'))
-            self.__install_perforce(self, feature_name, config['target'])
-        if config['target'] != config['source']:
-            self.__write_p4settings(config['target'])
-            self.__sync_perforce(config['target'])
-        self.__add_p4_env(config['target'])
+            self.__install_perforce(self, feature_name, target_config)
+        if target_config != source_config:
+            self.__write_p4settings(target_config)
+            self.__sync_perforce(target_config)
+        self.__add_p4_env(target_config)
 
     def destroy(self, feature_name, config):
         self.__destroy_perforce(config)

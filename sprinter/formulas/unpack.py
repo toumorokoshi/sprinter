@@ -22,13 +22,11 @@ class UnpackFormula(FormulaStandard):
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
         super(UnpackFormula, self).setup(feature_name, config)
 
-    def update(self, feature_name, config):
-        super(UnpackFormula, self).update(feature_name, config)
-        pass
+    def update(self, feature_name, source_config, target_config):
+        super(UnpackFormula, self).update(feature_name, source_config, target_config)
 
     def destroy(self, feature_name, config):
         super(UnpackFormula, self).destroy(feature_name, config)
-        pass
 
     def __extract_targz(self, url, target_dir):
         """ extract a targz and install to the target directory """

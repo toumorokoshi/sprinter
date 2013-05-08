@@ -31,15 +31,15 @@ class FormulaStandard(FormulaBase):
                                       bash=True,
                                       cwd=cwd))
 
-    def update(self, feature_name, config):
+    def update(self, feature_name, source_config, target_config):
         """ Setup performs the setup required, and works with the old
         config is destruction is required """
         install_directory = self.directory.install_directory(feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
-        if 'rc' in config['target']:
-            self.directory.add_to_rc(config['target']['rc'])
-        if 'command' in config['target']:
-            self.logger.info(lib.call(config['target']['command'],
+        if 'rc' in target_config:
+            self.directory.add_to_rc(target_config['rc'])
+        if 'command' in target_config:
+            self.logger.info(lib.call(target_config['command'],
                                       bash=True,
                                       cwd=cwd))
 
