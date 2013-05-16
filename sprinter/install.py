@@ -15,6 +15,9 @@ description = \
 Install an environment as specified in a sprinter config file
 """
 
+VALID_COMMANDS = ["install", "update", "environments", "validate",
+                  "remove", "deactivate", "activate", "reload"]
+
 parser = OptionParser(description=description)
 # parser = argparse.ArgumentParser(description=description)
 # parser.add_option('command', metavar='C',
@@ -41,12 +44,30 @@ def main():
     parse_args(sys.argv[1:])
 
 
+def error(message):
+    print message
+    exit()
+
+
 def parse_args(argv, Environment=Environment):
     options, args = parser.parse_args(argv)
+    if len(args) == 0:
+        error("Please enter a sprinter action: %s" % str(VALID_COMMANDS))
     command = args[0].lower()
+    if command not in VALID_COMMANDS:
+        error("Please enter a valid sprinter action: %s" % str(VALID_COMMANDS))
     target = args[1] if len(args) > 1 else None
     logging_level = logging.DEBUG if options.verbose else logging.INFO
     env = Environment(logging_level=logging_level)
+
+    if command == "environments":
+        SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
+        for env in os.listdir(SPRINTER_ROOT):
+            print "%s" % env
+
+    # these commands need an target
+    if target is None:
+        error("Please enter a target!")
 
     if command in ('remove', 'deactivate', 'activate', 'reload'):
         getattr(env, command)(target)
@@ -69,11 +90,6 @@ def parse_args(argv, Environment=Environment):
             if not options.password:
                 options.password = lib.prompt("Please enter the password for %s..." % target, secret=True)
         env.update(target, username=options.username, password=options.password)
-
-    elif command == "environments":
-        SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
-        for env in os.listdir(SPRINTER_ROOT):
-            print "%s" % env
 
     elif command == "validate":
         if options.username or options.auth:

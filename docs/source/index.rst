@@ -12,7 +12,7 @@ Sprinter was designed with modularity, and adaption in mind. Some of the feature
 
 * Installing environments directly from configs on the web
 * Updating existing environments
-* Managing several environments, activating and deactiviting as needed
+* Managing several environments, activating and deactivating as needed
 
 To Install: ::
 
