@@ -13,8 +13,6 @@ from sprinter.directory import Directory
 from sprinter.injections import Injections
 from sprinter.system import System
 from sprinter.lib import get_formula_class
-from sprinter.ez_setup import use_setuptools
-use_setuptools(version="0.6c11")
 
 config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
