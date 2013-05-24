@@ -169,6 +169,14 @@ class Manifest(object):
         """
         return True
 
+    def is_true(self, section, option):
+        """
+        Return true if the section option combo exists and it is set
+        to a truthy value.
+        """
+        return self.has_option(section, option) and \
+            self.get(section, option).lower().startswith('t')
+
     # act like a configparser if asking for a non-existent method.
     def __getattr__(self, name):
         return getattr(self.manifest, name)

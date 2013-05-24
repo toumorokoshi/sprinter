@@ -120,13 +120,18 @@ class Environment(object):
         self.logger.info("Reloading environment %s..." % source_manifest.namespace)
         self._reload(source_manifest, directory=directory)
 
-    def initialize(self, source_manifest=None, target_manifest=None, directory=None):
+    def initialize(self, source_manifest=None, target_manifest=None, directory=None, new=False):
         """
         Initialize the environment for a sprinter action
         """
         self.config = Config(source=source_manifest, target=target_manifest)
         self.directory = directory if directory else Directory(self.config.namespace)
         self.directory.initialize()
+        if new or (target_manifest.is_true('config', 'virtualenv') and \
+               not source_manifest.is_true('config', 'virtualenv')):
+            self.logger.info("Installing Virtualenv...")
+            create_virtualenv(self.directory.root_dir,
+                              use_distribute=True)
         self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
         self.config.grab_inputs(target_manifest if target_manifest else source_manifest)
         kind = 'target' if target_manifest else 'source'
@@ -161,7 +166,9 @@ class Environment(object):
         """
         Intall an environment from a target manifest Manifest
         """
-        self.initialize(target_manifest=target_manifest, directory=directory)
+        self.initialize(target_manifest=target_manifest, 
+                        directory=directory,
+                        new=True)
         self._run_setups()
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                                (self.directory.root_dir, self.directory.root_dir))
