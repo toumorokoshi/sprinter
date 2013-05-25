@@ -1,8 +1,8 @@
 # a one-liner to setup a sandboxed sprinter and perform a sprinter
 # command use this if you do not want to install sprinter globally,
 # and prefer a one-time use instead.
-mkdir -p /tmp/sprinter
-cd /tmp/sprinter
+mkdir -p /tmp/sprinter-sandbox
+cd /tmp/sprinter-sandbox
 #write out the required buildout config file
 echo "
 [buildout]
@@ -27,4 +27,4 @@ bin/sprinter install https://raw.github.com/toumorokoshi/sprinter/master/example
 
 
 # finally, delete the temporary directory
-rm -r $TMP
+rm -r /tmp/sprinter-sandbox
