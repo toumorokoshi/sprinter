@@ -8,11 +8,15 @@ import os
 import re
 import shutil
 import sys
+
+from sprinter.brew import install_brew
 from sprinter.manifest import Config, Manifest
 from sprinter.directory import Directory
 from sprinter.injections import Injections
 from sprinter.system import System
 from sprinter.lib import get_formula_class
+
+from sprinter.virtualenv import create_environment as create_virtualenv
 
 config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
@@ -134,6 +138,8 @@ class Environment(object):
                               use_distribute=True)
         self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
         self.config.grab_inputs(target_manifest if target_manifest else source_manifest)
+        self.logger.info("Installing Brew...")
+        install_brew(self.directory.root_dir)
         kind = 'target' if target_manifest else 'source'
         self.context_dict = self.__generate_context_dict(kind=kind)
 

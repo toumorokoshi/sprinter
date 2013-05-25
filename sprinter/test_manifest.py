@@ -53,9 +53,6 @@ class TestManifest(unittest.TestCase):
         self.manifest_old = Manifest(StringIO(manifest_old))
         self.manifest_incorrect_dependency = Manifest(StringIO(manifest_incorrect_dependency))
 
-    def tearDown(self):
-        pass
-
     def test_dependency_order(self):
         """ Test whether a proper dependency tree generated the correct output. """
         sections = self.manifest_old.formula_sections()

@@ -3,11 +3,13 @@ Library module for sprinter. To handle a lot of the typical
 features of the library.
 
 """
+import gzip
 import inspect
 import imp
 import os
 import re
 import subprocess
+import tarfile
 import urllib2
 from StringIO import StringIO
 from base64 import b64encode
@@ -199,6 +201,22 @@ def which(program):
                 return exe_file
 
     return None
+
+
+def extract_targz(url, target_dir, remove_comman_prefix=False):
+    """ extract a targz and install to the target directory """
+    gz = gzip.GzipFile(fileobj=StringIO(urllib2.urlopen(url).read()))
+    tf = tarfile.TarFile(fileobj=gz)
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    if not remove_comman_prefix:
+        tf.extractall(path=target_dir)
+        return
+    common_prefix = os.path.commonprefix(tf.getnames()) + "/"
+    for tfile in tf.getmembers():
+        tfile.name = tfile.name.replace(common_prefix, "", 1)
+        if tfile.name != "":
+            tf.extract(tfile, target_dir)
 
 if __name__ == '__main__':
     import doctest
