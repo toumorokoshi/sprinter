@@ -16,13 +16,13 @@ eggs = sprinter
 if [[ `uname` == 'Linux' ]]; then 
     wget http://downloads.buildout.org/2/bootstrap.py
 elif [[ `uname` == 'Darwin' ]]; then
-    curl http://downloads.buildout.org/2/bootstrap.py
+    curl -o bootstrap.py http://downloads.buildout.org/2/bootstrap.py
 fi
 python bootstrap.py
 bin/buildout
 
 
-# put your commands here. e.g.:
+# Put your Commands here. e.g.:
 bin/sprinter install https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter.cfg
 
 
