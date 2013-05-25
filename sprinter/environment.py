@@ -139,6 +139,7 @@ class Environment(object):
         self.injections = Injections(wrapper="SPRINTER_%s" % self.config.namespace)
         self.config.grab_inputs(target_manifest if target_manifest else source_manifest)
         self.logger.info("Installing Brew...")
+        os.environ['PATH'] = self.directory.bin_path + ":" + os.environ['PATH']
         install_brew(self.directory.root_dir)
         kind = 'target' if target_manifest else 'source'
         self.context_dict = self.__generate_context_dict(kind=kind)

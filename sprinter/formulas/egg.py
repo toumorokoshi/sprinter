@@ -15,7 +15,7 @@ class EggFormula(FormulaStandard):
         super(EggFormula, self).__init__(environment)
 
     def setup(self, feature_name, config):
-        easy_install([config['egg'], "--prefix", self.directory.root_path])
+        call("easy_install %s" % config['egg'])
         self.__install_package(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
