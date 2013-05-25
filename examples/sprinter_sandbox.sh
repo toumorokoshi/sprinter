@@ -1,8 +1,8 @@
 # a one-liner to setup a sandboxed sprinter and perform a sprinter
 # command use this if you do not want to install sprinter globally,
 # and prefer a one-time use instead.
-TMP="$(mktemp -d)"
-cd $TMP
+mkdir -p /tmp/sprinter
+cd /tmp/sprinter
 #write out the required buildout config file
 echo "
 [buildout]
