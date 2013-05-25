@@ -3,7 +3,7 @@ Installs a package from whatever the native package manager is
 (apt-get for debian-based, brew for OS X)
 [env]
 formula = sprinter.formulas.package
-debian = git
+apt-get = git
 brew = git
 """
 import os
@@ -31,10 +31,11 @@ class PackageFormula(FormulaStandard):
     def __install_package(self, feature_name, config):
         if self.package_manager in config:
             if not self.manager_installed:
-                if self.package_manager == "brew":
+                # prompt this
+                """if self.package_manager == "brew":
                     if not self.__install_brew():
                         self.logger.info("Unable to install package! skipping...")
-                        return
+                        return"""
             package = config[self.package_manager]
             self.logger.info("Installing %s..." % package)
             call_command = "%s%s install %s" % (self.package_manager, self.args, package)
