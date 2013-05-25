@@ -2,6 +2,19 @@ sprinter
 ========
 [![Build Status](https://travis-ci.org/toumorokoshi/sprinter.png)](https://travis-ci.org/toumorokoshi/sprinter)
 
+Installation
+============
+You can install sprinter using easy_install:
+
+    $ (sudo) easy_install http://github.com/toumorokoshi/sprinter/tarball/master
+
+Or use a sandboxed install:
+
+OSX:
+
+    $ $(curl -fsSL http://github.com/toumorokoshi/sprinter/tarball/master)
+   
+
 A cross-platform environment bootstrapping framework!
 
 Sprinter is a framework designed to making bootstrapping development environments easier. There are three main components to a usable sprinter script:
@@ -31,3 +44,5 @@ deactivate MY_ENVIRONMENT
     $ sprinter update MY_ENVIRONMENT
 
 Updates the environment to the latest version as specified in the manifest, and activates it
+
+
