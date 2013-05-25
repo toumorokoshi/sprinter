@@ -131,8 +131,8 @@ class Environment(object):
         self.config = Config(source=source_manifest, target=target_manifest)
         self.directory = directory if directory else Directory(self.config.namespace)
         self.directory.initialize()
-        if new or (target_manifest.is_true('config', 'virtualenv') and \
-               not source_manifest.is_true('config', 'virtualenv')):
+        if (source_manifest is None or not source_manifest.is_true('config', 'virtualenv')) and \
+           target_manifest.is_true('config', 'virtualenv'):
             self.logger.info("Installing Virtualenv...")
             create_virtualenv(self.directory.root_dir,
                               use_distribute=True)
