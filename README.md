@@ -12,7 +12,11 @@ Or use a sandboxed install:
 
 OSX:
 
-    $ $(curl -fsSL http://github.com/toumorokoshi/sprinter/tarball/master)
+    $ curl -s https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter_sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
+
+Debian-Based (e.g. Ubuntu)
+    
+    $ cd /tmp/; wget https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter_sandbox.sh; bash sprinter_sandbox.sh
    
 
 A cross-platform environment bootstrapping framework!
