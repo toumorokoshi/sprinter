@@ -23,8 +23,11 @@ class PackageFormula(FormulaStandard):
         super(PackageFormula, self).setup(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
-        if 'formula' not in source_config or \
-                source_config['formula'] != target_config['formula']:
+        install_package = ('formula' not in source_config
+                           or (source_config['formula'] != target_config['formula'])
+                           or (self.package_manager in target_config and self.package_manager not in source_config)
+                           or (target_config[self.package_manager] != source_config[self.package_manager]))
+        if install_package:
             self.__install_package(feature_name, target_config)
         super(PackageFormula, self).update(feature_name, source_config, target_config)
 
