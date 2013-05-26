@@ -1,19 +1,20 @@
-# a one-liner to setup a sandboxed sprinter and perform a sprinter
-# command use this if you do not want to install sprinter globally,
-# and prefer a one-time use instead.
+# a one-liner to install a sandboxed sprinter. Use this if you do not
+# want to or can not install sprinter as sudo.
 mkdir -p /tmp/sprinter-sandbox
 cd /tmp/sprinter-sandbox
 #write out the required buildout config file
 echo "
 [buildout]
 parts = python
+find-links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.4.1
 
 [python]
 recipe = zc.recipe.egg
-eggs = sprinter
+include-site-packages = false
+eggs = sprinter==0.4.1
 " > buildout.cfg
 # install buildout sandboxed
-if [[ `uname` == 'Linux' ]]; then 
+if [[ `uname` == 'Linux' ]]; then
     wget http://downloads.buildout.org/2/bootstrap.py
 elif [[ `uname` == 'Darwin' ]]; then
     curl -o bootstrap.py http://downloads.buildout.org/2/bootstrap.py
