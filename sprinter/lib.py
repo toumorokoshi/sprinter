@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import tarfile
+import tempfile
 import urllib2
 from StringIO import StringIO
 from base64 import b64encode
