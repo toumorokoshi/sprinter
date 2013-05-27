@@ -35,7 +35,7 @@ class UnpackFormula(FormulaStandard):
     def __install(self, feature_name, config):
         if config['type'] == "tar.gz":
             extract_targz(config['url'], self.directory.install_directory(feature_name))
-        else if config['type'] == "dmg":
+        elif config['type'] == "dmg":
             extract_dmg(config['url'], self.directory.install_directory(feature_name))
 
     def __extract_targz(self, url, target_dir):

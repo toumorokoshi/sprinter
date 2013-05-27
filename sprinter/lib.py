@@ -8,10 +8,12 @@ import inspect
 import imp
 import os
 import re
+import shutil
 import subprocess
 import tarfile
 import tempfile
 import urllib2
+import urllib
 from StringIO import StringIO
 from base64 import b64encode
 
@@ -221,11 +223,21 @@ def extract_targz(url, target_dir, remove_comman_prefix=False):
 
 def extract_dmg(url, target_dir):
     tmpdir = tempfile.mkdtemp()
-    tmp_file = os.path.join(tmpdir, "temp.dmg")
-    urllib.urlretrieve(url, temp_file)
-    call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
-    shutil.copytree("/Volumes/a", target_dir)
-    call("hdiutil unmount /Volumes/a")
+    try:
+        temp_file = os.path.join(tmpdir, "temp.dmg")
+        urllib.urlretrieve(url, temp_file)
+        call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
+        for f in os.listdir("/Volumes/a/"):
+            if not f.startswith(".") and f != ' ':
+                source_path = os.path.join("/Volumes/a", f)
+                target_path = os.path.join(target_dir, f)
+                if os.path.isdir(source_path):
+                    shutil.copytree(source_path, target_path)
+                else:
+                    shutil.copy(source_path, target_path)
+    finally:
+        call("hdiutil unmount /Volumes/a")
+        shutil.rmtree(tmpdir)
 
 if __name__ == '__main__':
     import doctest
