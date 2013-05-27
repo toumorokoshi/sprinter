@@ -218,6 +218,14 @@ def extract_targz(url, target_dir, remove_comman_prefix=False):
         if tfile.name != "":
             tf.extract(tfile, target_dir)
 
+def extract_dmg(url, target_dir):
+    tmpdir = tempfile.mkdtemp()
+    tmp_file = os.path.join(tmpdir, "temp.dmg")
+    urllib.urlretrieve(url, temp_file)
+    call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
+    shutil.copytree("/Volumes/a", target_dir)
+    call("hdiutil unmount /Volumes/a")
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
