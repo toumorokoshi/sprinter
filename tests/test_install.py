@@ -25,6 +25,7 @@ class TestInstall(unittest.TestCase):
 
     @patch('sprinter.environment.Environment')
     def test_install_environment(self, environment):
+        """ Test if install calls the proper methods """
         args = ['install', 'http://www.google.com']
         calls = [call(logging_level=logging.INFO),
                  call().install('http://www.google.com',
@@ -36,6 +37,7 @@ class TestInstall(unittest.TestCase):
 
     @patch('sprinter.environment.Environment')
     def test_errors_(self, environment):
+        """ Test if validate catches an invalid manifest """
         config = {'validate_manifest.return_value' : ['this is funky']}
         environment.configure_mock(**config)
         args = ['validate', self.temp_file_path]
@@ -47,6 +49,7 @@ class TestInstall(unittest.TestCase):
         environment.assert_has_calls(calls)
 
     def test_parse_domain(self):
+        """ Test if domains are properly parsed """
         match_tuples = [
             ("http://github.com/antehuantuehton", "http://github.com/"),
             ("https://github.com", "https://github.com")

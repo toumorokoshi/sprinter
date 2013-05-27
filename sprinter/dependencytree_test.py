@@ -1,5 +1,3 @@
-import unittest
-
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 
 LEGAL_TREE = {
@@ -24,14 +22,7 @@ CYCLIC_TREE = {
 
 LEGAL_ORDER = []
 
-
-class TestInjections(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class TestDependencyTree(object):
 
     def test_proper_tree(self):
         """ Test whether a proper dependency tree generated the correct output. """
@@ -40,12 +31,13 @@ class TestInjections(unittest.TestCase):
         added_elements = []
         for el in order:
             for dependency in LEGAL_TREE[el]:
-                self.assertTrue(dependency in added_elements,
-                                "Element %s depends on %s and not added yet with order of %s!" %
-                                (el, dependency, added_elements))
+                assert dependency in added_elements, \
+                    "Element %s depends on %s and not added yet with order of %s!" % \
+                    (el, dependency, added_elements)
             added_elements.append(el)
 
     def test_missing_entry_tree(self):
+        """ Test if dependencytree catches a missing tree """
         try:
             DependencyTree(MISSING_ENTRY_TREE)
         except DependencyTreeException:
@@ -53,6 +45,7 @@ class TestInjections(unittest.TestCase):
         raise("Missing entry tree did not raise an error!")
 
     def test_cyclic_tree(self):
+        """ Test if dependencytree catches a cycle """
         try:
             DependencyTree(CYCLIC_TREE)
         except DependencyTreeException:

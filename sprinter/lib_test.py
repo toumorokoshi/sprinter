@@ -17,6 +17,7 @@ class TestLib(unittest.TestCase):
             self.environment = Environment()
 
         def test_get_formula_class(self):
+            """ Test if a formula class is grabbed """
             class_instance = lib.get_formula_class("sprinter.formulas.unpack", self.environment)
             self.assertTrue(issubclass(class_instance.__class__, FormulaBase))
 
@@ -28,13 +29,13 @@ class TestLib(unittest.TestCase):
                             "%s class is not equal to %s" % (class_instance, EnvFormula))
 
         def test_lib_errorcode(self):
-            """ Verify a proper error code is returned """
-            self.assertEqual(lib.call("ls"), 0, "ls call returns a non-zero exit!")
-            self.assertEqual(lib.call("ls", bash=True), 0, "ls call returns a non-zero exit!")
+            """ Test a proper error code is returned """
+            self.assertEqual(lib.call("cd"), 0, "cd call returns a non-zero exit!")
+            self.assertEqual(lib.call("cd", bash=True), 0, "cd call returns a non-zero exit!")
             self.assertEqual(lib.call("exit 1", bash=True), 1, "gibberish call returns a zero exit!")
 
         def test_call_error(self):
-            """ Verify an exception is thrown for a non-existent command """
+            """ Test an exception is thrown for a non-existent command """
             try:
                 lib.call("eahxanea0e0")
             except CommandMissingException:

@@ -31,7 +31,7 @@ client = perforce.local:1666
 """
 
 
-def load_tests(loader, tests, ignore):
+"""def load_tests(loader, tests, ignore):
     # globs for manifest
     old_manifest = Manifest(StringIO(test_old_version))
     new_manifest = Manifest(StringIO(test_new_version))
@@ -44,3 +44,4 @@ def load_tests(loader, tests, ignore):
                                                     'config_old_only': config_old_only}))
     tests.addTests(doctest.DocTestSuite(module=sprinter.lib))
     return tests
+"""

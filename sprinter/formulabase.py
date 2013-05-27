@@ -40,3 +40,7 @@ class FormulaBase(object):
     def reload(self, feature_name, config):
         """ tasks to call when reloading """
         pass
+
+    def validate(self, config):
+        """ validate the configuration as good """
+        pass

@@ -43,5 +43,9 @@ class FormulaStandard(FormulaBase):
                                       bash=True,
                                       cwd=cwd))
 
+    def validate(self, config):
+        """ Validate whether a configuration is valid or not """
+        return True
+
     def destroy(self, feature_name, config):
         """ Destroys an old feature if it is no longer required """
