@@ -5,7 +5,9 @@ This page highlights Sprinter's roadmap to reach 1.0
 release. Currently sprinter as at version 0.4
 
 ### 0.5
-Ensure proper coverage for these madules:
+Remove use of sudo as much as possible
+
+Ensure proper coverage for these modules:
 
 * directory
 * environment
@@ -21,17 +23,6 @@ General:
 
 * add way to ask for prompts
 * cleanly close bad installs
-
-DMG Installation utility:
-Create a formula to install the contents of a dmg somewhere, since it seems that a lot of os x utilities use this mechanism.
-
-* Commands to run:
-    * hdiutil mount ~/Downloads/P4V.dmg 
-    * sudo cp -R /Volumes/P4V/p4v.app /Applications/
-
-* Looks like this would help:
-	* http://osxdaily.com/2011/12/17/mount-a-dmg-from-the-command-line-in-mac-os-x/
-
 
 ### 0.6 
 0.6 will focus on how to test formulas. Many bugs will be fixed as well, such as:
