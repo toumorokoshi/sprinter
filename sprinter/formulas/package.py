@@ -1,7 +1,7 @@
 """
 Installs a package from whatever the native package manager is
 (apt-get for debian-based, brew for OS X)
-[env]
+[git]
 formula = sprinter.formulas.package
 apt-get = git
 brew = git

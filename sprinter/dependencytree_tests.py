@@ -22,6 +22,7 @@ CYCLIC_TREE = {
 
 LEGAL_ORDER = []
 
+
 class TestDependencyTree(object):
 
     def test_proper_tree(self):

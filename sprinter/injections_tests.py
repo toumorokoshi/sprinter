@@ -1,15 +1,10 @@
 import os
 import shutil
 import tempfile
-import unittest
 
-from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.injections import Injections
 
-from nose import tools
-
-TEST_CONTENT = \
-"""
+TEST_CONTENT = """
 Testing abc.
 
 #OVERRIDE
@@ -17,8 +12,7 @@ here is an override string. it should appear at the bottom.
 #OVERRIDE
 """
 
-TEST_OVERRIDE_CONTENT = \
-"""
+TEST_OVERRIDE_CONTENT = """
 Testing abc.
 
 
@@ -29,7 +23,6 @@ injectme
 #OVERRIDE
 here is an override string. it should appear at the bottom.
 #OVERRIDE"""
-
 
 
 class TestInjections(object):
@@ -77,7 +70,6 @@ class TestInjections(object):
 
     def test_created(self):
         """ Test the injection creates a file if it does not exist """
-        test_injections = "this should stay"
         i = Injections("testinjection")
         new_file = os.path.join(self.temp_dir, "testcreated")
         i.inject(new_file, self.test_injection)

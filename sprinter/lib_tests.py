@@ -5,8 +5,6 @@ Tests for the library
 import os
 import shutil
 import tempfile
-import unittest
-import urllib
 
 from sprinter.formulabase import FormulaBase
 from sprinter.environment import Environment
