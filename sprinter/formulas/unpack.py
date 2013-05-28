@@ -6,6 +6,7 @@ import gzip
 import os
 import tarfile
 import urllib
+import shutil
 from StringIO import StringIO
 
 from sprinter.formulastandard import FormulaStandard
@@ -24,9 +25,9 @@ class UnpackFormula(FormulaStandard):
 
     def update(self, feature_name, source_config, target_config):
         if (source_config['formula'] != target_config['formula']
-            or source_config['url'] != target_config['url']):
+           or source_config['url'] != target_config['url']):
             shutil.rmtree(self.directory.install_directory(feature_name))
-            self.__install(config['url'], self.directory.install_directory(feature_name))
+            self.__install(target_config['url'], self.directory.install_directory(feature_name))
         super(UnpackFormula, self).update(feature_name, source_config, target_config)
 
     def destroy(self, feature_name, config):
@@ -36,7 +37,10 @@ class UnpackFormula(FormulaStandard):
         if config['type'] == "tar.gz":
             extract_targz(config['url'], self.directory.install_directory(feature_name))
         elif config['type'] == "dmg":
-            extract_dmg(config['url'], self.directory.install_directory(feature_name))
+            if not self.system.isOSX():
+                self.logger.warn("Non OSX based distributions can not install a dmg!")
+            else:
+                extract_dmg(config['url'], self.directory.install_directory(feature_name))
 
     def __extract_targz(self, url, target_dir):
         """ extract a targz and install to the target directory """
