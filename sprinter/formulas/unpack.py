@@ -10,7 +10,7 @@ import shutil
 from StringIO import StringIO
 
 from sprinter.formulastandard import FormulaStandard
-from sprinter.lib import extract_dmg, extract_targz
+from sprinter.lib import extract_dmg, extract_targz, extract_zip
 
 
 class UnpackFormula(FormulaStandard):
@@ -36,6 +36,8 @@ class UnpackFormula(FormulaStandard):
     def __install(self, feature_name, config):
         if config['type'] == "tar.gz":
             extract_targz(config['url'], self.directory.install_directory(feature_name))
+        elif config['type'] == "zip":
+            extract_zip(config['url'], self.directory.install_directory(feature_name))
         elif config['type'] == "dmg":
             if not self.system.isOSX():
                 self.logger.warn("Non OSX based distributions can not install a dmg!")
