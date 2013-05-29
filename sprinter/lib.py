@@ -224,13 +224,17 @@ def extract_targz(url, target_dir, remove_common_prefix=False):
             tf.extract(tfile, target_dir)
 
 
-def extract_zip(url, target_dir):
+def extract_zip(url, target_dir, remove_common_prefix=False):
+    if remove_common_prefix:
+        raise("Remove common prefix for zip not implemented yet!")
     memory_file = io.BytesIO(urllib.urlopen(url).read())
     zip_file = zipfile.ZipFile(memory_file)
     zip_file.extractall(target_dir)
 
 
-def extract_dmg(url, target_dir):
+def extract_dmg(url, target_dir, remove_common_prefix=False):
+    if remove_common_prefix:
+        raise("Remove common prefix for zip not implemented yet!")
     tmpdir = tempfile.mkdtemp()
     try:
         temp_file = os.path.join(tmpdir, "temp.dmg")

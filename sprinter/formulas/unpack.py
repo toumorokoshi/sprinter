@@ -1,5 +1,7 @@
 """
 Unpacks and deploys to a location
+
+strip-top-level-directory=True
 """
 
 import gzip
@@ -11,6 +13,7 @@ from StringIO import StringIO
 
 from sprinter.formulastandard import FormulaStandard
 from sprinter.lib import extract_dmg, extract_targz, extract_zip
+from sprinte import lib
 
 
 class UnpackFormula(FormulaStandard):
@@ -28,21 +31,31 @@ class UnpackFormula(FormulaStandard):
            or source_config['url'] != target_config['url']):
             shutil.rmtree(self.directory.install_directory(feature_name))
             self.__install(target_config['url'], self.directory.install_directory(feature_name))
-        super(UnpackFormula, self).update(feature_name, source_config, target_config)
+            if 'command' in target_config:
+                self.logger.info(lib.call(target_config['command'],
+                                          bash=True,
+                                          cwd=self.directory.install_directory(feature_name)))
+        if 'rc' in target_config:
+            self.directory.add_to_rc(target_config['rc'])
 
     def destroy(self, feature_name, config):
         super(UnpackFormula, self).destroy(feature_name, config)
 
     def __install(self, feature_name, config):
+        remove_common_prefix = 'remove_common_prefix' in config and \
+                               config['remove_common_prefix'].lower().startswith('t')
         if config['type'] == "tar.gz":
-            extract_targz(config['url'], self.directory.install_directory(feature_name))
+            extract_targz(config['url'], self.directory.install_directory(feature_name),
+                          remove_common_prefix=remove_common_prefix)
         elif config['type'] == "zip":
-            extract_zip(config['url'], self.directory.install_directory(feature_name))
+            extract_zip(config['url'], self.directory.install_directory(feature_name),
+                        remove_common_prefix=remove_common_prefix)
         elif config['type'] == "dmg":
             if not self.system.isOSX():
                 self.logger.warn("Non OSX based distributions can not install a dmg!")
             else:
-                extract_dmg(config['url'], self.directory.install_directory(feature_name))
+                extract_dmg(config['url'], self.directory.install_directory(feature_name),
+                            remove_common_prefix=remove_common_prefix)
 
     def __extract_targz(self, url, target_dir):
         """ extract a targz and install to the target directory """
