@@ -13,7 +13,7 @@ from StringIO import StringIO
 
 from sprinter.formulastandard import FormulaStandard
 from sprinter.lib import extract_dmg, extract_targz, extract_zip
-from sprinte import lib
+from sprinter import lib
 
 
 class UnpackFormula(FormulaStandard):
