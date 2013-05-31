@@ -13,34 +13,23 @@ class FormulaBase(object):
         self.config = environment.config
         self.injections = environment.injections
         self.system = environment.system
+        self.lib = environment.lib
         self.logger = logging.getLogger('sprinter')
 
-    def setup(self, feature_name, config):
-        """ Setup performs the setup required, with the config
-        specified """
-        pass
+    def install(self, feature_name, config):
+        """ Install is called when a feature does not previously exist. """
 
     def update(self, feature_name, source_config, target_config):
-        """ Setup performs the setup required, and works with the old
-        config is destruction is required """
-        pass
+        """ Update is called when a feature previously exists. """
 
-    def destroy(self, feature_name, config):
-        """ Destroys an old feature if it is no longer required """
-        pass
+    def remove(self, feature_name, config):
+        """ Remove is called when a feature no longer exists. """
 
     def deactivate(self, feature_name, config):
-        """ tasks to run when deactivating """
-        pass
+        """ Deactivate is called when a user deactivates the environment. """
 
     def activate(self, feature_name, config):
-        """ function to run when activating """
-        pass
-
-    def reload(self, feature_name, config):
-        """ tasks to call when reloading """
-        pass
+        """ Activate is called when a user activates the environment. """
 
     def validate(self, config):
-        """ validate the configuration as good """
-        pass
+        """ validates the feature configuration, and returns true or false. """

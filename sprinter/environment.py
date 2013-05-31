@@ -9,6 +9,7 @@ import re
 import shutil
 import sys
 
+from sprinter import lib
 from sprinter.brew import install_brew
 from sprinter.manifest import Config, Manifest
 from sprinter.directory import Directory
@@ -23,15 +24,18 @@ config_substitute_match = re.compile("%\(config:([^\)]+)\)")
 
 class Environment(object):
 
-    formula_dict = {}
     config = None  # handles the configuration, and manifests
-    system = None  # stores system information
-    injections = None  # handles injections
     directory = None  # handles interactions with the environment directory
-    context_dict = {}
+    injections = None  # handles injections
+    logger = None  # the logger for the class
+    system = None  # stores system information
+    lib = None  # reference to lib methods
+    _context_dict = {}
+    _formula_dict = {}
 
     def __init__(self, logger=None, logging_level=logging.INFO):
         self.system = System()
+        self.lib = lib
         self.logger = self.__build_logger(logger=logger, level=logging_level)
         if logging_level == logging.DEBUG:
             self.logger.debug("Starting in debug mode...")
@@ -143,7 +147,7 @@ class Environment(object):
             self.logger.info("Installing Brew...")
             install_brew(self.directory.root_dir)
         kind = 'target' if target_manifest else 'source'
-        self.context_dict = self.__generate_context_dict(kind=kind)
+        self._context_dict = self.__generate_context_dict(kind=kind)
 
     def finalize(self):
         """ command to run at the end of sprinter's run """
@@ -156,7 +160,7 @@ class Environment(object):
 
     def context(self):
         """ get a context dictionary to replace content """
-        return self.context_dict
+        return self._context_dict
 
     def validate_context(self, content):
         """ check if all the config variables desired exist, and prompt them if not """
@@ -174,7 +178,7 @@ class Environment(object):
         """
         Intall an environment from a target manifest Manifest
         """
-        self.initialize(target_manifest=target_manifest, 
+        self.initialize(target_manifest=target_manifest,
                         directory=directory,
                         new=True)
         self._run_setups()
@@ -298,9 +302,9 @@ class Environment(object):
         get an instance of the formula object object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        if formula not in self.formula_dict:
-            self.formula_dict[formula] = get_formula_class(formula, self)
-        return self.formula_dict[formula]
+        if formula not in self._formula_dict:
+            self._formula_dict[formula] = get_formula_class(formula, self)
+        return self._formula_dict[formula]
 
     def __generate_context_dict(self, kind='target'):
         context_dict = self.config.get_context_dict(kind=kind)
@@ -319,7 +323,7 @@ class Environment(object):
         if type(value) == dict:
             return dict([(k, self.__substitute_objects(v)) for k, v in value.items()])
         elif type(value) == str:
-            return value % self.context_dict
+            return value % self._context_dict
         else:
             return value
 
@@ -329,3 +333,10 @@ class Environment(object):
         """
         return ('phases' not in config or
                 phase_name in [x.strip() for x in config['phases'].split(",")])
+
+    def install_formula(self, feature_name, formula_instance=None):
+        """ Installs a formula with a given config object """
+        if not formula_instance:
+            formula_instance = self.__get_formula_instance(self.config['target']['formula'])
+        specialized_config = self.__substitute_objects(self.config.target.formula_sections('feature_name')
+        formula_instance.setup(feature_name, specialized_config)
