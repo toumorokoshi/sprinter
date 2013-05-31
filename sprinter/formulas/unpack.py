@@ -28,7 +28,6 @@ class UnpackFormula(FormulaStandard):
         self.__install(feature_name, config)
         if config['type'] == "tar.gz":
             extract_targz(config['url'], self.directory.install_directory(feature_name))
-            self.__extract_targz(config['url'], self.directory.install_directory(feature_name))
         if 'executable' in config:
             symlink_target = config['symlink'] if 'symlink' in config else config['executable']
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
@@ -64,15 +63,6 @@ class UnpackFormula(FormulaStandard):
             else:
                 extract_dmg(config['url'], self.directory.install_directory(feature_name),
                             remove_common_prefix=remove_common_prefix)
-
-    def __extract_targz(self, url, target_dir):
-        """ extract a targz and install to the target directory """
-        self.environment.logger.debug("Extracting package at %s" % url)
-        gz = gzip.GzipFile(fileobj=StringIO(urllib.urlopen(url).read()))
-        tf = tarfile.TarFile(fileobj=gz)
-        if not os.path.exists(target_dir):
-            os.makedirs(target_dir)
-        tf.extractall(path=target_dir)
 
     def __symlink_executable(self, feature_name, source, target):
         source_path = os.path.join(self.directory.install_directory(feature_name), source)
