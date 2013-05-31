@@ -26,8 +26,6 @@ class UnpackFormula(FormulaStandard):
 
     def setup(self, feature_name, config):
         self.__install(feature_name, config)
-        if config['type'] == "tar.gz":
-            extract_targz(config['url'], self.directory.install_directory(feature_name))
         if 'executable' in config:
             symlink_target = config['symlink'] if 'symlink' in config else config['executable']
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
