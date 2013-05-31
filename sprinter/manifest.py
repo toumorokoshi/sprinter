@@ -206,7 +206,7 @@ class Config(object):
         self.source = source
         self.target = target
         if self.target:
-            self.source_location = self.target.source() 
+            self.source_location = self.target.source()
         if self.source and not self.source_location:
             self.source.source()
         # store raws to use on write

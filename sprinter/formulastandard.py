@@ -19,9 +19,7 @@ class FormulaStandard(FormulaBase):
         self.system = environment.system
         self.logger = logging.getLogger('sprinter')
 
-    def setup(self, feature_name, config):
-        """ Setup performs the setup required, with the config
-        specified """
+    def install(self, feature_name, config):
         install_directory = self.directory.install_directory(feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
         if 'rc' in config:
@@ -32,8 +30,6 @@ class FormulaStandard(FormulaBase):
                                       cwd=cwd))
 
     def update(self, feature_name, source_config, target_config):
-        """ Setup performs the setup required, and works with the old
-        config is destruction is required """
         install_directory = self.directory.install_directory(feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
         if 'rc' in target_config:
@@ -44,8 +40,4 @@ class FormulaStandard(FormulaBase):
                                       cwd=cwd))
 
     def validate(self, config):
-        """ Validate whether a configuration is valid or not """
         return True
-
-    def destroy(self, feature_name, config):
-        """ Destroys an old feature if it is no longer required """
