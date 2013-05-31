@@ -10,6 +10,7 @@ class TestFormula(object):
     """
 
     def setUp(self):
+        self.environment = Mock()
         pass
 
     def tearDown(self):
