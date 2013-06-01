@@ -326,5 +326,3 @@ class Environment(object):
         """ Installs a formula with a given config object """
         if not formula_instance:
             formula_instance = self.__get_formula_instance(self.config['target']['formula'])
-        specialized_config = self.__substitute_objects(self.config.target.formula_sections('feature_name')
-        formula_instance.setup(feature_name, specialized_config)

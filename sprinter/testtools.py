@@ -12,7 +12,8 @@ class TestFormula(unittest.TestCase):
     A test class to provide utility methods for testing sprinter
     formulas.
     """
-    def __init__(self, formula_class, source_config=None, target_config=None):
+    def __init__(self, formula_class, source_config=None, target_config=None, **kwargs):
+        super(TestFormula, self).__init__(**kwargs)
         self.source = (None if not source_config else
                        Manifest(StringIO(source_config), namespace="test"))
         self.target = (None if not target_config else
