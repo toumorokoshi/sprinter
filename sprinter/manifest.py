@@ -62,7 +62,7 @@ main_branch==comp_main
 """
 
 
-CONFIG_RESERVED = ['source', 'inputs']
+CONFIG_RESERVED = ['source', 'inputs', 'rc']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
 
 
@@ -162,13 +162,6 @@ class Manifest(object):
         else:
             return [s for s in self.manifest.sections() if s != "config"]
 
-    def valid(self):
-        """
-        Validate the configuration, ensure that the configuration is
-        properly formatted.
-        """
-        return True
-
     def is_true(self, section, option):
         """
         Return true if the section option combo exists and it is set
@@ -176,6 +169,11 @@ class Manifest(object):
         """
         return self.has_option(section, option) and \
             self.get(section, option).lower().startswith('t')
+
+    def get_formula_class(self, section):
+        if section not in self.formula_sections():
+            raise ManifestError("Cannot get feature %s!" % section)
+        return self.manifest.get(section, 'formula')
 
     # act like a configparser if asking for a non-existent method.
     def __getattr__(self, name):

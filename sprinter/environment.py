@@ -116,18 +116,6 @@ class Environment(object):
         self.logger.info("Activating environment %s..." % source_manifest.namespace)
         self._activate(source_manifest, directory=directory)
 
-    def reload(self, namespace):
-        """
-        Activate an environment namespace
-        """
-        directory = Directory(namespace, rewrite_rc=False)
-        if directory.new:
-            self.logger.error("Namespace %s does not exist!" % namespace)
-            return
-        source_manifest = Manifest(directory.manifest_path)
-        self.logger.info("Reloading environment %s..." % source_manifest.namespace)
-        self._reload(source_manifest, directory=directory)
-
     def initialize(self, source_manifest=None, target_manifest=None, directory=None, new=False):
         """
         Initialize the environment for a sprinter action
