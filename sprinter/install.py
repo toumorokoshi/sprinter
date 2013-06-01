@@ -9,14 +9,16 @@ from optparse import OptionParser
 
 from sprinter import lib
 from sprinter.environment import Environment
+from sprinter.manifest import Manifest
+from sprinter.directory import Directory
 
 description = \
 """
 Install an environment as specified in a sprinter config file
 """
 
-VALID_COMMANDS = ["install", "update", "environments", "validate",
-                  "remove", "deactivate", "activate", "reload"]
+VALID_COMMANDS = ["install", "update", "remove", "deactivate", "activate",
+                  "environments", "validate"]
 
 parser = OptionParser(description=description)
 # parser = argparse.ArgumentParser(description=description)
@@ -43,6 +45,7 @@ parser.add_option('--virtualenv', dest='virtualenv', default=False,
                     help="if true, will virtualenv sprinter and install eggs relative to it, " +
                          "false will disable apt-get sandboxes for configuration that request it.")
 
+
 def signal_handler(signal, frame):
     print "Shutting down sprinter..."
     sys.exit(0)
@@ -64,48 +67,43 @@ def parse_args(argv, Environment=Environment):
         error("Please enter a sprinter action: %s" % str(VALID_COMMANDS))
     command = args[0].lower()
     if command not in VALID_COMMANDS:
-        error("Please enter a valid sprinter action: %s" % str(VALID_COMMANDS))
+        error("Please enter a valid sprinter action: %s" % ",".join(VALID_COMMANDS))
     target = args[1] if len(args) > 1 else None
     logging_level = logging.DEBUG if options.verbose else logging.INFO
+    # start processing commands
     env = Environment(logging_level=logging_level)
 
-    if command == "environments":
+    if command == "install":
+        if options.username or options.auth:
+            options = get_credentials(options, parse_domain(target))
+            target = Manifest(target, username=options.username, password=options.password)
+        env.target = target
+        env.namespace = options.namespace
+        env.install()
+
+    elif command == "update":
+        env.directory = Directory(target)
+        env.source = Manifest(env.directory.manifest_path)
+        if options.username or options.auth:
+            options = get_credentials(options, target)
+        env.target = Manifest(env.source.source(),
+                              username=options.username,
+                              password=options.password)
+        env.update()
+
+    elif command in ["remove", "deactivate", "activate"]:
+        env.directory = Directory(target)
+        env.source = Manifest(env.directory.manifest_path)
+        getattr(env, command)()
+
+    elif command == "environments":
         SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
         for env in os.listdir(SPRINTER_ROOT):
             print "%s" % env
 
-    # these commands need an target
-    if target is None:
-        error("Please enter a target!")
-
-    if command in ('remove', 'deactivate', 'activate', 'reload'):
-        getattr(env, command)(target)
-
-    elif command == "install":
-        if options.username or options.auth:
-            if not options.username:
-                options.username = lib.prompt("Please enter the username for %s..." % parse_domain(target))
-            if not options.password:
-                options.password = lib.prompt("Please enter the password for %s..." % parse_domain(target), secret=True)
-        env.install(target,
-                  namespace=options.namespace,
-                  username=options.username,
-                  password=options.password)
-
-    elif command == "update":
-        if options.username or options.auth:
-            if not options.username:
-                options.username = lib.prompt("Please enter the username for %s..." % target)
-            if not options.password:
-                options.password = lib.prompt("Please enter the password for %s..." % target, secret=True)
-        env.update(target, username=options.username, password=options.password)
-
     elif command == "validate":
         if options.username or options.auth:
-            if not options.username:
-                options.username = lib.prompt("Please enter the username for the sprinter url...")
-            if not options.password:
-                options.password = lib.prompt("Please enter the password for the sprinter url...", secret=True)
+            options = get_credentials(parse_domain(target))
         errors = env.validate_manifest(target, username=options.username, password=options.password)
         if len(errors) > 0:
             print "Manifest is invalid!"
@@ -119,6 +117,16 @@ def parse_domain(url):
     domain_match = lib.DOMAIN_REGEX.match(url)
     if domain_match:
         return domain_match.group()
+
+
+def get_credentials(options, environment):
+    """ Get credentials or prompt for them from options """
+    if options.username or options.auth:
+        if not options.username:
+            options.username = lib.prompt("Please enter the username for %s..." % environment)
+        if not options.password:
+            options.password = lib.prompt("Please enter the password for %s..." % environment, secret=True)
+    return options
 
 if __name__ == '__main__':
     main()

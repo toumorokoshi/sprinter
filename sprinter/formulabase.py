@@ -32,4 +32,6 @@ class FormulaBase(object):
         """ Activate is called when a user activates the environment. """
 
     def validate(self, config):
-        """ validates the feature configuration, and returns true or false. """
+        """
+        validates the feature configuration, and returns a list of errors (empty list if no error)
+        """

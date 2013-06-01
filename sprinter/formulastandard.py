@@ -40,4 +40,4 @@ class FormulaStandard(FormulaBase):
                                       cwd=cwd))
 
     def validate(self, config):
-        return True
+        return []
