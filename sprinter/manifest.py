@@ -18,55 +18,11 @@ from StringIO import StringIO
 from sprinter import lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 
-test_old_version = """
-[config]
-namespace = sprinter
-
-[maven]
-formula = sprinter.formulas.unpack
-specific_version = 2.10
-
-[ant]
-formula = sprinter.formulas.unpack
-specific_version = 1.8.4
-
-[mysql]
-formula = sprinter.formulas.package
-apt-get = libmysqlclient
-          libmysqlclient-dev
-brew = mysql
-"""
-
-test_new_version = """
-[config]
-namespace = sprinter
-
-[maven]
-formula = sprinter.formulas.unpack
-specific_version = 3.0.4
-
-[ant]
-formula = sprinter.formulas.unpack
-specific_version = 1.8.4
-
-[myrc]
-formula = sprinter.formulas.template
-"""
-
-test_input_string = \
-"""
-gitroot==~/workspace
-username
-password?
-main_branch==comp_main
-"""
-
-
 CONFIG_RESERVED = ['source', 'inputs', 'rc']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
 
 
-class ManifestError(Exception):
+class ManifestException(Exception):
     pass
 
 
@@ -85,9 +41,9 @@ class Manifest(object):
     dtree = None  # dependency tree object to ascertain order
     invalidations = []   # a list of the invalidation of the Manifest. Aggregated while parsing
 
-    def __init__(self, raw_manifest, namespace=None, logger='sprinter',
+    def __init__(self, raw_manifest, namespace=None, logger=None,
                  username=None, password=None):
-        self.logger = logging.getLogger(logger)
+        self.logger = logger if logger else logging.getLogger('sprinter')
         self.manifest = self.__load_manifest(raw_manifest,
                                              username=username,
                                              password=password)
@@ -170,14 +126,31 @@ class Manifest(object):
         return self.has_option(section, option) and \
             self.get(section, option).lower().startswith('t')
 
-    def get_formula_class(self, section):
+    def get_feature_class(self, section):
         if section not in self.formula_sections():
-            raise ManifestError("Cannot get feature %s!" % section)
+            raise ManifestException("Cannot get feature %s!" % section)
         return self.manifest.get(section, 'formula')
 
+    # custom equality method
+    def __eq__(self, other):
+        if not isinstance(other, Manifest):
+            return False
+        for s in self.manifest.sections():
+            if s not in other.manifest.sections():
+                return False
+            for option in self.manifest.options(s):
+                if(not other.manifest.has_option(s, option) or
+                   self.manifest.get(s, option) != other.manifest.get(s, option)):
+                    return False
+        return True
+                
     # act like a configparser if asking for a non-existent method.
     def __getattr__(self, name):
         return getattr(self.manifest, name)
+
+
+class ConfigException(Exception):
+    """ Specifies exception is with a config """
 
 
 class Config(object):
@@ -196,11 +169,12 @@ class Config(object):
     source_location = None
     config = {}
 
-    def __init__(self, source=None, target=None, namespace=None):
+    def __init__(self, source=None, target=None, namespace=None, lib=lib):
         """
         Takes in a source and target Manifest object, with a namespace
         to override if it is desired.
         """
+        self.lib = lib
         self.source = source
         self.target = target
         if self.target:
@@ -220,11 +194,47 @@ class Config(object):
         if self.source:
             self.__load_configs(self.source)
 
-    def grab_inputs(self, manifest):
+    def setups(self):
+        """ Return a list of the features which need to be setup. """
+        if not self.target:
+            raise ConfigException("Update method requires a target manifest!")
+        return [s for s in self.target.formula_sections()
+                if not self.source or not self.source.has_section(s)]
+
+    def updates(self):
+        """ Return a list of features which need to be updated. """
+        if not self.target:
+            raise ConfigException("Update method requires a target manifest!")
+        if not self.source:
+            raise ConfigException("Update method requires a source manifest!")
+        return [s for s in self.target.formula_sections() if self.source.has_section(s)]
+
+    def removes(self):
+        """ Return a list of features which need to be destroyed. """
+        if not self.source:
+            raise ConfigException("Remove method requires a source manifest!")
+        return [s for s in self.source.formula_sections()
+                if not self.target or not self.target.has_section(s)]
+
+    def deactivations(self):
+        """ Return a list of the features which need to be deactivated. """
+        if not self.source:
+            raise ConfigException("Deactivations method requires a source manifest!")
+        return [s for s in self.source.formula_sections()]
+
+    def activations(self):
+        """ Return a list of the features which need to be deactivated. """
+        if not self.source:
+            raise ConfigException("Activations method requires a source manifest!")
+        return [s for s in self.source.formula_sections()]
+
+    def grab_inputs(self, manifest=None):
         """
-        Look for any inputs not already asked accounted for in the manifest, and
+        Look for any inputs not already accounted for in the manifest, and
         query the user for them.
         """
+        if not manifest:
+            manifest = self.target
         if manifest:
             for s in manifest.sections():
                 if manifest.has_option(s, 'inputs'):
@@ -233,90 +243,6 @@ class Config(object):
                         default = (attributes['default'] if 'default' in attributes else None)
                         secret = (attributes['secret'] if 'secret' in attributes else False)
                         self.get_config(param, default=default, secret=secret)
-
-    def setups(self):
-        """
-        Return a dictionary with all the features that need to be setup.
-        >>> c.setups()
-        [('myrc', {'target': {'formula': 'sprinter.formulas.template'}})]
-        """
-        new_sections = []
-        for s in self.target.formula_sections():
-            if not self.source or not self.source.has_section(s):
-                new_sections.append((s, {"target": dict(self.target.items(s))}))
-        return new_sections
-
-    def updates(self):
-        """
-        Return a dictionary with all the features that need to be
-        updated.
-
-        >>> c.updates()
-        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}, 'target': {'formula': 'sprinter.formulas.unpack', 'specific_version': '3.0.4'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}, 'target': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}})]
-
-        >>> config_old_only.updates()
-        Traceback (most recent call last):
-          File "<stdin>", line 1, in ?
-        ManifestError: Update method requires a target manifest!
-        """
-        if not self.target:
-            raise ManifestError("Update method requires a target manifest!")
-        different_sections = []
-        for s in self.target.formula_sections():
-            if self.source.has_section(s):
-                target_dict = dict(self.target.items(s))
-                source_dict = dict(self.source.items(s))
-                different_sections.append((s, {"source": source_dict,
-                                               "target": target_dict}))
-        return different_sections
-
-    def destroys(self):
-        """
-        Return a dictionary with all the features that need to be
-        destroyed.
-        >>> c.destroys()
-        [('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
-        """
-        missing_sections = []
-        for s in self.source.formula_sections():
-            if not self.target or not self.target.has_section(s):
-                missing_sections.append((s, {"source": dict(self.source.items(s))}))
-        return missing_sections
-
-    def deactivations(self):
-        """
-        Return a dictionary of activation formulas.
-
-        >>> c.deactivations()
-        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
-        """
-        deactivation_sections = []
-        for s in self.source.formula_sections():
-            deactivation_sections.append((s, {"source": dict(self.source.items(s))}))
-        return deactivation_sections
-
-    def activations(self):
-        """
-        Return a dictionary of activation formulas.
-
-        >>> c.activations()
-        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
-        """
-        activation_sections = []
-        for s in self.source.formula_sections():
-            activation_sections.append((s, {"source": dict(self.source.items(s))}))
-        return activation_sections
-
-    def reloads(self):
-        """
-        return reload dictionaries
-        >>> c.reloads()
-        [('maven', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '2.10'}}), ('ant', {'source': {'formula': 'sprinter.formulas.unpack', 'specific_version': '1.8.4'}}), ('mysql', {'source': {'brew': 'mysql', 'formula': 'sprinter.formulas.package', 'apt-get': 'libmysqlclient\\nlibmysqlclient-dev'}})]
-        """
-        reload_sections = []
-        for s in self.source.formula_sections():
-                reload_sections.append((s, {"source": dict(self.source.items(s))}))
-        return reload_sections
 
     def write(self, file_handle):
         """
@@ -338,21 +264,22 @@ class Config(object):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
         """
-        prompt = "please enter your %s" % param_name
-        if default:
-            prompt += " (default %s)" % default
         if param_name not in self.config:
-            self.config[param_name] = lib.prompt("please enter your %s" % param_name, default=default, secret=secret)
+            self.config[param_name] = self.lib.prompt("please enter your %s" % param_name,
+                                                      default=default,
+                                                      secret=secret)
         if secret:
             self.temporary_sections.append(param_name)
         return self.config[param_name]
 
-    def get_context_dict(self, kind='target'):
+    def get_context_dict(self, manifest_type='target'):
         """
         return a context dict of the desired state
         """
         context_dict = {}
-        manifest = self.target if kind == 'target' else self.source
+        if not hasattr(self, manifest_type):
+            raise ConfigException("manifest_type '%s' doesn't exist!" % manifest_type)
+        manifest = getattr(self, manifest_type)
         if manifest:
             for s in manifest.formula_sections():
                 for k, v in manifest.items(s):
@@ -382,29 +309,6 @@ class Config(object):
                 s = s.split("/")[-1]
             namespace = s
         return namespace
-
-    def __update_needed(self, source_dict, target_dict):
-        """
-        checks if an update is needed if there is a diff between the items provided
-
-        >>> c._Config__update_needed({"a": "b", "c": "d"}, {"a": "b", "c": "e"})
-        True
-
-        >>> c._Config__update_needed({"a": "b"}, {"a": "b", "c": "e"})
-        True
-
-        >>> c._Config__update_needed({"a": "b", "c": "d"}, {"a": "b"})
-        True
-
-        >>> c._Config__update_needed({"a": "b", "c": "d", "e": "f"}, {"a": "b", "c": "d", "e": "f"})
-        False
-        """
-        if len(source_dict) != len(target_dict):
-            return True
-        for k in source_dict:
-            if k not in target_dict or source_dict[k] != target_dict[k]:
-                return True
-        return False
 
     def __parse_input_string(self, input_string):
         """

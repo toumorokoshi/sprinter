@@ -30,7 +30,7 @@ def populate_formula_instance(config):
             if not formula_instance:
                 formula_instance = self.__get_formula_instance(
                     self.target,
-                    getattr(self, config).get_formula_class(formula_name)
+                    getattr(self, config).get_feature_class(formula_name)
                 )
             return f(self, formula_name, formula_instance=formula_instance)
         return wrapped
@@ -61,6 +61,7 @@ class Environment(object):
     def install(self):
         """ Install the environment """
         self.directory.initialize()
+        self.config.grab_inputs(self.target)
 
     @warmup
     def update(self):
@@ -143,6 +144,15 @@ class Environment(object):
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
 
+    def _finalize(self):
+        """ command to run at the end of sprinter's run """
+        self.logger.debug("Finalizing...")
+        if os.path.exists(self.directory.manifest_path):
+            self.config.write(open(self.directory.manifest_path, "w+"))
+        if self.directory.rewrite_rc:
+            self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
+        self.injections.commit()
+
     def _install_sandbox(self, name, call, kwargs={}):
         if (self.target.is_true('config', name) and
            (not self.source or not self.source.is_true('config', name))):
@@ -164,6 +174,5 @@ class Environment(object):
         create one, add it to the dict, and pass return it.
         """
         if formula not in self._formula_dict:
-            self._formula_dict[formula] = get_formula_class(formula, self)
+            self._formula_dict[formula] = self.manifest.get_formula_class(formula, self)
         return self._formula_dict[formula]
-

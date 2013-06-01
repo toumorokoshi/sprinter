@@ -3,7 +3,6 @@ import doctest
 import sprinter.manifest
 import sprinter.lib
 from StringIO import StringIO
-from sprinter.manifest import Manifest, Config, test_new_version, test_old_version
 
 TEST_MANIFEST = \
     """
