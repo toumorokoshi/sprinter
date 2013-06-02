@@ -376,3 +376,12 @@ class Config(object):
                 attribute_dict['secret'] = True
             return (value, attribute_dict)
         return None
+
+    def context(self, manifest_type=None):
+        """ get the context dictionary desired """
+        manifest = None
+        if manifest_type is None:
+            manifest = self.target if self.target else self.source
+        else:
+            manifest = getattr(self, manifest_type)
+        return manifest.get_context_dict()

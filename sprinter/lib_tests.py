@@ -32,7 +32,7 @@ class TestLib(object):
 
         def test_lib_errorcode(self):
             """ Test a proper error code is returned """
-            assert lib.call("cd") == 0, "cd call returns a non-zero exit!"
+            assert lib.call("sh") == 0, "cd call returns a non-zero exit!"
             assert lib.call("cd", bash=True) == 0, "cd call returns a non-zero exit!"
             assert lib.call("exit 1", bash=True) == 1, "gibberish call returns a zero exit!"
 

@@ -6,10 +6,11 @@ import logging
 import tempfile
 import shutil
 import os
-from mock import call, Mock, patch
+from mock import call, patch
 
 from sprinter.install import parse_args, parse_domain
 from . import TEST_MANIFEST
+
 
 class TestInstall(unittest.TestCase):
 
@@ -28,10 +29,7 @@ class TestInstall(unittest.TestCase):
         """ Test if install calls the proper methods """
         args = ['install', 'http://www.google.com']
         calls = [call(logging_level=logging.INFO),
-                 call().install('http://www.google.com',
-                                username=None,
-                                password=None,
-                                namespace=None)]
+                 call().install()]
         parse_args(args, Environment=environment)
         environment.assert_has_calls(calls)
 
