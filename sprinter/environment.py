@@ -5,9 +5,11 @@ import sys
 
 from sprinter import virtualenv
 from sprinter import brew
+from sprinter import lib
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
+from sprinter.lib import get_formula_class
 from sprinter.manifest import Config, Manifest
 from sprinter.system import System
 
@@ -39,10 +41,8 @@ def populate_formula_instance(config):
 
         def wrapped(self, feature_name, formula_instance=None):
             if not formula_instance:
-                formula_instance = self.__get_formula_instance(
-                    self.target,
-                    getattr(self, config).get_feature_class(feature_name)
-                )
+                formula_instance = self._get_formula_instance(
+                    getattr(self, config).get_feature_class(feature_name))
             return f(self, feature_name, formula_instance=formula_instance)
         return wrapped
     return wrapper
@@ -59,6 +59,7 @@ class Environment(object):
     directory = None  # handles interactions with the environment directory
     injections = None  # handles injections
     system = None  # stores utility methods to determine system specifics
+    lib = lib  # utility library
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
     _formula_dict = {}  # a dictionary of existing formula instances to pull from
@@ -66,8 +67,9 @@ class Environment(object):
     def __init__(self, logger=None, logging_level=logging.INFO):
         self.system = System()
         if not logger:
-            self.logger = self._build_logger(logging_level=logging.INFO)
+            logger = self._build_logger(level=logging.INFO)
         logger.setLevel(logging_level)
+        self.logger = logger
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
 
@@ -79,6 +81,7 @@ class Environment(object):
             return self.update()
         self.logger.info("Installing environment %s..." % self.namespace)
         self.directory.initialize()
+        self._specialize_contexts()
         for feature in self.config.setups():
             self.install_feature(feature)
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
@@ -92,6 +95,7 @@ class Environment(object):
     def update(self):
         """ update the environment """
         self.logger.info("Updating environment %s..." % self.namespace)
+        self._specialize_contexts()
         for feature in self.config.setups():
             self.install_feature(feature)
         for feature in self.config.updates():
@@ -105,6 +109,7 @@ class Environment(object):
     def remove(self):
         """ remove the environment """
         self.logger.info("Removing environment %s..." % self.namespace)
+        self._specialize_contexts()
         for feature in self.config.removes():
             self.remove_feature(feature)
         self.injections.clear("~/.bash_profile")
@@ -115,7 +120,9 @@ class Environment(object):
     @install_required
     def deactivate(self):
         """ deactivate the environment """
+        self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
+        self._specialize_contexts()
         for feature in self.config.deactivations():
             self.deactivate_feature(feature)
         self.injections.clear("~/.bash_profile")
@@ -125,7 +132,9 @@ class Environment(object):
     @install_required
     def activate(self):
         """ activate the environment """
+        self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
+        self._specialize_contexts()
         for feature in self.config.activations():
             self.activate_feature(feature)
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
@@ -150,25 +159,25 @@ class Environment(object):
     @populate_formula_instance('source')
     def remove_feature(self, feature_name, formula_instance=None):
         """ Remove a specific formula """
-        return self._run_action("Removing", feature_name, formula_instance.remove, 'source')
+        return self._run_action("Removing", feature_name, formula_instance.remove, ['source'])
 
     @warmup
     @populate_formula_instance('source')
     def deactivate_feature(self, feature_name, formula_instance=None):
         """ Deactivate a specific formula """
-        return self._run_action("Deactivating", feature_name, formula_instance.deactivate, 'source')
+        return self._run_action("Deactivating", feature_name, formula_instance.deactivate, ['source'])
 
     @warmup
     @populate_formula_instance('source')
     def activate_feature(self, feature_name, formula_instance=None):
         """ Activate a specific formula """
-        return self._run_action("Activating", feature_name, formula_instance.activate, 'source')
+        return self._run_action("Activating", feature_name, formula_instance.activate, ['source'])
 
     @warmup
     @populate_formula_instance('target')
     def validate_feature(self, feature_name, formula_instance=None):
         """ Validate a specific formula """
-        return self._run_action("Activating", feature_name, formula_instance.activate, 'target')
+        return self._run_action("Activating", feature_name, formula_instance.activate, ['target'])
 
     @warmup
     def validate_manifest(self, manifest):
@@ -177,10 +186,10 @@ class Environment(object):
         for s in self.target.formula_sections():
             invalidations += self.validate_feature(self, s)
         return invalidations
-        
+
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
-        self.log.debug("Warming up...")
+        self.logger.debug("Warming up...")
         if not isinstance(self.source, Manifest) and self.source:
             self.source = Manifest(self.source)
         if not isinstance(self.target, Manifest) and self.target:
@@ -200,7 +209,7 @@ class Environment(object):
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
-        self.config.grab_inputs()
+        self.warmed_up = True
 
     def _finalize(self):
         """ command to run at the end of sprinter's run """
@@ -217,7 +226,7 @@ class Environment(object):
             self.logger.info("Installing %s..." % name)
             call(self.directory.root_dir, **kwargs)
 
-    def _build_logger(self, logger=None, level=logging.INFO):
+    def _build_logger(self, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
         logger = logging.getLogger('sprinter')
         out_hdlr = logging.StreamHandler(sys.stdout)
@@ -226,23 +235,25 @@ class Environment(object):
         logger.addHandler(out_hdlr)
         return logger
 
-    def __get_formula_instance(self, formula):
+    def _get_formula_instance(self, formula):
         """
         get an instance of the formula object object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        if formula not in self._formula_dict:
-            self._formula_dict[formula] = self.manifest.get_formula_class(formula, self)
-        return self._formula_dict[formula]
+        #if formula not in self._formula_dict:
+        #self._formula_dict[formula] = get_formula_class(formula, self)
+        #return self._formula_dict[formula]
+        return get_formula_class(formula, self)
 
-    def __run_action(self, adjective, feature_name, call, configs):
+    def _run_action(self, adjective, feature_name, call, configs):
         self.logger.info("%s %s..." % (adjective, feature_name))
         configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
         call(feature_name, *configs)
 
-    def specialize_contexts(self):
+    def _specialize_contexts(self):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
+        self.config.grab_inputs()
         for manifest in [self.source, self.target]:
             context_dict = {}
             for s in manifest.formula_sections():
