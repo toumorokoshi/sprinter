@@ -276,7 +276,7 @@ class Config(object):
         query the user for them.
         """
         if not manifest:
-            manifest = self.target
+            manifest = self.target if self.target else self.source
         if manifest:
             for s in manifest.sections():
                 if manifest.has_option(s, 'inputs'):
