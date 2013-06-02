@@ -2,7 +2,7 @@ Roadmap
 -------
 
 This page highlights Sprinter's roadmap to reach 1.0
-release. Currently sprinter as at version 0.4
+release. Currently sprinter is at version 0.4
 
 ### 0.5
 Remove use of sudo as much as possible
@@ -11,10 +11,8 @@ Ensure proper coverage for these modules:
 
 * directory
 * environment
-* install
+* install 
 * lib? (double check)
-* recipestandard
-* manifest? (double check)
 * system? (maybe, don't know how to test this)
 
 Test these methods:

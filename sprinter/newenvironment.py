@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import sys
 
 from sprinter import virtualenv
@@ -21,18 +22,28 @@ def warmup(f):
     return wrapped
 
 
+def install_required(f):
+    """ Return an exception if the namespace is not already installed """
+
+    def wrapped(self, *args, **kwargs):
+        if self.directory.new:
+            raise SprinterException("Namespace %s is not yet installed!" % self.namespace)
+        return f(self, *args, **kwargs)
+    return wrapped
+
+
 def populate_formula_instance(config):
     """ Populate the formula_instance variable if it is none, from the formula config specified """
 
     def wrapper(f):
 
-        def wrapped(self, formula_name, formula_instance=None):
+        def wrapped(self, feature_name, formula_instance=None):
             if not formula_instance:
                 formula_instance = self.__get_formula_instance(
                     self.target,
-                    getattr(self, config).get_feature_class(formula_name)
+                    getattr(self, config).get_feature_class(feature_name)
                 )
-            return f(self, formula_name, formula_instance=formula_instance)
+            return f(self, feature_name, formula_instance=formula_instance)
         return wrapped
     return wrapper
 
@@ -60,65 +71,108 @@ class Environment(object):
     @warmup
     def install(self):
         """ Install the environment """
+        if not self.directory.new:
+            self.logger.info("Namespace %s already exists!")
+            return self.update()
+        self.logger.info("Installing environment %s..." % self.namespace)
         self.directory.initialize()
-        self.config.grab_inputs(self.target)
-
+        for feature in self.config.setups():
+            self.install_feature(feature)
+        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+        self._finalize()
+        
     @warmup
+    @install_required
     def update(self):
         """ update the environment """
-        if self.directory.new:
-            raise SprinterException("Namespace %s is not yet installed!" % self.namespace)
+        self.logger.info("Updating environment %s..." % self.namespace)
+        for feature in self.config.setups():
+            self.install_feature(feature)
+        for feature in self.config.updates():
+            self.update_feature(feature)
+        for feature in self.config.removes():
+            self.remove_feature(feature)
+        self._finalize()
 
     @warmup
+    @install_required
     def remove(self):
         """ remove the environment """
-        if self.directory.new:
-            raise SprinterException("Namespace %s is not yet installed!" % self.namespace)
+        self.logger.info("Removing environment %s..." % self.namespace)
+        for feature in self.config.removes():
+            self.remove_feature(feature)
+        self.injections.clear("~/.bash_profile")
+        shutil.rmtree(self.directory.root_dir)
+        self._finalize()
 
     @warmup
+    @install_required
     def deactivate(self):
         """ deactivate the environment """
+        self.directory.rewrite_rc = False
+        for feature in self.config.deactivations():
+            self.deactivate_feature(feature)
+        self.injections.clear("~/.bash_profile")
+        self._finalize()
 
     @warmup
+    @install_required
     def activate(self):
         """ activate the environment """
+        self.directory.rewrite_rc = False
+        for feature in self.config.activations():
+            self.activate_feature(feature)
+        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+        self._finalize()
 
     @warmup
     @populate_formula_instance('target')
-    def install_formula(self, formula_name, formula_instance=None):
+    def install_feature(self, feature_name, formula_instance=None):
         """ Install a specific formula """
+        return self._run_action("Installing", feature_name, formula_instance.install, ['target'])
 
     @warmup
     @populate_formula_instance('target')
-    def update_formula(self, formula_name, formula_instance=None):
+    def update_feature(self, feature_name, formula_instance=None):
         """ Update a specific formula """
+        return self._run_action("Updating", feature_name, formula_instance.update, ['source', 'target'])
 
     @warmup
     @populate_formula_instance('source')
-    def remove_formula(self, formula_name, formula_instance=None):
+    def remove_feature(self, feature_name, formula_instance=None):
         """ Remove a specific formula """
+        return self._run_action("Removing", feature_name, formula_instance.remove, 'source')
 
     @warmup
     @populate_formula_instance('source')
-    def deactivate_formula(self, formula_name, formula_instance=None):
+    def deactivate_feature(self, feature_name, formula_instance=None):
         """ Deactivate a specific formula """
+        return self._run_action("Deactivating", feature_name, formula_instance.deactivate, 'source')
 
     @warmup
     @populate_formula_instance('source')
-    def activate_formula(self, formula_name, formula_instance=None):
+    def activate_feature(self, feature_name, formula_instance=None):
         """ Activate a specific formula """
+        return self._run_action("Activating", feature_name, formula_instance.activate, 'source')
 
     @warmup
     @populate_formula_instance('target')
-    def validate_formula(self, formula_name, formula_instance=None):
+    def validate_feature(self, feature_name, formula_instance=None):
         """ Validate a specific formula """
+        return self._run_action("Activating", feature_name, formula_instance.activate, 'target')
 
     @warmup
     def validate_manifest(self, manifest):
         """ Validate a manifest object """
         invalidations = manifest.invalidations
         for s in self.target.formula_sections():
-            invalidations += self.validate_formula(self, s)
+            invalidations += self.validate_feature(self, s)
         return invalidations
         
     def _warmup(self):
@@ -176,3 +230,18 @@ class Environment(object):
         if formula not in self._formula_dict:
             self._formula_dict[formula] = self.manifest.get_formula_class(formula, self)
         return self._formula_dict[formula]
+
+    def __run_action(self, adjective, feature_name, call, configs):
+        self.logger.info("%s %s..." % (adjective, feature_name))
+        configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
+        call(feature_name, *configs)
+
+    def specialize_contexts(self):
+        """ Add variables and specialize contexts """
+        # add in the 'root_dir' directories to the context dictionaries
+        for manifest in [self.source, self.target]:
+            context_dict = {}
+            for s in manifest.formula_sections():
+                context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+            context_dict['config:node'] = self.system.node
+            manifest.additional_context_variables = context_dict

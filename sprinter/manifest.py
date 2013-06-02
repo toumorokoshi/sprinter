@@ -18,7 +18,8 @@ from StringIO import StringIO
 from sprinter import lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 
-CONFIG_RESERVED = ['source', 'inputs', 'rc']
+CONFIG_RESERVED = ['source', 'inputs']
+FEATURE_RESERVED = ['rc', 'command', 'phase']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
 
 
@@ -40,6 +41,7 @@ class Manifest(object):
     """
     dtree = None  # dependency tree object to ascertain order
     invalidations = []   # a list of the invalidation of the Manifest. Aggregated while parsing
+    additional_context_variables = {}  # a list of the additional context variables available
 
     def __init__(self, raw_manifest, namespace=None, logger=None,
                  username=None, password=None):
@@ -56,6 +58,47 @@ class Manifest(object):
         """
         return self.get('config', 'source') if \
             self.has_option('config', 'source') else None
+
+    def formula_sections(self):
+        """
+        Return all sections related to a formula, re-ordered according to the "depends" section.
+        """
+        if self.dtree is not None:
+            return self.dtree.order
+        else:
+            return [s for s in self.manifest.sections() if s != "config"]
+
+    def is_true(self, section, option):
+        """
+        Return true if the section option combo exists and it is set
+        to a truthy value.
+        """
+        return self.has_option(section, option) and \
+            self.get(section, option).lower().startswith('t')
+
+    def get_feature_class(self, section):
+        if section not in self.formula_sections():
+            raise ManifestException("Cannot get feature %s!" % section)
+        return self.manifest.get(section, 'formula')
+
+    def get_feature_config(self, feature):
+        """ Get the feature configuration for a class """
+        context_dict = dict(self.additional_context_variables.items() +
+                            self.get_context_dict().items())
+        return self.__substitute_objects(dict(self.manifest.items(feature)), context_dict)
+
+    def get_context_dict(self):
+        """ return a context dict of the desired state """
+        context_dict = {}
+        for s in self.formula_sections():
+            for k, v in self.manifest.items(s):
+                context_dict["%s:%s" % (s, k)] = v
+        return context_dict
+
+    def run_phase(self, feature, phase_name):
+        """ Determine if the feature should run in the given phase """
+        return (not self.manifest.has_option(feature, 'phases') or
+                phase_name in [x.strip() for x in self.manifest.get(feature, 'phases').split(",")])
 
     def __load_manifest(self, raw_manifest, username=None, password=None):
         manifest = RawConfigParser()
@@ -109,27 +152,20 @@ class Manifest(object):
             self.invalidations.append("Issue with building dependency tree: %s" % str(dte))
             return None
 
-    def formula_sections(self):
+    def __substitute_objects(self, value, context_dict):
         """
-        Return all sections related to a formula, re-ordered according to the "depends" section.
+        recursively substitute value with the context_dict
         """
-        if self.dtree is not None:
-            return self.dtree.order
+        if type(value) == dict:
+            return dict([(k, self.__substitute_objects(v, context_dict)) for k, v in value.items()])
+        elif type(value) == str:
+            try:
+                return value % context_dict
+            except KeyError as e:
+                self.logger.warn("Could not specialize %s! Error: %s" % (value, e))
+                return value
         else:
-            return [s for s in self.manifest.sections() if s != "config"]
-
-    def is_true(self, section, option):
-        """
-        Return true if the section option combo exists and it is set
-        to a truthy value.
-        """
-        return self.has_option(section, option) and \
-            self.get(section, option).lower().startswith('t')
-
-    def get_feature_class(self, section):
-        if section not in self.formula_sections():
-            raise ManifestException("Cannot get feature %s!" % section)
-        return self.manifest.get(section, 'formula')
+            return value
 
     # custom equality method
     def __eq__(self, other):
@@ -199,6 +235,7 @@ class Config(object):
         if not self.target:
             raise ConfigException("Update method requires a target manifest!")
         return [s for s in self.target.formula_sections()
+                if self.target.run_phase(s, "setup")
                 if not self.source or not self.source.has_section(s)]
 
     def updates(self):
@@ -207,26 +244,31 @@ class Config(object):
             raise ConfigException("Update method requires a target manifest!")
         if not self.source:
             raise ConfigException("Update method requires a source manifest!")
-        return [s for s in self.target.formula_sections() if self.source.has_section(s)]
+        return [s for s in self.target.formula_sections()
+                if self.target.run_phase(s, "update")
+                if self.source.has_section(s)]
 
     def removes(self):
         """ Return a list of features which need to be destroyed. """
         if not self.source:
             raise ConfigException("Remove method requires a source manifest!")
         return [s for s in self.source.formula_sections()
+                if self.source.run_phase(s, "remove")
                 if not self.target or not self.target.has_section(s)]
 
     def deactivations(self):
         """ Return a list of the features which need to be deactivated. """
         if not self.source:
             raise ConfigException("Deactivations method requires a source manifest!")
-        return [s for s in self.source.formula_sections()]
+        return [s for s in self.source.formula_sections()
+                if self.source.run_phase(s, "deactivate")]
 
     def activations(self):
         """ Return a list of the features which need to be deactivated. """
         if not self.source:
             raise ConfigException("Activations method requires a source manifest!")
-        return [s for s in self.source.formula_sections()]
+        return [s for s in self.source.formula_sections()
+                if self.source.run_phase(s, "activate")]
 
     def grab_inputs(self, manifest=None):
         """
@@ -272,7 +314,7 @@ class Config(object):
             self.temporary_sections.append(param_name)
         return self.config[param_name]
 
-    def get_context_dict(self, manifest_type='target'):
+    def set_additional_context(self, manifest_type='target', additional_context={}):
         """
         return a context dict of the desired state
         """
@@ -280,13 +322,10 @@ class Config(object):
         if not hasattr(self, manifest_type):
             raise ConfigException("manifest_type '%s' doesn't exist!" % manifest_type)
         manifest = getattr(self, manifest_type)
-        if manifest:
-            for s in manifest.formula_sections():
-                for k, v in manifest.items(s):
-                    context_dict["%s:%s" % (s, k)] = v
         for k, v in self.config.items():
                 context_dict["config:%s" % k] = v
-        return context_dict
+        manifest.additional_context_variables = dict(context_dict.items() +
+                                                     additional_context.items())
 
     def __load_configs(self, config):
         if config.has_section('config'):
@@ -320,31 +359,12 @@ class Config(object):
                  username
                  password?
                  main_branch==comp_main
-
-        >>> c._Config__parse_input_string(test_input_string)
-        [('gitroot', {'default': '~/workspace'}), ('username', {}), ('password', {'secret': True}), ('main_branch', {'default': 'comp_main'})]
         """
         raw_params = input_string.split('\n')
         return [self.__parse_param_line(rp) for rp in raw_params if len(rp.strip(' \t')) > 0]
 
     def __parse_param_line(self, line):
-        """
-        Parse a single param line.
-
-        >>> c._Config__parse_param_line("username")
-        ('username', {})
-
-        >>> c._Config__parse_param_line("password?")
-        ('password', {'secret': True})
-
-        >>> c._Config__parse_param_line("main_branch==comp_main")
-        ('main_branch', {'default': 'comp_main'})
-
-        >>> c._Config__parse_param_line("main_branch?==comp_main")
-        ('main_branch', {'default': 'comp_main', 'secret': True})
-
-        >>> c._Config__parse_param_line("")
-        """
+        """ Parse a single param line. """
         value = line.strip('\n \t')
         if len(value) > 0:
             attribute_dict = {}
@@ -356,14 +376,3 @@ class Config(object):
                 attribute_dict['secret'] = True
             return (value, attribute_dict)
         return None
-
-if __name__ == '__main__':
-    import doctest
-    old_manifest = Manifest(StringIO(test_old_version))
-    new_manifest = Manifest(StringIO(test_new_version))
-    config = Config(source=old_manifest, target=new_manifest)
-    config_new_only = Config(target=new_manifest)
-    config_old_only = Config(source=old_manifest)
-    doctest.testmod(extraglobs={'c': config,
-                                'config_new_only': config_new_only,
-                                'config_old_only': config_old_only})
