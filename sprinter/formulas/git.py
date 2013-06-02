@@ -4,14 +4,13 @@ Creates a git repository and places it at the install location.
 import os
 import shutil
 
-from sprinter.formulastandard import FormulaStandard
-from sprinter.lib import call
+from sprinter.formulabase import FormulaBase
 
 
-class GitFormula(FormulaStandard):
+class GitFormula(FormulaBase):
     """ A sprinter formula for git"""
 
-    def setup(self, feature_name, config):
+    def install(self, feature_name, config):
         branch = (config['branch'] if 'branch' in config else None)
         self.__clone_repo(config['url'],
                           self.directory.install_directory(feature_name),
@@ -39,40 +38,32 @@ class GitFormula(FormulaStandard):
                                   target_directory,
                                   branch=target_branch)
             os.chdir(target_directory)
-            error = call("git pull origin %s" %
-                         (target_config['branch'] if 'branch' in target_config else 'master'))
+            error = self.lib.call("git pull origin %s" %
+                                  (target_config['branch'] if 'branch' in target_config else 'master'))
             if error:
                 self.logger.error("An error occured! Exiting...")
                 return error
         super(GitFormula, self).update(feature_name, source_config, target_config)
 
-    def destroy(self, feature_name, config):
+    def remove(self, feature_name, config):
         super(GitFormula, self).destroy(feature_name, config)
         shutil.rmtree(self.directory.install_directory(feature_name))
-
-    def reload(self, feature_name, config):
-        super(GitFormula, self).reload(feature_name, config)
-        os.chdir(self.directory.install_directory(feature_name))
-        error = call("git pull origin %s" % (config['branch'] if 'branch' in config else 'master'))
-        if error:
-            self.logger.error("An error occured! Exiting...")
-            return error
 
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)
         os.chdir(target_directory)
-        error = call("git fetch origin %s" % branch)
+        error = self.lib.call("git fetch origin %s" % branch)
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
-        error = call("git checkout %s" % branch)
+        error = self.lib.call("git checkout %s" % branch)
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
 
     def __clone_repo(self, repo_url, target_directory, branch=None):
         self.logger.debug("Cloning repository %s into %s..." % (repo_url, target_directory))
-        error = call("git clone %s %s" % (repo_url, target_directory))
+        error = self.lib.call("git clone %s %s" % (repo_url, target_directory))
         if error:
             self.logger.error("An error occured! Exiting...")
             return error

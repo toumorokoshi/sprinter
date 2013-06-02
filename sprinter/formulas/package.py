@@ -8,17 +8,16 @@ brew = git
 """
 import os
 
-from sprinter.formulastandard import FormulaStandard
-from sprinter import lib
+from sprinter.formulabase import FormulaBase
 
 
-class PackageFormula(FormulaStandard):
+class PackageFormula(FormulaBase):
 
     def __init__(self, environment):
         super(PackageFormula, self).__init__(environment)
         self.package_manager, self.manager_installed, self.sudo_required, self.args = self.__get_package_manager()
 
-    def setup(self, feature_name, config):
+    def install(self, feature_name, config):
         self.__install_package(feature_name, config)
         super(PackageFormula, self).setup(feature_name, config)
 
@@ -47,7 +46,7 @@ class PackageFormula(FormulaStandard):
             if self.sudo_required:
                 call_command = "sudo " + call_command
             self.logger.debug("Calling command: %s" % call_command)
-            lib.call(call_command)
+            self.lib.call(call_command)
 
     def __get_package_manager(self):
         """
@@ -64,7 +63,7 @@ class PackageFormula(FormulaStandard):
             args = " -y"
         elif self.system.isFedoraBased():
             package = "yum"
-        installed = lib.which(package) is not None
+        installed = self.lib.which(package) is not None
         if not installed:
             self.logger.error("package manager %s is not installed!" % package)
         return package, installed, sudo_required, args
@@ -73,12 +72,12 @@ class PackageFormula(FormulaStandard):
         """
         install brew if possible
         """
-        if lib.which("brew") is None:
+        if self.lib.which("brew") is None:
             if not os.path.exists('/usr/bin/xcodebuild'):
                 self.logger.error("Unable to install brew! Please install xcode command line tools:")
                 self.logger.error("https://developer.apple.com/xcode/")
                 return False
             else:
                 self.logger.info("Installing brew....")
-                lib.call('ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"')
+                self.lib.call('ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"')
         return True

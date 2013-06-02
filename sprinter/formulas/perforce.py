@@ -16,8 +16,7 @@ import shutil
 import re
 import urllib
 
-from sprinter.formulastandard import FormulaStandard
-from sprinter import lib
+from sprinter.formulabase import FormulaBase
 
 url_template = "http://filehost.perforce.com/perforce/%s/%s/p4"
 exec_dict = {"r10.1": {"mac": "bin.macosx104u",
@@ -55,13 +54,14 @@ View:
 """
 
 
-class PerforceFormula(FormulaStandard):
+class PerforceFormula(FormulaBase):
     """ A sprinter formula for git"""
 
-    def setup(self, feature_name, config):
+    def install(self, feature_name, config):
         super(PerforceFormula, self).setup(feature_name, config)
         self.p4environ = dict(os.environ.items() + [('P4USER', config['username']),
-                                                    ('P4PASSWD', config['password'])])
+                                                    ('P4PASSWD', config['password']),
+                                                    ('P4CLIENT', config['client'])])
         self.__install_perforce(feature_name, config)
         if not os.path.exists(os.path.expanduser(config['root_path'])):
             os.makedirs(os.path.expanduser(config['root_path']))
@@ -79,15 +79,8 @@ class PerforceFormula(FormulaStandard):
             self.__sync_perforce(target_config)
         self.__add_p4_env(target_config)
 
-    def destroy(self, feature_name, config):
+    def remove(self, feature_name, config):
         self.__destroy_perforce(config)
-
-    def reload(self, feature_name, config):
-        self.p4environ = dict(os.environ.items() + [('P4USER', config['username']),
-                                                    ('P4PASSWD', config['password']),
-                                                    ('P4CLIENT', config['client'])])
-        self.p4_command = os.path.join(self.directory.install_directory(feature_name), "p4")
-        self.__sync_perforce(config)
 
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """
@@ -109,9 +102,9 @@ class PerforceFormula(FormulaStandard):
         p4settings_path = os.path.join(root_dir, ".p4settings")
         out_content = p4settings_template % config
         if os.path.exists(p4settings_path) and out_content != open(p4settings_path, "r+").read():
-            overwrite = lib.prompt("p4settings already exists at %s. Overwrite?" % root_dir,
-                                   default="no",
-                                   boolean=True)
+            overwrite = self.lib.prompt("p4settings already exists at %s. Overwrite?" % root_dir,
+                                        default="no",
+                                        boolean=True)
             if overwrite:
                 self.logger.info("Overwriting existing p4settings...")
                 os.remove(p4settings_path)
@@ -119,18 +112,18 @@ class PerforceFormula(FormulaStandard):
                 return
         with open(p4settings_path, "w+") as p4settings_file:
             p4settings_file.write(p4settings_template % config)
-            add_p4passwd = lib.prompt("Also insert p4passwd? " +
-                                      "(password will be stored in plaintext in a file in your perforce root)",
-                                      default="no",
-                                      boolean=True)
+            add_p4passwd = self.lib.prompt("Also insert p4passwd? " +
+                                           "(password will be stored in plaintext in a file in your perforce root)",
+                                           default="no",
+                                           boolean=True)
             if add_p4passwd:
                 p4settings_file.write("\nP4PASSWD=%s" % config['password'])
 
     def __configure_client(self, config):
         """ write the perforce client """
-        overwrite = lib.prompt("Would you like to overwrite the client workspace in perforce?",
-                               default="yes",
-                               boolean=True)
+        overwrite = self.lib.prompt("Would you like to overwrite the client workspace in perforce?",
+                                    default="yes",
+                                    boolean=True)
         if overwrite:
             self.logger.info("Configuring p4 client...")
             os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
@@ -139,22 +132,22 @@ class PerforceFormula(FormulaStandard):
             config['p4view'] = config['p4view'] % self.environment.context()
             client = re.sub('//depot', '    //depot', p4client_template % config)
             cwd = os.path.expanduser(config['root_path'] % self.environment.context())
-            self.logger.info(lib.call("%s client -i" % self.p4_command,
-                                      stdin=client,
-                                      env=self.p4environ,
-                                      cwd=cwd))
+            self.logger.info(self.lib.call("%s client -i" % self.p4_command,
+                                           stdin=client,
+                                           env=self.p4environ,
+                                           cwd=cwd))
 
     def __sync_perforce(self, config):
         """ prompt and sync perforce """
-        sync = lib.prompt("would you like to sync your perforce root?",
-                          default="yes",
-                          boolean=True)
+        sync = self.lib.prompt("would you like to sync your perforce root?",
+                               default="yes",
+                               boolean=True)
         if sync:
             self.logger.info("Syncing perforce root... (this can take a while).")
             cwd = os.path.expanduser(config['root_path'] % self.environment.context())
-            self.logger.info(lib.call("%s sync" % self.p4_command,
-                                      env=self.p4environ,
-                                      cwd=cwd))
+            self.logger.info(self.lib.call("%s sync" % self.p4_command,
+                                           env=self.p4environ,
+                                           cwd=cwd))
 
     def __add_p4_env(self, config):
         self.directory.add_to_rc('export P4PORT=%s' % config['port'])
@@ -162,7 +155,7 @@ class PerforceFormula(FormulaStandard):
 
     def __destroy_perforce(self, config):
         """ destroy the perforce root """
-        sync = lib.prompt("would you like to completely remove the perforce root?", default="no")
+        sync = self.lib.prompt("would you like to completely remove the perforce root?", default="no")
         if sync.lower().startswith('y'):
             self.logger.info("Removing %s..." % config['root_path'])
             shutil.rmtree(os.path.expanduser(config['root_path'] % self.environment.context()))

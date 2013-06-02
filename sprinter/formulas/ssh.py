@@ -11,8 +11,7 @@ user = toumorokoshi
 """
 import os
 
-from sprinter.formulastandard import FormulaStandard
-from sprinter import lib
+from sprinter.formulabase import FormulaBase
 
 ssh_config_template = \
     """
@@ -25,32 +24,32 @@ Host %(host)s
 ssh_config_path = os.path.expanduser('~/.ssh/config')
 
 
-class SSHFormula(FormulaStandard):
+class SSHFormula(FormulaBase):
 
-    def setup(self, feature_name, config):
+    def install(self, feature_name, config):
         ssh_path = self.__generate_key(feature_name, config)
         self.__install_ssh_config(config, ssh_path)
-        if 'command' in config:
-            self.__call_command(config['command'], ssh_path)
+        super(FormulaBase, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
         ssh_path = self.__generate_key(feature_name, target_config)
         self.__install_ssh_config(target_config, ssh_path)
-        if 'command' in target_config:
-            self.__call_command(target_config['command'], ssh_path)
+        super(SSHFormula, self).update(feature_name, source_config, target_config)
+
+    def remove(self, feature_name, config):
+        super(SSHFormula, self).destroy(feature_name, config)
 
     def deactivate(self, feature_name, config):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),
                                 config['keyname'])
         self.__install_ssh_config(config, ssh_path)
+        super(SSHFormula, self).activate(feature_name, config)
 
     def activate(self, feature_name, config):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),
                                 config['keyname'])
         self.__install_ssh_config(config, ssh_path)
-
-    def destroy(self, feature_name, config):
-        super(SSHFormula, self).destroy(feature_name, config)
+        super(SSHFormula, self).deactivate(feature_name, config)
 
     def __generate_key(self, feature_name, config):
         """
@@ -61,7 +60,7 @@ class SSHFormula(FormulaStandard):
         if not os.path.exists(cwd):
             os.makedirs(cwd)
         if not os.path.exists(os.path.join(cwd, config['keyname'])):
-            self.logger.info(lib.call(command, cwd=cwd))
+            self.logger.info(self.lib.call(command, cwd=cwd))
         return os.path.join(cwd, config['keyname'])
 
     def __install_ssh_config(self, config, ssh_path):
@@ -76,7 +75,7 @@ class SSHFormula(FormulaStandard):
                     not self.injections.injected(ssh_config_path):
                 self.logger.info("SSH config for %s already exists! Override?")
                 self.logger.info("Your existing config will not be overwritten, simply inactive.")
-                overwrite = lib.prompt("Override?", boolean=True, default="no")
+                overwrite = self.lib.prompt("Override?", boolean=True, default="no")
                 if overwrite:
                     self.injections.inject(ssh_config_path, ssh_config_injection)
             else:
@@ -89,4 +88,4 @@ class SSHFormula(FormulaStandard):
         ssh_path += ".pub"  # make this the public key
         ssh_contents = open(ssh_path, 'r').read().rstrip('\n')
         command = command.replace('{{ssh}}', ssh_contents)
-        self.logger.info(lib.call(command, bash=True))
+        self.logger.info(self.lib.call(command, bash=True))

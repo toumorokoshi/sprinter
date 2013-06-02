@@ -14,10 +14,12 @@ from sprinter.formulabase import FormulaBase
 class EnvFormula(FormulaBase):
     """ A sprinter formula for git"""
 
-    def setup(self, feature_name, config):
+    def install(self, feature_name, config):
         [self.directory.add_to_rc('export %s=%s' % (c.upper(), config[c]))
          for c in config if c != 'formula']
+        super(EnvFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
         [self.directory.add_to_rc('export %s=%s' % (c.upper(), target_config[c]))
          for c in target_config if c != 'formula']
+        super(EnvFormula, self).update(feature_name, source_config, target_config)
