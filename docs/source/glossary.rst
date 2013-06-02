@@ -9,6 +9,9 @@ Glossary
   feature
     A sprinter feature represents a single unit of configuration for a sprinter environment. A feature should represent a single modular, functional unit to manage one aspect of an environment, such as the environment variables, a package that needs to be installed, or an in-house command line tool.
 
+  formula
+    A formula represents a classification of a feature, that provides the steps to install, update, etc. a feature.
+
   manifest
     A sprinter manifest is a configuration file describing a sprinter :term:`environment`. Sprinter manifest examples can be found in the source code, or in the :doc:`tutorial`.
 

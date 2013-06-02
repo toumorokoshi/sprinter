@@ -58,14 +58,59 @@ class TestManifest(object):
         assert len(self.manifest_incorrect_dependency.invalidations) > 0, \
             "No errors were produced with an incorrect manifest"
 
+    def test_get_feature_class(self):
+        """ Get Feature class should return the formula class name of the feature """
+        tools.eq_(self.manifest_old.get_feature_class("sub"), "sprinter.formulas.git")
+
     @tools.raises(ManifestException)
-    def test_formula_class_bad_name(self):
+    def test_feature_class_bad_name(self):
         """ Getting a feature that doesn't exist should raise an exception """
         self.manifest_old.get_feature_class('febetnaetnuh')
 
     def test_equality(self):
         """ Manifest object should be equal to itself """
         tools.eq_(self.manifest_old, Manifest(StringIO(manifest_old)))
+
+    def test_get_feature_config(self):
+        """ Get_feature_config should return a dictionary with the attributes """
+        tools.eq_(self.manifest_old.get_feature_config("sub"), {
+            'url': 'git://github.com/Toumorokoshi/sub.git',
+            'formula': 'sprinter.formulas.git',
+            'depends': 'git',
+            'branch': 'yusuke',
+            'rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp'})
+
+    def test_get_context_dict(self):
+        """ Test getting a config dict """
+        tools.eq_(self.manifest_old.get_context_dict(),
+                  {'ant:formula': 'sprinter.formulas.unpack',
+                   'ant:phases': 'update',
+                   'ant:specific_version': '1.8.4',
+                   'git:brew': 'git',
+                   'git:formula': 'sprinter.formulas.package',
+                   'maven:formula': 'sprinter.formulas.unpack',
+                   'maven:specific_version': '2.10',
+                   'mysql:apt-get': 'libmysqlclient\nlibmysqlclient-dev',
+                   'mysql:brew': 'mysql', 'git:apt-get': 'git-core',
+                   'mysql:formula': 'sprinter.formulas.package',
+                   'sub:branch': 'yusuke',
+                   'sub:depends': 'git',
+                   'sub:formula': 'sprinter.formulas.git',
+                   'sub:rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
+                   'sub:url': 'git://github.com/Toumorokoshi/sub.git'})
+
+    def test_run_phase(self):
+        """
+        Run phase should sallow phases that are specifically listed, and
+        disallow ones that are not
+        """
+        assert self.manifest_old.run_phase('ant', 'update'), \
+            "Update in phase but not being run!"
+        assert not self.manifest_old.run_phase('ant', 'install'), \
+            "Install not in phase but being run!"
+        assert self.manifest_old.run_phase('sub', 'deactivate'), \
+            "Deactivate not run in feature that does not specify phase!"
+
 
 manifest_old = """
 [config]
@@ -77,6 +122,7 @@ specific_version = 2.10
 
 [ant]
 formula = sprinter.formulas.unpack
+phases = update
 specific_version = 1.8.4
 
 [sub]
@@ -166,7 +212,7 @@ class TestConfig(object):
 
     def test_deactivations(self):
         """ Test if deactivations returns the proper list """
-        tools.eq_(set(self.config.deactivations()), set(['maven', 'ant', 'sub', 'mysql', 'git']))
+        tools.eq_(set(self.config.deactivations()), set(['maven', 'sub', 'mysql', 'git']))
 
     @tools.raises(ConfigException)
     def test_deactivations_notsource(self):
@@ -175,7 +221,7 @@ class TestConfig(object):
 
     def test_activations(self):
         """ Test if deactivations returns the proper list """
-        tools.eq_(set(self.config.activations()), set(['maven', 'ant', 'sub', 'mysql', 'git']))
+        tools.eq_(set(self.config.activations()), set(['maven', 'sub', 'mysql', 'git']))
 
     @tools.raises(ConfigException)
     def test_activations_notsource(self):
@@ -214,18 +260,14 @@ class TestConfig(object):
         self.config.write(new_manifest)
         tools.eq_(Manifest(new_manifest), Manifest(manifest_new), "A secret value was written to the config!")
 
-    def test_get_context_dict(self):
-        """ Test getting a config dict """
-        tools.eq_(self.config.get_context_dict(),
-                  {'config:namespace': 'sprinter',
-                   'config:hobopopo': 'no',
-                   'maven:formula': 'sprinter.formulas.unpack',
-                   'maven:specific_version': '3.0.4',
-                   'ant:formula': 'sprinter.formulas.unpack',
-                   'ant:specific_version': '1.8.4',
-                   'myrc:formula': 'sprinter.formulas.template'})
-
     @tools.raises(ConfigException)
-    def test_get_context_dict_bad_manifest_type(self):
+    def test_set_additional_context_bad_manifest_type(self):
         """ A band manifest type should raise an exception on get context dict """
-        self.config.get_context_dict('hobo')
+        self.config.set_additional_context('hobo')
+        
+    def test_additional_context(self):
+        """ Ensure that additional context variables are configured correctly """
+        additional_context_variables = {"sub:root_dir": "teststring"}
+        self.config.set_additional_context('source', additional_context_variables)
+        sub_values = self.config.source.get_feature_config("sub")
+        assert sub_values['rc'].find("teststring") != -1, "teststring is not substituted in"

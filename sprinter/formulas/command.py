@@ -5,7 +5,7 @@ formula = sprinter.formulas.command
 hideoutput=true
 setup=echo 'setting up...'
 update=echo 'updating...'
-destroy=echo 'destroying...'
+remove=echo 'destroying...'
 activate=echo 'activating...'
 deactivate=echo 'deactivating...'
 """
@@ -20,8 +20,8 @@ class CommandFormula(FormulaBase):
     def update(self, feature_name, source_config, target_config):
         self.__run_command('update', target_config)
 
-    def destroy(self, feature_name, config):
-        self.__run_command('destroy', config)
+    def remove(self, feature_name, config):
+        self.__run_command('remove', config)
 
     def activate(self, feature_name, config):
         self.__run_command('activate', config)
