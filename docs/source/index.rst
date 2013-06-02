@@ -46,16 +46,17 @@ your difficulties with other unix-based operating systems.
 
 There are currently no plans to develop sprinter against non-unix based operating systems.
 
-Contents:
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
 
    tutorial
-   recipes
+   formulas
    manifests
-   internal
-   sprinter
+   lifecycle
+   internals
    glossary
 
 

@@ -3,6 +3,14 @@ Environment Lifecycle
 
 The environment lifecycle was designed to be minimal and intuitive. Actions occur as they are necessary.
 
+You can restrict a feature to only occur during specific phases with a comma-delimited list of the phases it should run:
+
+.. code:: python
+
+  [sub]
+  recipe = sprinter.formulas.git
+  phases = update
+
 Installation
 ------------
 
