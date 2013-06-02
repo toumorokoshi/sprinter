@@ -115,6 +115,7 @@ class TestManifest(object):
 manifest_old = """
 [config]
 namespace = sprinter
+inputs = sourceonly
 
 [maven]
 formula = sprinter.formulas.unpack
@@ -245,6 +246,13 @@ class TestConfig(object):
             call("password", secret=True),
             call("main_branch", default="comp_main", secret=True)
         ])
+
+    def test_grab_inputs_source(self):
+        """ Test grabbing inputs from source """
+        self.config_source_only.get_config = Mock(return_value="no")
+        self.config_source_only.grab_inputs()
+        self.config_source_only.get_config.assert_called_once_with(
+            "sourceonly", default=None, secret=False)
 
     def test_write(self):
         """ Test the write command """

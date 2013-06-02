@@ -9,11 +9,10 @@ brew = git
 """
 
 
-class TestPackageFormula(testtools.TestFormula):
+class TestPackageFormula(object):
 
     def setup(self):
-        super(TestPackageFormula, self).__init__(formula_config=package_configs)
-        self.instance = PackageFormula(self.environment)
+        pass
 
     def teardown(self):
         pass
