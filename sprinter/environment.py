@@ -88,6 +88,7 @@ class Environment(object):
         try:
             self.logger.info("Installing environment %s..." % self.namespace)
             self.directory.initialize()
+            self.install_sandboxes()
             self._specialize_contexts()
             for feature in self.config.installs():
                 self.install_feature(feature)
@@ -106,6 +107,7 @@ class Environment(object):
         """ update the environment """
         self.last_phase = "update"
         self.logger.info("Updating environment %s..." % self.namespace)
+        self.install_sandboxes()
         self._specialize_contexts()
         for feature in self.config.installs():
             self.install_feature(feature)
@@ -231,12 +233,6 @@ class Environment(object):
         if not self.directory:
             self.directory = Directory(self.namespace, sprinter_root=self.root)
         self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(), self.namespace))
-        # install virtualenv
-        if self.target:
-            self._install_sandbox('virtualenv', virtualenv.create_environment,
-                                  {'use_distribute': True})
-            if self.system.isOSX():
-                self._install_sandbox('brew', brew.install_brew)
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
@@ -252,6 +248,14 @@ class Environment(object):
             self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
             self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
         self.injections.commit()
+
+    def install_sandboxes(self):
+        # install virtualenv
+        if self.target:
+            self._install_sandbox('virtualenv', virtualenv.create_environment,
+                                  {'use_distribute': True})
+            if self.system.isOSX():
+                self._install_sandbox('brew', brew.install_brew)
 
     def _install_sandbox(self, name, call, kwargs={}):
         if (self.target.is_true('config', name) and
