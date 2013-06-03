@@ -9,7 +9,31 @@ import os
 from mock import call, patch
 
 from sprinter.install import parse_args, parse_domain
-from . import TEST_MANIFEST
+
+TEST_MANIFEST = \
+    """
+[config]
+inputs = stashroot==~/p4
+         username
+         password?
+         main_branch==comp_main
+[sub]
+recipe = sprinter.recipes.git
+url = git://github.com/Toumorokoshi/sub.git
+branch = yusuke
+rc = temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp
+[m2]
+recipe = sprinter.recipes.template
+target = ~/.m2/settings.bak
+source = https://raw.github.com/Toumorokoshi/EmacsEnv/master/.vimrc
+[perforce]
+inputs = p4passwd?
+recipe = sprinter.recipes.perforce
+version = r10.1
+username = %(config:username)
+password = %(config:p4passwd)
+client = perforce.local:1666
+"""
 
 
 class TestInstall(unittest.TestCase):
@@ -36,7 +60,7 @@ class TestInstall(unittest.TestCase):
     @patch('sprinter.environment.Environment')
     def test_errors_(self, environment):
         """ Test if validate catches an invalid manifest """
-        config = {'validate_manifest.return_value' : ['this is funky']}
+        config = {'validate_manifest.return_value': ['this is funky']}
         environment.configure_mock(**config)
         args = ['validate', self.temp_file_path]
         calls = [call(logging_level=logging.INFO),
@@ -53,5 +77,5 @@ class TestInstall(unittest.TestCase):
             ("https://github.com", "https://github.com")
         ]
         for in_string, out_string in match_tuples:
-            self.assertEqual(parse_domain(in_string), out_string, 
+            self.assertEqual(parse_domain(in_string), out_string,
                              "%s did not result in %s! Resulted in %s instead." % (in_string, out_string, parse_domain(in_string)))
