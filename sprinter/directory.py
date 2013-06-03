@@ -12,6 +12,10 @@ export PATH=%s:$PATH
 """
 
 
+class DirectoryException(Exception):
+    """ An exception to specify it's a directory """
+
+
 class Directory(object):
 
     root_dir = None  # path to the root directory
@@ -21,9 +25,9 @@ class Directory(object):
                        # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
 
-    def __init__(self, namespace, rewrite_rc=True):
+    def __init__(self, namespace, rewrite_rc=True, sprinter_root=os.path.join("~", ".sprinter")):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
-        self.root_dir = os.path.expanduser(os.path.join("~", ".sprinter", namespace))
+        self.root_dir = os.path.expanduser(os.path.join(sprinter_root, namespace))
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
         self.rewrite_rc = rewrite_rc
@@ -65,7 +69,7 @@ class Directory(object):
 
     def lib_path(self):
         """ return the lib directory path """
-        return os.path.join(self.root_dir, "bin")
+        return os.path.join(self.root_dir, "lib")
 
     def install_directory(self, feature_name):
         """
@@ -78,7 +82,7 @@ class Directory(object):
         add content to the rc script.
         """
         if not self.rewrite_rc:
-            raise Exception("Error! Directory was not intialized w/ rewrite_rc.")
+            raise DirectoryException("Error! Directory was not intialized w/ rewrite_rc.")
         if not self.rc_file:
             self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
         self.rc_file.write(content + '\n')
