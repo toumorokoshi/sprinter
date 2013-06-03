@@ -4,6 +4,7 @@ packages to different locations.
 
 """
 import os
+import shutil
 import stat
 
 rc_template = \
@@ -48,6 +49,12 @@ class Directory(object):
         if not os.path.exists(self.manifest_path):
             open(self.manifest_path, "w+").close()
         self.new = False
+
+    def remove(self):
+        """ Removes the sprinter directory, if it exists """
+        if self.rc_file:
+            self.rc_file.close()
+        shutil.rmtree(self.root_dir)
 
     def symlink_to_bin(self, name, path):
         """

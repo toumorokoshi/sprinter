@@ -92,3 +92,8 @@ class TestDirectory(object):
         directory = Directory('test', rewrite_rc=False,
                               sprinter_root=self.temp_dir)
         directory.add_to_rc("test")
+
+    def test_remove(self):
+        """ Remove should remove the environment directory """
+        self.directory.remove()
+        assert not os.path.exists(self.directory.root_dir), "Path still exists after remove!"

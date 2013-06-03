@@ -9,11 +9,7 @@ Remove use of sudo as much as possible
 
 Ensure proper coverage for these modules:
 
-* directory
 * environment
-* install 
-* lib? (double check)
-* system? (maybe, don't know how to test this)
 
 Test these methods:
 

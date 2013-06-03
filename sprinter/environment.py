@@ -1,6 +1,5 @@
 import logging
 import os
-import shutil
 import sys
 
 from sprinter import virtualenv
@@ -113,7 +112,7 @@ class Environment(object):
         for feature in self.config.removes():
             self.remove_feature(feature)
         self.injections.clear("~/.bash_profile")
-        shutil.rmtree(self.directory.root_dir)
+        self.directory.remove()
         self._finalize()
 
     @warmup
