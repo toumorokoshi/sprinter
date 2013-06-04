@@ -23,6 +23,11 @@ class TestLib(object):
             class_instance = lib.get_formula_class("sprinter.formulas.unpack", self.environment)
             assert issubclass(class_instance.__class__, FormulaBase)
 
+        def test_get_formulabase(self):
+            """ Test if formulabase can be grabbed"""
+            class_instance = lib.get_formula_class("sprinter.formulabase", self.environment)
+            assert issubclass(class_instance.__class__, FormulaBase)
+
         # can't get this test to work right...
         def skip_get_formula_class_correct_import(self):
             """ This test a bug with importing the proper class"""
