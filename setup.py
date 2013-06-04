@@ -12,7 +12,6 @@ setup(name='sprinter',
       author_email='yusuke@yusuketsutsumi.com',
       url='http://toumorokoshi.github.io/sprinter',
       packages=['sprinter', 'sprinter.formulas'],
-      setup_requires=['nose>=1.3.0'],
       requires=['distribute (>=0.6.36)'],
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -30,5 +29,5 @@ setup(name='sprinter',
           ]
       },
       tests_require=['mock>=1.0.1', 'nose>=1.3.0'],
-      test_suite='tests'
+      test_suite='nose.collector'
 )
