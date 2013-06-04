@@ -77,6 +77,7 @@ class Environment(object):
         """ Install the environment """
         if not self.directory.new:
             self.logger.info("Namespace %s already exists!" % self.namespace)
+            self.source = Manifest(self.directory.manifest_path)
             return self.update()
         self.logger.info("Installing environment %s..." % self.namespace)
         self.directory.initialize()
