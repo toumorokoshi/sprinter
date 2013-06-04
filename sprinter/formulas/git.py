@@ -15,7 +15,7 @@ class GitFormula(FormulaBase):
         self.__clone_repo(config['url'],
                           self.directory.install_directory(feature_name),
                           branch=branch)
-        super(GitFormula, self).setup(feature_name, config)
+        super(GitFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
         target_directory = self.directory.install_directory(feature_name)
@@ -46,7 +46,7 @@ class GitFormula(FormulaBase):
         super(GitFormula, self).update(feature_name, source_config, target_config)
 
     def remove(self, feature_name, config):
-        super(GitFormula, self).destroy(feature_name, config)
+        super(GitFormula, self).remove(feature_name, config)
         shutil.rmtree(self.directory.install_directory(feature_name))
 
     def __checkout_branch(self, target_directory, branch):

@@ -198,14 +198,14 @@ class TestConfig(object):
         self.config_source_only = Config(source=self.old_manifest)
         self.config_target_only = Config(target=self.new_manifest)
 
-    def test_setups(self):
+    def test_intalls(self):
         """ Test if setups returns the proper list """
-        tools.eq_(set(self.config.setups()), set(['myrc']))
+        tools.eq_(set(self.config.installs()), set(['myrc']))
 
     @tools.raises(ConfigException)
     def test_setups_notarget(self):
         """ Test if setups returns the proper list """
-        self.config_source_only.setups()
+        self.config_source_only.installs()
 
     def test_updates(self):
         """ Test if updates returns the proper list """

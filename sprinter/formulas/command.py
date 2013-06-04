@@ -3,7 +3,7 @@ Runs a command
 [ssh]
 formula = sprinter.formulas.command
 hideoutput=true
-setup=echo 'setting up...'
+install=echo 'setting up...'
 update=echo 'updating...'
 remove=echo 'destroying...'
 activate=echo 'activating...'
@@ -15,7 +15,7 @@ from sprinter.formulabase import FormulaBase
 class CommandFormula(FormulaBase):
 
     def install(self, feature_name, config):
-        self.__run_command('setup', config, 'target')
+        self.__run_command('install', config, 'target')
         super(CommandFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):

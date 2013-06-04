@@ -234,8 +234,8 @@ class Config(object):
         if self.source:
             self.__load_configs(self.source)
 
-    def setups(self):
-        """ Return a list of the features which need to be setup. """
+    def installs(self):
+        """ Return a list of the features which need to be installed. """
         if not self.target:
             raise ConfigException("Update method requires a target manifest!")
         return [s for s in self.target.formula_sections()

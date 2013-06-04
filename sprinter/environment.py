@@ -82,7 +82,7 @@ class Environment(object):
         self.logger.info("Installing environment %s..." % self.namespace)
         self.directory.initialize()
         self._specialize_contexts()
-        for feature in self.config.setups():
+        for feature in self.config.installs():
             self.install_feature(feature)
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                                (self.directory.root_dir, self.directory.root_dir))
@@ -96,7 +96,7 @@ class Environment(object):
         """ update the environment """
         self.logger.info("Updating environment %s..." % self.namespace)
         self._specialize_contexts()
-        for feature in self.config.setups():
+        for feature in self.config.installs():
             self.install_feature(feature)
         for feature in self.config.updates():
             self.update_feature(feature)

@@ -37,19 +37,19 @@ class SSHFormula(FormulaBase):
         super(SSHFormula, self).update(feature_name, source_config, target_config)
 
     def remove(self, feature_name, config):
-        super(SSHFormula, self).destroy(feature_name, config)
+        super(SSHFormula, self).remove(feature_name, config)
 
     def deactivate(self, feature_name, config):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),
                                 config['keyname'])
         self.__install_ssh_config(config, ssh_path)
-        super(SSHFormula, self).activate(feature_name, config)
+        super(SSHFormula, self).deactivate(feature_name, config)
 
     def activate(self, feature_name, config):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),
                                 config['keyname'])
         self.__install_ssh_config(config, ssh_path)
-        super(SSHFormula, self).deactivate(feature_name, config)
+        super(SSHFormula, self).activate(feature_name, config)
 
     def __generate_key(self, feature_name, config):
         """

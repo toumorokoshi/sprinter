@@ -58,7 +58,7 @@ class PerforceFormula(FormulaBase):
     """ A sprinter formula for git"""
 
     def install(self, feature_name, config):
-        super(PerforceFormula, self).setup(feature_name, config)
+        super(PerforceFormula, self).install(feature_name, config)
         self.p4environ = dict(os.environ.items() + [('P4USER', config['username']),
                                                     ('P4PASSWD', config['password']),
                                                     ('P4CLIENT', config['client'])])

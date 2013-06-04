@@ -19,7 +19,7 @@ class PackageFormula(FormulaBase):
 
     def install(self, feature_name, config):
         self.__install_package(feature_name, config)
-        super(PackageFormula, self).setup(feature_name, config)
+        super(PackageFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
         install_package = False

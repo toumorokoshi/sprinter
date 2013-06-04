@@ -6,6 +6,7 @@ formula = sprinter.formulas.unpack
 symlink = bin/go
 remove_common_prefix = true
 url = https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz
+destination = /tmp/
 strip-top-level-directory=True
 """
 
@@ -23,7 +24,7 @@ class UnpackFormula(FormulaBase):
         if 'executable' in config:
             symlink_target = config['symlink'] if 'symlink' in config else config['executable']
             self.__symlink_executable(feature_name, config['executable'], symlink_target)
-        super(UnpackFormula, self).setup(feature_name, config)
+        super(UnpackFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
         if (source_config['formula'] != target_config['formula']
@@ -38,7 +39,7 @@ class UnpackFormula(FormulaBase):
             self.directory.add_to_rc(target_config['rc'])
 
     def remove(self, feature_name, config):
-        super(UnpackFormula, self).destroy(feature_name, config)
+        super(UnpackFormula, self).remove(feature_name, config)
 
     def __install(self, feature_name, config):
         remove_common_prefix = 'remove_common_prefix' in config and \

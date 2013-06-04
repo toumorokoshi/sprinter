@@ -24,7 +24,7 @@ activate = echo 'activating...'
 target_config = """
 [install]
 formula = sprinter.formulas.command
-setup = echo 'setting up...'
+install = echo 'setting up...'
 update = echo 'updating...'
 
 [update]
@@ -48,7 +48,7 @@ class TestCommandFormula(object):
     def teardown(self):
         del(self.environment)
 
-    def test_setup(self):
+    def test_install(self):
         self.environment.install_feature("install")
         self.lib.call.assert_called_once_with("echo 'setting up...'")
 
