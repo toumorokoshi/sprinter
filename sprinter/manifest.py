@@ -100,6 +100,10 @@ class Manifest(object):
         return (not self.manifest.has_option(feature, 'phases') or
                 phase_name in [x.strip() for x in self.manifest.get(feature, 'phases').split(",")])
 
+    def add_additional_context(self, additonal_context):
+        """ Add additional context variable """
+        self.additional_context_variables = dict(self.additional_context_variables.items() + additonal_context.items())
+
     def __load_manifest(self, raw_manifest, username=None, password=None):
         manifest = RawConfigParser()
         manifest.add_section('config')
@@ -289,6 +293,10 @@ class Config(object):
                             default = (attributes['default'] if 'default' in attributes else None)
                             secret = (attributes['secret'] if 'secret' in attributes else False)
                             self.get_config(param, default=default, secret=secret)
+            if self.target:
+                self.set_additional_context('target')
+            if self.source:
+                self.set_additional_context('source')
 
     def write(self, file_handle):
         """
@@ -322,10 +330,10 @@ class Config(object):
         """
         return a context dict of the desired state
         """
-        context_dict = {}
         if not hasattr(self, manifest_type):
             raise ConfigException("manifest_type '%s' doesn't exist!" % manifest_type)
         manifest = getattr(self, manifest_type)
+        context_dict = manifest.additional_context_variables
         for k, v in self.config.items():
                 context_dict["config:%s" % k] = v
         manifest.additional_context_variables = dict(context_dict.items() +
@@ -389,3 +397,9 @@ class Config(object):
         else:
             manifest = getattr(self, manifest_type)
         return manifest.get_context_dict()
+
+    def set_source(self, source_manifest):
+        """ Set the source manifest """
+        self.source = source_manifest
+        self.set_additional_context('source')
+        return source_manifest

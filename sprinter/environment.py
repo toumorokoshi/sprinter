@@ -77,7 +77,7 @@ class Environment(object):
         """ Install the environment """
         if not self.directory.new:
             self.logger.info("Namespace %s already exists!" % self.namespace)
-            self.source = Manifest(self.directory.manifest_path)
+            self.source = self.config.set_source(Manifest(self.directory.manifest_path))
             return self.update()
         self.logger.info("Installing environment %s..." % self.namespace)
         self.directory.initialize()
@@ -259,4 +259,4 @@ class Environment(object):
             for s in manifest.formula_sections():
                 context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
             context_dict['config:node'] = self.system.node
-            manifest.additional_context_variables = context_dict
+            manifest.add_additional_context(context_dict)

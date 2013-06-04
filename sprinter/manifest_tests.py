@@ -77,26 +77,29 @@ class TestManifest(object):
             'formula': 'sprinter.formulas.git',
             'depends': 'git',
             'branch': 'yusuke',
-            'rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp'})
+            'rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
+            'bc': 'temp=`pwd`; cd %(sub:testvar)s/libexec && . sub-init2 && cd $tmp'})
 
     def test_get_context_dict(self):
         """ Test getting a config dict """
         tools.eq_(self.manifest_old.get_context_dict(),
-                  {'ant:formula': 'sprinter.formulas.unpack',
-                   'ant:phases': 'update',
-                   'ant:specific_version': '1.8.4',
-                   'git:brew': 'git',
-                   'git:formula': 'sprinter.formulas.package',
-                   'maven:formula': 'sprinter.formulas.unpack',
-                   'maven:specific_version': '2.10',
+                  {'sub:bc': 'temp=`pwd`; cd %(sub:testvar)s/libexec && . sub-init2 && cd $tmp',
                    'mysql:apt-get': 'libmysqlclient\nlibmysqlclient-dev',
-                   'mysql:brew': 'mysql', 'git:apt-get': 'git-core',
-                   'mysql:formula': 'sprinter.formulas.package',
-                   'sub:branch': 'yusuke',
-                   'sub:depends': 'git',
+                   'maven:formula': 'sprinter.formulas.unpack',
+                   'ant:specific_version': '1.8.4',
+                   'git:formula': 'sprinter.formulas.package',
                    'sub:formula': 'sprinter.formulas.git',
+                   'maven:specific_version': '2.10',
+                   'sub:branch': 'yusuke',
+                   'ant:formula': 'sprinter.formulas.unpack',
+                   'mysql:brew': 'mysql',
+                   'git:apt-get': 'git-core',
+                   'sub:url': 'git://github.com/Toumorokoshi/sub.git',
+                   'ant:phases': 'update',
+                   'sub:depends': 'git',
+                   'mysql:formula': 'sprinter.formulas.package',
                    'sub:rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
-                   'sub:url': 'git://github.com/Toumorokoshi/sub.git'})
+                   'git:brew': 'git'})
 
     def test_run_phase(self):
         """
@@ -109,6 +112,14 @@ class TestManifest(object):
             "Install not in phase but being run!"
         assert self.manifest_old.run_phase('sub', 'deactivate'), \
             "Deactivate not run in feature that does not specify phase!"
+
+    def test_add_additonal_context(self):
+        """ Test the add additonal context method """
+        self.manifest_old.add_additional_context({'testme': 'testyou'})
+        assert 'testme' in self.manifest_old.additional_context_variables
+        self.manifest_old.add_additional_context({'testhim': 'testher'})
+        assert 'testme' in self.manifest_old.additional_context_variables
+        assert 'testhim' in self.manifest_old.additional_context_variables
 
 
 manifest_old = """
@@ -131,6 +142,7 @@ depends = git
 url = git://github.com/Toumorokoshi/sub.git
 branch = yusuke
 rc = temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp
+bc = temp=`pwd`; cd %(sub:testvar)s/libexec && . sub-init2 && cd $tmp
 
 [mysql]
 formula = sprinter.formulas.package
@@ -267,6 +279,16 @@ class TestConfig(object):
         ])
         assert config.get_config.call_count == 2, "More calls were called!"
 
+    def test_grab_inputs_additional_context(self):
+        """ Grab inputs should re-call additional context """
+        source_manifest = Manifest(StringIO(manifest_input_params))
+        config = Config(source=source_manifest,
+                        target=self.new_manifest)
+        config.get_config = Mock()
+        config.grab_inputs()
+        assert 'config:username' in config.source.additional_context_variables,\
+            "Username config not added to context variables!"
+        
     def test_grab_inputs_source(self):
         """ Test grabbing inputs from source """
         self.config_source_only.get_config = Mock(return_value="no")
@@ -299,3 +321,17 @@ class TestConfig(object):
         self.config.set_additional_context('source', additional_context_variables)
         sub_values = self.config.source.get_feature_config("sub")
         assert sub_values['rc'].find("teststring") != -1, "teststring is not substituted in"
+        # should add to context
+        additional_context_variables = {"sub:testvar": "teststring2"}
+        self.config.set_additional_context('source', additional_context_variables)
+        sub_values = self.config.source.get_feature_config("sub")
+        assert sub_values['rc'].find("teststring") != -1, "teststring is not substituted in"
+        assert sub_values['bc'].find("teststring2") != -1, "teststring2 is not substituted in"
+
+    def test_set_source(self):
+        """ Test the source set """
+        self.config.config['test_variable'] = "test"
+        source = Manifest(manifest_old)
+        self.config.set_source(source)
+        assert 'config:test_variable' in source.additional_context_variables,\
+            "Additional context variables not set on new source!"
