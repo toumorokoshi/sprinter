@@ -76,7 +76,7 @@ class Environment(object):
     def install(self):
         """ Install the environment """
         if not self.directory.new:
-            self.logger.info("Namespace %s already exists!")
+            self.logger.info("Namespace %s already exists!" % self.namespace)
             return self.update()
         self.logger.info("Installing environment %s..." % self.namespace)
         self.directory.initialize()

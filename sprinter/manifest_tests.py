@@ -29,8 +29,7 @@ depends = sub
 """
 
 
-test_input_string = \
-"""
+test_input_string = """
 gitroot==~/workspace
 username
 password?
@@ -145,6 +144,14 @@ apt-get = git-core
 brew = git
 """
 
+manifest_input_params = """
+[config]
+namespace = sprinter
+username = toumorokoshi
+gitroot = ~/workspace
+"""
+
+
 manifest_new = """
 [config]
 namespace = sprinter
@@ -240,12 +247,25 @@ class TestConfig(object):
         """ Test grabbing inputs """
         self.config.get_config = Mock()
         self.config.grab_inputs()
-        self.config.get_config.has_calls([
-            call("gitroot", default="~/workspace"),
-            call("username"),
-            call("password", secret=True),
+        self.config.get_config.assert_has_calls([
+            call("gitroot", default="~/workspace", secret=False),
+            call("username", default=None, secret=False),
+            call("password", default=None, secret=True),
             call("main_branch", default="comp_main", secret=True)
         ])
+
+    def test_grab_inputs_existing_source(self):
+        """ Grabbing inputs should source from source first, if it exists """
+        source_manifest = Manifest(StringIO(manifest_input_params))
+        config = Config(source=source_manifest,
+                        target=self.new_manifest)
+        config.get_config = Mock()
+        config.grab_inputs()
+        config.get_config.assert_has_calls([
+            call("password", default=None, secret=True),
+            call("main_branch", default="comp_main", secret=True)
+        ])
+        assert config.get_config.call_count == 2, "More calls were called!"
 
     def test_grab_inputs_source(self):
         """ Test grabbing inputs from source """

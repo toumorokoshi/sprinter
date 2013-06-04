@@ -277,14 +277,18 @@ class Config(object):
         """
         if not manifest:
             manifest = self.target if self.target else self.source
+        old_manifest = self.source if manifest is self.target else None
         if manifest:
             for s in manifest.sections():
                 if manifest.has_option(s, 'inputs'):
                     for param, attributes in \
                             self.__parse_input_string(manifest.get(s, 'inputs')):
-                        default = (attributes['default'] if 'default' in attributes else None)
-                        secret = (attributes['secret'] if 'secret' in attributes else False)
-                        self.get_config(param, default=default, secret=secret)
+                        if old_manifest and old_manifest.has_option('config', param):
+                            self.config[param] = old_manifest.get('config', param)
+                        else:
+                            default = (attributes['default'] if 'default' in attributes else None)
+                            secret = (attributes['secret'] if 'secret' in attributes else False)
+                            self.get_config(param, default=default, secret=secret)
 
     def write(self, file_handle):
         """
