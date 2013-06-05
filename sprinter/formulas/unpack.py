@@ -6,7 +6,7 @@ formula = sprinter.formulas.unpack
 symlink = bin/go
 remove_common_prefix = true
 url = https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz
-destination = /tmp/
+target = /tmp/
 strip-top-level-directory=True
 """
 
@@ -44,8 +44,8 @@ class UnpackFormula(FormulaBase):
     def __install(self, feature_name, config):
         remove_common_prefix = 'remove_common_prefix' in config and \
                                config['remove_common_prefix'].lower().startswith('t')
-        destination = (self.directory.install_directory(feature_name) if 'directory'
-                       not in config else config['directory'])
+        destination = (self.directory.install_directory(feature_name) if 'target'
+                       not in config else config['target'])
         if config['type'] == "tar.gz":
             self.lib.extract_targz(config['url'], destination,
                                    remove_common_prefix=remove_common_prefix)
