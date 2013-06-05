@@ -98,7 +98,7 @@ class PerforceFormula(FormulaBase):
     def __write_p4settings(self, config):
         """ write perforce settings """
         self.logger.info("Writing p4settings...")
-        root_dir = os.path.expanduser(config['root_path'] % self.environment.context())
+        root_dir = os.path.expanduser(config['root_path'] % self.environment.target.get_context_dict())
         p4settings_path = os.path.join(root_dir, ".p4settings")
         out_content = p4settings_template % config
         if os.path.exists(p4settings_path) and out_content != open(p4settings_path, "r+").read():
@@ -126,12 +126,12 @@ class PerforceFormula(FormulaBase):
                                     boolean=True)
         if overwrite:
             self.logger.info("Configuring p4 client...")
-            os.chdir(os.path.expanduser(config['root_path'] % self.environment.context()))
+            os.chdir(os.path.expanduser(config['root_path'] % self.environment.target.get_context_dict()))
             config['root_path'] = os.path.expanduser(config['root_path'])
             config['hostname'] = self.system.node
-            config['p4view'] = config['p4view'] % self.environment.context()
+            config['p4view'] = config['p4view'] % self.environment.target.get_context_dict()
             client = re.sub('//depot', '    //depot', p4client_template % config)
-            cwd = os.path.expanduser(config['root_path'] % self.environment.context())
+            cwd = os.path.expanduser(config['root_path'] % self.environment.target.get_context_dict())
             self.logger.info(self.lib.call("%s client -i" % self.p4_command,
                                            stdin=client,
                                            env=self.p4environ,
@@ -144,7 +144,7 @@ class PerforceFormula(FormulaBase):
                                boolean=True)
         if sync:
             self.logger.info("Syncing perforce root... (this can take a while).")
-            cwd = os.path.expanduser(config['root_path'] % self.environment.context())
+            cwd = os.path.expanduser(config['root_path'] % self.environment.target.get_context_dict())
             self.logger.info(self.lib.call("%s sync" % self.p4_command,
                                            env=self.p4environ,
                                            cwd=cwd))
@@ -158,4 +158,4 @@ class PerforceFormula(FormulaBase):
         sync = self.lib.prompt("would you like to completely remove the perforce root?", default="no")
         if sync.lower().startswith('y'):
             self.logger.info("Removing %s..." % config['root_path'])
-            shutil.rmtree(os.path.expanduser(config['root_path'] % self.environment.context()))
+            shutil.rmtree(os.path.expanduser(config['root_path'] % self.environment.get_context_dict()))
