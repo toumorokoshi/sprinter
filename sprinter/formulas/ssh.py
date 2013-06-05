@@ -30,7 +30,7 @@ class SSHFormula(FormulaBase):
         ssh_path = self.__generate_key(feature_name, config)
         self.__install_ssh_config(config, ssh_path)
         if 'command' in config:
-            self.__call_command(self, config['command'], ssh_path)
+            self.__call_command(config['command'], ssh_path)
 
     def update(self, feature_name, source_config, target_config):
         ssh_path = self.__generate_key(feature_name, target_config)
