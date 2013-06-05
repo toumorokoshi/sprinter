@@ -61,3 +61,6 @@ These functions are:
 * 'command': this will run the specified command after the recipe is finished (for setup and updates)
 * 'phases': this is a comma-delimited list designating the phases this feature
   runs in. If it is unset, it will run in all phases.
+* 'systems': this specifies the systems that this particular recipe should run on. The currently supported values are:
+  * osx = OSX systems
+  * debian = debian-based systems
