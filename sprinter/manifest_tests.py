@@ -99,23 +99,31 @@ class TestManifest(object):
     def test_get_context_dict(self):
         """ Test getting a config dict """
         tools.eq_(self.manifest_old.get_context_dict(),
-                  {'sub:bc': 'temp=`pwd`; cd %(sub:testvar)s/libexec && . sub-init2 && cd $tmp',
-                   'mysql:apt-get': 'libmysqlclient\nlibmysqlclient-dev',
-                   'maven:formula': 'sprinter.formulas.unpack',
-                   'ant:specific_version': '1.8.4',
-                   'git:formula': 'sprinter.formulas.package',
-                   'sub:formula': 'sprinter.formulas.git',
+                  {'maven:formula': 'sprinter.formulas.unpack',
+                   'config:hobopopo': 'no',
                    'maven:specific_version': '2.10',
-                   'sub:branch': 'yusuke',
                    'ant:formula': 'sprinter.formulas.unpack',
-                   'mysql:brew': 'mysql',
+                   'mysql:formula': 'sprinter.formulas.package',
+                   'sub:rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
+                   'ant:specific_version': '1.8.4',
+                   'sub:formula': 'sprinter.formulas.git',
+                   'sub:branch': 'yusuke',
                    'git:apt-get': 'git-core',
                    'sub:url': 'git://github.com/Toumorokoshi/sub.git',
                    'ant:phases': 'update',
                    'sub:depends': 'git',
-                   'mysql:formula': 'sprinter.formulas.package',
-                   'sub:rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
-                   'git:brew': 'git'})
+                   'config:namespace': 'sprinter',
+                   'sub:bc': 'temp=`pwd`; cd %(sub:testvar)s/libexec && . sub-init2 && cd $tmp',
+                   'mysql:apt-get': 'libmysqlclient\nlibmysqlclient-dev',
+                   'config:username': 'toumorokoshi',
+                   'config:gitroot': '~/workspace',
+                   'mysql:brew': 'mysql',
+                   'git:brew': 'git',
+                   'git:formula': 'sprinter.formulas.package',
+                   'config:test_variable': 'test',
+                   'config:inputs': 'sourceonly'})
+        self.manifest_old.add_additional_context({"config:test": "testing this"})
+        assert "config:test" in self.manifest_old.get_context_dict()
 
     def test_run_phase(self):
         """
