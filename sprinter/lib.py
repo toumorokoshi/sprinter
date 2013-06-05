@@ -207,7 +207,7 @@ def which(program):
     return None
 
 
-def extract_targz(url, target_dir, remove_common_prefix=False):
+def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     """ extract a targz and install to the target directory """
     gz = gzip.GzipFile(fileobj=StringIO(urllib2.urlopen(url).read()))
     tf = tarfile.TarFile(fileobj=gz)
@@ -220,18 +220,26 @@ def extract_targz(url, target_dir, remove_common_prefix=False):
     for tfile in tf.getmembers():
         tfile.name = tfile.name.replace(common_prefix, "", 1)
         if tfile.name != "":
+            target_path = os.path.join(tfile, target_dir)
+            if target_path != target_dir and os.path.exists(target_path):
+                if overwrite:
+                    remove_path(target_path)
+                else:
+                    return
             tf.extract(tfile, target_dir)
 
 
-def extract_zip(url, target_dir, remove_common_prefix=False):
+def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
     if remove_common_prefix:
         raise("Remove common prefix for zip not implemented yet!")
+    if overwrite:
+        raise NotImplementedError("overwrite not implemented for zip yet!")
     memory_file = io.BytesIO(urllib.urlopen(url).read())
     zip_file = zipfile.ZipFile(memory_file)
     zip_file.extractall(target_dir)
 
 
-def extract_dmg(url, target_dir, remove_common_prefix=False):
+def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
     if remove_common_prefix:
         raise("Remove common prefix for zip not implemented yet!")
     tmpdir = tempfile.mkdtemp()
@@ -243,6 +251,11 @@ def extract_dmg(url, target_dir, remove_common_prefix=False):
             if not f.startswith(".") and f != ' ':
                 source_path = os.path.join("/Volumes/a", f)
                 target_path = os.path.join(target_dir, f)
+                if target_path != target_dir and os.path.exists(target_path):
+                    if overwrite:
+                        remove_path(target_path)
+                    else:
+                        return
                 if os.path.isdir(source_path):
                     shutil.copytree(source_path, target_path)
                 else:
@@ -250,6 +263,23 @@ def extract_dmg(url, target_dir, remove_common_prefix=False):
     finally:
         call("hdiutil unmount /Volumes/a")
         shutil.rmtree(tmpdir)
+
+
+def remove_path(target_path):
+    """ Delete the target path """
+    if os.path.isdir(target_path):
+        shutil.rmtree(target_path)
+    else:
+        os.unlink(target_path)
+
+
+def _determine_overwrite(prompt, overwrite, path):
+    """ Determines if an overwrite is desired """
+    if overwrite:
+        return True
+    elif prompt:
+        return prompt("Path %s already exist! Overwrite?" % path, boolean=True)
+    return True
 
 if __name__ == '__main__':
     import doctest

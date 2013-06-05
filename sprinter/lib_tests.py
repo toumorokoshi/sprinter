@@ -6,6 +6,8 @@ import os
 import shutil
 import tempfile
 
+from mock import Mock
+
 from sprinter.formulabase import FormulaBase
 from sprinter.environment import Environment
 from sprinter.formulas.env import EnvFormula
@@ -67,5 +69,52 @@ class TestLib(object):
                 lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True)
                 assert os.path.exists(os.path.join(test_dir, "sprinter"))
                 assert os.path.isdir(os.path.join(test_dir, "sprinter"))
+            finally:
+                shutil.rmtree(test_dir)
+
+        def skip_targz_with_prompt(self):
+            """ Test if the targz extract works, and prompts for overwrite """
+            test_dir = tempfile.mkdtemp()
+            try:
+                # test if prompt returns false
+                os.mkdir(os.path.join(test_dir, "sprinter"))
+                lib.prompt = Mock(return_value=False)
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, prompt=True)
+                assert not os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
+                assert lib.prompt.call_count == 1
+
+                # test if prompt returns true
+                lib.prompt = Mock(return_value=True)
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, prompt=True)
+                assert os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
+                assert lib.prompt.call_count == 1
+            finally:
+                shutil.rmtree(test_dir)
+
+        def test_targz_with_overwrite(self):
+            """ Test if the targz extract works, and overwrites """
+            test_dir = tempfile.mkdtemp()
+            try:
+                os.mkdir(os.path.join(test_dir, "sprinter"))
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True)
+                assert not os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, overwrite=True)
+                assert os.path.exists(os.path.join(test_dir, "sprinter", "formulas"))
+            finally:
+                shutil.rmtree(test_dir)
+
+        def test_remove_path(self):
+            """ Remove path should handle removing a directory and a path """
+            test_dir = tempfile.mkdtemp()
+            try:
+                # test directory
+                test_target_dir = tempfile.mkdtemp(prefix=test_dir)
+                lib.remove_path(test_target_dir)
+                assert not os.path.exists(test_target_dir)
+                
+                # test file
+                _, test_target_path = tempfile.mkstemp(prefix=test_dir)
+                lib.remove_path(test_target_path)
+                assert not os.path.exists(test_target_path)
             finally:
                 shutil.rmtree(test_dir)
