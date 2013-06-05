@@ -29,12 +29,13 @@ class SSHFormula(FormulaBase):
     def install(self, feature_name, config):
         ssh_path = self.__generate_key(feature_name, config)
         self.__install_ssh_config(config, ssh_path)
-        super(SSHFormula, self).install(feature_name, config)
+        if 'command' in config:
+            self.__call_command(self, config['command'], ssh_path)
 
     def update(self, feature_name, source_config, target_config):
         ssh_path = self.__generate_key(feature_name, target_config)
         self.__install_ssh_config(target_config, ssh_path)
-        super(SSHFormula, self).update(feature_name, source_config, target_config)
+        #super(SSHFormula, self).update(feature_name, source_config, target_config)
 
     def remove(self, feature_name, config):
         super(SSHFormula, self).remove(feature_name, config)
@@ -43,13 +44,13 @@ class SSHFormula(FormulaBase):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),
                                 config['keyname'])
         self.__install_ssh_config(config, ssh_path)
-        super(SSHFormula, self).deactivate(feature_name, config)
+        #super(SSHFormula, self).deactivate(feature_name, config)
 
     def activate(self, feature_name, config):
         ssh_path = os.path.join(self.directory.install_directory(feature_name),
                                 config['keyname'])
         self.__install_ssh_config(config, ssh_path)
-        super(SSHFormula, self).activate(feature_name, config)
+        #super(SSHFormula, self).activate(feature_name, config)
 
     def __generate_key(self, feature_name, config):
         """

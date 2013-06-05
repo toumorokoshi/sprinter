@@ -13,19 +13,19 @@ target_config = """
 formula = sprinter.formulas.unpack
 url = %(targz)s
 type = tar.gz
-destination = '/testpath'
+destination = /testpath
 
 [dmg_with_destination]
 formula = sprinter.formulas.unpack
 url = %(dmg)s
 type = dmg
-destination = '/testpath'
+destination = /testpath
 
 [zip_with_destination]
 formula = sprinter.formulas.unpack
 url = %(zip)s
 type = zip
-destination = '/testpath'
+destination = /testpath
 """ % {'targz': TEST_TARGZ, 'dmg': TEST_DMG, 'zip': TEST_ZIP}
 
 
