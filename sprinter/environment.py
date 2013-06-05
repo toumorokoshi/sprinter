@@ -256,7 +256,8 @@ class Environment(object):
         self.config.grab_inputs()
         for manifest in [self.source, self.target]:
             context_dict = {}
-            for s in manifest.formula_sections():
-                context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
-            context_dict['config:node'] = self.system.node
-            manifest.add_additional_context(context_dict)
+            if manifest:
+                for s in manifest.formula_sections():
+                    context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+                    context_dict['config:node'] = self.system.node
+                manifest.add_additional_context(context_dict)
