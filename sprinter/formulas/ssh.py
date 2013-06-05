@@ -29,7 +29,7 @@ class SSHFormula(FormulaBase):
     def install(self, feature_name, config):
         ssh_path = self.__generate_key(feature_name, config)
         self.__install_ssh_config(config, ssh_path)
-        super(FormulaBase, self).install(feature_name, config)
+        super(SSHFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
         ssh_path = self.__generate_key(feature_name, target_config)
