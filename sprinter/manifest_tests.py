@@ -4,6 +4,7 @@ from nose import tools
 from mock import Mock, call
 
 from sprinter.manifest import Config, ConfigException, Manifest, ManifestException
+from sprinter.system import System
 
 manifest_correct_dependency = """
 [sub]
@@ -18,7 +19,6 @@ formula = sprinter.formulas.package
 apt-get = git-core
 brew = git
 """
-
 manifest_incorrect_dependency = """
 [config]
 namespace = sprinter
@@ -28,12 +28,28 @@ formula = sprinter.formulas.git
 depends = sub
 """
 
-
 test_input_string = """
 gitroot==~/workspace
 username
 password?
 main_branch==comp_main
+"""
+
+osx_only_manifest = """
+[osx]
+systems = osx
+formula = sprinter.formulas.template
+
+[osx2]
+systems = OsX
+formula = sprinter.formulas.template
+"""
+
+debian_only_manifest = """
+[debian]
+systems = debian
+formula = sprinter.formulas.template
+
 """
 
 
@@ -103,7 +119,7 @@ class TestManifest(object):
 
     def test_run_phase(self):
         """
-        Run phase should sallow phases that are specifically listed, and
+        Run phase should allow phases that are specifically listed, and
         disallow ones that are not
         """
         assert self.manifest_old.run_phase('ant', 'update'), \
@@ -113,7 +129,27 @@ class TestManifest(object):
         assert self.manifest_old.run_phase('sub', 'deactivate'), \
             "Deactivate not run in feature that does not specify phase!"
 
-    def test_add_additonal_context(self):
+    def test_osx_only(self):
+        """ Test a feature that should only occur on osx """
+        test_manifest = Manifest(StringIO(osx_only_manifest))
+        test_manifest.system = Mock()
+        test_manifest.system.isOSX = Mock(return_value=True)
+        assert test_manifest.run_phase('osx', 'install')
+        assert test_manifest.run_phase('osx2', 'install')
+        test_manifest.system.isOSX = Mock(return_value=False)
+        assert not test_manifest.run_phase('osx', 'install')
+        assert not test_manifest.run_phase('osx2', 'install')
+
+    def test_debianbased_only(self):
+        """ Test a feature that should only occur on debian-based distributions """
+        test_manifest = Manifest(StringIO(debian_only_manifest))
+        test_manifest.system = Mock(spec=System)
+        test_manifest.system.isDebianBased = Mock(return_value=True)
+        assert test_manifest.run_phase('debian', 'install')
+        test_manifest.system.isDebianBased = Mock(return_value=False)
+        assert not test_manifest.run_phase('debian', 'install')
+
+    def test_add_additional_context(self):
         """ Test the add additonal context method """
         self.manifest_old.add_additional_context({'testme': 'testyou'})
         assert 'testme' in self.manifest_old.additional_context_variables
@@ -183,6 +219,7 @@ specific_version = 1.8.4
 [myrc]
 formula = sprinter.formulas.template
 """
+
 
 
 class TestConfig(object):

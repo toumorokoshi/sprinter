@@ -17,6 +17,7 @@ from StringIO import StringIO
 
 from sprinter import lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
+from sprinter.system import System
 
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
@@ -51,6 +52,7 @@ class Manifest(object):
                                              password=password)
         self.namespace = namespace if namespace else self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
+        self.system = System(logger=self.logger)
 
     def source(self):
         """
@@ -97,9 +99,19 @@ class Manifest(object):
 
     def run_phase(self, feature, phase_name):
         """ Determine if the feature should run in the given phase """
-        return (not self.manifest.has_option(feature, 'phases') or
-                phase_name in [x.strip() for x in self.manifest.get(feature, 'phases').split(",")])
-
+        should_run = True
+        if(self.manifest.has_option(feature, 'phases') and
+                phase_name not in [x.strip() for x in self.manifest.get(feature, 'phases').split(",")]):
+            return False
+        if self.manifest.has_option(feature, 'systems'):
+            should_run = False
+            valid_systems = [s.lower() for s in self.manifest.get(feature, 'systems').split(",")]
+            for system_type, param in [('isOSX', 'osx'),
+                                       ('isDebianBased', 'debian')]:
+                if param in valid_systems and getattr(self.system, system_type)() is True:
+                    should_run = True
+        return should_run
+                    
     def add_additional_context(self, additonal_context):
         """ Add additional context variable """
         self.additional_context_variables = dict(self.additional_context_variables.items() + additonal_context.items())
