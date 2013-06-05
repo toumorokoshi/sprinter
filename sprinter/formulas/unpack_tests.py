@@ -10,9 +10,9 @@ target_config = """
 [targz_with_destination]
 formula = sprinter.formulas.unpack
 url = %(targz)s
-destination = %(config:customurl)s
-""" % {'targz': TEST_TARGZ,
-       'config:customurl': '%(config:customurl)s'}
+type = tar.gz
+destination = '/testpath'
+""" % {'targz': TEST_TARGZ}
 
 
 class TestUnpackFormula(FormulaTest):
@@ -24,3 +24,5 @@ class TestUnpackFormula(FormulaTest):
 
     def test_targz_with_destination(self):
         """ Test the targz extracting to a specific destination """
+        self.environment.install_feature("targz_with_destination")
+        self.lib.extract_targz.assert_has_call(TEST_TARGZ, '/testpath', remove_common_prefix=False)

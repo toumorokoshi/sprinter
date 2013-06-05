@@ -39,22 +39,24 @@ class UnpackFormula(FormulaBase):
             self.directory.add_to_rc(target_config['rc'])
 
     def remove(self, feature_name, config):
-        super(UnpackFormula, self).remove(feature_name, config)
+        super(UnpackFormula, self).destroy(feature_name, config)
 
     def __install(self, feature_name, config):
         remove_common_prefix = 'remove_common_prefix' in config and \
                                config['remove_common_prefix'].lower().startswith('t')
+        destination = (self.directory.install_directory(feature_name) if 'directory'
+                       not in config else config['directory'])
         if config['type'] == "tar.gz":
-            self.lib.extract_targz(config['url'], self.directory.install_directory(feature_name),
+            self.lib.extract_targz(config['url'], destination,
                                    remove_common_prefix=remove_common_prefix)
         elif config['type'] == "zip":
-            self.lib.extract_zip(config['url'], self.directory.install_directory(feature_name),
+            self.lib.extract_zip(config['url'], destination,
                                  remove_common_prefix=remove_common_prefix)
         elif config['type'] == "dmg":
             if not self.system.isOSX():
                 self.logger.warn("Non OSX based distributions can not install a dmg!")
             else:
-                self.lib.extract_dmg(config['url'], self.directory.install_directory(feature_name),
+                self.lib.extract_dmg(config['url'], destination,
                                      remove_common_prefix=remove_common_prefix)
 
     def __symlink_executable(self, feature_name, source, target):

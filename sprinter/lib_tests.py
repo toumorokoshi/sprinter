@@ -12,6 +12,8 @@ from sprinter.formulas.env import EnvFormula
 from sprinter import lib
 from sprinter.lib import CommandMissingException
 
+TEST_TARGZ = "http://github.com/toumorokoshi/sprinter/tarball/master"
+
 
 class TestLib(object):
 
@@ -55,5 +57,15 @@ class TestLib(object):
             try:
                 lib.extract_dmg("https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg", test_dir)
                 assert os.path.exists(os.path.join(test_dir, "Google Chrome.app")), "app was not extracted!"
+            finally:
+                shutil.rmtree(test_dir)
+
+        def test_targz(self):
+            """ Test if the targz extract works """
+            test_dir = tempfile.mkdtemp()
+            try:
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True)
+                assert os.path.exists(os.path.join(test_dir, "sprinter"))
+                assert os.path.isdir(os.path.join(test_dir, "sprinter"))
             finally:
                 shutil.rmtree(test_dir)
