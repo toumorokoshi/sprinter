@@ -5,6 +5,7 @@ Tests for the library
 import os
 import shutil
 import tempfile
+import httpretty
 
 from mock import Mock
 
@@ -62,6 +63,20 @@ class TestLib(object):
             finally:
                 shutil.rmtree(test_dir)
 
+        def integrate_dmg_with_overwrite(self):
+            """ Test if the dmg install works, with an overwrite """
+            test_dir = tempfile.mkdtemp()
+            try:
+                os.mkdir(os.path.join(test_dir, "sprinter"))
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True)
+                assert not os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
+                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, overwrite=True)
+                assert os.path.exists(os.path.join(test_dir, "sprinter", "formulas"))
+                lib.extract_dmg("https://dl.google.com/chrome/mac/stable/GGRM/googlechrome.dmg", test_dir, overwrite=True)
+                assert os.path.exists(os.path.join(test_dir, "Google Chrome.app")), "app was not extracted!"
+            finally:
+                shutil.rmtree(test_dir)
+
         def test_targz(self):
             """ Test if the targz extract works """
             test_dir = tempfile.mkdtemp()
@@ -69,25 +84,6 @@ class TestLib(object):
                 lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True)
                 assert os.path.exists(os.path.join(test_dir, "sprinter"))
                 assert os.path.isdir(os.path.join(test_dir, "sprinter"))
-            finally:
-                shutil.rmtree(test_dir)
-
-        def skip_targz_with_prompt(self):
-            """ Test if the targz extract works, and prompts for overwrite """
-            test_dir = tempfile.mkdtemp()
-            try:
-                # test if prompt returns false
-                os.mkdir(os.path.join(test_dir, "sprinter"))
-                lib.prompt = Mock(return_value=False)
-                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, prompt=True)
-                assert not os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
-                assert lib.prompt.call_count == 1
-
-                # test if prompt returns true
-                lib.prompt = Mock(return_value=True)
-                lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, prompt=True)
-                assert os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
-                assert lib.prompt.call_count == 1
             finally:
                 shutil.rmtree(test_dir)
 
@@ -99,6 +95,36 @@ class TestLib(object):
                 lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True)
                 assert not os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
                 lib.extract_targz(TEST_TARGZ, test_dir, remove_common_prefix=True, overwrite=True)
+                assert os.path.exists(os.path.join(test_dir, "sprinter", "formulas"))
+            finally:
+                shutil.rmtree(test_dir)
+               
+        @httpretty.activate
+        def test_zip(self):
+            """ Test if the zip extract works """
+            TEST_URI = "http://testme.com/test.zip"
+            httpretty.register_uri(httpretty.GET, TEST_URI,
+                                   body=open("./test_data/test_zip.zip").read())
+            test_dir = tempfile.mkdtemp()
+            try:
+                lib.extract_zip(TEST_URI, test_dir, remove_common_prefix=True)
+                assert os.path.exists(os.path.join(test_dir, "sprinter"))
+                assert os.path.isdir(os.path.join(test_dir, "sprinter"))
+            finally:
+                shutil.rmtree(test_dir)
+
+        @httpretty.activate
+        def test_zip_with_overwrite(self):
+            """ Test if the zip extract works, and overwrites """
+            TEST_URI = "http://testme.com/test.zip"
+            httpretty.register_uri(httpretty.GET, TEST_URI,
+                                   body=open("./test_data/test_zip.zip").read())
+            test_dir = tempfile.mkdtemp()
+            try:
+                os.mkdir(os.path.join(test_dir, "sprinter"))
+                lib.extract_zip(TEST_URI, test_dir, remove_common_prefix=True)
+                assert not os.path.exists(os.path.join(test_dir, "sprinter", "sprinter"))
+                lib.extract_zip(TEST_URI, test_dir, remove_common_prefix=True, overwrite=True)
                 assert os.path.exists(os.path.join(test_dir, "sprinter", "formulas"))
             finally:
                 shutil.rmtree(test_dir)

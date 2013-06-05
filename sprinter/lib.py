@@ -213,12 +213,10 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     tf = tarfile.TarFile(fileobj=gz)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-    if not remove_common_prefix:
-        tf.extractall(path=target_dir)
-        return
     common_prefix = os.path.commonprefix(tf.getnames()) + "/"
     for tfile in tf.getmembers():
-        tfile.name = tfile.name.replace(common_prefix, "", 1)
+        if remove_common_prefix:
+            tfile.name = tfile.name.replace(common_prefix, "", 1)
         if tfile.name != "":
             target_path = os.path.join(tfile, target_dir)
             if target_path != target_dir and os.path.exists(target_path):
@@ -230,13 +228,21 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
 
 
 def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
-    if remove_common_prefix:
-        raise("Remove common prefix for zip not implemented yet!")
-    if overwrite:
-        raise NotImplementedError("overwrite not implemented for zip yet!")
     memory_file = io.BytesIO(urllib.urlopen(url).read())
     zip_file = zipfile.ZipFile(memory_file)
-    zip_file.extractall(target_dir)
+    common_prefix = os.path.commonprefix(zip_file.namelist())
+    for zip_file_info in zip_file.infolist():
+        target_path = zip_file_info.filename
+        if remove_common_prefix:
+            target_path = target_path.replace(common_prefix, "", 1)
+        if target_path != "":
+            target_path = os.path.join(target_dir, target_path)
+            if target_path != target_dir and os.path.exists(target_path):
+                if overwrite:
+                    remove_path(target_path)
+                else:
+                    return
+            zip_file.extract(zip_file_info, target_path)
 
 
 def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
