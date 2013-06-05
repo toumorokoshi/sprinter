@@ -95,7 +95,7 @@ class Manifest(object):
         for s in self.formula_sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
-        return context_dict
+        return dict(context_dict.items() + self.additional_context_variables.items())
 
     def run_phase(self, feature, phase_name):
         """ Determine if the feature should run in the given phase """
