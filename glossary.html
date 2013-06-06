@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -14,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -35,9 +34,6 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="internals.html" title="Sprinter Internals"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
@@ -56,6 +52,8 @@
 <dd>An environment in the sprinter context is a collection of <a class="reference internal" href="#term-feature"><em class="xref std std-term">features</em></a> for a client machine that can be described by a sprinter manifest file. Sprinter&#8217;s main job is to install, update, and ultimately manages these environments.</dd>
 <dt id="term-feature">feature</dt>
 <dd>A sprinter feature represents a single unit of configuration for a sprinter environment. A feature should represent a single modular, functional unit to manage one aspect of an environment, such as the environment variables, a package that needs to be installed, or an in-house command line tool.</dd>
+<dt id="term-formula">formula</dt>
+<dd>A formula represents a classification of a feature, that provides the steps to install, update, etc. a feature.</dd>
 <dt id="term-manifest">manifest</dt>
 <dd>A sprinter manifest is a configuration file describing a sprinter <a class="reference internal" href="#term-environment"><em class="xref std std-term">environment</em></a>. Sprinter manifest examples can be found in the source code, or in the <a class="reference internal" href="tutorial.html"><em>Sprinter Tutorial</em></a>.</dd>
 <dt id="term-rc-file">.rc file</dt>
@@ -103,9 +101,6 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="internals.html" title="Sprinter Internals"
              >previous</a> |</li>
         <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
@@ -113,7 +108,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2013, Yusuke Tsutsumi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sprinter Formulas &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" />
+    <link rel="next" title="Manifests" href="manifests.html" />
+    <link rel="prev" title="Sprinter Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="manifests.html" title="Manifests"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Sprinter Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sprinter-formulas">
+<h1>Sprinter Formulas<a class="headerlink" href="#sprinter-formulas" title="Permalink to this headline">¶</a></h1>
+<p>Sprinter formulas are the building block of sprinter environments:
+they handle a specific piece of functionality of your environment,
+from cloning a git repository to install system packages.</p>
+<p>In your sprinter environment configuration, each section (aside from
+some reserved names) represents a configured formula, knows as a
+<a class="reference internal" href="glossary.html#term-feature"><em class="xref std std-term">feature</em></a>. Here is an example:</p>
+<div class="code python highlight-python"><pre>[sub]
+recipe = sprinter.formulas.git
+url = git://github.com/Toumorokoshi/sub.git
+branch = yusuke
+rc = temp=`pwd`; cd %(sub:root_dir)s/libexec &amp;&amp; . sub-init2 &amp;&amp; cd $tmp</pre>
+</div>
+<p>This section:</p>
+<ul class="simple">
+<li>utilizes the standard sprinter git recipe</li>
+<li>clones a git repo from the url specified</li>
+<li>checks out a specific branch yusuke</li>
+<li>adds the initialization command to the environment&#8217;s .rc script</li>
+</ul>
+<p>Configuration parameters vary from recipe to recipe, so look at the
+documentation to figure out which parameters are available to you.</p>
+<p>Now let&#8217;s talk more about formulas in detail.</p>
+<div class="section" id="where-to-find-formulas">
+<h2>Where to find formulas<a class="headerlink" href="#where-to-find-formulas" title="Permalink to this headline">¶</a></h2>
+<p>Currently, formulas can be found in one place:</p>
+<ol class="arabic">
+<li><p class="first">contained inside the standard sprinter library. Currently the formulas include:</p>
+<blockquote>
+<div><ul class="simple">
+<li>command, to execute a commnd</li>
+<li>env, to add environment variables</li>
+<li>git, for git repo cloning</li>
+<li>package, to install packages from the package manager of your environment</li>
+<li>perforce, to configure and install perforce</li>
+<li>ssh, to set up an ssh key</li>
+<li>template, to specialize a template and write it to a specified location</li>
+<li>unpack, to unpack tar.gz files</li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="standard-formula-options">
+<h2>Standard Formula Options<a class="headerlink" href="#standard-formula-options" title="Permalink to this headline">¶</a></h2>
+<p>Although sprinter formulas perform different functions, they all have
+a common set of functionality to facilitate workflows like adding
+files to the init script.</p>
+<p>These functions are:</p>
+<ul class="simple">
+<li>&#8216;rc&#8217;: this will add lines into the .rc of your environment, thereby
+being added to your environment if it&#8217;s activated. (for setup and
+updates)</li>
+<li>&#8216;command&#8217;: this will run the specified command after the recipe is finished (for setup and updates)</li>
+<li>&#8216;phases&#8217;: this is a comma-delimited list designating the phases this feature
+runs in. If it is unset, it will run in all phases.</li>
+<li>&#8216;systems&#8217;: this specifies the systems that this particular recipe should run on. The currently supported values are:
+* osx = OSX systems
+* debian = debian-based systems</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sprinter Formulas</a><ul>
+<li><a class="reference internal" href="#where-to-find-formulas">Where to find formulas</a></li>
+<li><a class="reference internal" href="#standard-formula-options">Standard Formula Options</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Sprinter Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="manifests.html"
+                        title="next chapter">Manifests</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/formulas.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="manifests.html" title="Manifests"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Sprinter Tutorial"
+             >previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

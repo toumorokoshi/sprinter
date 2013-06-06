@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Environment Lifecycle &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" />
+    <link rel="next" title="Sprinter Internals" href="internals.html" />
+    <link rel="prev" title="Manifests" href="manifests.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="internals.html" title="Sprinter Internals"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="manifests.html" title="Manifests"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="environment-lifecycle">
+<h1>Environment Lifecycle<a class="headerlink" href="#environment-lifecycle" title="Permalink to this headline">¶</a></h1>
+<p>The environment lifecycle was designed to be minimal and intuitive. Actions occur as they are necessary.</p>
+<p>You can restrict a feature to only occur during specific phases with a comma-delimited list of the phases it should run:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">sub</span><span class="p">]</span>
+<span class="n">recipe</span> <span class="o">=</span> <span class="n">sprinter</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">git</span>
+<span class="n">phases</span> <span class="o">=</span> <span class="n">update</span>
+</pre></div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>When an environment is installed for the first time, the &#8216;install&#8217;
+directive is called on every feature.</p>
+</div>
+<div class="section" id="upgrade">
+<h2>Upgrade<a class="headerlink" href="#upgrade" title="Permalink to this headline">¶</a></h2>
+<p>When an environment is upgraded:</p>
+<ul class="simple">
+<li>newly listed features have the &#8216;install&#8217; directive called on them.</li>
+<li>existing features have the &#8216;update&#8217; directive called on them.</li>
+<li>features no longer listed in have the &#8216;remove&#8217; directive called on them.</li>
+</ul>
+</div>
+<div class="section" id="remove">
+<h2>Remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h2>
+<p>When an environment is removed, every feature has the &#8216;remove&#8217; directive called on them.</p>
+</div>
+<div class="section" id="deactivate">
+<h2>Deactivate<a class="headerlink" href="#deactivate" title="Permalink to this headline">¶</a></h2>
+<p>When an environment is deactivated, every feature has the &#8216;deactivate&#8217; directive called on them.</p>
+</div>
+<div class="section" id="activate">
+<h2>Activate<a class="headerlink" href="#activate" title="Permalink to this headline">¶</a></h2>
+<p>When an environment is activated, every feature has the &#8216;activate&#8217; directive called on them.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Environment Lifecycle</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#upgrade">Upgrade</a></li>
+<li><a class="reference internal" href="#remove">Remove</a></li>
+<li><a class="reference internal" href="#deactivate">Deactivate</a></li>
+<li><a class="reference internal" href="#activate">Activate</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="manifests.html"
+                        title="previous chapter">Manifests</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="internals.html"
+                        title="next chapter">Sprinter Internals</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/lifecycle.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="internals.html" title="Sprinter Internals"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="manifests.html" title="Manifests"
+             >previous</a> |</li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
