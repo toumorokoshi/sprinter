@@ -202,10 +202,11 @@ class Environment(object):
             self.directory = Directory(self.namespace)
         self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
         # install virtualenv
-        self._install_sandbox('virtualenv', virtualenv.create_environment,
-                              {'use_distribute': True})
-        if self.system.isOSX():
-            self._install_sandbox('brew', brew.install_brew)
+        if self.target:
+            self._install_sandbox('virtualenv', virtualenv.create_environment,
+                                  {'use_distribute': True})
+            if self.system.isOSX():
+                self._install_sandbox('brew', brew.install_brew)
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
