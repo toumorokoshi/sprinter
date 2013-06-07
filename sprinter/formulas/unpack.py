@@ -44,7 +44,7 @@ class UnpackFormula(FormulaBase):
             self.directory.add_to_rc(target_config['rc'])
 
     def remove(self, feature_name, config):
-        super(UnpackFormula, self).destroy(feature_name, config)
+        super(UnpackFormula, self).remove(feature_name, config)
 
     def __install(self, feature_name, config):
         remove_common_prefix = 'remove_common_prefix' in config and \
