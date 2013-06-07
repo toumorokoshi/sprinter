@@ -63,6 +63,21 @@ class TestDirectory(object):
         finally:
             os.unlink(temp_file_path)
 
+    def test_remove_from_bin(self):
+        """ removing from bin should remove a file from bin """
+        _, temp_file_path = tempfile.mkstemp()
+        try:
+            with open(temp_file_path, 'w+') as temp_file:
+                temp_file.write('hobo')
+            self.directory.symlink_to_bin('newfile', temp_file_path)
+            self.directory.remove_from_bin('newfile')
+            assert not os.path.exists(os.path.join(self.directory.bin_path(), 'newfile'))
+            os.mkdir(os.path.join(self.directory.bin_path(), 'newfolder'))
+            self.directory.remove_from_bin('newfolder')
+            assert not os.path.exists(os.path.join(self.directory.bin_path(), 'newfolder'))
+        finally:
+            os.unlink(temp_file_path)
+
     def test_symlink_to_lib(self):
         """ symlink to lib should symlink to the lib sprinter environment folder """
         _, temp_file = tempfile.mkstemp()

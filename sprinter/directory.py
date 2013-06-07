@@ -57,17 +57,21 @@ class Directory(object):
         shutil.rmtree(self.root_dir)
 
     def symlink_to_bin(self, name, path):
-        """
-        Symlink an object at path to name in the bin folder. remove it if it already exists.
-        """
+        """ Symlink an object at path to name in the bin folder. """
         self.__symlink_dir("bin", name, path)
         os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR)
         os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR | stat.S_IRUSR)
 
+    def remove_from_bin(self, name):
+        """ Remove an object from the bin folder. """
+        target_path = os.path.join(self.root_dir, "bin", name)
+        if os.path.isdir(target_path):
+            shutil.rmtree(target_path)
+        else:
+            os.unlink(target_path)
+
     def symlink_to_lib(self, name, path):
-        """
-        Symlink an object at path to name in the lib folder. remove it if it already exists.
-        """
+        """ Symlink an object at path to name in the lib folder. """
         self.__symlink_dir("lib", name, path)
 
     def bin_path(self):
