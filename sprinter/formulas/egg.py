@@ -15,4 +15,5 @@ class EggFormula(FormulaBase):
         super(EggFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
+        self.lib.call("easy_install %s" % target_config['egg'])
         super(EggFormula, self).update(feature_name, source_config, target_config)
