@@ -3,7 +3,7 @@ Unpacks and deploys to a location
 
 [unpack]
 formula = sprinter.formulas.unpack
-symlink = bin/go
+executable = bin/go
 remove_common_prefix = true
 url = https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz
 target = /tmp/
@@ -31,15 +31,16 @@ class UnpackFormula(FormulaBase):
            or source_config['url'] != target_config['url']):
             shutil.rmtree(self.directory.install_directory(feature_name))
             self.__install(target_config['url'], self.directory.install_directory(feature_name))
-            if 'executable' in source_config:
-                self.directory.remove_from_bin(source_config['executable'])
-            if 'executable' in target_config:
-                symlink_target = target_config['symlink'] if 'symlink' in target_config else target_config['executable']
-                self.__symlink_executable(feature_name, target_config['executable'], symlink_target)
             if 'command' in target_config:
                 self.logger.info(self.lib.call(target_config['command'],
                                                bash=True,
                                                cwd=self.directory.install_directory(feature_name)))
+        if 'executable' in source_config:
+            self.directory.remove_from_bin(source_config['symlink'] if 'symlink' in source_config\
+                                           else source_config['executable'])
+        if 'executable' in target_config:
+            symlink_target = target_config['symlink'] if 'symlink' in target_config else target_config['executable']
+            self.__symlink_executable(feature_name, target_config['executable'], symlink_target)
         if 'rc' in target_config:
             self.directory.add_to_rc(target_config['rc'])
 
