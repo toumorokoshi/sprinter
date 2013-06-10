@@ -3,6 +3,7 @@ directory.py stores methodology to install various files and
 packages to different locations.
 
 """
+import logging
 import os
 import shutil
 import stat
@@ -26,9 +27,11 @@ class Directory(object):
                        # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
 
-    def __init__(self, namespace, rewrite_rc=True, sprinter_root=os.path.join("~", ".sprinter")):
+    def __init__(self, namespace, rewrite_rc=True, sprinter_root=os.path.join("~", ".sprinter"),
+                 logger=logging.getLogger('sprinter')):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = os.path.expanduser(os.path.join(sprinter_root, namespace))
+        self.logger = logger
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
         self.rewrite_rc = rewrite_rc
@@ -112,7 +115,8 @@ class Directory(object):
         """
         target_path = os.path.join(self.root_dir, dir_name, name)
         if os.path.exists(target_path):
-            assert not os.path.isdir(target_path), \
-                "%s is not a symlink! please remove it manually." % target_path
-            os.remove(target_path)
+            if os.path.islink(target_path):
+                os.remove(target_path)
+            else:
+                self.logger.warn("%s is not a symlink! please remove it manually." % target_path)
         os.symlink(path, target_path)

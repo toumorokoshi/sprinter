@@ -37,14 +37,17 @@ class UnpackFormula(FormulaBase):
                                                bash=True,
                                                cwd=self.directory.install_directory(feature_name)))
         if 'executable' in source_config:
-            try:
-                self.directory.remove_from_bin(source_config['symlink'] if 'symlink' in source_config\
-                                               else source_config['executable'])
-            except OSError:
-                pass
+            symlink = source_config['symlink'] if 'symlink' in source_config else source_config['executable']
+            if os.path.exists(symlink) and os.path.islink(symlink):
+                try:
+                    self.directory.remove_from_bin(source_config['symlink'] if 'symlink' in source_config
+                                                   else source_config['executable'])
+                except OSError:
+                    pass
         if 'executable' in target_config:
             symlink_target = target_config['symlink'] if 'symlink' in target_config else target_config['executable']
-            self.__symlink_executable(feature_name, target_config['executable'], symlink_target)
+            if not os.path.exists(symlink_target):
+                self.__symlink_executable(feature_name, target_config['executable'], symlink_target)
         if 'rc' in target_config:
             self.directory.add_to_rc(target_config['rc'])
 
