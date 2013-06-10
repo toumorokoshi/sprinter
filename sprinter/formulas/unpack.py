@@ -30,7 +30,7 @@ class UnpackFormula(FormulaBase):
         if (source_config['formula'] != target_config['formula']
            or source_config['url'] != target_config['url']):
             shutil.rmtree(self.directory.install_directory(feature_name))
-            self.__install(target_config['url'], self.directory.install_directory(feature_name))
+            self.__install(feature_name, target_config)
             if 'command' in target_config:
                 self.logger.info(self.lib.call(target_config['command'],
                                                bash=True,
@@ -69,4 +69,7 @@ class UnpackFormula(FormulaBase):
         source_path = os.path.join(self.directory.install_directory(feature_name), source)
         self.logger.debug("Symlinking executable at %s to bin/%s" %
                           (source_path, target))
-        self.directory.symlink_to_bin(target, source_path)
+        try:
+            self.directory.symlink_to_bin(target, source_path)
+        except OSError:
+            self.logger.warn("Could not find source path, unable to symlink! %s" % source)
