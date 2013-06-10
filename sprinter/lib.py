@@ -213,7 +213,9 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     tf = tarfile.TarFile(fileobj=gz)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-    common_prefix = os.path.commonprefix(tf.getnames()) + "/"
+    common_prefix = os.path.commonprefix(tf.getnames())
+    if not common_prefix.endswith('/'):
+        common_prefix += "/"
     for tfile in tf.getmembers():
         if remove_common_prefix:
             tfile.name = tfile.name.replace(common_prefix, "", 1)
