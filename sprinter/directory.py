@@ -119,4 +119,5 @@ class Directory(object):
                 os.remove(target_path)
             else:
                 self.logger.warn("%s is not a symlink! please remove it manually." % target_path)
+                return
         os.symlink(path, target_path)

@@ -63,7 +63,27 @@ class TestDirectory(object):
         finally:
             os.unlink(temp_file_path)
 
-    def test_remove_from_bin(self):
+    def test_symlink_to_bin_file_exists(self):
+        """
+        symlink to bin should not symlink to the bin sprinter environment
+        folder if the file already exists.
+        """
+        _, temp_file_path = tempfile.mkstemp()
+        bin_path = None
+        try:
+            with open(temp_file_path, 'w+') as temp_file:
+                temp_file.write('hobo')
+            bin_path = os.path.join(self.directory.bin_path(), 'newfile')
+            with open(bin_path, 'w+') as temp_file:
+                temp_file.write('hobomobo')
+            self.directory.symlink_to_bin('newfile', temp_file_path)
+            assert not os.path.islink(os.path.join(self.directory.bin_path(), 'newfile'))
+        finally:
+            os.unlink(temp_file_path)
+            if bin_path and os.path.exists(bin_path):
+                os.unlink(bin_path)
+
+    def test_remove_from_bin_file_exists(self):
         """ removing from bin should remove a file from bin """
         _, temp_file_path = tempfile.mkstemp()
         try:

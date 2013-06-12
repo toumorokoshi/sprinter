@@ -156,6 +156,7 @@ class TestManifest(object):
         assert test_manifest.run_phase('debian', 'install')
         test_manifest.system.isDebianBased = Mock(return_value=False)
         assert not test_manifest.run_phase('debian', 'install')
+        assert not test_manifest.run_phase('debian', 'update')
 
     def test_add_additional_context(self):
         """ Test the add additonal context method """
