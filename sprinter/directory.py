@@ -45,7 +45,7 @@ class Directory(object):
         if not os.path.exists(self.root_dir):
             os.makedirs(self.root_dir)
         assert os.path.isdir(self.root_dir), "%s is not a directory! Please move or remove it." % self.root_dir
-        for d in ["bin", "lib"]:
+        for d in ["bin", "lib", "include"]:
             target_path = os.path.join(self.root_dir, d)
             if not os.path.exists(target_path):
                 os.makedirs(target_path)
@@ -77,6 +77,10 @@ class Directory(object):
         """ Symlink an object at path to name in the lib folder. """
         self.__symlink_dir("lib", name, path)
 
+    def symlink_to_include(self, name, path):
+        """ Symlink an object at path to name in the lib folder. """
+        self.__symlink_dir("include", name, path)
+
     def bin_path(self):
         """ return the bin directory path """
         return os.path.join(self.root_dir, "bin")
@@ -84,6 +88,10 @@ class Directory(object):
     def lib_path(self):
         """ return the lib directory path """
         return os.path.join(self.root_dir, "lib")
+
+    def include_path(self):
+        """ return the include directory path """
+        return os.path.join(self.root_dir, "include")
 
     def install_directory(self, feature_name):
         """

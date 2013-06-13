@@ -108,6 +108,17 @@ class TestDirectory(object):
         tools.eq_(open(os.path.join(self.directory.lib_path(), 'newfile')).read(),
                   open(temp_file).read(),
                   "File contents are different for symlinked files!")
+
+    def test_symlink_to_include(self):
+        """ symlink to lib should symlink to the lib sprinter environment folder """
+        _, temp_file = tempfile.mkstemp()
+        with open(temp_file, 'w+') as tfh:
+            tfh.write('hobo')
+        self.directory.symlink_to_include('newfile', temp_file)
+        assert os.path.islink(os.path.join(self.directory.include_path(), 'newfile'))
+        tools.eq_(open(os.path.join(self.directory.include_path(), 'newfile')).read(),
+                  open(temp_file).read(),
+                  "File contents are different for symlinked files!")
         
     def test_add_to_rc(self):
         """ Test if the add_to_rc method adds to the rc """

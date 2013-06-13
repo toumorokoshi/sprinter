@@ -219,6 +219,8 @@ class Environment(object):
             self.config.write(open(self.directory.manifest_path, "w+"))
         if self.directory.rewrite_rc:
             self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
+            self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
+            self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
         self.injections.commit()
 
     def _install_sandbox(self, name, call, kwargs={}):
