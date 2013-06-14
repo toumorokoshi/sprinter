@@ -8,8 +8,7 @@ import os
 import shutil
 import stat
 
-rc_template = \
-"""
+rc_template = """
 export PATH=%s:$PATH
 """
 

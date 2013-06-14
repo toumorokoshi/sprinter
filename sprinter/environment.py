@@ -63,12 +63,13 @@ class Environment(object):
     warmed_up = False  # returns true if the environment is ready for environments
     _formula_dict = {}  # a dictionary of existing formula instances to pull from
 
-    def __init__(self, logger=None, logging_level=logging.INFO):
+    def __init__(self, logger=None, logging_level=logging.INFO, root=None):
         self.system = System()
         if not logger:
             logger = self._build_logger(level=logging.INFO)
         logger.setLevel(logging_level)
         self.logger = logger
+        self.root = root or os.path.expanduser(os.path.join("~", ".sprinter"))
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
 
@@ -199,7 +200,7 @@ class Environment(object):
         if not self.namespace:
             self.namespace = self.config.namespace
         if not self.directory:
-            self.directory = Directory(self.namespace)
+            self.directory = Directory(self.namespace, sprinter_root=self.root)
         self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
         # install virtualenv
         if self.target:
