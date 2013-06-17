@@ -30,7 +30,8 @@ class UnpackFormula(FormulaBase):
     def update(self, feature_name, source_config, target_config):
         if (source_config['formula'] != target_config['formula']
            or source_config['url'] != target_config['url']):
-            shutil.rmtree(self.directory.install_directory(feature_name))
+            if os.path.exists(self.directory.install_directory(feature_name)):
+                shutil.rmtree(self.directory.install_directory(feature_name))
             self.__install(feature_name, target_config)
             if 'command' in target_config:
                 self.logger.info(self.lib.call(target_config['command'],
