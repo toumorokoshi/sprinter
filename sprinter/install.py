@@ -11,6 +11,7 @@ from sprinter import lib
 from sprinter.environment import Environment
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
+from sprinter.exceptions import SprinterException, BadCredentialsException
 
 description = \
 """
@@ -53,7 +54,14 @@ def signal_handler(signal, frame):
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
-    parse_args(sys.argv[1:])
+    try:
+        parse_args(sys.argv[1:])
+    except SprinterException, e:
+        print str(e)
+        print "Sprinter shut down with an error!"
+    except BadCredentialsException, e:
+        print str(e)
+        print "Invalid username and password combination!"
 
 
 def error(message):

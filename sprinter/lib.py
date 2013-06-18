@@ -23,15 +23,9 @@ from getpass import getpass
 from subprocess import PIPE, STDOUT
 
 from sprinter.formulabase import FormulaBase
+from sprinter.exceptions import CommandMissingException, BadCredentialsException
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
-
-
-class CommandMissingException(Exception):
-    """ Return if command doesn't exist """
-
-    def __init__(self, command):
-        self.message = "Command %s does not exist in the current path!" % command
 
 
 def get_formula_class(formula, environment):
@@ -139,10 +133,16 @@ def authenticated_get(username, password, url):
     """
     Perform an authorized query to the url, and return the result
     """
-    request = urllib2.Request(url)
-    base64string = b64encode((b"%s:%s" % (username, password)).decode("ascii"))
-    request.add_header("Authorization", "Basic %s" % base64string)
-    result = urllib2.urlopen(request)
+    try:
+        request = urllib2.Request(url)
+        base64string = b64encode((b"%s:%s" % (username, password)).decode("ascii"))
+        request.add_header("Authorization", "Basic %s" % base64string)
+        result = urllib2.urlopen(request)
+    except urllib2.HTTPError, e:
+        if e.code == 401:
+            raise BadCredentialsException(
+                "Unable to authenticate user %s to %s with password provided!"
+                % (username, url))
     return result.read()
 
 

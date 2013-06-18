@@ -191,10 +191,14 @@ class Environment(object):
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
         self.logger.debug("Warming up...")
-        if not isinstance(self.source, Manifest) and self.source:
-            self.source = Manifest(self.source)
-        if not isinstance(self.target, Manifest) and self.target:
-            self.target = Manifest(self.target)
+        try:
+            if not isinstance(self.source, Manifest) and self.source:
+                self.source = Manifest(self.source)
+            if not isinstance(self.target, Manifest) and self.target:
+                self.target = Manifest(self.target)
+        except self.lib.BadCredentialsException, e:
+            self.logger.error(str(e))
+            raise SprinterException("Fatal error! Bad credentials to grab manifest!")
         self.config = Config(source=self.source, target=self.target,
                              namespace=self.namespace)
         if not self.namespace:
