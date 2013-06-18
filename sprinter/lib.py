@@ -58,14 +58,14 @@ def get_formula_class(formula, environment):
 
 def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
     if not bash:
-        args = __whitespace_smart_split(command)
+        args = whitespace_smart_split(command)
         if not which(args[0]):
             raise CommandMissingException(args[0])
         p = subprocess.Popen(args, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
         p.communicate(input=stdin)[0]
         return p.returncode
     else:
-        command = " ".join([__process(arg) for arg in __whitespace_smart_split(command)])
+        command = " ".join([__process(arg) for arg in whitespace_smart_split(command)])
         return subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
 
 
@@ -93,7 +93,7 @@ def __escape(s):
     return buf.getvalue()
 
 
-def __whitespace_smart_split(command):
+def whitespace_smart_split(command):
     """
     Split a command by whitespace, taking care to not split on whitespace within quotes.
 

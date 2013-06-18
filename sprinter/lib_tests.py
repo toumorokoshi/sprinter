@@ -8,6 +8,7 @@ import tempfile
 import httpretty
 
 from mock import Mock
+from nose import tools
 
 from sprinter.formulabase import FormulaBase
 from sprinter.environment import Environment
@@ -45,6 +46,10 @@ class TestLib(object):
             assert lib.call("sh") == 0, "cd call returns a non-zero exit!"
             assert lib.call("cd", bash=True) == 0, "cd call returns a non-zero exit!"
             assert lib.call("exit 1", bash=True) == 1, "gibberish call returns a zero exit!"
+
+        def test_lib_ampersandinquotes(self):
+            """ An ampersand and other variables in quotes should not split """
+            tools.eq_(lib.whitespace_smart_split('"ae09ge&eai"'), ['\"ae09ge&eai\"'])
 
         def test_call_error(self):
             """ Test an exception is thrown for a non-existent command """
