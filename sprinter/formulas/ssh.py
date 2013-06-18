@@ -8,6 +8,8 @@ nopassphrase = true
 type = rsa
 hostname = github.com
 user = toumorokoshi
+ssh_path = 
+create = false
 """
 import os
 
@@ -58,10 +60,13 @@ class SSHFormula(FormulaBase):
         """
         command = "ssh-keygen -t %(type)s -f %(keyname)s -N  " % config
         cwd = self.directory.install_directory(feature_name)
-        if not os.path.exists(cwd):
-            os.makedirs(cwd)
-        if not os.path.exists(os.path.join(cwd, config['keyname'])):
-            self.logger.info(self.lib.call(command, cwd=cwd))
+        if 'ssh_path' in config:
+            cwd = config['ssh_path']
+        if 'create' not in config or config['create'].lower().startswith('t'):
+            if not os.path.exists(cwd):
+                os.makedirs(cwd)
+            if not os.path.exists(os.path.join(cwd, config['keyname'])):
+                self.logger.info(self.lib.call(command, cwd=cwd))
         return os.path.join(cwd, config['keyname'])
 
     def __install_ssh_config(self, config, ssh_path):
