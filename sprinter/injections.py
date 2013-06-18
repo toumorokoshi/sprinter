@@ -68,7 +68,6 @@ class Injections(object):
             contents = fh.read()
         return self.wrapper_match.search(contents) is not None
 
-
     def destructive_inject(self, filename, content):
         """
         Injects the injections desired immediately. This should
@@ -100,6 +99,13 @@ class Injections(object):
         if not os.path.exists(file_path):
             open(file_path, "w+").close()
         return file_path
+
+    def in_noninjected_file(self, file_path, content):
+        """ Checks if a string exists in the file, sans the injected """
+        if os.path.exists(file_path):
+            file_content = open(file_path).read()
+        file_content = self.wrapper_match.sub("", file_content)
+        return file_content.find(content) != -1
 
     def inject_content(self, content, inject_string):
         """

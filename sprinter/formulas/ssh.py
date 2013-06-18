@@ -12,6 +12,7 @@ ssh_path =
 create = false
 """
 import os
+import re
 
 from sprinter.formulabase import FormulaBase
 
@@ -76,10 +77,8 @@ class SSHFormula(FormulaBase):
         config['ssh_path'] = ssh_path
         ssh_config_injection = ssh_config_template % config
         if os.path.exists(ssh_config_path):
-            ssh_contents = open(ssh_config_path, "r+").read()
-            if ssh_contents.find(config['host']) != -1 and \
-                    not self.injections.injected(ssh_config_path):
-                self.logger.info("SSH config for %s already exists! Override?")
+            if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config['host']):
+                self.logger.info("SSH config for host %s already exists! Override?" % config['host'])
                 self.logger.info("Your existing config will not be overwritten, simply inactive.")
                 overwrite = self.lib.prompt("Override?", boolean=True, default="no")
                 if overwrite:

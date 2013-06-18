@@ -68,6 +68,18 @@ class TestInjections(object):
         i.commit()
         assert i.injected(self.temp_file_path), "Injected check returned false"
 
+    def test_in_noninjected_file(self):
+        """
+        in_noninjected_file should return true if a string exists
+        non-injected and false it only exists in injected
+        """
+        i = Injections("testinjection")
+        assert not i.injected(self.temp_file_path), "Injected check returned true when not injected yet."
+        i.inject(self.temp_file_path, self.test_injection)
+        i.commit()
+        assert i.in_noninjected_file(self.temp_file_path, self.permanent_string)
+        assert not i.in_noninjected_file(self.temp_file_path, self.test_injection)
+
     def test_created(self):
         """ Test the injection creates a file if it does not exist """
         i = Injections("testinjection")
