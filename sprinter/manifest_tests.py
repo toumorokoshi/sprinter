@@ -245,7 +245,6 @@ formula = sprinter.formulas.template
 """
 
 
-
 class TestConfig(object):
     """
     Test the Config object
