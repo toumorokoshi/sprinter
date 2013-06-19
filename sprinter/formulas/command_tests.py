@@ -30,6 +30,11 @@ update = echo 'updating...'
 [update]
 formula = sprinter.formulas.command
 update = echo 'update up...'
+
+[with-bash]
+formula = sprinter.formulas.command
+install = echo 'installing...'
+bash = True
 """
 
 
@@ -50,25 +55,26 @@ class TestCommandFormula(object):
 
     def test_install(self):
         self.environment.install_feature("install")
-        self.lib.call.assert_called_once_with("echo 'setting up...'")
+        self.lib.call.assert_called_once_with("echo 'setting up...'", bash=False)
 
     def test_update(self):
         self.environment.update_feature("update")
-        self.lib.call.assert_called_once_with("echo 'update up...'")
+        self.lib.call.assert_called_once_with("echo 'update up...'", bash=False)
 
     def test_remove(self):
         self.environment.remove_feature("remove")
-        self.lib.call.assert_called_once_with("echo 'destroy up...'")
+        self.lib.call.assert_called_once_with("echo 'destroy up...'", bash=False)
 
     def test_deactivate(self):
         self.environment.deactivate_feature("deactivate")
-        self.lib.call.assert_called_once_with("echo 'deactivating...'")
+        self.lib.call.assert_called_once_with("echo 'deactivating...'", bash=False)
 
     def test_activate(self):
         self.environment.activate_feature("activate")
-        self.lib.call.assert_called_once_with("echo 'activating...'")
+        self.lib.call.assert_called_once_with("echo 'activating...'", bash=False)
 
-
-
-
-
+    def test_bash(self):
+        """The bash clause should make the command run with bash """
+        self.environment.lib.is_affirmative = Mock(return_value=True)
+        self.environment.install_feature("with-bash")
+        self.lib.call.assert_called_once_with("echo 'installing...'", bash=True)

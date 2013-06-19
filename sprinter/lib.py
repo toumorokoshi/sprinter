@@ -55,7 +55,6 @@ def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
     if not bash:
         args = whitespace_smart_split(command)
         if not which(args[0]):
-            import pdb; pdb.set_trace()
             raise CommandMissingException(args[0])
         p = subprocess.Popen(args, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
         p.communicate(input=stdin)[0]
@@ -186,6 +185,14 @@ def __recursive_import(module_name):
         (module_file, pathname, description) = imp.find_module(name, path)
         module = imp.load_module(name, module_file, pathname, description)
     return module
+
+
+def is_affirmative(phrase):
+    """
+    Determine if a phrase is in the affirmative
+    * start with a t or y, case insensitive
+    """
+    return phrase.lower()[0] in ['t', 'y']
 
 
 # From:

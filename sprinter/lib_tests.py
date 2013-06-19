@@ -7,7 +7,6 @@ import shutil
 import tempfile
 import httpretty
 
-from mock import Mock
 from nose import tools
 
 from sprinter.formulabase import FormulaBase
@@ -149,3 +148,14 @@ class TestLib(object):
                 assert not os.path.exists(test_target_path)
             finally:
                 shutil.rmtree(test_dir)
+
+        def test_is_affirmative(self):
+            """ the is_affirmative command should return true if a value is truthy """
+            assert lib.is_affirmative("yes")
+            assert lib.is_affirmative("t")
+            assert lib.is_affirmative("y")
+            assert lib.is_affirmative("True")
+            assert not lib.is_affirmative("False")
+            assert not lib.is_affirmative("gibberish")
+            assert not lib.is_affirmative("coto")
+            assert not lib.is_affirmative("eslaf")
