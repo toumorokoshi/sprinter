@@ -8,7 +8,7 @@ TODO:
 This page highlights Sprinter's roadmap to reach 1.0
 release. Currently sprinter is at version 0.4
 
-### 0.5
+### 0.6
 Remove use of sudo as much as possible
 
 Ensure proper coverage for these modules:
@@ -22,8 +22,8 @@ General:
 * add way to ask for prompts
 * cleanly close bad installs
 
-### 0.6 
-0.6 will focus on how to test formulas. Many bugs will be fixed as well, such as:
+### 0.7
+0.7 will focus on how to test formulas. Many bugs will be fixed as well, such as:
 
 Perforce Recipe:
 
@@ -34,13 +34,6 @@ Perforce Recipe:
 SSH Recipe:
 
 * ssh recipe doesn't make .ssh directory (can't repro)
-
-Package Recipe:
-
-* brew functionality (check if brew is functional, error if not)
-
-    * on update, if a package isn't installed, install it again
-
 
 ### 0.8
 Bugfix release:
@@ -59,3 +52,6 @@ The documentation needs to properly and completely document
 the sprinter libraries and extension design:
 
 * Add doc section for 'phases' and phases keyword in config
+
+### 1.0
+Success! A Stable library that can be used to install environments to machines with ease

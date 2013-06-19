@@ -26,6 +26,7 @@ from sprinter.formulabase import FormulaBase
 from sprinter.exceptions import CommandMissingException, BadCredentialsException
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
+COMMAND_WHITELIST = ["cd"]
 
 
 def get_formula_class(formula, environment):
@@ -54,6 +55,7 @@ def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
     if not bash:
         args = whitespace_smart_split(command)
         if not which(args[0]):
+            import pdb; pdb.set_trace()
             raise CommandMissingException(args[0])
         p = subprocess.Popen(args, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
         p.communicate(input=stdin)[0]
@@ -193,6 +195,8 @@ def is_exe(fpath):
 
 
 def which(program):
+    if program in COMMAND_WHITELIST:
+        return True
     fpath, fname = os.path.split(program)
     if fpath:
         if is_exe(program):
