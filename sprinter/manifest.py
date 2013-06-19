@@ -95,8 +95,9 @@ class Manifest(object):
         for s in self.formula_sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
-                context_dict["%s:%s|escaped" % (s, k)] = re.escape(v)
-        return dict(context_dict.items() + self.additional_context_variables.items())
+        return_dict = dict(context_dict.items() + self.additional_context_variables.items())
+        return_dict_escaped = dict([(k + "|escaped", v) for k, v in return_dict])
+        return dict(return_dict.items() + return_dict_escaped.items())
 
     def run_phase(self, feature, phase_name):
         """ Determine if the feature should run in the given phase """
