@@ -9,6 +9,7 @@ class TestLifecycle(object):
     Test the sprinter lifecycle
     """
 
+    @httpretty.activate
     def test_full_lifecycle(self):
         """ Test the full sprinter lifecycle """
         temp_directory = tempfile.mkdtemp()
@@ -18,7 +19,7 @@ class TestLifecycle(object):
                                    body=open("./test_data/test_setup.cfg").read())
             env = environment.Environment(root=temp_directory)
             env.source = TEST_URI
-            #env.setup()
+            #env.install()
             #env.remove()
         finally:
             shutil.rmtree(temp_directory)

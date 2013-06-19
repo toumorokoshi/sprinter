@@ -220,7 +220,7 @@ def which(program):
 
 def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     """ extract a targz and install to the target directory """
-    gz = gzip.GzipFile(fileobj=StringIO(urllib2.urlopen(url).read()))
+    gz = gzip.GzipFile(fileobj=StringIO(urllib.urlopen(url).read()))
     tf = tarfile.TarFile(fileobj=gz)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
