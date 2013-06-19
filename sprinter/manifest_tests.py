@@ -125,6 +125,13 @@ class TestManifest(object):
         self.manifest_old.add_additional_context({"config:test": "testing this"})
         assert "config:test" in self.manifest_old.get_context_dict()
 
+    def test_get_context_dict_escaped_character(self):
+        """ Test getting a config dict with escaping filter will properly escape a character"""
+        manifest = Manifest(StringIO(manifest_escaped_parameters))
+        context_dict = manifest.get_context_dict()
+        assert "section:escapeme|escaped" in context_dict
+        tools.eq_(context_dict["section:escapeme|escaped"], "\!\@\#\$\%\^\&\*\(\)\\\"\\'\~\`\/\?\<\>")
+
     def test_run_phase(self):
         """
         Run phase should allow phases that are specifically listed, and
@@ -206,6 +213,14 @@ manifest_input_params = """
 namespace = sprinter
 username = toumorokoshi
 gitroot = ~/workspace
+"""
+
+manifest_escaped_parameters = """
+[section]
+namespace = sprinter
+username = toumorokoshi
+gitroot = ~/workspace
+escapeme = !@#$%^&*()"'~`/?<>
 """
 
 
