@@ -96,7 +96,7 @@ class Manifest(object):
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
         return_dict = dict(context_dict.items() + self.additional_context_variables.items())
-        return_dict_escaped = dict([(k + "|escaped", v) for k, v in return_dict])
+        return_dict_escaped = dict([(k + "|escaped", v) for k, v in return_dict.items()])
         return dict(return_dict.items() + return_dict_escaped.items())
 
     def run_phase(self, feature, phase_name):
