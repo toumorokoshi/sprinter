@@ -18,8 +18,10 @@ class TestLifecycle(object):
             httpretty.register_uri(httpretty.GET, TEST_URI,
                                    body=open("./test_data/test_setup.cfg").read())
             env = environment.Environment(root=temp_directory)
-            env.source = TEST_URI
-            #env.install()
+            env.target = TEST_URI
+            env.install()
+            #env = environment.Environment(root=temp_directory)
+            #env.source = TEST_URI
             #env.remove()
         finally:
             shutil.rmtree(temp_directory)

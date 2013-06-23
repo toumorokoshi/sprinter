@@ -251,7 +251,7 @@ class Config(object):
     def installs(self):
         """ Return a list of the features which need to be installed. """
         if not self.target:
-            raise ConfigException("Update method requires a target manifest!")
+            raise ConfigException("Install method requires a target manifest!")
         return [s for s in self.target.formula_sections()
                 if self.target.run_phase(s, "setup")
                 if not self.source or not self.source.has_section(s)]
