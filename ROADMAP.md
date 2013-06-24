@@ -32,10 +32,6 @@ Perforce Recipe:
 * perforce should install p4v
 * perforce should prompt for writing password to p4settings (if desired)
 
-SSH Recipe:
-
-* ssh recipe doesn't make .ssh directory (can't repro)
-
 ### 0.8
 Bugfix release:
 Low Priority:
