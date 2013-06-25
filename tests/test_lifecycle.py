@@ -2,8 +2,10 @@ import tempfile
 import shutil
 from sprinter import environment
 import httpretty
+from nose.plugins.attrib import attr
 
 
+@attr('full')
 class TestLifecycle(object):
     """
     Test the sprinter lifecycle

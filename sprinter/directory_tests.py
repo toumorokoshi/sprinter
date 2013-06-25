@@ -109,6 +109,16 @@ class TestDirectory(object):
                   open(temp_file).read(),
                   "File contents are different for symlinked files!")
 
+    def test_symlink_to_lib_conflicts_with_existing_file(self):
+        """ If the target file exists and is not a symlink, do not remove it """
+        """ symlink to lib should symlink to the lib sprinter environment folder """
+        _, temp_file = tempfile.mkstemp()
+        with open(temp_file, 'w+') as tfh:
+            tfh.write('hobo')
+        os.makedirs(os.path.join(self.directory.lib_path(), 'newfile'))
+        self.directory.symlink_to_lib('newfile', temp_file)
+        assert not os.path.islink(os.path.join(self.directory.lib_path(), 'newfile'))
+
     def test_symlink_to_include(self):
         """ symlink to lib should symlink to the lib sprinter environment folder """
         _, temp_file = tempfile.mkstemp()
