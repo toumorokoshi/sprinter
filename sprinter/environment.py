@@ -62,14 +62,17 @@ class Environment(object):
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
     _formula_dict = {}  # a dictionary of existing formula instances to pull from
+    sprinter_namespace = None  # the namespace to make installs with. this affects:
+    # the prefix added to injections
 
-    def __init__(self, logger=None, logging_level=logging.INFO, root=None):
+    def __init__(self, logger=None, logging_level=logging.INFO, root=None, sprinter_namespace='sprinter'):
         self.system = System()
         if not logger:
             logger = self._build_logger(level=logging.INFO)
         logger.setLevel(logging_level)
         self.logger = logger
-        self.root = root or os.path.expanduser(os.path.join("~", ".sprinter"))
+        self.sprinter_namespace = sprinter_namespace
+        self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
 
@@ -119,7 +122,7 @@ class Environment(object):
         self.injections.clear("~/.bash_profile")
         self.injections.clear("~/.bashrc")
         self.directory.remove()
-        self._finalize()
+        self.injections.commit()
 
     @warmup
     @install_required
@@ -213,7 +216,7 @@ class Environment(object):
             self.namespace = self.config.namespace
         if not self.directory:
             self.directory = Directory(self.namespace, sprinter_root=self.root)
-        self.injections = Injections(wrapper="SPRINTER_%s" % self.namespace)
+        self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(), self.namespace))
         # install virtualenv
         if self.target:
             self._install_sandbox('virtualenv', virtualenv.create_environment,
