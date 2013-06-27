@@ -39,3 +39,6 @@ docs/build
 \#*
 *~
 *\.#*
+
+# annoying targz files
+distribute-*.tar.gz
