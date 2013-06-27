@@ -13,6 +13,8 @@ from sprinter.manifest import Manifest
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException, BadCredentialsException
 
+env = None
+
 description = \
 """
 Install an environment as specified in a sprinter config file
@@ -82,6 +84,12 @@ def parse_args(argv, Environment=Environment):
     env = Environment(logging_level=logging_level)
 
     if command == "install":
+        def handle_install_shutdown(signal, frame):
+            print "Removing install..."
+            env.directory.remove()
+            env.clear_environment_rc()
+            signal_handler(signal, frame)
+        signal.signal(signal.SIGINT, handle_install_shutdown)
         if options.username or options.auth:
             options = get_credentials(options, parse_domain(target))
             target = Manifest(target, username=options.username, password=options.password)

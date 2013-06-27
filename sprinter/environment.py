@@ -79,22 +79,24 @@ class Environment(object):
     @warmup
     def install(self):
         """ Install the environment """
-        if not self.directory.new:
-            self.logger.info("Namespace %s already exists!" % self.namespace)
-            self.source = self.config.set_source(Manifest(self.directory.manifest_path))
-            return self.update()
-        self.logger.info("Installing environment %s..." % self.namespace)
-        self.directory.initialize()
-        self._specialize_contexts()
-        for feature in self.config.installs():
-            self.install_feature(feature)
-        self.injections.inject("~/.profile", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
-        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
-        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
-        self._finalize()
+        try:
+            if not self.directory.new:
+                self.logger.info("Namespace %s already exists!" % self.namespace)
+                self.source = self.config.set_source(Manifest(self.directory.manifest_path))
+                return self.update()
+            self.logger.info("Installing environment %s..." % self.namespace)
+            self.directory.initialize()
+            self._specialize_contexts()
+            for feature in self.config.installs():
+                self.install_feature(feature)
+            self.inject_environment_rc()
+            self._finalize()
+        except Exception, e:
+            self.logger.error("An error occured during installation!")
+            self.clear_environment_rc()
+            self.logger.info("Removing installation %s..." % self.namespace)
+            self.directory.remove()
+            raise e
         
     @warmup
     @install_required
@@ -118,9 +120,7 @@ class Environment(object):
         self._specialize_contexts()
         for feature in self.config.removes():
             self.remove_feature(feature)
-        self.injections.clear("~/.profile")
-        self.injections.clear("~/.bash_profile")
-        self.injections.clear("~/.bashrc")
+        self.clear_environment_rc()
         self.directory.remove()
         self.injections.commit()
 
@@ -133,9 +133,7 @@ class Environment(object):
         self._specialize_contexts()
         for feature in self.config.deactivations():
             self.deactivate_feature(feature)
-        self.injections.clear("~/.profile")
-        self.injections.clear("~/.bash_profile")
-        self.injections.clear("~/.bashrc")
+        self.clear_environment_rc()
         self._finalize()
 
     @warmup
@@ -147,12 +145,7 @@ class Environment(object):
         self._specialize_contexts()
         for feature in self.config.activations():
             self.activate_feature(feature)
-        self.injections.inject("~/.profile", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
-        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
-        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
+        self.inject_environment_rc()
         self._finalize()
 
     @warmup
@@ -198,6 +191,21 @@ class Environment(object):
         for s in self.target.formula_sections():
             invalidations += self.validate_feature(self, s)
         return invalidations
+
+    @warmup
+    def inject_environment_rc(self):
+        self.injections.inject("~/.profile", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
+                               (self.directory.root_dir, self.directory.root_dir))
+
+    @warmup
+    def clear_environment_rc(self):
+        self.injections.clear("~/.profile")
+        self.injections.clear("~/.bash_profile")
+        self.injections.clear("~/.bashrc")
 
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
