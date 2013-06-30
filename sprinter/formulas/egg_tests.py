@@ -23,7 +23,7 @@ eggs = jedi, epc=0.5
 
 
 class TestEggFormula(FormulaTest):
-    """ Tests for the unpack formula """
+    """ Tests for the egg formula """
 
     def setup(self):
         super(TestEggFormula, self).setup(source_config=source_config,
