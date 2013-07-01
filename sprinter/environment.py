@@ -79,11 +79,11 @@ class Environment(object):
     @warmup
     def install(self):
         """ Install the environment """
+        if not self.directory.new:
+            self.logger.info("Namespace %s already exists!" % self.namespace)
+            self.source = self.config.set_source(Manifest(self.directory.manifest_path))
+            return self.update()
         try:
-            if not self.directory.new:
-                self.logger.info("Namespace %s already exists!" % self.namespace)
-                self.source = self.config.set_source(Manifest(self.directory.manifest_path))
-                return self.update()
             self.logger.info("Installing environment %s..." % self.namespace)
             self.directory.initialize()
             self._specialize_contexts()
