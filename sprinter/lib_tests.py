@@ -50,6 +50,11 @@ class TestLib(object):
             """ An ampersand and other variables in quotes should not split """
             tools.eq_(lib.whitespace_smart_split('"ae09ge&eai"'), ['\"ae09ge&eai\"'])
 
+        def test_lib_sprinterpip(self):
+            """ Pip install command should work """
+            tools.eq_(lib.whitespace_smart_split("pip install http://github.com/toumorokoshi/sprinter/tarball/master"), 
+                                                 ['pip', 'install', 'http://github.com/toumorokoshi/sprinter/tarball/master'])
+
         def test_call_error(self):
             """ Test an exception is thrown for a non-existent command """
             try:
@@ -167,3 +172,5 @@ class TestLib(object):
             assert not lib.is_affirmative("gibberish")
             assert not lib.is_affirmative("coto")
             assert not lib.is_affirmative("eslaf")
+
+    

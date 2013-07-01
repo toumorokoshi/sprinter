@@ -19,6 +19,10 @@ formula = sprinter.formulas.egg
 egg = sprinter
 eggs = jedi, epc=0.5
        pelican
+
+[sprinter]
+formula = sprinter.formulas.egg
+egg = http://github.com/toumorokoshi/sprinter/tarball/master
 """
 
 
@@ -48,3 +52,8 @@ class TestEggFormula(FormulaTest):
         self.lib.call.assert_has_call("pip install epc=0.5")
         self.lib.call.assert_has_call("pip install pelican")
         self.lib.call.assert_has_call("pip install sprinter")
+
+    def test_sprinter(self):
+        """ The sprinter egg formula should install sprinter from a remote protocol """
+        self.environment.install_feature("sprinter")
+        self.lib.call.assert_has_call("pip install http://github.com/toumorokoshi/sprinter/tarball/master")
