@@ -39,14 +39,15 @@ class TestUnpackFormula(FormulaTest):
     def test_zip_with_target(self):
         """ Test the zip extracting to a specific target """
         self.environment.install_feature("zip_with_target")
-        self.lib.extract_zip.assert_has_call(TEST_ZIP, '/testpath', remove_common_prefix=False)
+        self.lib.extract_zip.assert_called_with(TEST_ZIP, '/testpath', remove_common_prefix=False)
 
     def test_dmg_with_target(self):
         """ Test the dmg extracting to a specific target """
+        self.environment.system.isOSX = Mock(return_value=True)
         self.environment.install_feature("dmg_with_target")
-        self.lib.extract_targz.assert_has_call(TEST_DMG, '/testpath', remove_common_prefix=False)
+        self.lib.extract_dmg.assert_called_with(TEST_DMG, '/testpath', remove_common_prefix=False)
 
     def test_targz_with_target(self):
         """ Test the targz extracting to a specific target """
         self.environment.install_feature("targz_with_target")
-        self.lib.extract_targz.assert_has_call(TEST_TARGZ, '/testpath', remove_common_prefix=False)
+        self.lib.extract_targz.assert_called_with(TEST_TARGZ, '/testpath', remove_common_prefix=False)

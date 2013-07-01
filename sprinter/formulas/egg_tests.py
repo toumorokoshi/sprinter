@@ -1,4 +1,4 @@
-from mock import Mock
+from mock import Mock, call
 from sprinter.testtools import FormulaTest
 
 source_config = """
@@ -36,24 +36,24 @@ class TestEggFormula(FormulaTest):
     def test_simple_example(self):
         """ The egg formula should install a single egg """
         self.environment.install_feature("simple_example")
-        self.lib.call.assert_has_call("pip install jedi")
+        self.lib.call.assert_called_with("pip install jedi")
 
     def test_simple_multiple_eggs(self):
         """ The egg formula should install multiple eggs """
         self.environment.install_feature("simple_multiple_eggs")
-        self.lib.call.assert_has_call("pip install jedi")
-        self.lib.call.assert_has_call("pip install epc=0.5")
-        self.lib.call.assert_has_call("pip install pelican")
+        self.lib.call.assert_any_call("pip install jedi")
+        self.lib.call.assert_any_call("pip install epc=0.5")
+        self.lib.call.assert_any_call("pip install pelican")
 
     def test_simple_multiple_and_single_eggs(self):
         """ The egg formula should install single and multiple eggs """
-        self.environment.install_feature("simple_multiple_eggs")
-        self.lib.call.assert_has_call("pip install jedi")
-        self.lib.call.assert_has_call("pip install epc=0.5")
-        self.lib.call.assert_has_call("pip install pelican")
-        self.lib.call.assert_has_call("pip install sprinter")
+        self.environment.install_feature("simple_multiple_and_single_eggs")
+        self.lib.call.assert_any_call("pip install jedi")
+        self.lib.call.assert_any_call("pip install epc=0.5")
+        self.lib.call.assert_any_call("pip install pelican")
+        self.lib.call.assert_any_call("pip install sprinter")
 
     def test_sprinter(self):
         """ The sprinter egg formula should install sprinter from a remote protocol """
         self.environment.install_feature("sprinter")
-        self.lib.call.assert_has_call("pip install http://github.com/toumorokoshi/sprinter/tarball/master")
+        self.lib.call.assert_called_with("pip install http://github.com/toumorokoshi/sprinter/tarball/master")

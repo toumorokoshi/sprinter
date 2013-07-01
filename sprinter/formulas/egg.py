@@ -24,7 +24,7 @@ class EggFormula(FormulaBase):
         """ Install eggs for a particular configuration """
         eggs = []
         if 'egg' in config:
-            eggs += config['egg']
+            eggs += [config['egg']]
         if 'eggs' in config:
             eggs += [egg.strip() for egg in re.split(',|\n', config['eggs'])]
         for egg in eggs:
