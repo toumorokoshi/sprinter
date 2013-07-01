@@ -85,9 +85,10 @@ def parse_args(argv, Environment=Environment):
 
     if command == "install":
         def handle_install_shutdown(signal, frame):
-            print "Removing install..."
-            env.directory.remove()
-            env.clear_environment_rc()
+            if env.last_phase == "install":
+                print "Removing install..."
+                env.directory.remove()
+                env.clear_environment_rc()
             signal_handler(signal, frame)
         signal.signal(signal.SIGINT, handle_install_shutdown)
         if options.username or options.auth:

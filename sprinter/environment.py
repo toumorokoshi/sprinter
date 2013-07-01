@@ -64,6 +64,7 @@ class Environment(object):
     _formula_dict = {}  # a dictionary of existing formula instances to pull from
     sprinter_namespace = None  # the namespace to make installs with. this affects:
     # the prefix added to injections
+    last_phase = None # the last phase run
 
     def __init__(self, logger=None, logging_level=logging.INFO, root=None, sprinter_namespace='sprinter'):
         self.system = System()
@@ -79,6 +80,7 @@ class Environment(object):
     @warmup
     def install(self):
         """ Install the environment """
+        self.last_phase = "install"
         if not self.directory.new:
             self.logger.info("Namespace %s already exists!" % self.namespace)
             self.source = self.config.set_source(Manifest(self.directory.manifest_path))
@@ -102,6 +104,7 @@ class Environment(object):
     @install_required
     def update(self):
         """ update the environment """
+        self.last_phase = "update"
         self.logger.info("Updating environment %s..." % self.namespace)
         self._specialize_contexts()
         for feature in self.config.installs():
@@ -116,6 +119,7 @@ class Environment(object):
     @install_required
     def remove(self):
         """ remove the environment """
+        self.last_phase = "remove"
         self.logger.info("Removing environment %s..." % self.namespace)
         self._specialize_contexts()
         for feature in self.config.removes():
@@ -128,6 +132,7 @@ class Environment(object):
     @install_required
     def deactivate(self):
         """ deactivate the environment """
+        self.last_phase = "deactivate"
         self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self._specialize_contexts()
@@ -140,6 +145,7 @@ class Environment(object):
     @install_required
     def activate(self):
         """ activate the environment """
+        self.last_phase = "activate"
         self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self._specialize_contexts()
