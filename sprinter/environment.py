@@ -202,8 +202,6 @@ class Environment(object):
 
     @warmup
     def inject_environment_rc(self):
-        self.injections.inject("~/.profile", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                                (self.directory.root_dir, self.directory.root_dir))
         self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
