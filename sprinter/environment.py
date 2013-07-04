@@ -115,6 +115,7 @@ class Environment(object):
             self.update_feature(feature)
         for feature in self.config.removes():
             self.remove_feature(feature)
+        self.inject_environment_rc()
         self._finalize()
 
     @warmup
@@ -202,6 +203,9 @@ class Environment(object):
 
     @warmup
     def inject_environment_rc(self):
+        # clearing profile for now, to make sure
+        # profile injections are cleared for sprinter installs
+        self.injections.clear("~/.profile")
         self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
                                (self.directory.root_dir, self.directory.root_dir))
         self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
