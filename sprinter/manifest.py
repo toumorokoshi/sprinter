@@ -79,7 +79,8 @@ class Manifest(object):
             self.get(section, option).lower().startswith('t')
 
     def get_feature_class(self, section):
-        if section not in self.formula_sections():
+        if (section not in self.formula_sections() or
+           not self.manifest.has_option(section, 'formula')):
             raise ManifestException("Cannot get formula %s!" % section)
         return self.manifest.get(section, 'formula')
 
