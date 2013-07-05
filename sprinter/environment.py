@@ -46,6 +46,8 @@ def populate_formula_instance(config):
                         getattr(self, config).get_feature_class(feature_name))
                 except ManifestException:
                     self.logger.warn("Unable to retrieve formula for feature %s!" % feature_name)
+                except ImportError:
+                    self.logger.warn("Unable to retrieve formula for feature %s!" % feature_name)
             if not formula_instance:
                 return None
             return f(self, feature_name, formula_instance=formula_instance)
@@ -288,6 +290,7 @@ class Environment(object):
         debug_hdlr = logging.StreamHandler(self._debug_stream)
         debug_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
         debug_hdlr.setLevel(logging.DEBUG)
+        logger.addHandler(debug_hdlr)
         logger.setLevel(logging.DEBUG)
         return logger
 
