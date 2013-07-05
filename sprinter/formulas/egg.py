@@ -33,4 +33,4 @@ class EggFormula(FormulaBase):
             try:
                 self.lib.call("pip install %s" % egg)
             except CommandMissingException:
-                self.logger.warn("Unable to install egg %s, please install pip!")
+                self.logger.warn("Unable to install egg %s, please install pip!" % egg)
