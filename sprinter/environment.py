@@ -292,7 +292,12 @@ class Environment(object):
     def _run_action(self, adjective, feature_name, call, configs):
         self.logger.info("%s %s..." % (adjective, feature_name))
         configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
-        call(feature_name, *configs)
+        valid = True
+        for c in configs:
+            if 'formula' not in c:
+                valid = False
+        if valid:
+            call(feature_name, *configs)
 
     def _specialize_contexts(self):
         """ Add variables and specialize contexts """

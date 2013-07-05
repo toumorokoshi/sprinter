@@ -31,7 +31,7 @@ class TestEggFormula(FormulaTest):
 
     def setup(self):
         super(TestEggFormula, self).setup(source_config=source_config,
-                                             target_config=target_config)
+                                          target_config=target_config)
 
     def test_simple_example(self):
         """ The egg formula should install a single egg """
@@ -57,3 +57,7 @@ class TestEggFormula(FormulaTest):
         """ The sprinter egg formula should install sprinter from a remote protocol """
         self.environment.install_feature("sprinter")
         self.lib.call.assert_called_with("pip install http://github.com/toumorokoshi/sprinter/tarball/master")
+
+    def test_no_pip(self):
+        """ The egg formula should install single and multiple eggs """
+        pass
