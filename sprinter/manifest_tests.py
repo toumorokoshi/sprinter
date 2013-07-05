@@ -1,5 +1,6 @@
 from StringIO import StringIO
 
+import httpretty
 from nose import tools
 from mock import Mock, call
 
@@ -50,6 +51,12 @@ debian_only_manifest = """
 systems = debian
 formula = sprinter.formulas.template
 
+"""
+
+http_manifest = """
+[sub]
+formula = sprinter.formulas.git
+depends = sub
 """
 
 
@@ -174,6 +181,15 @@ class TestManifest(object):
         self.manifest_old.add_additional_context({'testhim': 'testher'})
         assert 'testme' in self.manifest_old.additional_context_variables
         assert 'testhim' in self.manifest_old.additional_context_variables
+
+    @httpretty.activate
+    def test_source_from_url(self):
+        """ When the manifest is sourced from a url, the source should be the url. """
+        TEST_URI = "http://testme.com/test.cfg"
+        httpretty.register_uri(httpretty.GET, TEST_URI,
+                               body=http_manifest)
+        m = Manifest(TEST_URI)
+        assert m.source() == TEST_URI
 
 
 manifest_old = """

@@ -221,7 +221,6 @@ class Config(object):
     # a list of values to not save into the config.
     # e.g. passwords
     temporary_sections = []
-    source_location = None
     config = {}
 
     def __init__(self, source=None, target=None, namespace=None, lib=lib):
@@ -232,10 +231,6 @@ class Config(object):
         self.lib = lib
         self.source = source
         self.target = target
-        if self.target:
-            self.source_location = self.target.source()
-        if self.source and not self.source_location:
-            self.source.source()
         # store raws to use on write
         self.source_raw = source
         self.target_raw = target
@@ -325,8 +320,6 @@ class Config(object):
             if k not in self.temporary_sections:
                 self.target.set('config', k, v)
         self.target.set('config', 'namespace', self.namespace)
-        if self.source_location:
-            self.target.set('config', 'source', self.source_location)
         self.target.write(file_handle)
 
     def get_config(self, param_name, default=None, secret=False):

@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from StringIO import StringIO
 
 from sprinter import virtualenv
 from sprinter import brew
@@ -71,11 +72,11 @@ class Environment(object):
     # the prefix added to injections
     last_phase = None  # the last phase run
 
-    def __init__(self, logger=None, logging_level=logging.INFO, root=None, sprinter_namespace='sprinter'):
+    def __init__(self, logger=None, logging_level=logging.INFO,
+                 root=None, sprinter_namespace='sprinter'):
         self.system = System()
         if not logger:
             logger = self._build_logger(level=logging.INFO)
-        logger.setLevel(logging_level)
         self.logger = logger
         self.sprinter_namespace = sprinter_namespace
         self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
@@ -222,6 +223,19 @@ class Environment(object):
         self.injections.clear("~/.bash_profile")
         self.injections.clear("~/.bashrc")
 
+    def install_sandboxes(self):
+        # install virtualenv
+        if self.target:
+            self._install_sandbox('virtualenv', virtualenv.create_environment,
+                                  {'use_distribute': True})
+            if self.system.isOSX():
+                self._install_sandbox('brew', brew.install_brew)
+
+    def write_debug_log(self, file_path):
+        """ Write the debug log to a file """
+        with open(file_path, "w+") as fh:
+            fh.write(self._debug_stream.getvalue())
+
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
         self.logger.debug("Warming up...")
@@ -247,7 +261,7 @@ class Environment(object):
 
     def _finalize(self):
         """ command to run at the end of sprinter's run """
-        self.logger.debug("Finalizing...")
+        self.logger.info("Finalizing...")
         if os.path.exists(self.directory.manifest_path):
             self.config.write(open(self.directory.manifest_path, "w+"))
         if self.directory.rewrite_rc:
@@ -255,14 +269,6 @@ class Environment(object):
             self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
             self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
         self.injections.commit()
-
-    def install_sandboxes(self):
-        # install virtualenv
-        if self.target:
-            self._install_sandbox('virtualenv', virtualenv.create_environment,
-                                  {'use_distribute': True})
-            if self.system.isOSX():
-                self._install_sandbox('brew', brew.install_brew)
 
     def _install_sandbox(self, name, call, kwargs={}):
         if (self.target.is_true('config', name) and
@@ -272,11 +278,17 @@ class Environment(object):
 
     def _build_logger(self, level=logging.INFO):
         """ return a logger. if logger is none, generate a logger from stdout """
+        self._debug_stream = StringIO()
         logger = logging.getLogger('sprinter')
+        # stdout log
         out_hdlr = logging.StreamHandler(sys.stdout)
-        out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
         out_hdlr.setLevel(level)
         logger.addHandler(out_hdlr)
+        # debug log
+        debug_hdlr = logging.StreamHandler(self._debug_stream)
+        debug_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+        debug_hdlr.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
         return logger
 
     def _get_formula_instance(self, formula):
@@ -284,9 +296,6 @@ class Environment(object):
         get an instance of the formula object object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        #if formula not in self._formula_dict:
-        #self._formula_dict[formula] = get_formula_class(formula, self)
-        #return self._formula_dict[formula]
         return get_formula_class(formula, self)
 
     def _run_action(self, verb, feature_name, call, configs):

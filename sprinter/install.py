@@ -82,51 +82,55 @@ def parse_args(argv, Environment=Environment):
     logging_level = logging.DEBUG if options.verbose else logging.INFO
     # start processing commands
     env = Environment(logging_level=logging_level)
+    try:
+        if command == "install":
+            def handle_install_shutdown(signal, frame):
+                if env.last_phase == "install":
+                    print "Removing install..."
+                    env.directory.remove()
+                    env.clear_environment_rc()
+                signal_handler(signal, frame)
+            signal.signal(signal.SIGINT, handle_install_shutdown)
+            if options.username or options.auth:
+                options = get_credentials(options, parse_domain(target))
+                target = Manifest(target, username=options.username, password=options.password)
+            env.target = target
+            env.namespace = options.namespace
+            env.install()
 
-    if command == "install":
-        def handle_install_shutdown(signal, frame):
-            if env.last_phase == "install":
-                print "Removing install..."
-                env.directory.remove()
-                env.clear_environment_rc()
-            signal_handler(signal, frame)
-        signal.signal(signal.SIGINT, handle_install_shutdown)
-        if options.username or options.auth:
-            options = get_credentials(options, parse_domain(target))
-            target = Manifest(target, username=options.username, password=options.password)
-        env.target = target
-        env.namespace = options.namespace
-        env.install()
+        elif command == "update":
+            env.directory = Directory(target)
+            env.source = Manifest(env.directory.manifest_path)
+            if options.username or options.auth:
+                options = get_credentials(options, target)
+            env.target = Manifest(env.source.source(),
+                                  username=options.username,
+                                  password=options.password)
+            env.update()
 
-    elif command == "update":
-        env.directory = Directory(target)
-        env.source = Manifest(env.directory.manifest_path)
-        if options.username or options.auth:
-            options = get_credentials(options, target)
-        env.target = Manifest(env.source.source(),
-                              username=options.username,
-                              password=options.password)
-        env.update()
+        elif command in ["remove", "deactivate", "activate"]:
+            env.directory = Directory(target)
+            env.source = Manifest(env.directory.manifest_path)
+            getattr(env, command)()
 
-    elif command in ["remove", "deactivate", "activate"]:
-        env.directory = Directory(target)
-        env.source = Manifest(env.directory.manifest_path)
-        getattr(env, command)()
+        elif command == "environments":
+            SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
+            for env in os.listdir(SPRINTER_ROOT):
+                print "%s" % env
 
-    elif command == "environments":
-        SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
-        for env in os.listdir(SPRINTER_ROOT):
-            print "%s" % env
-
-    elif command == "validate":
-        if options.username or options.auth:
-            options = get_credentials(parse_domain(target))
-        errors = env.validate_manifest(target, username=options.username, password=options.password)
-        if len(errors) > 0:
-            print "Manifest is invalid!"
-            print "\n".join(errors)
-        else:
-            print "Manifest is valid!"
+        elif command == "validate":
+            if options.username or options.auth:
+                options = get_credentials(parse_domain(target))
+            errors = env.validate_manifest(target, username=options.username, password=options.password)
+            if len(errors) > 0:
+                print "Manifest is invalid!"
+                print "\n".join(errors)
+            else:
+                print "Manifest is valid!"
+    except Exception:
+        env.logger.exception("An exception occurred!")
+        env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
+        env.write_debug_log("/tmp/sprinter.log")
 
 
 def parse_domain(url):
