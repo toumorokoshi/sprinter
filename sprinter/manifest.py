@@ -80,7 +80,7 @@ class Manifest(object):
 
     def get_feature_class(self, section):
         if section not in self.formula_sections():
-            raise ManifestException("Cannot get feature %s!" % section)
+            raise ManifestException("Cannot get formula %s!" % section)
         return self.manifest.get(section, 'formula')
 
     def get_feature_config(self, feature):

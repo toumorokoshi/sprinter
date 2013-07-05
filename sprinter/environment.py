@@ -9,7 +9,7 @@ from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
 from sprinter.lib import get_formula_class
-from sprinter.manifest import Config, Manifest
+from sprinter.manifest import Config, Manifest, ManifestException
 from sprinter.system import System
 
 
@@ -40,8 +40,13 @@ def populate_formula_instance(config):
 
         def wrapped(self, feature_name, formula_instance=None):
             if not formula_instance:
-                formula_instance = self._get_formula_instance(
-                    getattr(self, config).get_feature_class(feature_name))
+                try:
+                    formula_instance = self._get_formula_instance(
+                        getattr(self, config).get_feature_class(feature_name))
+                except ManifestException:
+                    self.logger.warn("Unable to retrieve formula for feature %s!" % feature_name)
+            if not formula_instance:
+                return None
             return f(self, feature_name, formula_instance=formula_instance)
         return wrapped
     return wrapper
@@ -64,7 +69,7 @@ class Environment(object):
     _formula_dict = {}  # a dictionary of existing formula instances to pull from
     sprinter_namespace = None  # the namespace to make installs with. this affects:
     # the prefix added to injections
-    last_phase = None # the last phase run
+    last_phase = None  # the last phase run
 
     def __init__(self, logger=None, logging_level=logging.INFO, root=None, sprinter_namespace='sprinter'):
         self.system = System()
