@@ -127,10 +127,13 @@ def parse_args(argv, Environment=Environment):
                 print "\n".join(errors)
             else:
                 print "Manifest is valid!"
-    except Exception:
+    except BadCredentialsException, e:
+        raise e
+    except Exception, e:
         env.logger.exception("An exception occurred!")
         env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
         env.write_debug_log("/tmp/sprinter.log")
+        raise e
 
 
 def parse_domain(url):
