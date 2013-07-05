@@ -8,6 +8,7 @@ eggs = pelican, pelican-gist
 """
 import re
 from sprinter.formulabase import FormulaBase
+from sprinter.exceptions import CommandMissingException
 
 
 class EggFormula(FormulaBase):
@@ -29,4 +30,7 @@ class EggFormula(FormulaBase):
             eggs += [egg.strip() for egg in re.split(',|\n', config['eggs'])]
         for egg in eggs:
             self.logger.debug("Installing egg %s..." % egg)
-            self.lib.call("pip install %s" % egg)
+            try:
+                self.lib.call("pip install %s" % egg)
+            except CommandMissingException:
+                self.logger.warn("Unable to install egg %s, please install pip!")
