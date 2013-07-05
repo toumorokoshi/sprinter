@@ -289,8 +289,8 @@ class Environment(object):
         #return self._formula_dict[formula]
         return get_formula_class(formula, self)
 
-    def _run_action(self, adjective, feature_name, call, configs):
-        self.logger.info("%s %s..." % (adjective, feature_name))
+    def _run_action(self, verb, feature_name, call, configs):
+        self.logger.info("%s %s..." % (verb, feature_name))
         configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
         valid = True
         for c in configs:
@@ -298,6 +298,8 @@ class Environment(object):
                 valid = False
         if valid:
             call(feature_name, *configs)
+        else:
+            self.logger.warn("Feature %s has invalid configs! Not %s" % (feature_name, verb))
 
     def _specialize_contexts(self):
         """ Add variables and specialize contexts """
