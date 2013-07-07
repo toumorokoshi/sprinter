@@ -11,8 +11,14 @@ The following sections have a special meaning in a manifest:
 config
 ######
 
-The config section is where all user variables are stored. in addition, it can also house the name of the environment, input variables, and any standard confguration you need in your environment.
+The config section is where all user variables are stored. in
+addition, it can also house the name of the environment, input
+variables, and any standard confguration you need in your environment.
 
+One can also add messages to the beginnig and the end of sprinter with the following variables:
+
+* message_success: print a message at the end of a sprinter command, on success
+* message_failure: print a message at the end of a sprinter command, on failure
 
 Variable substitution
 ---------------------

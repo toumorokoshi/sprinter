@@ -133,6 +133,8 @@ def parse_args(argv, Environment=Environment):
         env.logger.exception("An exception occurred!")
         env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
         env.write_debug_log("/tmp/sprinter.log")
+        if env.message_failure():
+            env.logger.info(env.message_failure)
         raise e
 
 

@@ -238,6 +238,19 @@ class Environment(object):
         with open(file_path, "w+") as fh:
             fh.write(self._debug_stream.getvalue())
 
+    def message_failure(self):
+        """ return a failure message, if one exists """
+        manifest = self.target or self.source
+        if manifest.has_option('config', 'message_failure'):
+            return manifest.get('config', 'message_failure')
+        return None
+
+    def message_success(self):
+        """ return a success message, if one exists """
+        manifest = self.target or self.source
+        if manifest.has_option('config', 'message_success'):
+            return manifest.get('config', 'message_success')
+
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
         self.logger.debug("Warming up...")
@@ -271,6 +284,8 @@ class Environment(object):
             self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
             self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
         self.injections.commit()
+        if self.message_success():
+            self.logger.info(self.message_success())
 
     def _install_sandbox(self, name, call, kwargs={}):
         if (self.target.is_true('config', name) and
