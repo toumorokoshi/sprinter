@@ -73,6 +73,9 @@ class Environment(object):
     sprinter_namespace = None  # the namespace to make installs with. this affects:
     # the prefix added to injections
     last_phase = None  # the last phase run
+    # a list of errors that occured within the environment's run.
+    # an error should be a tuple with the source of the error and the description.
+    errors = []
 
     def __init__(self, logger=None, logging_level=logging.INFO,
                  root=None, sprinter_namespace='sprinter'):

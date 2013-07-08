@@ -5,8 +5,9 @@ Tests for the library
 import os
 import shutil
 import tempfile
-import httpretty
+from StringIO import StringIO
 
+import httpretty
 from nose import tools
 
 from sprinter.formulabase import FormulaBase

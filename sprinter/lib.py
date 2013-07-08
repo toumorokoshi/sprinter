@@ -51,12 +51,15 @@ def get_formula_class(formula, environment):
         raise e
 
 
-def call(command, stdin=None, env=os.environ, cwd=None, bash=False):
+def call(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_output=False):
     if not bash:
         args = whitespace_smart_split(command)
         if not which(args[0]):
             raise CommandMissingException(args[0])
-        p = subprocess.Popen(args, stdin=PIPE, stderr=STDOUT, env=env, cwd=cwd)
+        stdout = subprocess.PIPE if suppress_output else None
+        p = subprocess.Popen(args, stdin=PIPE, 
+                             stdout=stdout, 
+                             stderr=STDOUT, env=env, cwd=cwd)
         p.communicate(input=stdin)[0]
         return p.returncode
     else:
