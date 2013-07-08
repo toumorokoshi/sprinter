@@ -78,6 +78,8 @@ class UnpackFormula(FormulaBase):
                                          remove_common_prefix=remove_common_prefix)
         except OSError:
             self.logger.warn("Unable to extract file for feature %s" % feature_name)
+        except IOError:
+            self.logger.warn("Unable to extract file for feature %s" % feature_name)
 
     def __symlink_executable(self, feature_name, source, target):
         source_path = os.path.join(self.directory.install_directory(feature_name), source)
