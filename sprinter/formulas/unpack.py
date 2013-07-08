@@ -31,7 +31,10 @@ class UnpackFormula(FormulaBase):
         if (source_config['formula'] != target_config['formula']
            or source_config['url'] != target_config['url']):
             if os.path.exists(self.directory.install_directory(feature_name)):
-                shutil.rmtree(self.directory.install_directory(feature_name))
+                try:
+                    shutil.rmtree(self.directory.install_directory(feature_name))
+                except OSError:
+                    self.logger.error("Unable to remove old directory!")
             self.__install(feature_name, target_config)
             if 'command' in target_config:
                 self.logger.info(self.lib.call(target_config['command'],
