@@ -60,18 +60,21 @@ class UnpackFormula(FormulaBase):
                                config['remove_common_prefix'].lower().startswith('t')
         destination = (self.directory.install_directory(feature_name) if 'target'
                        not in config else config['target'])
-        if config['type'] == "tar.gz":
-            self.lib.extract_targz(config['url'], destination,
-                                   remove_common_prefix=remove_common_prefix)
-        elif config['type'] == "zip":
-            self.lib.extract_zip(config['url'], destination,
-                                 remove_common_prefix=remove_common_prefix)
-        elif config['type'] == "dmg":
-            if not self.system.isOSX():
-                self.logger.warn("Non OSX based distributions can not install a dmg!")
-            else:
-                self.lib.extract_dmg(config['url'], destination,
+        try:
+            if config['type'] == "tar.gz":
+                self.lib.extract_targz(config['url'], destination,
+                                       remove_common_prefix=remove_common_prefix)
+            elif config['type'] == "zip":
+                self.lib.extract_zip(config['url'], destination,
                                      remove_common_prefix=remove_common_prefix)
+            elif config['type'] == "dmg":
+                if not self.system.isOSX():
+                    self.logger.warn("Non OSX based distributions can not install a dmg!")
+                else:
+                    self.lib.extract_dmg(config['url'], destination,
+                                         remove_common_prefix=remove_common_prefix)
+        except OSError:
+            self.logger.warn("Unable to extract file for feature %s" % feature_name)
 
     def __symlink_executable(self, feature_name, source, target):
         source_path = os.path.join(self.directory.install_directory(feature_name), source)
