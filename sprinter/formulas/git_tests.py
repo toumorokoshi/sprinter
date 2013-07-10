@@ -1,3 +1,4 @@
+import logging
 from mock import Mock, call
 from sprinter.testtools import FormulaTest
 from nose.plugins.attrib import attr
@@ -24,10 +25,12 @@ class TestGitFormula(FormulaTest):
                                           target_config=target_config)
 
     def test_simple_example(self):
-        """ The git formula should call a clone to a git repo """ 
+        """ The git formula should call a clone to a git repo """
         self.environment.install_feature("simple_example")
         self.lib.call.assert_called_with("git clone %s %s" % (vals['repoA'],
-                                                              self.directory.install_directory('simple_example')))
+                                                              self.directory.install_directory('simple_example')),
+                                         output_log_level=logging.DEBUG)
+
 
 @attr('full')
 class TestAllGitFormula(FormulaTest):

@@ -1,6 +1,7 @@
 """
 Creates a git repository and places it at the install location.
 """
+import logging
 import os
 import shutil
 
@@ -34,12 +35,15 @@ class GitFormula(FormulaBase):
         else:
             if not os.path.exists(target_directory):
                 self.logger.debug("No repository cloned. Re-cloning...")
-                self.__clone_repo(target_config['url'],
-                                  target_directory,
-                                  branch=target_branch)
+                error = self.__clone_repo(target_config['url'],
+                                          target_directory,
+                                          branch=target_branch)
+                if error:
+                    return
             os.chdir(target_directory)
             error = self.lib.call("git pull origin %s" %
-                                  (target_config['branch'] if 'branch' in target_config else 'master'))
+                                  (target_config['branch'] if 'branch' in target_config else 'master'),
+                                  output_log_level=logging.DEBUG)[0]
             if error:
                 self.logger.error("An error occured! Exiting...")
                 return error
@@ -52,18 +56,21 @@ class GitFormula(FormulaBase):
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)
         os.chdir(target_directory)
-        error = self.lib.call("git fetch origin %s" % branch)
+        error = self.lib.call("git fetch origin %s" % branch,
+                              output_log_level=logging.DEBUG)[0]
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
-        error = self.lib.call("git checkout %s" % branch)
+        error = self.lib.call("git checkout %s" % branch,
+                              output_log_level=logging.DEBUG)[0]
         if error:
             self.logger.error("An error occured! Exiting...")
             return error
 
     def __clone_repo(self, repo_url, target_directory, branch=None):
         self.logger.debug("Cloning repository %s into %s..." % (repo_url, target_directory))
-        error = self.lib.call("git clone %s %s" % (repo_url, target_directory))
+        error = self.lib.call("git clone %s %s" % (repo_url, target_directory),
+                              output_log_level=logging.DEBUG)[0]
         if error:
             self.logger.error("An error occured! Exiting...")
             return error

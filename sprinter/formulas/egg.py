@@ -32,6 +32,6 @@ class EggFormula(FormulaBase):
         for egg in eggs:
             self.logger.debug("Installing egg %s..." % egg)
             try:
-                self.lib.call("pip install %s" % egg)
+                self.lib.call("pip install %s" % egg, output_log_level=logging.DEBUG)
             except CommandMissingException:
                 self.logger.warn("Unable to install egg %s, please install pip!" % egg)

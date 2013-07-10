@@ -35,9 +35,9 @@ class FormulaBase(object):
         if 'rc' in target_config:
             self.directory.add_to_rc(target_config['rc'])
         if 'command' in target_config:
-            self.logger.info(self.lib.call(target_config['command'],
-                                           shell=True,
-                                           cwd=cwd))
+            self.lib.call(target_config['command'],
+                          shell=True,
+                          cwd=cwd)
 
     def remove(self, feature_name, config):
         """ Remove is called when a feature no longer exists. """
