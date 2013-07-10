@@ -16,3 +16,7 @@ class CommandMissingException(Exception):
 
 class BadCredentialsException(Exception):
     """ Returned if the credentials are incorrect """
+
+
+class ExtractException(Exception):
+    """ Returned if there was an issue with extracting a package """

@@ -6,6 +6,7 @@ import shutil
 import tempfile
 
 from nose import tools
+from mock import Mock, patch
 from sprinter.directory import Directory, DirectoryException
 
 
@@ -97,6 +98,20 @@ class TestDirectory(object):
             assert not os.path.exists(os.path.join(self.directory.bin_path(), 'newfolder'))
         finally:
             os.unlink(temp_file_path)
+            
+    def test_remove_from_bin_no_file_warns(self):
+        """ If a file doesn't exist and is attempted to be removed, a warning should fire """
+        self.directory.logger.warn = Mock()
+        self.directory.remove_from_bin('newfolder')
+        assert self.directory.logger.warn.called
+
+    @tools.raises(DirectoryException)
+    def test_remove_feature_with_error_throws_exception(self):
+        """ Attempting to remove a feature that throws an exception should raise a directory exception """
+        with patch('shutil.rmtree') as mock:
+            mock.side_effect = OSError()
+            os.makedirs(self.directory.install_directory('test'))
+            self.directory.remove_feature('test')
 
     def test_symlink_to_lib(self):
         """ symlink to lib should symlink to the lib sprinter environment folder """

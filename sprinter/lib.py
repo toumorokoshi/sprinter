@@ -24,7 +24,9 @@ from getpass import getpass
 from subprocess import PIPE, STDOUT
 
 from sprinter.formulabase import FormulaBase
-from sprinter.exceptions import CommandMissingException, BadCredentialsException
+from sprinter.exceptions import (CommandMissingException,
+                                 BadCredentialsException,
+                                 ExtractException)
 
 LOGGER = logging.getLogger('sprinter')
 
@@ -53,22 +55,6 @@ def get_formula_class(formula, environment):
         return sprinter_class(environment)
     except ImportError as e:
         raise e
-
-
-def call_old(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_output=False, logger=LOGGER):
-    if not bash:
-        args = whitespace_smart_split(command)
-        if not which(args[0]):
-            raise CommandMissingException(args[0])
-        stdout = subprocess.PIPE if suppress_output else None
-        p = subprocess.Popen(args, stdin=PIPE, 
-                             stdout=stdout, 
-                             stderr=STDOUT, env=env, cwd=cwd)
-        p.communicate(input=stdin)[0]
-        return p.returncode
-    else:
-        command = " ".join([__process(arg) for arg in whitespace_smart_split(command)])
-        return subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
 
 
 def call(command, stdin=None, env=os.environ, cwd=None, shell=False, output_log_level=logging.INFO, logger=LOGGER):
@@ -239,42 +225,52 @@ def which(program):
 
 def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     """ extract a targz and install to the target directory """
-    gz = gzip.GzipFile(fileobj=StringIO(urllib.urlopen(url).read()))
-    tf = tarfile.TarFile(fileobj=gz)
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir)
-    common_prefix = os.path.commonprefix(tf.getnames())
-    if not common_prefix.endswith('/'):
-        common_prefix += "/"
-    for tfile in tf.getmembers():
-        if remove_common_prefix:
-            tfile.name = tfile.name.replace(common_prefix, "", 1)
-        if tfile.name != "":
-            target_path = os.path.join(tfile, target_dir)
-            if target_path != target_dir and os.path.exists(target_path):
-                if overwrite:
-                    remove_path(target_path)
-                else:
-                    return
-            tf.extract(tfile, target_dir)
+    try:
+        gz = gzip.GzipFile(fileobj=StringIO(urllib.urlopen(url).read()))
+        tf = tarfile.TarFile(fileobj=gz)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        common_prefix = os.path.commonprefix(tf.getnames())
+        if not common_prefix.endswith('/'):
+            common_prefix += "/"
+        for tfile in tf.getmembers():
+            if remove_common_prefix:
+                tfile.name = tfile.name.replace(common_prefix, "", 1)
+            if tfile.name != "":
+                target_path = os.path.join(tfile, target_dir)
+                if target_path != target_dir and os.path.exists(target_path):
+                    if overwrite:
+                        remove_path(target_path)
+                    else:
+                        return
+                tf.extract(tfile, target_dir)
+    except OSError:
+        raise ExtractException()
+    except IOError:
+        raise ExtractException()
 
 
 def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
-    memory_file = io.BytesIO(urllib.urlopen(url).read())
-    zip_file = zipfile.ZipFile(memory_file)
-    common_prefix = os.path.commonprefix(zip_file.namelist())
-    for zip_file_info in zip_file.infolist():
-        target_path = zip_file_info.filename
-        if remove_common_prefix:
-            target_path = target_path.replace(common_prefix, "", 1)
-        if target_path != "":
-            target_path = os.path.join(target_dir, target_path)
-            if target_path != target_dir and os.path.exists(target_path):
-                if overwrite:
-                    remove_path(target_path)
-                else:
-                    return
-            zip_file.extract(zip_file_info, target_path)
+    try:
+        memory_file = io.BytesIO(urllib.urlopen(url).read())
+        zip_file = zipfile.ZipFile(memory_file)
+        common_prefix = os.path.commonprefix(zip_file.namelist())
+        for zip_file_info in zip_file.infolist():
+            target_path = zip_file_info.filename
+            if remove_common_prefix:
+                target_path = target_path.replace(common_prefix, "", 1)
+            if target_path != "":
+                target_path = os.path.join(target_dir, target_path)
+                if target_path != target_dir and os.path.exists(target_path):
+                    if overwrite:
+                        remove_path(target_path)
+                    else:
+                        return
+                zip_file.extract(zip_file_info, target_path)
+    except OSError:
+        raise ExtractException()
+    except IOError:
+        raise ExtractException()
 
 
 def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
@@ -298,6 +294,10 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
                     shutil.copytree(source_path, target_path)
                 else:
                     shutil.copy(source_path, target_path)
+    except OSError:
+        raise ExtractException()
+    except IOError:
+        raise ExtractException()
     finally:
         call("hdiutil unmount /Volumes/a")
         shutil.rmtree(tmpdir)

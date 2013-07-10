@@ -66,11 +66,11 @@ class Directory(object):
 
     def remove_from_bin(self, name):
         """ Remove an object from the bin folder. """
-        target_path = os.path.join(self.root_dir, "bin", name)
-        if os.path.isdir(target_path):
-            shutil.rmtree(target_path)
-        else:
-            os.unlink(target_path)
+        self.__remove_path(os.path.join(self.root_dir, "bin", name))
+
+    def remove_feature(self, feature_name):
+        """ Remove an object from the bin folder. """
+        self.__remove_path(self.install_directory(feature_name))
 
     def symlink_to_lib(self, name, path):
         """ Symlink an object at path to name in the lib folder. """
@@ -107,6 +107,20 @@ class Directory(object):
         if not self.rc_file:
             self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
         self.rc_file.write(content + '\n')
+
+    def __remove_path(self, path):
+        """ Remove an object """
+        if not os.path.exists(path):
+            self.logger.warn("Attempted to remove a non-existent path %s" % path)
+            return
+        try:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.unlink(path)
+        except OSError:
+            self.logger.error("Unable to remove object at path %s" % path)
+            raise DirectoryException("Unable to remove object at path %s" % path)
 
     def __get_rc_handle(self, root_dir):
         """ get the filepath and filehandle to the rc file for the environment """

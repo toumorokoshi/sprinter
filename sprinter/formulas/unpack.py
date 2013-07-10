@@ -12,9 +12,10 @@ strip-top-level-directory=True
 """
 
 import os
-import shutil
 
 from sprinter.formulabase import FormulaBase
+from sprinter.exceptions import ExtractException
+from sprinter.directory import DirectoryException
 
 
 class UnpackFormula(FormulaBase):
@@ -32,8 +33,8 @@ class UnpackFormula(FormulaBase):
            or source_config['url'] != target_config['url']):
             if os.path.exists(self.directory.install_directory(feature_name)):
                 try:
-                    shutil.rmtree(self.directory.install_directory(feature_name))
-                except OSError:
+                    self.directory.remove_feature(feature_name)
+                except DirectoryException:
                     self.logger.error("Unable to remove old directory!")
             self.__install(feature_name, target_config)
             if 'command' in target_config:
@@ -46,7 +47,7 @@ class UnpackFormula(FormulaBase):
                 try:
                     self.directory.remove_from_bin(source_config['symlink'] if 'symlink' in source_config
                                                    else source_config['executable'])
-                except OSError:
+                except DirectoryException:
                     pass
         if 'executable' in target_config:
             symlink_target = target_config['symlink'] if 'symlink' in target_config else target_config['executable']
@@ -76,9 +77,7 @@ class UnpackFormula(FormulaBase):
                 else:
                     self.lib.extract_dmg(config['url'], destination,
                                          remove_common_prefix=remove_common_prefix)
-        except OSError:
-            self.logger.warn("Unable to extract file for feature %s" % feature_name)
-        except IOError:
+        except ExtractException:
             self.logger.warn("Unable to extract file for feature %s" % feature_name)
 
     def __symlink_executable(self, feature_name, source, target):
