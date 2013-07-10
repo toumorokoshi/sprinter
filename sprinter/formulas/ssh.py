@@ -12,7 +12,6 @@ ssh_path =
 create = false
 """
 import os
-import re
 
 from sprinter.formulabase import FormulaBase
 
@@ -93,4 +92,4 @@ class SSHFormula(FormulaBase):
         ssh_path += ".pub"  # make this the public key
         ssh_contents = open(ssh_path, 'r').read().rstrip('\n')
         command = command.replace('{{ssh}}', ssh_contents)
-        self.logger.info(self.lib.call(command, bash=True))
+        self.logger.info(self.lib.call(command, shell=True))

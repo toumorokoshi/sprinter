@@ -55,7 +55,7 @@ def get_formula_class(formula, environment):
         raise e
 
 
-def call(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_output=False, logger=LOGGER):
+def call_old(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_output=False, logger=LOGGER):
     if not bash:
         args = whitespace_smart_split(command)
         if not which(args[0]):
@@ -71,18 +71,16 @@ def call(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_out
         return subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
 
 
-def call_next(command, env=os.environ, cwd=None, output_log_level=logging.INFO, logger=LOGGER):
+def call(command, stdin=None, env=os.environ, cwd=None, shell=False, output_log_level=logging.INFO, logger=LOGGER):
     """ Better, smarter call logic """
-    args = whitespace_smart_split(command)
-    if not which(args[0]):
+    args = command if shell else whitespace_smart_split(command)
+    if not shell and not which(args[0]):
         raise CommandMissingException(args[0])
     process = subprocess.Popen(args, stdin=PIPE, stdout=PIPE, stderr=STDOUT,
-                               env=env, cwd=cwd)
-    output = StringIO()
-    for line in process.stdout:
-        output.write("%s\n" % line)
-        logger.log(output_log_level, line)
-    return output.getvalue()
+                               env=env, cwd=cwd, shell=shell)
+    output = process.communicate(input=stdin)[0]
+    logger.log(output_log_level, output)
+    return (process.returncode, output)
 
 
 def __process(arg):

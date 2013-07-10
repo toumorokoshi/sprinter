@@ -38,5 +38,5 @@ class CommandFormula(FormulaBase):
         if command_type in config:
             command = config[command_type] % self.config.context(manifest_type)
             self.logger.info("Running %s..." % command)
-            bash = 'bash' in config and self.lib.is_affirmative(config['bash'])
-            self.lib.call(command, bash=bash)
+            shell = 'shell' in config and self.lib.is_affirmative(config['shell'])
+            self.lib.call(command, shell=shell)

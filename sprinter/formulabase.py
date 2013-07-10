@@ -25,7 +25,7 @@ class FormulaBase(object):
             self.directory.add_to_rc(config['rc'])
         if 'command' in config:
             self.logger.info(self.lib.call(config['command'],
-                                           bash=True,
+                                           shell=True,
                                            cwd=cwd))
 
     def update(self, feature_name, source_config, target_config):
@@ -36,7 +36,7 @@ class FormulaBase(object):
             self.directory.add_to_rc(target_config['rc'])
         if 'command' in target_config:
             self.logger.info(self.lib.call(target_config['command'],
-                                           bash=True,
+                                           shell=True,
                                            cwd=cwd))
 
     def remove(self, feature_name, config):

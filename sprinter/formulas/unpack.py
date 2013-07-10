@@ -38,7 +38,7 @@ class UnpackFormula(FormulaBase):
             self.__install(feature_name, target_config)
             if 'command' in target_config:
                 self.logger.info(self.lib.call(target_config['command'],
-                                               bash=True,
+                                               shell=True,
                                                cwd=self.directory.install_directory(feature_name)))
         if 'executable' in source_config:
             symlink = source_config['symlink'] if 'symlink' in source_config else source_config['executable']

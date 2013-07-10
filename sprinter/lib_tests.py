@@ -43,9 +43,9 @@ class TestLib(object):
 
         def test_lib_errorcode(self):
             """ Test a proper error code is returned """
-            assert lib.call("sh") == 0, "cd call returns a non-zero exit!"
-            assert lib.call("cd", bash=True) == 0, "cd call returns a non-zero exit!"
-            assert lib.call("exit 1", bash=True) == 1, "gibberish call returns a zero exit!"
+            assert lib.call("sh")[0] == 0, "cd call returns a non-zero exit!"
+            assert lib.call("cd", shell=True)[0] == 0, "cd call returns a non-zero exit!"
+            tools.eq_(lib.call("exit 1", shell=True)[0], 1, "exit 1 call returns a zero exit!")
 
         def test_lib_ampersandinquotes(self):
             """ An ampersand and other variables in quotes should not split """
@@ -53,7 +53,7 @@ class TestLib(object):
 
         def test_lib_sprinterpip(self):
             """ Pip install command should work """
-            tools.eq_(lib.whitespace_smart_split("pip install http://github.com/toumorokoshi/sprinter/tarball/master"), 
+            tools.eq_(lib.whitespace_smart_split("pip install http://github.com/toumorokoshi/sprinter/tarball/master"),
                                                  ['pip', 'install', 'http://github.com/toumorokoshi/sprinter/tarball/master'])
 
         def test_call_error(self):

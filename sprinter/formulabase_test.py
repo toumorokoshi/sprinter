@@ -31,5 +31,5 @@ class TestFormulaBase(FormulaTest):
     def test_install_with_command(self):
         """ Test install with rc """
         self.environment.install_feature("install_with_command")
-        self.lib.call.assert_called_once_with("echo 'helloworld'", cwd="/tmp/", bash=True)
+        self.lib.call.assert_called_once_with("echo 'helloworld'", cwd="/tmp/", shell=True)
         assert not self.directory.add_to_rc.called, "add to rc called when rc not enabled!"
