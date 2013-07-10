@@ -6,6 +6,7 @@ egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc
 """
+import logging
 import re
 from sprinter.formulabase import FormulaBase
 from sprinter.exceptions import CommandMissingException
@@ -31,6 +32,6 @@ class EggFormula(FormulaBase):
         for egg in eggs:
             self.logger.debug("Installing egg %s..." % egg)
             try:
-                self.lib.call("pip install %s" % egg, suppress_output=True)
+                self.lib.call_next("pip install %s" % egg, output_log_level=logging.DEBUG)
             except CommandMissingException:
                 self.logger.warn("Unable to install egg %s, please install pip!" % egg)

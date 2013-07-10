@@ -5,6 +5,7 @@ features of the library.
 """
 import zipfile
 import gzip
+import logging
 import inspect
 import imp
 import io
@@ -25,8 +26,11 @@ from subprocess import PIPE, STDOUT
 from sprinter.formulabase import FormulaBase
 from sprinter.exceptions import CommandMissingException, BadCredentialsException
 
+LOGGER = logging.getLogger('sprinter')
+
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
+BYTE_CHUNKS = 50
 
 
 def get_formula_class(formula, environment):
@@ -51,7 +55,7 @@ def get_formula_class(formula, environment):
         raise e
 
 
-def call(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_output=False):
+def call(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_output=False, logger=LOGGER):
     if not bash:
         args = whitespace_smart_split(command)
         if not which(args[0]):
@@ -67,11 +71,25 @@ def call(command, stdin=None, env=os.environ, cwd=None, bash=False, suppress_out
         return subprocess.call(command, shell=True, executable='/bin/bash', cwd=cwd, env=env)
 
 
+def call_next(command, env=os.environ, cwd=None, output_log_level=logging.INFO, logger=LOGGER):
+    """ Better, smarter call logic """
+    args = whitespace_smart_split(command)
+    if not which(args[0]):
+        raise CommandMissingException(args[0])
+    process = subprocess.Popen(args, stdin=PIPE, stdout=PIPE, stderr=STDOUT,
+                               env=env, cwd=cwd)
+    output = StringIO()
+    for line in process.stdout:
+        output.write("%s\n" % line)
+        logger.log(output_log_level, line)
+    return output.getvalue()
+
+
 def __process(arg):
     """
     Process args for a bash shell
     """
-    # assumes it's wrappen in quotes, or is a flag
+    # assumes it's wrapped in quotes, or is a flag
     if arg[0] in ["'", '"', '-']:
         return arg
     else:
