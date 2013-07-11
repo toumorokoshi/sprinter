@@ -65,7 +65,6 @@ def call(command, stdin=None, env=os.environ, cwd=None, shell=False, output_log_
         raise CommandMissingException(args[0])
     if shell:
         kw['shell'] = True
-        kw['executable'] = '/bin/bash'
     process = subprocess.Popen(args, stdin=PIPE, stdout=PIPE, stderr=STDOUT,
                                env=env, cwd=cwd, **kw)
     output = process.communicate(input=stdin)[0]
