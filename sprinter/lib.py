@@ -60,10 +60,14 @@ def get_formula_class(formula, environment):
 def call(command, stdin=None, env=os.environ, cwd=None, shell=False, output_log_level=logging.INFO, logger=LOGGER):
     """ Better, smarter call logic """
     args = command if shell else whitespace_smart_split(command)
+    kw = {}
     if not shell and not which(args[0]):
         raise CommandMissingException(args[0])
+    if shell:
+        kw['shell'] = True
+        kw['executable'] = '/bin/bash'
     process = subprocess.Popen(args, stdin=PIPE, stdout=PIPE, stderr=STDOUT,
-                               env=env, cwd=cwd, shell=shell)
+                               env=env, cwd=cwd, **kw)
     output = process.communicate(input=stdin)[0]
     logger.log(output_log_level, output)
     return (process.returncode, output)
