@@ -61,8 +61,7 @@ class Directory(object):
     def symlink_to_bin(self, name, path):
         """ Symlink an object at path to name in the bin folder. """
         self.__symlink_dir("bin", name, path)
-        os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR)
-        os.chmod(os.path.join(self.root_dir, "bin", name), stat.S_IXUSR | stat.S_IRUSR)
+        os.chmod(os.path.join(self.root_dir, "bin", name), os.stat(path).st_mode | stat.S_IXUSR | stat.S_IRUSR)
 
     def remove_from_bin(self, name):
         """ Remove an object from the bin folder. """
