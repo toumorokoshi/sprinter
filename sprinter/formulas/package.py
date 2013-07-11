@@ -46,7 +46,7 @@ class PackageFormula(FormulaBase):
             if self.sudo_required:
                 call_command = "sudo " + call_command
             self.logger.debug("Calling command: %s" % call_command)
-            self.lib.call(call_command)
+            self.lib.call(call_command, shell=True)
 
     def __get_package_manager(self):
         """
