@@ -112,7 +112,7 @@ def parse_args(argv, Environment=Environment):
 
         elif command in ["remove", "deactivate", "activate", "reconfigure"]:
             env.directory = Directory(target)
-            env.source = Manifest(env.directory.manifest_path)
+            env.source = Manifest(env.directory.manifest_path, namespace=target)
             getattr(env, command)()
 
         elif command == "environments":

@@ -7,16 +7,11 @@ TODO:
 * test the 'bash' clause in command
 
 This page highlights Sprinter's roadmap to reach 1.0
-release. Currently sprinter is at version 0.4
-
-### 0.6
-* All formulas sufficiently tested
-* ensure proper coverage for environment
+release. Currently sprinter is at version 0.6
 
 ### 0.7
-* check if environment exists before removing, throw message if it doesn't.
-* add reconfigure command to re-choose values
-* generate a verbose log, and opt to output in on error (DONE)
+* All formulas sufficiently tested
+* ensure proper coverage for environment
 
 ### 0.8
 * Catch exceptions failsafe
