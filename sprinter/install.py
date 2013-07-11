@@ -37,9 +37,10 @@ parser.add_option('--auth', dest='auth', action='store_true',
 parser.add_option('--password', dest='password', default=None,
                   help="Password if the url requires authentication")
 parser.add_option('-v', dest='verbose', action='store_true', help="Make output verbose")
-parser.add_option('--reconfigure', dest='reconfigure', default=False,
+parser.add_option('--reconfigure', dest='reconfigure', default=False, action="store_true",
                   help="if true, a sprinter update will reconfigure the existing environment specified")
 # not implemented yet
+"""
 parser.add_option('--sandboxbrew', dest='sandbox_brew', default=False,
                   help="if true, sandbox a brew installation, alternatively, " +
                   "false will disable brew sandboxes for configuration that request it.")
@@ -49,6 +50,7 @@ parser.add_option('--sandboxaptget', dest='sandbox_aptget', default=False,
 parser.add_option('--virtualenv', dest='virtualenv', default=False,
                   help="if true, will virtualenv sprinter and install eggs relative to it, " +
                   "false will disable apt-get sandboxes for configuration that request it.")
+"""
 
 
 def signal_handler(signal, frame):

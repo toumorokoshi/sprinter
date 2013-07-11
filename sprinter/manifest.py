@@ -297,7 +297,7 @@ class Config(object):
                 if manifest.has_option(s, 'inputs'):
                     for param, attributes in \
                             self.__parse_input_string(manifest.get(s, 'inputs')):
-                        if old_manifest and old_manifest.has_option('config', param):
+                        if old_manifest and old_manifest.has_option('config', param) and not force_prompt:
                             self.config[param] = old_manifest.get('config', param)
                         else:
                             default = (attributes['default'] if 'default' in attributes else None)
