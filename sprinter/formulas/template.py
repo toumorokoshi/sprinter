@@ -8,6 +8,7 @@ source = http://mywebsite.com/.gitignore
 target = ~/.gitignore
 username = %(config:username)s
 password = %(config:mywebsitepassword)s
+on_update = false
 """
 import os
 import urllib
@@ -22,7 +23,8 @@ class TemplateFormula(FormulaBase):
         super(TemplateFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
-        self.__install_file(target_config['source'], target_config['target'], target_config)
+        if self.lib.is_affirmative('on_update'):
+            self.__install_file(target_config['source'], target_config['target'], target_config)
         super(TemplateFormula, self).update(feature_name, source_config, target_config)
 
     def remove(self, feature_name, config):
