@@ -262,6 +262,17 @@ specific_version = 1.8.4
 formula = sprinter.formulas.template
 """
 
+manifest_force_inputs = """
+[config]
+namespace = sprinter
+inputs = gitroot==~/workspace
+         username
+         main_branch?==comp_main
+username = toumorokoshi
+gitroot = ~/workspace
+main_branch = comp_rel_a
+"""
+
 
 class TestConfig(object):
     """
@@ -333,15 +344,41 @@ class TestConfig(object):
         self.config.lib.prompt.assert_called_once_with("please enter your hobopopo",
                                                        default="Yes", secret=False)
 
+    def test_get_config_force_prompt(self):
+        """ Test the get config with force_prompt """
+        self.config.lib.prompt = Mock(return_value="no")
+        self.config.config['hobopopo'] = 'test'
+        self.config.get_config('hobopopo', default="Yes", secret=False, force_prompt=True)
+        self.config.lib.prompt.assert_called_once_with("please enter your hobopopo",
+                                                       default="Yes", secret=False)
+
+    def test_get_config_filled_parameter(self):
+        """ Test the get config with force_prompt """
+        self.config.lib.prompt = Mock(return_value="no")
+        self.config.config['hobopopo'] = 'test'
+        self.config.get_config('hobopopo', default="Yes", secret=False)
+        assert not self.config.lib.prompt.called
+
     def test_grab_inputs(self):
         """ Test grabbing inputs """
         self.config.get_config = Mock()
         self.config.grab_inputs()
         self.config.get_config.assert_has_calls([
-            call("gitroot", default="~/workspace", secret=False),
-            call("username", default=None, secret=False),
-            call("password", default=None, secret=True),
-            call("main_branch", default="comp_main", secret=True)
+            call("gitroot", default="~/workspace", secret=False, force_prompt=False),
+            call("username", default=None, secret=False, force_prompt=False),
+            call("password", default=None, secret=True, force_prompt=False),
+            call("main_branch", default="comp_main", secret=True, force_prompt=False)
+        ])
+
+    def test_force_prompt_grab_inputs(self):
+        """ Test the force_prompt grabbing of inputs """
+        self.config.target = Manifest(StringIO(manifest_force_inputs))
+        self.config.get_config = Mock()
+        self.config.grab_inputs(force_prompt=True)
+        self.config.get_config.assert_has_calls([
+            call("gitroot", default="~/workspace", secret=False, force_prompt=True),
+            call("username", default=None, secret=False, force_prompt=True),
+            call("main_branch", default="comp_main", secret=True, force_prompt=True)
         ])
 
     def test_grab_inputs_existing_source(self):
@@ -352,8 +389,8 @@ class TestConfig(object):
         config.get_config = Mock()
         config.grab_inputs()
         config.get_config.assert_has_calls([
-            call("password", default=None, secret=True),
-            call("main_branch", default="comp_main", secret=True)
+            call("password", default=None, secret=True, force_prompt=False),
+            call("main_branch", default="comp_main", secret=True, force_prompt=False)
         ])
         assert config.get_config.call_count == 2, "More calls were called!"
 
@@ -372,7 +409,7 @@ class TestConfig(object):
         self.config_source_only.get_config = Mock(return_value="no")
         self.config_source_only.grab_inputs()
         self.config_source_only.get_config.assert_called_once_with(
-            "sourceonly", default=None, secret=False)
+            "sourceonly", default=None, secret=False, force_prompt=False)
 
     def test_write(self):
         """ Test the write command """

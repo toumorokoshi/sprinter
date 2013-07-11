@@ -16,7 +16,7 @@ release. Currently sprinter is at version 0.4
 ### 0.7
 * check if environment exists before removing, throw message if it doesn't.
 * add reconfigure command to re-choose values
-* generate a verbose log, and opt to output in on error
+* generate a verbose log, and opt to output in on error (DONE)
 
 ### 0.8
 * Catch exceptions failsafe

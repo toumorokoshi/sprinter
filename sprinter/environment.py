@@ -114,11 +114,13 @@ class Environment(object):
         
     @warmup
     @install_required
-    def update(self):
+    def update(self, reconfigure=False):
         """ update the environment """
         self.last_phase = "update"
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
+        if reconfigure:
+            self.config.grab_inputs(force_prompt=True)
         self._specialize_contexts()
         for feature in self.config.installs():
             self.install_feature(feature)
@@ -167,6 +169,16 @@ class Environment(object):
             self.activate_feature(feature)
         self.inject_environment_rc()
         self._finalize()
+
+    @warmup
+    @install_required
+    def reconfigure(self):
+        """ reconfigure the environment """
+        self.last_phase = "reconfigure"
+        self.config.grab_inputs(force_prompt=True)
+        if os.path.exists(self.directory.manifest_path):
+            self.config.write(open(self.directory.manifest_path, "w+"))
+        self.logger.info("Reconfigured! Note: It's recommended to update after a configure")
 
     @warmup
     @populate_formula_instance('target')

@@ -21,7 +21,7 @@ Install an environment as specified in a sprinter config file
 """
 
 VALID_COMMANDS = ["install", "update", "remove", "deactivate", "activate",
-                  "environments", "validate"]
+                  "environments", "reconfigure", "validate"]
 
 parser = OptionParser(description=description)
 # parser = argparse.ArgumentParser(description=description)
@@ -37,6 +37,8 @@ parser.add_option('--auth', dest='auth', action='store_true',
 parser.add_option('--password', dest='password', default=None,
                   help="Password if the url requires authentication")
 parser.add_option('-v', dest='verbose', action='store_true', help="Make output verbose")
+parser.add_option('--reconfigure', dest='reconfigure', default=False,
+                  help="if true, a sprinter update will reconfigure the existing environment specified")
 # not implemented yet
 parser.add_option('--sandboxbrew', dest='sandbox_brew', default=False,
                   help="if true, sandbox a brew installation, alternatively, " +
@@ -106,9 +108,9 @@ def parse_args(argv, Environment=Environment):
             env.target = Manifest(env.source.source(),
                                   username=options.username,
                                   password=options.password)
-            env.update()
+            env.update(reconfigure=options.reconfigure)
 
-        elif command in ["remove", "deactivate", "activate"]:
+        elif command in ["remove", "deactivate", "activate", "reconfigure"]:
             env.directory = Directory(target)
             env.source = Manifest(env.directory.manifest_path)
             getattr(env, command)()
@@ -130,12 +132,16 @@ def parse_args(argv, Environment=Environment):
     except BadCredentialsException, e:
         raise e
     except Exception, e:
-        env.logger.exception("An exception occurred!")
+        if not isinstance(e, SprinterException):
+            env.logger.exception("An exception occurred!")
+        else:
+            env.logger.error(str(e))
         env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
         env.write_debug_log("/tmp/sprinter.log")
         if env.message_failure():
             env.logger.info(env.message_failure)
-        raise e
+        if not isinstance(e, SprinterException):
+            raise e
 
 
 def parse_domain(url):

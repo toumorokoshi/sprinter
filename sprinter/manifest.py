@@ -284,7 +284,7 @@ class Config(object):
         return [s for s in self.source.formula_sections()
                 if self.source.run_phase(s, "activate")]
 
-    def grab_inputs(self, manifest=None):
+    def grab_inputs(self, manifest=None, force_prompt=False):
         """
         Look for any inputs not already accounted for in the manifest, and
         query the user for them.
@@ -302,7 +302,7 @@ class Config(object):
                         else:
                             default = (attributes['default'] if 'default' in attributes else None)
                             secret = (attributes['secret'] if 'secret' in attributes else False)
-                            self.get_config(param, default=default, secret=secret)
+                            self.get_config(param, default=default, secret=secret, force_prompt=force_prompt)
             if self.target:
                 self.set_additional_context('target')
             if self.source:
@@ -322,11 +322,11 @@ class Config(object):
         self.target.set('config', 'namespace', self.namespace)
         self.target.write(file_handle)
 
-    def get_config(self, param_name, default=None, secret=False):
+    def get_config(self, param_name, default=None, secret=False, force_prompt=False):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
         """
-        if param_name not in self.config:
+        if param_name not in self.config or force_prompt:
             self.config[param_name] = self.lib.prompt("please enter your %s" % param_name,
                                                       default=default,
                                                       secret=secret)
