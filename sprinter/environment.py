@@ -243,8 +243,7 @@ class Environment(object):
     def install_sandboxes(self):
         # install virtualenv
         if self.target:
-            self._install_sandbox('virtualenv', virtualenv.create_environment,
-                                  {'use_distribute': True})
+            self._install_sandbox('virtualenv', virtualenv.create_environment)
             if self.system.isOSX():
                 self._install_sandbox('brew', brew.install_brew)
 
