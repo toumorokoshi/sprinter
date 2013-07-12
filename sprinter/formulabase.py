@@ -24,9 +24,9 @@ class FormulaBase(object):
         if 'rc' in config:
             self.directory.add_to_rc(config['rc'])
         if 'command' in config:
-            self.logger.info(self.lib.call(config['command'],
-                                           shell=True,
-                                           cwd=cwd))
+            self.lib.call(config['command'],
+                          shell=True,
+                          cwd=cwd))
 
     def update(self, feature_name, source_config, target_config):
         """ Update is called when a feature previously exists. """
