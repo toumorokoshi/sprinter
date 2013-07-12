@@ -47,9 +47,6 @@ parser.add_option('--sandboxbrew', dest='sandbox_brew', default=False,
 parser.add_option('--sandboxaptget', dest='sandbox_aptget', default=False,
                   help="if true, sandbox an apt-get installation, alternatively, " +
                   "false will disable apt-get sandboxes for configuration that request it.")
-parser.add_option('--virtualenv', dest='virtualenv', default=False,
-                  help="if true, will virtualenv sprinter and install eggs relative to it, " +
-                  "false will disable apt-get sandboxes for configuration that request it.")
 """
 
 
