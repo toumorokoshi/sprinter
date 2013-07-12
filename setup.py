@@ -13,7 +13,7 @@ setup(name='sprinter',
       author_email='yusuke@yusuketsutsumi.com',
       url='http://toumorokoshi.github.io/sprinter',
       packages=['sprinter', 'sprinter.formulas'],
-      requires=['virtualenv (>=1.9.1)'],
+      requires=[],
       classifiers=[
           'Development Status :: 4 - Beta',
           'Operating System :: MacOS',

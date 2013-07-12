@@ -26,7 +26,7 @@ class FormulaBase(object):
         if 'command' in config:
             self.lib.call(config['command'],
                           shell=True,
-                          cwd=cwd))
+                          cwd=cwd)
 
     def update(self, feature_name, source_config, target_config):
         """ Update is called when a feature previously exists. """
