@@ -3,7 +3,6 @@ import os
 import sys
 from StringIO import StringIO
 
-from sprinter import virtualenv
 from sprinter import brew
 from sprinter import lib
 from sprinter.directory import Directory
@@ -60,7 +59,7 @@ class Environment(object):
     source = None  # the path to the source handle, the handle itself, or a manifest instance
     target = None  # the path to the target handle, the handle itself, or a manifest instance
     namespace = None  # the namespace of the environment
-    sandboxes = []  # a list of package managers to sandbox (brew, virtualenv)
+    sandboxes = []  # a list of package managers to sandbox (brew)
     # the libraries that environment utilizes
     config = None  # handles the configuration, and manifests
     directory = None  # handles interactions with the environment directory
@@ -241,9 +240,7 @@ class Environment(object):
         self.injections.clear("~/.bashrc")
 
     def install_sandboxes(self):
-        # install virtualenv
         if self.target:
-            self._install_sandbox('virtualenv', virtualenv.create_environment)
             if self.system.isOSX():
                 self._install_sandbox('brew', brew.install_brew)
 
