@@ -13,7 +13,9 @@ setup(name='sprinter',
       author_email='yusuke@yusuketsutsumi.com',
       url='http://toumorokoshi.github.io/sprinter',
       packages=['sprinter', 'sprinter.formulas'],
-      requires=['distribute (>=0.6.36)'],
+      install_requires=[
+          'requests>=1.2.3',
+      ],
       classifiers=[
           'Development Status :: 4 - Beta',
           'Operating System :: MacOS',
