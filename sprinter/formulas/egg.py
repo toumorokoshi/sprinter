@@ -36,13 +36,13 @@ eggs = %(eggs)s
 class EggFormula(FormulaBase):
 
     def install(self, feature_name, config):
-        self.bp = BuildoutPuppet(root_path="~/.sprinter/sprinter")
+        self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
         self.__install_eggs(config)
         self.__add_paths(config)
         super(EggFormula, self).install(feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
-        self.bp = BuildoutPuppet(root_path="~/.sprinter/sprinter")
+        self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
         if (source_config.get('egg', None) != target_config.get('egg', None) or
            source_config.get('eggs', None) != target_config.get('eggs', None)):
             self.__install_eggs(target_config)
@@ -70,7 +70,7 @@ class EggFormula(FormulaBase):
             PYTHONPATH = ""
             for egg in os.listdir(self.bp.egg_path()):
                 PYTHONPATH += os.path.join(self.bp.egg_path(), egg) + ":"
-                rc_script += "export PYTHONPATH=%s$PYTHONPATH\n" % PYTHONPATH
+            rc_script += "export PYTHONPATH=%s$PYTHONPATH\n" % PYTHONPATH
         self.directory.add_to_rc(rc_script)
         
 
