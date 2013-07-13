@@ -57,7 +57,7 @@ class EggFormula(FormulaBase):
         if 'eggs' in config:
             eggs += [egg.strip() for egg in re.split(',|\n', config['eggs'])]
         self.bp.eggs = self.eggs = eggs
-        self.bp.links = [link.strip() for link in re.split(',|\n', config['links'])]
+        self.bp.links = [link.strip() for link in re.split(',|\n', config.get('links', ''))]
         self.logger.debug("Installing eggs %s..." % eggs)
         self.bp.install()
 
