@@ -11,6 +11,7 @@ from sprinter.injections import Injections
 from sprinter.lib import get_formula_class
 from sprinter.manifest import Config, Manifest, ManifestException
 from sprinter.system import System
+from sprinter.pippuppet import Pip, PipException
 
 
 def warmup(f):
@@ -75,6 +76,8 @@ class Environment(object):
     # a list of errors that occured within the environment's run.
     # an error should be a tuple with the source of the error and the description.
     errors = []
+    # a pip puppet used to install eggs and add it to the classpath
+    pip = None
 
     def __init__(self, logger=None, logging_level=logging.INFO,
                  root=None, sprinter_namespace='sprinter'):
@@ -84,6 +87,8 @@ class Environment(object):
         self.logger = logger
         self.sprinter_namespace = sprinter_namespace
         self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
+        self.global_path = os.path.join(self.root, ".global")
+        self.pip = Pip(self.global_path)
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
 
@@ -325,7 +330,20 @@ class Environment(object):
         get an instance of the formula object object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        return get_formula_class(formula, self)
+        try:
+            return get_formula_class(formula, self)
+        except SprinterException:
+            self.logger.info("Downloading %s..." % formula)
+            self.pip.install_egg(formula)
+            return get_formula_class(formula, self)
+        except ImportError:
+            self.logger.info("Downloading %s..." % formula)
+            try:
+                self.pip.install_egg(formula)
+            except PipException:
+                self.logger.error("Unable to download %s!" % formula)
+            return get_formula_class(formula, self)
+            
 
     def _run_action(self, verb, feature_name, call, configs):
         self.logger.info("%s %s..." % (verb, feature_name))

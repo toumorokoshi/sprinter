@@ -26,14 +26,14 @@ from subprocess import PIPE, STDOUT
 from sprinter.formulabase import FormulaBase
 from sprinter.exceptions import (CommandMissingException,
                                  BadCredentialsException,
-                                 ExtractException)
+                                 ExtractException,
+                                 SprinterException)
 
 LOGGER = logging.getLogger('sprinter')
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
 BYTE_CHUNKS = 50
-
 
 def get_formula_class(formula, environment):
     """
@@ -51,7 +51,7 @@ def get_formula_class(formula, environment):
                 if sprinter_class is FormulaBase:
                     sprinter_class = v
         if sprinter_class is None:
-            raise Exception("No formula %s exists in classpath!" % formula)
+            raise SprinterException("No formula %s exists in classpath!" % formula)
         return sprinter_class(environment)
     except ImportError as e:
         raise e
