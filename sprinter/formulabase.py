@@ -5,6 +5,8 @@ and some documentation on what they should provide.
 import logging
 import os
 
+from sprinter.core import logger
+
 
 class FormulaBase(object):
 
@@ -15,7 +17,7 @@ class FormulaBase(object):
         self.injections = environment.injections
         self.system = environment.system
         self.lib = environment.lib
-        self.logger = logging.getLogger('sprinter')
+        self.logger = logger
 
     def install(self, feature_name, config):
         """ Install is called when a feature does not previously exist. """

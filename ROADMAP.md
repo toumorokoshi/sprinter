@@ -10,20 +10,22 @@ This page highlights Sprinter's roadmap to reach 1.0
 release. Currently sprinter is at version 0.6
 
 ### 0.7
-* All formulas sufficiently tested
-* ensure proper coverage for environment
+* Refactor config resolution
+* Refactor methodology to prompt user for input
+* Migrate 'sprinter.formulas' to 'sprinter.formula'
+* Investigate integrating buildout recipe compatability?
 
-### 0.8
-* Catch exceptions failsafe
-* add ability to source formulas dynamically
-
-
-### 0.9 
+# Before 1.0
 The documentation needs to properly and completely document
 the sprinter libraries and extension design:
 
+* All formulas sufficiently tested
+* ensure proper coverage for environment
 * Add doc section for 'phases' and phases keyword in config
-* Finish up fromula functionality
+* Finish up formula functionality
 
 ### 1.0
 Success! A Stable library that can be used to install environments to machines with ease
+
+### Post 1.0
+* Move all formulas out of the core sprinter repository

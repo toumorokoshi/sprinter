@@ -72,7 +72,7 @@ class Environment(object):
     _formula_dict = {}  # a dictionary of existing formula instances to pull from
     sprinter_namespace = None  # the namespace to make installs with. this affects:
     # the prefix added to injections
-    last_phase = None  # the last phase run
+    phase = None  # the phase currently running
     # a list of errors that occured within the environment's run.
     # an error should be a tuple with the source of the error and the description.
     errors = []
@@ -95,7 +95,7 @@ class Environment(object):
     @warmup
     def install(self):
         """ Install the environment """
-        self.last_phase = "install"
+        self.phase = "install"
         if not self.directory.new:
             self.logger.info("Namespace %s already exists!" % self.namespace)
             self.source = self.config.set_source(Manifest(self.directory.manifest_path))
@@ -120,7 +120,7 @@ class Environment(object):
     @install_required
     def update(self, reconfigure=False):
         """ update the environment """
-        self.last_phase = "update"
+        self.phase = "update"
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
         if reconfigure:
@@ -139,7 +139,7 @@ class Environment(object):
     @install_required
     def remove(self):
         """ remove the environment """
-        self.last_phase = "remove"
+        self.phase = "remove"
         self.logger.info("Removing environment %s..." % self.namespace)
         self._specialize_contexts()
         for feature in self.config.removes():
@@ -152,7 +152,7 @@ class Environment(object):
     @install_required
     def deactivate(self):
         """ deactivate the environment """
-        self.last_phase = "deactivate"
+        self.phase = "deactivate"
         self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self._specialize_contexts()
@@ -165,7 +165,7 @@ class Environment(object):
     @install_required
     def activate(self):
         """ activate the environment """
-        self.last_phase = "activate"
+        self.phase = "activate"
         self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self._specialize_contexts()
@@ -178,7 +178,7 @@ class Environment(object):
     @install_required
     def reconfigure(self):
         """ reconfigure the environment """
-        self.last_phase = "reconfigure"
+        self.phase = "reconfigure"
         self.config.grab_inputs(force_prompt=True)
         if os.path.exists(self.directory.manifest_path):
             self.config.write(open(self.directory.manifest_path, "w+"))

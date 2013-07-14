@@ -23,6 +23,39 @@ CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
 
+class FeatureManifest(object):
+
+    def get(self, param, default=None):
+        """ 
+        Returns the param value, and returns the default if it doesn't exist.
+        If default is none, an exception will be raised instead.
+        
+        the returned parameter will have been specialized against the global context
+        """
+
+    def is_affirmative(self, param):
+        return lib.is_affirmative(self.get('param'))
+        
+    def has(self, param):
+        """ return true if the param exists """
+
+    def set(self, param, value):
+        """ sets the param to the value provided """
+
+    def prompt_if_empty(self, param, message, default=None):
+        """ Prompts the user for a value, passing a default if it exists """
+        if not self.has(param):
+            value = lib.prompt(message, default=default)
+            self.set(param, value)
+
+    def set_if_empty(self, param, default):
+        """ Set the parameter to the default if it doesn't exist """
+        if not self.has(param):
+            self.set(param, defaulct)
+        
+    def to_dict(self):
+        """ Returns the context, fully specialized, as a dictionary """
+
 
 class ManifestException(Exception):
     pass

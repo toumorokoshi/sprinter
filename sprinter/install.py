@@ -86,7 +86,7 @@ def parse_args(argv, Environment=Environment):
     try:
         if command == "install":
             def handle_install_shutdown(signal, frame):
-                if env.last_phase == "install":
+                if env.phase == "install":
                     print "Removing install..."
                     env.directory.remove()
                     env.clear_environment_rc()

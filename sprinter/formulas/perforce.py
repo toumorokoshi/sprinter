@@ -9,7 +9,8 @@ version = r10.1
 root_path = ~/p4/
 username = %(config:p4username)s
 password = %(config:p4password)s
-port = perforce.local:1666 client = %(config:node)s
+port = perforce.local:1666 
+client = %(config:node)s
 """
 import os
 import shutil
@@ -80,7 +81,8 @@ class PerforceFormula(FormulaBase):
         self.__add_p4_env(target_config)
 
     def remove(self, feature_name, config):
-        self.__destroy_perforce(config)
+        if config.is_affirmative('remove_p4root'):
+            self.__destroy_perforce(config)
 
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """
