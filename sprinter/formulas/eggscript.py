@@ -20,7 +20,6 @@ from sprinter.exceptions import CommandMissingException
 from sprinter.buildoutpuppet import BuildoutPuppet
 
 
-
 class EggscriptFormula(FormulaBase):
 
     def install(self, feature_name, config):
@@ -31,10 +30,10 @@ class EggscriptFormula(FormulaBase):
 
     def update(self, feature_name, source_config, target_config):
         self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
-        if (source_config.get('egg', None) != target_config.get('egg', None) or
-            source_config.get('eggs', None) != target_config.get('eggs', None) or
-            lib.is_affirmative(target_config.get('redownload'))):
-                self.__install_eggs(target_config)
+        if (source_config.get('egg', '') != target_config.get('egg', '') or
+            source_config.get('eggs', '') != target_config.get('eggs', '') or
+                lib.is_affirmative(target_config.get('redownload', 'false'))):
+                    self.__install_eggs(target_config)
         self.__add_paths(target_config)
         super(EggscriptFormula, self).update(feature_name, source_config, target_config)
 
