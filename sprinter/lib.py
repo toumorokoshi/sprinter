@@ -218,7 +218,7 @@ def which(program, cwd=None):
         return True
     fpath, fname = os.path.split(program)
     if fpath:
-        if is_exe(os.path.join(program, cwd=(cwd or os.path.curdir))):
+        if is_exe(os.path.join((cwd or os.path.curdir), program)):
             return program
     else:
         for path in os.environ["PATH"].split(os.pathsep):
