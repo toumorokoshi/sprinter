@@ -4,7 +4,7 @@ import shutil
 import requests
 from sprinter import lib
 
-BOOTSTRAP_URL = "http://downloads.buildout.org/2/bootstrap.py"
+BOOTSTRAP_URL = "https://raw.github.com/toumorokoshi/sprinter/master/scripts/bootstrap.py"
 
 LOGGER = logging.getLogger('sprinter')
 
