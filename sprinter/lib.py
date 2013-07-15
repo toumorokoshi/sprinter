@@ -35,6 +35,7 @@ DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
 BYTE_CHUNKS = 50
 
+
 def get_formula_class(formula, environment):
     """
     Get the formula name and return an instance The formula path is a
@@ -61,7 +62,7 @@ def call(command, stdin=None, env=os.environ, cwd=None, shell=False, output_log_
     """ Better, smarter call logic """
     args = command if shell else whitespace_smart_split(command)
     kw = {}
-    if not shell and not which(args[0]):
+    if not shell and not which(args[0], cwd=cwd):
         raise CommandMissingException(args[0])
     if shell:
         kw['shell'] = True
@@ -212,12 +213,12 @@ def is_exe(fpath):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
 
-def which(program):
+def which(program, cwd=None):
     if program in COMMAND_WHITELIST:
         return True
     fpath, fname = os.path.split(program)
     if fpath:
-        if is_exe(program):
+        if is_exe(os.path.join(program, cwd=(cwd or os.path.curdir))):
             return program
     else:
         for path in os.environ["PATH"].split(os.pathsep):

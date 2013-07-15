@@ -19,6 +19,7 @@ recipe = zc.recipe.egg
 eggs = %(eggs)s
 """
 
+
 class BuildoutPuppet(object):
     """ A wrapper class to control buildout programatically """
 
@@ -48,7 +49,7 @@ class BuildoutPuppet(object):
     def clear_eggs(self):
         """ remove the eggs installed """
         for egg in os.listdir(self.egg_path()):
-            try: 
+            try:
                 shutil.rmtree(os.path.join(self.egg_path(), egg))
             except OSError:
                 self.logger.error("Unable to remove egg %s" % egg)
@@ -62,7 +63,7 @@ class BuildoutPuppet(object):
 
     def write_buildout(self):
         """ Write buildout.cfg to the path provided """
-        d = {'eggs':       "\n       ".join(self.eggs),
+        d = {'eggs': "\n       ".join(self.eggs),
              'find-links': "\n       ".join(self.links)}
         with open(self.buildout_path, 'w+') as fh:
             fh.write(BASE_CONFIG % d)
