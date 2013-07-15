@@ -68,6 +68,11 @@ class BuildoutPuppet(object):
         with open(self.buildout_path, 'w+') as fh:
             fh.write(BASE_CONFIG % d)
 
+    def delete_eggs(self):
+        """ Delete all eggs """
+        for f in os.listdir(self.egg_path()):
+            shutil.rmtree(os.path.join(self.egg_path(), f))
+
     def run_buildout(self):
         """ Run bootstrap.py and bin/buildout """
         lib.call("python -S bootstrap.py", cwd=self.root_path)

@@ -32,7 +32,7 @@ class EggscriptFormula(FormulaBase):
         self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
         if (source_config.get('egg', '') != target_config.get('egg', '') or
             source_config.get('eggs', '') != target_config.get('eggs', '') or
-                lib.is_affirmative(target_config.get('redownload', 'false'))):
+            lib.is_affirmative(target_config.get('redownload', 'false'))):
                     self.__install_eggs(target_config)
         self.__add_paths(target_config)
         super(EggscriptFormula, self).update(feature_name, source_config, target_config)
@@ -48,6 +48,7 @@ class EggscriptFormula(FormulaBase):
         self.bp.links = [link.strip() for link in re.split(',|\n', config.get('links', ''))]
         if lib.is_affirmative(config.get('redownload', 'false')):
             self.logger.debug("Removing eggs %s..." % eggs)
+            self.bp.delete_eggs()
         self.logger.debug("Installing eggs %s..." % eggs)
         self.bp.install()
 
