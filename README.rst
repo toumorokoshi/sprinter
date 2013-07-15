@@ -20,7 +20,7 @@ OSX::
 
 Debian-Based (e.g. Ubuntu)::
     
-    $ cd /tmp/; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sprinter_sandbox.sh; bash sprinter_sandbox.sh
+    $ cd /tmp/; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sprinter_sandbox.sh -O sprinter_sandbox.sh; bash sprinter_sandbox.sh
    
 
 A cross-platform environment bootstrapping framework!
