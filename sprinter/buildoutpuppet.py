@@ -72,7 +72,11 @@ class BuildoutPuppet(object):
         """ Delete all eggs """
         if os.path.exists(self.egg_path()):
             for f in os.listdir(self.egg_path()):
-                shutil.rmtree(os.path.join(self.egg_path(), f))
+                target_path = os.path.join(self.egg_path(), f)
+                if os.path.isdir(target_path):
+                    shutil.rmtree(target_path)
+                else:
+                    os.unlink(target_path)
 
     def run_buildout(self):
         """ Run bootstrap.py and bin/buildout """
