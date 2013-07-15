@@ -70,5 +70,5 @@ class BuildoutPuppet(object):
 
     def run_buildout(self):
         """ Run bootstrap.py and bin/buildout """
-        lib.call("python bootstrap.py", cwd=self.root_path)
+        lib.call("python -S bootstrap.py", cwd=self.root_path)
         lib.call("bin/buildout", cwd=self.root_path)
