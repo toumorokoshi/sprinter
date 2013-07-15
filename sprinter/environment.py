@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from StringIO import StringIO
+from functools import wraps
 
 from sprinter import brew
 from sprinter import lib
@@ -17,6 +18,7 @@ from sprinter.pippuppet import Pip, PipException
 def warmup(f):
     """ Decorator to run warmup before running a command """
 
+    @wraps(f)
     def wrapped(self, *args, **kwargs):
         if not self.warmed_up:
             self._warmup()
@@ -27,6 +29,7 @@ def warmup(f):
 def install_required(f):
     """ Return an exception if the namespace is not already installed """
 
+    @wraps(f)
     def wrapped(self, *args, **kwargs):
         if self.directory.new:
             raise SprinterException("Namespace %s is not yet installed!" % self.namespace)
@@ -39,6 +42,7 @@ def populate_formula_instance(config):
 
     def wrapper(f):
 
+        @wraps(f)
         def wrapped(self, feature_name, formula_instance=None):
             if not formula_instance:
                 try:
