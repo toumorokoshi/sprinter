@@ -3,7 +3,7 @@ Creates a perforce repository and places it at the install
 location.
 
 [perforce]
-formula = sprinter.formulas.perforce
+formula = sprinter.formula.perforce
 inputs = p4username
          p4password?
 version = r10.1

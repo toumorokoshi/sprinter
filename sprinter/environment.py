@@ -127,10 +127,12 @@ class Environment(object):
         self.phase = "update"
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
+        """
         for feature in self.config.updates():
             self.resolve_feature(feature)
+        """
         if reconfigure:
-            self.grab_inputs(force_prompt=True)
+            self.config.grab_inputs(force_prompt=True)
         self._specialize_contexts()
         for feature in self.config.installs():
             self.install_feature(feature)
@@ -198,7 +200,6 @@ class Environment(object):
         """ Install a specific formula """
         return self._run_action("Installing", feature_name, formula_instance.install, ['target'])
         
-
     @warmup
     @populate_formula_instance('target')
     def update_feature(self, feature_name, formula_instance=None):
@@ -230,20 +231,15 @@ class Environment(object):
         return self._run_action("Validating", feature_name, formula_instance.validate, ['target'])
 
     @warmup
-    @populate_formula_instance('target')
-    def resolve_feature(self, feature_name):
-        """ resolve a feature configuration's differences """
-        return self._run_action("Resolving", feature_name, formula_instance.resolve, ['source', 'target'])
-
-    @warmup
     @populate_formula_instance('source')
-    def reconfigure_feature(self, feature_name):
+    def reconfigure_feature(self, feature_name, formula_instance=None):
         """ resolve a feature configuration's differences """
-        return self._run_action("Reconfiguring", feature_name, formula_instance.reconfigure, ['source', 'target'])
+        return self._run_action("Reconfiguring", feature_name, formula_instance.reconfigure,
+                                ['source', 'target'])
 
     @warmup
     @populate_formula_instance('target')
-    def prompt_feature(self, feature_name):
+    def prompt_feature(self, feature_name, formula_instance=None):
         """ prompt a feature configuration differences """
         return self._run_action(None, feature_name, formula_instance.prompt, 'target')
 
@@ -293,6 +289,14 @@ class Environment(object):
         manifest = self.target or self.source
         if manifest.has_option('config', 'message_success'):
             return manifest.get('config', 'message_success')
+
+    """
+    def prompts(self, force_prompt=False):
+        self.config.grab_inputs()
+        for manifest in [self.source, self.target]:
+            if manifest:
+                for m in manifest.formula_sections():
+    """
 
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
@@ -371,7 +375,6 @@ class Environment(object):
                 self.logger.error("Unable to download %s!" % formula)
             return get_formula_class(formula, self)
             
-
     def _run_action(self, verb, feature_name, call, configs):
         if verb:
             self.logger.info("%s %s..." % (verb, feature_name))
