@@ -94,8 +94,8 @@ class TestManifest(object):
         tools.eq_(self.manifest_old, Manifest(StringIO(manifest_old)))
 
     def test_get_feature_config(self):
-        """ Get_feature_config should return a dictionary with the attributes """
-        tools.eq_(self.manifest_old.get_feature_config("sub"), {
+        """ get_feature_config should return a dictionary with the attributes """
+        tools.eq_(self.manifest_old.get_feature_config("sub").to_dict(), {
             'url': 'git://github.com/Toumorokoshi/sub.git',
             'formula': 'sprinter.formulas.git',
             'depends': 'git',

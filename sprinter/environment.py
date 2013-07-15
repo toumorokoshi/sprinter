@@ -189,6 +189,7 @@ class Environment(object):
     def install_feature(self, feature_name, formula_instance=None):
         """ Install a specific formula """
         return self._run_action("Installing", feature_name, formula_instance.install, ['target'])
+        
 
     @warmup
     @populate_formula_instance('target')
@@ -218,7 +219,7 @@ class Environment(object):
     @populate_formula_instance('target')
     def validate_feature(self, feature_name, formula_instance=None):
         """ Validate a specific formula """
-        return self._run_action("Activating", feature_name, formula_instance.activate, ['target'])
+        return self._run_action("Validating", feature_name, formula_instance.validate, ['target'])
 
     @warmup
     def validate_manifest(self, manifest):
@@ -350,10 +351,12 @@ class Environment(object):
         configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
         valid = True
         for c in configs:
-            if 'formula' not in c:
+            if not c.has('formula'):
                 valid = False
         if valid:
             call(feature_name, *configs)
+            for c in configs:
+                c.write_to_manifest()
         else:
             self.logger.warn("Feature %s has invalid configs! Not %s" % (feature_name, verb))
 

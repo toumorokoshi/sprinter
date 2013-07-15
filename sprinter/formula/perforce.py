@@ -29,7 +29,7 @@ from sprinter import lib
 
 class PerforceFormula(FormulaBase):
 
-    def prompt(self, feature_name, config, phase):
+    def prompt(self, feature_name, config, reconfigure=False):
         config.set_if_empty('write_p4settings', True)
         phase == "install":
             if config.is_affirmative('write_p4settings'):
@@ -82,14 +82,17 @@ class PerforceFormula(FormulaBase):
     def remove(self, feature_name, config):
         self.__destroy_perforce(config)
 
-    def validate(self, config):
+    def validate(self, feature_name, config):
         errors = super(PerforceFormula, self).validate()
         for required in ['root_path', 'port', 'client', 'username', 'password']:
             if not config.has(required):
                 errors.append("%s must be set!" % required)
+        for k in config.keys():
+            if k not in valid_options:
+                self.logger.warn("Unused option %s in %s!" % (k, feature_name)
 
     def reconfigure(self, feature_name, config):
-        self.prompt(feature_name, config, 'install')
+        self.prompt(feature_name, config, reconfigure=True)
         self.__write_p4settings(config)
 
     def __install_perforce(self, feature_name, config):

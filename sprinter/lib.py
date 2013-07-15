@@ -200,7 +200,10 @@ def is_affirmative(phrase):
     Determine if a phrase is in the affirmative
     * start with a t or y, case insensitive
     """
-    return phrase.lower()[0] in ['t', 'y']
+    if type(phrase) == str:
+        return phrase.lower()[0] in ['t', 'y']
+    else:
+        return phrase
 
 
 # From:

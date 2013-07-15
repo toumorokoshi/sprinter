@@ -23,8 +23,8 @@ class FormulaBase(object):
         """ Install is called when a feature does not previously exist. """
         install_directory = self.directory.install_directory(feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
-        if 'rc' in config:
-            self.directory.add_to_rc(config['rc'])
+        if config.has('rc'):
+            self.directory.add_to_rc(config.get('rc'))
         if 'command' in config:
             self.lib.call(config['command'],
                           shell=True,
