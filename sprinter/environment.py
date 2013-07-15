@@ -123,8 +123,10 @@ class Environment(object):
         self.phase = "update"
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
+        for feature in self.config.updates():
+            self.resolve_feature(feature)
         if reconfigure:
-            self.config.grab_inputs(force_prompt=True)
+            self.grab_inputs(force_prompt=True)
         self._specialize_contexts()
         for feature in self.config.installs():
             self.install_feature(feature)
@@ -182,6 +184,8 @@ class Environment(object):
         self.config.grab_inputs(force_prompt=True)
         if os.path.exists(self.directory.manifest_path):
             self.config.write(open(self.directory.manifest_path, "w+"))
+        for feature in self.config.sections():
+            self.reconfigure_feature(feature)
         self.logger.info("Reconfigured! Note: It's recommended to update after a configure")
 
     @warmup
@@ -220,6 +224,24 @@ class Environment(object):
     def validate_feature(self, feature_name, formula_instance=None):
         """ Validate a specific formula """
         return self._run_action("Validating", feature_name, formula_instance.validate, ['target'])
+
+    @warmup
+    @populate_formula_instance('target')
+    def resolve_feature(self, feature_name):
+        """ resolve a feature configuration's differences """
+        return self._run_action("Resolving", feature_name, formula_instance.resolve, ['source', 'target'])
+
+    @warmup
+    @populate_formula_instance('source')
+    def reconfigure_feature(self, feature_name):
+        """ resolve a feature configuration's differences """
+        return self._run_action("Reconfiguring", feature_name, formula_instance.reconfigure, ['source', 'target'])
+
+    @warmup
+    @populate_formula_instance('target')
+    def prompt_feature(self, feature_name):
+        """ prompt a feature configuration differences """
+        return self._run_action(None, feature_name, formula_instance.prompt, 'target')
 
     @warmup
     def validate_manifest(self, manifest):
@@ -347,7 +369,8 @@ class Environment(object):
             
 
     def _run_action(self, verb, feature_name, call, configs):
-        self.logger.info("%s %s..." % (verb, feature_name))
+        if verb:
+            self.logger.info("%s %s..." % (verb, feature_name))
         configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
         valid = True
         for c in configs:

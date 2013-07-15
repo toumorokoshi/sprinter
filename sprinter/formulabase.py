@@ -55,3 +55,8 @@ class FormulaBase(object):
         validates the feature configuration, and returns a list of errors (empty list if no error)
         """
         return []
+
+    def resolve(source_config, target_config):
+        """ Resolve differences between the target and the source configuration """
+        for k in (k for k in source_config.keys() if not target_config.has(k)):
+            target_config.set(k, source_config.get(k))

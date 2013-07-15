@@ -282,6 +282,13 @@ class Config(object):
         return [s for s in self.source.formula_sections()
                 if self.source.run_phase(s, "activate")]
 
+    def reconfigures(self):
+        """ Return a list of the features which need to be deactivated. """
+        if not self.source:
+            raise ConfigException("Activations method requires a source manifest!")
+        return [s for s in self.source.formula_sections()
+                if self.source.run_phase(s, "reconfigure")]
+
     def grab_inputs(self, manifest=None, force_prompt=False):
         """
         Look for any inputs not already accounted for in the manifest, and

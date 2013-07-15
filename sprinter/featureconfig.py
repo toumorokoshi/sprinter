@@ -55,11 +55,12 @@ class FeatureConfig(object):
     def is_affirmative(self, param):
         return lib.is_affirmative(self.get('param'))
 
-    def prompt_if_empty(self, param, message, default=None):
+    def prompt(self, param, message, default=None, only_if_empty=False):
         """ Prompts the user for a value, passing a default if it exists """
-        if not self.has(param):
-            value = lib.prompt(message, default=default)
-            self.set(param, value)
+        if self.has(param) and only_if_empty:
+            return
+        value = lib.prompt(message, default=default)
+        self.set(param, value)
 
     def set_if_empty(self, param, default):
         """ Set the parameter to the default if it doesn't exist """
