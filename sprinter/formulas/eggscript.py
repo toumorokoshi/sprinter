@@ -5,7 +5,7 @@ formula = sprinter.formulas.egg
 egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc
-links = http://github.com/toumorokoshi/sprinter/tarball/master#sprinter-0.6
+links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
 redownload = true
 """
 import logging
