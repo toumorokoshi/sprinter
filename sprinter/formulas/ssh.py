@@ -29,29 +29,29 @@ ssh_config_path = os.path.expanduser('~/.ssh/config')
 class SSHFormula(FormulaBase):
 
     def install(self, feature_name, config):
-        ssh_path = self.__generate_key(feature_name, config)
-        self.__install_ssh_config(config, ssh_path)
+        ssh_key_path = self.__generate_key(feature_name, config)
+        self.__install_ssh_config(config, ssh_key_path)
         if 'command' in config:
-            self.__call_command(config['command'], ssh_path)
+            self.__call_command(config['command'], ssh_key_path)
 
     def update(self, feature_name, source_config, target_config):
-        ssh_path = self.__generate_key(feature_name, target_config)
-        self.__install_ssh_config(target_config, ssh_path)
+        ssh_key_path = self.__generate_key(feature_name, target_config)
+        self.__install_ssh_config(target_config, ssh_key_path)
         #super(SSHFormula, self).update(feature_name, source_config, target_config)
 
     def remove(self, feature_name, config):
         super(SSHFormula, self).remove(feature_name, config)
 
     def deactivate(self, feature_name, config):
-        ssh_path = os.path.join(self.directory.install_directory(feature_name),
-                                config['keyname'])
-        self.__install_ssh_config(config, ssh_path)
+        ssh_key_path = os.path.join(self.directory.install_directory(feature_name),
+                                    config['keyname'])
+        self.__install_ssh_config(config, ssh_key_path)
         #super(SSHFormula, self).deactivate(feature_name, config)
 
     def activate(self, feature_name, config):
-        ssh_path = os.path.join(self.directory.install_directory(feature_name),
-                                config['keyname'])
-        self.__install_ssh_config(config, ssh_path)
+        ssh_key_path = os.path.join(self.directory.install_directory(feature_name),
+                                    config['keyname'])
+        self.__install_ssh_config(config, ssh_key_path)
         #super(SSHFormula, self).activate(feature_name, config)
 
     def __generate_key(self, feature_name, config):
@@ -69,11 +69,10 @@ class SSHFormula(FormulaBase):
                 self.logger.info(self.lib.call(command, cwd=cwd))
         return os.path.join(cwd, config['keyname'])
 
-    def __install_ssh_config(self, config, ssh_path):
+    def __install_ssh_config(self, config, ssh_key_path):
         """
         Install the ssh configuration
         """
-        config['ssh_path'] = ssh_path
         ssh_config_injection = ssh_config_template % config
         if os.path.exists(ssh_config_path):
             if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config['host']):
