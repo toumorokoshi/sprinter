@@ -22,28 +22,34 @@ from sprinter.buildoutpuppet import BuildoutPuppet
 
 class EggscriptFormula(FormulaBase):
 
-    def install(self, feature_name, config):
-        self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
+    def install(self):
+        self.bp = BuildoutPuppet(
+            root_path=self.directory.install_directory(self.feature_name))
         self.__install_eggs(config)
         self.__add_paths(config)
         super(EggscriptFormula, self).install(feature_name, config)
 
-    def update(self, feature_name, source_config, target_config):
+    def update(self):
         self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
-        if (source_config.get('egg', '') != target_config.get('egg', '') or
-            source_config.get('eggs', '') != target_config.get('eggs', '') or
-            lib.is_affirmative(target_config.get('redownload', 'false'))):
-                    self.__install_eggs(target_config)
-        self.__add_paths(target_config)
-        super(EggscriptFormula, self).update(feature_name, source_config, target_config)
+        if (self.source.get('egg', '') != self.target.get('egg', '') or
+            self.source.get('eggs', '') != self.target.get('eggs', '') or
+            lib.is_affirmative(self.target.get('redownload', 'false'))):
+                    self.__install_eggs(self.target)
+        self.__add_paths(self.target)
+        super(EggscriptFormula, self).update()
 
+    def validate(self):
+        if self.target:
+            if not (self.target.has('egg') or self.target.has('eggs')):
+                self.logger.warn("No eggs will be installed! 'egg' or 'eggs' parameter not set!")
+                
     def __install_eggs(self, config):
         """ Install eggs for a particular configuration """
         eggs = []
-        if 'egg' in config:
-            eggs += [config['egg']]
-        if 'eggs' in config:
-            eggs += [egg.strip() for egg in re.split(',|\n', config['eggs'])]
+        if config.has('egg'):
+            eggs += [config.get('egg')]
+        if config.has('eggs'):
+            eggs += [egg.strip() for egg in re.split(',|\n', config.get('eggs'))]
         self.bp.eggs = self.eggs = eggs
         self.bp.links = [link.strip() for link in re.split(',|\n', config.get('links', ''))]
         if lib.is_affirmative(config.get('redownload', 'false')):

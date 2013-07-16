@@ -109,17 +109,14 @@ class Environment(object):
         self.phase = PHASE.UPDATE
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
+        self._instantiate_features()
         for feature in self.config.updates():
             self.resolve_feature(feature)
         if reconfigure:
             self.config.grab_inputs(force_prompt=True)
         self._specialize_contexts()
-        for feature in self.config.installs():
-            self.install_feature(feature)
-        for feature in self.config.updates():
-            self.update_feature(feature)
-        for feature in self.config.removes():
-            self.remove_feature(feature)
+        for feature in self._feature_dict.keys():
+            self._run_action(feature, 'sync')
         self.inject_environment_rc()
         self._finalize()
 
@@ -129,9 +126,10 @@ class Environment(object):
         """ remove the environment """
         self.phase = "remove"
         self.logger.info("Removing environment %s..." % self.namespace)
+        self._instantiate_features()
         self._specialize_contexts()
-        for feature in self.config.removes():
-            self.remove_feature(feature)
+        for feature in self._feature_dict.keys():
+            self._run_action(feature, 'sync')
         self.clear_environment_rc()
         self.directory.remove()
         self.injections.commit()
@@ -143,9 +141,10 @@ class Environment(object):
         self.phase = "deactivate"
         self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
+        self._instantiate_features()
         self._specialize_contexts()
-        for feature in self.config.deactivations():
-            self.deactivate_feature(feature)
+        for feature in self._feature_dict.keys():
+            self._run_action(feature, 'deactivate')
         self.clear_environment_rc()
         self._finalize()
 
@@ -157,8 +156,8 @@ class Environment(object):
         self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self._specialize_contexts()
-        for feature in self.config.activations():
-            self.activate_feature(feature)
+        for feature in self._feature_dict.keys():
+            self._run_action(feature, 'activate')
         self.inject_environment_rc()
         self._finalize()
 
