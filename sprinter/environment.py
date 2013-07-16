@@ -4,12 +4,13 @@ import sys
 from StringIO import StringIO
 from functools import wraps
 
+from sprinter.core import PHASES
 from sprinter import brew
 from sprinter import lib
+from sprinter.formulabase import FormulaBase
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
-from sprinter.lib import get_formula_class
 from sprinter.manifest import Config, Manifest, ManifestException
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
@@ -36,52 +37,32 @@ def install_required(f):
         return f(self, *args, **kwargs)
     return wrapped
 
-
-def populate_formula_instance(config):
-    """ Populate the formula_instance variable if it is none, from the formula config specified """
-
-    def wrapper(f):
-
-        @wraps(f)
-        def wrapped(self, feature_name, formula_instance=None):
-            if not formula_instance:
-                try:
-                    formula_instance = self._get_formula_instance(
-                        getattr(self, config).get_feature_class(feature_name))
-                except ManifestException:
-                    self.logger.warn("Unable to retrieve formula for feature %s!" % feature_name)
-                except ImportError:
-                    self.logger.warn("Unable to retrieve formula for feature %s!" % feature_name)
-            if not formula_instance:
-                return None
-            return f(self, feature_name, formula_instance=formula_instance)
-        return wrapped
-    return wrapper
-
-
 class Environment(object):
 
     source = None  # the path to the source handle, the handle itself, or a manifest instance
     target = None  # the path to the target handle, the handle itself, or a manifest instance
     namespace = None  # the namespace of the environment
-    sandboxes = []  # a list of package managers to sandbox (brew)
+    sprinter_namespace = None  # the namespace to make installs with. this affects:
+    phase = None  # the phase currently running
+    # the prefix added to injections
     # the libraries that environment utilizes
     config = None  # handles the configuration, and manifests
     directory = None  # handles interactions with the environment directory
     injections = None  # handles injections
     system = None  # stores utility methods to determine system specifics
-    lib = lib  # utility library
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
-    _formula_dict = {}  # a dictionary of existing formula instances to pull from
-    sprinter_namespace = None  # the namespace to make installs with. this affects:
-    # the prefix added to injections
-    phase = None  # the phase currently running
-    # a list of errors that occured within the environment's run.
-    # an error should be a tuple with the source of the error and the description.
-    errors = []
+    error_occured = False
+    # a dictionary of the feature objects. 
+    # The key is a tuple of feature name and formula, while the value is an instance.
+    _feature_dict = {} 
+    # a dictionary of the errors associated with features. 
+    # The key is a tuple of feature name and formula, while the value is an instance.
+    _error_dict = {}
+    _errors = [] # list to keep all the errors
     # a pip puppet used to install eggs and add it to the classpath
-    pip = None
+    _pip = None
+    sandboxes = []  # a list of package managers to sandbox (brew)
 
     def __init__(self, logger=None, logging_level=logging.INFO,
                  root=None, sprinter_namespace='sprinter'):
@@ -92,14 +73,14 @@ class Environment(object):
         self.sprinter_namespace = sprinter_namespace
         self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
         self.global_path = os.path.join(self.root, ".global")
-        self.pip = Pip(self.global_path)
+        self._pip = Pip(self.global_path)
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
 
     @warmup
     def install(self):
         """ Install the environment """
-        self.phase = "install"
+        self.phase = PHASE.INSTALL
         if not self.directory.new:
             self.logger.info("Namespace %s already exists!" % self.namespace)
             self.source = self.config.set_source(Manifest(self.directory.manifest_path))
@@ -108,9 +89,10 @@ class Environment(object):
             self.logger.info("Installing environment %s..." % self.namespace)
             self.directory.initialize()
             self.install_sandboxes()
+            self._instantiate_features()
             self._specialize_contexts()
-            for feature in self.config.installs():
-                self.install_feature(feature)
+            for feature in self._feature_dict.keys():
+                self._run_action(feature, 'sync')
             self.inject_environment_rc()
             self._finalize()
         except Exception, e:
@@ -124,13 +106,11 @@ class Environment(object):
     @install_required
     def update(self, reconfigure=False):
         """ update the environment """
-        self.phase = "update"
+        self.phase = PHASE.UPDATE
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
-        """
         for feature in self.config.updates():
             self.resolve_feature(feature)
-        """
         if reconfigure:
             self.config.grab_inputs(force_prompt=True)
         self._specialize_contexts()
@@ -195,55 +175,6 @@ class Environment(object):
         self.logger.info("Reconfigured! Note: It's recommended to update after a configure")
 
     @warmup
-    @populate_formula_instance('target')
-    def install_feature(self, feature_name, formula_instance=None):
-        """ Install a specific formula """
-        return self._run_action("Installing", feature_name, formula_instance.install, ['target'])
-        
-    @warmup
-    @populate_formula_instance('target')
-    def update_feature(self, feature_name, formula_instance=None):
-        """ Update a specific formula """
-        return self._run_action("Updating", feature_name, formula_instance.update, ['source', 'target'])
-
-    @warmup
-    @populate_formula_instance('source')
-    def remove_feature(self, feature_name, formula_instance=None):
-        """ Remove a specific formula """
-        return self._run_action("Removing", feature_name, formula_instance.remove, ['source'])
-
-    @warmup
-    @populate_formula_instance('source')
-    def deactivate_feature(self, feature_name, formula_instance=None):
-        """ Deactivate a specific formula """
-        return self._run_action("Deactivating", feature_name, formula_instance.deactivate, ['source'])
-
-    @warmup
-    @populate_formula_instance('source')
-    def activate_feature(self, feature_name, formula_instance=None):
-        """ Activate a specific formula """
-        return self._run_action("Activating", feature_name, formula_instance.activate, ['source'])
-
-    @warmup
-    @populate_formula_instance('target')
-    def validate_feature(self, feature_name, formula_instance=None):
-        """ Validate a specific formula """
-        return self._run_action("Validating", feature_name, formula_instance.validate, ['target'])
-
-    @warmup
-    @populate_formula_instance('source')
-    def reconfigure_feature(self, feature_name, formula_instance=None):
-        """ resolve a feature configuration's differences """
-        return self._run_action("Reconfiguring", feature_name, formula_instance.reconfigure,
-                                ['source', 'target'])
-
-    @warmup
-    @populate_formula_instance('target')
-    def prompt_feature(self, feature_name, formula_instance=None):
-        """ prompt a feature configuration differences """
-        return self._run_action(None, feature_name, formula_instance.prompt, 'target')
-
-    @warmup
     def validate_manifest(self, manifest):
         """ Validate a manifest object """
         invalidations = manifest.invalidations
@@ -276,6 +207,14 @@ class Environment(object):
         """ Write the debug log to a file """
         with open(file_path, "w+") as fh:
             fh.write(self._debug_stream.getvalue())
+            fh.write("The following errors occured:\n")
+            for error in self.errors:
+                fh.write(error + "\n")
+            for k, v in self._error_dict:
+                if len(v) > 0:
+                    fh.write("Error(s) in %s with formula %s:\n" % k)
+                    for error in v:
+                        fh.write(error + "\n")
 
     def message_failure(self):
         """ return a failure message, if one exists """
@@ -290,14 +229,6 @@ class Environment(object):
         if manifest.has_option('config', 'message_success'):
             return manifest.get('config', 'message_success')
 
-    """
-    def prompts(self, force_prompt=False):
-        self.config.grab_inputs()
-        for manifest in [self.source, self.target]:
-            if manifest:
-                for m in manifest.formula_sections():
-    """
-
     def _warmup(self):
         """ initialize variables necessary to perform a sprinter action """
         self.logger.debug("Warming up...")
@@ -306,7 +237,7 @@ class Environment(object):
                 self.source = Manifest(self.source)
             if not isinstance(self.target, Manifest) and self.target:
                 self.target = Manifest(self.target)
-        except self.lib.BadCredentialsException, e:
+        except lib.BadCredentialsException, e:
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
         self.config = Config(source=self.source, target=self.target,
@@ -320,6 +251,27 @@ class Environment(object):
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
         self.warmed_up = True
+
+    def _instantiate_features(self):
+        """ Create and instantiate the feature dictionary """
+        for kind, manifest in [('source', self.source), 
+                               ('target', self.target)]:
+            for feature in manifest.formula_sections():
+                feature_config = manifest.get_feature_config(feature)
+                if feature_config.has('formula'):
+                    key = (feature, config.get('formula')
+                    if key not in self._feature_dict:
+                        try:
+                            formula_class = self._get_formula_class(config.get('formula'))
+                            self._feature_dict[key] = formula_class(self, **{kind: feature_config})
+                            self._error_dict[key] = []
+                        except SprinterException:
+                            self._log_error("Invalid formula %s for %s feature %s!" 
+                                            % (config.get('formula'), kind, feature))
+                    else:
+                        setattr(self._feature_dict[key], kind, feature_config)
+                else:
+                    errors += ['source feature %s has no formula!' % feature]
 
     def _finalize(self):
         """ command to run at the end of sprinter's run """
@@ -356,44 +308,50 @@ class Environment(object):
         logger.setLevel(logging.DEBUG)
         return logger
 
-    def _get_formula_instance(self, formula):
+    def _get_formula_class(self, formula):
         """
-        get an instance of the formula object object if it exists, else
+        get a formula class object if it exists, else
         create one, add it to the dict, and pass return it.
         """
         try:
-            return get_formula_class(formula, self)
-        except SprinterException:
-            self.logger.info("Downloading %s..." % formula)
-            self.pip.install_egg(formula)
-            return get_formula_class(formula, self)
-        except ImportError:
+            return lib.get_subclass_from_module(formula, FormulaBase)
+        except (SprinterException, ImportError):
             self.logger.info("Downloading %s..." % formula)
             try:
-                self.pip.install_egg(formula)
+                self._pip.install_egg(formula)
             except PipException:
                 self.logger.error("Unable to download %s!" % formula)
-            return get_formula_class(formula, self)
+            return lib.get_subclass_from_module(formula, FormulaBase)
+
+    def _log_error(self, error_message):
+        self.error_occured = True
+        self.errors += [error_message]
+        self.logger.error(error_message)
+
+    def _log_feature_error(self, feature, error_message):
+        self.error_occured = True
+        self._error_dict[feature] += [error_message]
+        self.logger.error(error_message)
             
-    def _run_action(self, verb, feature_name, call, configs):
-        if verb:
-            self.logger.info("%s %s..." % (verb, feature_name))
-        configs = [getattr(self.config, c).get_feature_config(feature_name) for c in configs]
-        valid = True
-        for c in configs:
-            if not c.has('formula'):
-                valid = False
-        if valid:
-            call(feature_name, *configs)
-            for c in configs:
-                c.write_to_manifest()
-        else:
-            self.logger.warn("Feature %s has invalid configs! Not %s" % (feature_name, verb))
+    def _run_action(self, feature, action, run_if_error=False):
+        """ Run an action, and log it's output in case of errors """
+        if len(self._error_dict[feature]) > 0 and not run_if_error:
+            return
+        instance = self._feature_dict[feature]
+        try:
+            self._error_dict[feature] += getattr(instance, action)()
+            if len(self._error_dict[feature]) > 0:
+                self.error_occured = True
+        except Exception, e:
+            self.log_feature_error(feature, str(e))
 
     def _specialize_contexts(self):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
         self.config.grab_inputs()
+        for feature in self._feature_dict.keys():
+            self._run_action(feature, 'validate', run_if_error=True)
+            self._run_action(feature, 'prompt')
         for manifest in [self.source, self.target]:
             context_dict = {}
             if manifest:

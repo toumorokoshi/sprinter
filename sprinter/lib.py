@@ -23,7 +23,6 @@ from base64 import b64encode
 from getpass import getpass
 from subprocess import PIPE, STDOUT
 
-from sprinter.formulabase import FormulaBase
 from sprinter.exceptions import (CommandMissingException,
                                  BadCredentialsException,
                                  ExtractException,
@@ -36,24 +35,24 @@ COMMAND_WHITELIST = ["cd"]
 BYTE_CHUNKS = 50
 
 
-def get_formula_class(formula, environment):
+def get_subclass_from_module(module, parent_class):
     """
-    Get the formula name and return an instance The formula path is a
-    path to the module. get_formula_class performs reflection to find
-    the first class that extends formulabase, and that is the class
-    that an instance of it gets returned.
+    Get a subclass of parent_class from the module at module
+
+    get_subclass_from_module performs reflection to find the first class that
+    extends the parent_class in the module path, and returns it.
     """
     try:
-        r = __recursive_import(formula)
+        r = __recursive_import(module)
         member_dict = dict(inspect.getmembers(r))
-        sprinter_class = FormulaBase
+        sprinter_class = parent_class
         for v in member_dict.values():
-            if inspect.isclass(v) and issubclass(v, FormulaBase) and v != FormulaBase:
-                if sprinter_class is FormulaBase:
+            if inspect.isclass(v) and issubclass(v, parent_class) and v != parent_class:
+                if sprinter_class is parent_class:
                     sprinter_class = v
         if sprinter_class is None:
-            raise SprinterException("No formula %s exists in classpath!" % formula)
-        return sprinter_class(environment)
+            raise SprinterException("No subclass %s that extends %s exists in classpath!" % (module, str(parent_class)))
+        return sprinter_class
     except ImportError as e:
         raise e
 
