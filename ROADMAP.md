@@ -1,6 +1,10 @@
 Roadmap
 -------
 
+Refactor:
+
+* handle depedency trees
+
 TODO:
 * Directory behavior changed to warn if a directory is not a symlink, not throw an error.
 * test authenticated get catches unauthorized error
