@@ -68,7 +68,6 @@ class PerforceFormula(FormulaBase):
             os.makedirs(os.path.expanduser(config['root_path']))
         self.__write_p4settings(config)
         self.__configure_client(config)
-        self.__sync_perforce(config)
         self.__add_p4_env(config)
 
     def update(self, feature_name, source_config, target_config):
@@ -77,7 +76,6 @@ class PerforceFormula(FormulaBase):
             self.__install_perforce(self, feature_name, target_config)
         if target_config != source_config:
             self.__write_p4settings(target_config)
-            self.__sync_perforce(target_config)
         self.__add_p4_env(target_config)
 
     def remove(self, feature_name, config):
@@ -136,18 +134,6 @@ class PerforceFormula(FormulaBase):
             cwd = os.path.expanduser(config['root_path'] % self.environment.target.get_context_dict())
             self.logger.info(self.lib.call("%s client -i" % self.p4_command,
                                            stdin=client,
-                                           env=self.p4environ,
-                                           cwd=cwd))
-
-    def __sync_perforce(self, config):
-        """ prompt and sync perforce """
-        sync = self.lib.prompt("would you like to sync your perforce root?",
-                               default="yes",
-                               boolean=True)
-        if sync:
-            self.logger.info("Syncing perforce root... (this can take a while).")
-            cwd = os.path.expanduser(config['root_path'] % self.environment.target.get_context_dict())
-            self.logger.info(self.lib.call("%s sync" % self.p4_command,
                                            env=self.p4environ,
                                            cwd=cwd))
 
