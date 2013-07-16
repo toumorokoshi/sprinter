@@ -19,7 +19,7 @@ ssh_config_template = \
     """
 Host %(host)s
   HostName %(hostname)s
-  IdentityFile %(ssh_path)s
+  IdentityFile %(ssh_key_path)s
   User %(user)s
 """
 
@@ -73,7 +73,9 @@ class SSHFormula(FormulaBase):
         """
         Install the ssh configuration
         """
-        ssh_config_injection = ssh_config_template % config
+        config_dict = config.to_dict()
+        config_dict['ssh_key_path'] = ssh_key_path
+        ssh_config_injection = ssh_config_template % config_dict
         if os.path.exists(ssh_config_path):
             if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config['host']):
                 self.logger.info("SSH config for host %s already exists! Override?" % config['host'])
