@@ -25,23 +25,26 @@ class EggscriptFormula(FormulaBase):
     def install(self):
         self.bp = BuildoutPuppet(
             root_path=self.directory.install_directory(self.feature_name))
-        self.__install_eggs(config)
-        self.__add_paths(config)
-        super(EggscriptFormula, self).install(feature_name, config)
+        self.__install_eggs(self.target)
+        self.__add_paths(self.target)
+        return super(EggscriptFormula, self).install()
 
     def update(self):
-        self.bp = BuildoutPuppet(root_path=self.directory.install_directory(feature_name))
+        self.bp = BuildoutPuppet(
+            root_path=self.directory.install_directory(self.feature_name))
         if (self.source.get('egg', '') != self.target.get('egg', '') or
+
             self.source.get('eggs', '') != self.target.get('eggs', '') or
             lib.is_affirmative(self.target.get('redownload', 'false'))):
                     self.__install_eggs(self.target)
         self.__add_paths(self.target)
-        super(EggscriptFormula, self).update()
+        return super(EggscriptFormula, self).update()
 
     def validate(self):
         if self.target:
             if not (self.target.has('egg') or self.target.has('eggs')):
                 self.logger.warn("No eggs will be installed! 'egg' or 'eggs' parameter not set!")
+        return []
                 
     def __install_eggs(self, config):
         """ Install eggs for a particular configuration """

@@ -1,6 +1,6 @@
 import copy
 
-from sprinter.core import logger
+from sprinter.core import LOGGER
 
 class ParamNotFoundException(Exception):
     """ Exception for a parameter not being found """
@@ -9,7 +9,7 @@ class FeatureConfig(object):
 
     manifest = None  # the manifest the featureconfig is derived from
 
-    def __init__(self, manifest, feature_name, logger=logger):
+    def __init__(self, manifest, feature_name, logger=LOGGER):
         self.feature_name = feature_name
         self.manifest = manifest
         self.raw_dict = dict(manifest.items(feature_name))
@@ -42,11 +42,13 @@ class FeatureConfig(object):
     def set(self, param, value):
         """ sets the param to the value provided """
         self.raw_dict[param] = value
+        self.manifest.set(self.feature_name, param, value)
 
     def remove(self, param):
         """ Remove a parameter from the manifest """
         if self.has(param):
             del(self.raw_dict[param])
+            self.manifest.remove_option(self.feature_name, param)
 
     def keys(self):
         """ return all of the keys in the config """

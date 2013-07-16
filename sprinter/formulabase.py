@@ -6,7 +6,7 @@ and some documentation on what they should provide.
 import logging
 import os
 
-from sprinter.core import LOGGER, PHASES
+from sprinter.core import LOGGER, PHASE
 from sprinter.exceptions import FormulaException
 
 
@@ -28,7 +28,6 @@ class FormulaBase(object):
         self.config = environment.config
         self.injections = environment.injections
         self.system = environment.system
-        self.lib = environment.lib
         self.logger = LOGGER
 
     def prompt(self):
@@ -56,15 +55,15 @@ class FormulaBase(object):
 
         install, as with all sprinter actions, should return a list of errors
         """
-        install_directory = self.directory.install_directory(feature_name)
+        install_directory = self.directory.install_directory(self.feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
         if self.target.has('rc'):
             self.directory.add_to_rc(self.target.get('rc'))
-        if config.has('command'):
+        if self.target.has('command'):
             self.lib.call(self.target.get('command'), shell=True, cwd=cwd)
         return []
 
-    def update(self, source_config, target_config):
+    def update(self):
         """ 
         Update is called when a feature previously exists, with the same formula
 
@@ -129,20 +128,20 @@ class FormulaBase(object):
     # these methods are overwritten less often, and are not recommended to do so.
     def sync_phase(self):
         """ Says whether a sync is an install, update, or delete """
-        if not self.target:
-            return PHASES.INSTALL
         if not self.source:
-            return PHASES.REMOVE
-        return PHASES.UPDATE
+            return PHASE.INSTALL
+        if not self.target:
+            return PHASE.REMOVE
+        return PHASE.UPDATE
 
     def sync(self):
         """ Updates the state of the feature to what it should be """
         phase = self.sync_phase()
         self.logger.info("%s %s..." % (phase.verb, self.feature_name))
-        return getattr(self, phase)()
+        return getattr(self, phase.name)()
 
     def resolve(self):
         """ Resolve differences between the target and the source configuration """
         if self.source and self.target:
-            for k in (k for k in source_config.keys() if not target_config.has(k)):
-                target_config.set(k, source_config.get(k))
+            for k in (k for k in self.source.keys() if not self.target.has(k)):
+                self.target.set(k, self.source.get(k))

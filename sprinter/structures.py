@@ -22,7 +22,7 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-class EnumInstance(self):
+class EnumInstance(object):
 
     def __init__(self, **kw):
         for k in kw:

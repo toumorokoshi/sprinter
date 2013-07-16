@@ -4,7 +4,7 @@ import sys
 from StringIO import StringIO
 from functools import wraps
 
-from sprinter.core import PHASES
+from sprinter.core import PHASE
 from sprinter import brew
 from sprinter import lib
 from sprinter.formulabase import FormulaBase
@@ -110,8 +110,6 @@ class Environment(object):
         self.logger.info("Updating environment %s..." % self.namespace)
         self.install_sandboxes()
         self._instantiate_features()
-        for feature in self.config.updates():
-            self.resolve_feature(feature)
         if reconfigure:
             self.config.grab_inputs(force_prompt=True)
         self._specialize_contexts()
@@ -207,9 +205,9 @@ class Environment(object):
         with open(file_path, "w+") as fh:
             fh.write(self._debug_stream.getvalue())
             fh.write("The following errors occured:\n")
-            for error in self.errors:
+            for error in self._errors:
                 fh.write(error + "\n")
-            for k, v in self._error_dict:
+            for k, v in self._error_dict.items():
                 if len(v) > 0:
                     fh.write("Error(s) in %s with formula %s:\n" % k)
                     for error in v:
@@ -255,22 +253,23 @@ class Environment(object):
         """ Create and instantiate the feature dictionary """
         for kind, manifest in [('source', self.source), 
                                ('target', self.target)]:
-            for feature in manifest.formula_sections():
-                feature_config = manifest.get_feature_config(feature)
-                if feature_config.has('formula'):
-                    key = (feature, config.get('formula')
-                    if key not in self._feature_dict:
-                        try:
-                            formula_class = self._get_formula_class(config.get('formula'))
-                            self._feature_dict[key] = formula_class(self, **{kind: feature_config})
-                            self._error_dict[key] = []
-                        except SprinterException:
-                            self._log_error("Invalid formula %s for %s feature %s!" 
-                                            % (config.get('formula'), kind, feature))
+            if manifest:
+                for feature in manifest.formula_sections():
+                    feature_config = manifest.get_feature_config(feature)
+                    if feature_config.has('formula'):
+                        key = (feature, feature_config.get('formula'))
+                        if key not in self._feature_dict:
+                            try:
+                                formula_class = self._get_formula_class(feature_config.get('formula'))
+                                self._feature_dict[key] = formula_class(self, feature, **{kind: feature_config})
+                                self._error_dict[key] = []
+                            except SprinterException:
+                                self._log_error("Invalid formula %s for %s feature %s!" 
+                                                % (config.get('formula'), kind, feature))
+                        else:
+                            setattr(self._feature_dict[key], kind, feature_config)
                     else:
-                        setattr(self._feature_dict[key], kind, feature_config)
-                else:
-                    errors += ['source feature %s has no formula!' % feature]
+                        errors += ['source feature %s has no formula!' % feature]
 
     def _finalize(self):
         """ command to run at the end of sprinter's run """
@@ -282,6 +281,8 @@ class Environment(object):
             self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
             self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
         self.injections.commit()
+        if self.error_occured:
+            raise SprinterException("Error occured!")
         if self.message_success():
             self.logger.info(self.message_success())
 
@@ -324,7 +325,7 @@ class Environment(object):
 
     def _log_error(self, error_message):
         self.error_occured = True
-        self.errors += [error_message]
+        self._errors += [error_message]
         self.logger.error(error_message)
 
     def _log_feature_error(self, feature, error_message):
@@ -342,7 +343,8 @@ class Environment(object):
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
         except Exception, e:
-            self.log_feature_error(feature, str(e))
+            self.logger.exception("An exception occurred!")
+            self._log_feature_error(feature, str(e))
 
     def _specialize_contexts(self):
         """ Add variables and specialize contexts """
