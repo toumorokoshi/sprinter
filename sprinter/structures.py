@@ -1,3 +1,8 @@
+"""
+A location for various structs/class bases
+"""
+
+
 class Singleton(type):
     """
     A basic singleton to be used as a metaclass
