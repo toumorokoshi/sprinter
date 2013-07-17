@@ -291,52 +291,6 @@ class TestConfig(object):
         """ Test if setups returns the proper list """
         tools.eq_(set(self.config.installs()), set(['myrc']))
 
-    @tools.raises(ConfigException)
-    def test_setups_notarget(self):
-        """ Test if setups returns the proper list """
-        self.config_source_only.installs()
-
-    def test_updates(self):
-        """ Test if updates returns the proper list """
-        tools.eq_(set(self.config.updates()), set(['maven', 'ant']))
-    
-    @tools.raises(ConfigException)
-    def test_updates_notarget(self):
-        """ Updates without a target should raise an exception """
-        self.config_source_only.updates()
-
-    @tools.raises(ConfigException)
-    def test_updates_nosource(self):
-        """ Updates without a source should raise an exception """
-        self.config_source_only.updates()
-
-    def test_removes(self):
-        """ Test if removes returns the proper list """
-        tools.eq_(set(self.config.removes()), set(['sub', 'mysql', 'git']))
-
-    @tools.raises(ConfigException)
-    def test_removes_nosource(self):
-        """ Removes without a source should raise an exception """
-        self.config_target_only.removes()
-
-    def test_deactivations(self):
-        """ Test if deactivations returns the proper list """
-        tools.eq_(set(self.config.deactivations()), set(['maven', 'sub', 'mysql', 'git']))
-
-    @tools.raises(ConfigException)
-    def test_deactivations_notsource(self):
-        """ Deactivations without a source should raise an exception """
-        self.config_target_only.deactivations()
-
-    def test_activations(self):
-        """ Test if deactivations returns the proper list """
-        tools.eq_(set(self.config.activations()), set(['maven', 'sub', 'mysql', 'git']))
-
-    @tools.raises(ConfigException)
-    def test_activations_notsource(self):
-        """ Activations without a source should raise an exception """
-        self.config_target_only.activations()
-
     def test_get_config(self):
         """ Test the get config """
         self.config.lib.prompt = Mock(return_value="no")

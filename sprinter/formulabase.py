@@ -126,6 +126,17 @@ class FormulaBase(object):
         return []
 
     # these methods are overwritten less often, and are not recommended to do so.
+    def should_run(self):
+        """ Returns true if the feature should run """
+        config = self.target or self.source
+        if config.has('systems'):
+            valid_systems = [s.lower() for s in config.get('systems').split(",")]
+            for system_type, param in [('isOSX', 'osx'),
+                                       ('isDebianBased', 'debian')]:
+                if param in valid_systems and getattr(self.system, system_type)() is True:
+                    should_run = True
+        return False
+            
     def sync_phase(self):
         """ Says whether a sync is an install, update, or delete """
         if not self.source:
