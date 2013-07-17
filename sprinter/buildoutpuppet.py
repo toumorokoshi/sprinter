@@ -58,7 +58,7 @@ class BuildoutPuppet(object):
         """ Install buildout to the path provided """
         bootstrap_path = os.path.join(self.root_path, "bootstrap.py")
         with open(bootstrap_path, 'w+') as fh:
-            fh.write(requests.get(BOOTSTRAP_URL).content)
+            fh.write(requests.get(BOOTSTRAP_URL, verify=False).content)
 
     def write_buildout(self):
         """ Write buildout.cfg to the path provided """
