@@ -65,7 +65,7 @@ options, args = parser.parse_args()
 
 # remove osx's 'extras', which install a bad setuptools.
 sys.path[:] = [x for x in sys.path if 'Extras/lib/python' not in x
-               if '/dist-packages/' not in x]
+               if 'dist-packages' not in x]
 
 to_reload = False
 try:
@@ -84,10 +84,16 @@ except ImportError:
     exec(urlopen('https://bitbucket.org/pypa/setuptools/downloads/ez_setup.py'
                 ).read(), ez)
     setup_args = dict(to_dir=tmpeggs, download_delay=0)
+    import site
+    # remove site-packages, we want to sandbox for this one
+    for s in site.getsitepackages():
+        sys.path[:] = [x for x in sys.path if s not in x]
     ez['use_setuptools'](**setup_args)
 
-    if to_reload:
+    try:
         reload(pkg_resources)
+    except NameError:
+        pass
     import pkg_resources
     # This does not (always?) update the default working set.  We will
     # do it.
