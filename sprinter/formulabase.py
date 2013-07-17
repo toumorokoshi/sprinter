@@ -13,6 +13,7 @@ from sprinter.exceptions import FormulaException
 class FormulaBase(object):
 
     valid_options = ['rc', 'command']
+    required_options = []
 
     def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
         """
@@ -117,9 +118,12 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        for k in config.keys():
+        for k in self.target.keys():
             if k not in self.valid_options:
                 self.logger.warn("Unused option %s in %s!" % (k, feature_name))
+        for k in self.required_options:
+            if not self.target.has(k):
+                self._log_error("Required option %s not present in feature %s!" % (k, feature_name))
 
     # these methods are overwritten less often, and are not recommended to do so.
     def should_run(self):
