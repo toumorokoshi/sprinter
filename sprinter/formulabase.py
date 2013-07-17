@@ -25,7 +25,6 @@ class FormulaBase(object):
             raise FormulaException("A formula requires a source and/or a target!")
         self.environment = environment
         self.directory = environment.directory
-        self.config = environment.config
         self.injections = environment.injections
         self.system = environment.system
         self.logger = LOGGER

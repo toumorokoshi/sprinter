@@ -68,7 +68,7 @@ class Manifest(object):
 
     def grab_inputs(self, force_prompt=False):
         for s in self.manifest.sections():
-            if manifest.has_option(s, 'inputs'):
+            if self.has_option(s, 'inputs'):
                 for param, attributes in \
                         self.__parse_input_string(manifest.get(s, 'inputs')):
                     default = attributes.get('default', None)
@@ -94,14 +94,17 @@ class Manifest(object):
         return self.has_option(section, option) and \
             lib.is_affirmative(self.get(section, option))
     
-    def write(self, file_Handle):
+    def write(self, file_handle):
         """ write the current state to a file manifest """
-        manifest_to_write = copy.deepcopy(self.manifest)
+        temp_variables = {}
         for k, v in self.items('config'):
             if k in self.temporary_config_variables:
-                manifest_to_write.remove_option('config', k)
-        manifest_to_write.set('config', 'namespace', self.namespace)
-        manifest_to_write.write(file_handle)
+                temp_variables[k] = v
+                self.remove_option('config', k)
+        self.set('config', 'namespace', self.namespace)
+        self.manifest.write(file_handle)
+        for k, v in temp_variables:
+            self.set('config', k, v)
 
     def get_config(self, param_name, default=None, secret=False, force_prompt=False):
         """

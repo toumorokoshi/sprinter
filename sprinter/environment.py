@@ -96,41 +96,53 @@ class Environment(object):
                 self._run_action(feature, 'sync')
             self.inject_environment_rc()
             self._finalize()
-        except Exception, e:
-            self.logger.error("An error occured during installation!")
+        except Exception:
+            self.logger.exception("")
+            self.log.info("An error occured during installation!")
             self.clear_environment_rc()
             self.logger.info("Removing installation %s..." % self.namespace)
             self.directory.remove()
-            raise e
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
         
     @warmup
     @install_required
     def update(self, reconfigure=False):
         """ update the environment """
-        self.phase = PHASE.UPDATE
-        self.logger.info("Updating environment %s..." % self.namespace)
-        self.install_sandboxes()
-        self._instantiate_features()
-        self.grab_inputs(force_prompt=reconfigure)
-        self._specialize_contexts()
-        for feature in self._feature_dict_order:
-            self._run_action(feature, 'sync')
-        self.inject_environment_rc()
-        self._finalize()
+        try:
+            self.phase = PHASE.UPDATE
+            self.logger.info("Updating environment %s..." % self.namespace)
+            self.install_sandboxes()
+            self._instantiate_features()
+            self.grab_inputs(force_prompt=reconfigure)
+            self._specialize_contexts()
+            for feature in self._feature_dict_order:
+                self._run_action(feature, 'sync')
+            self.inject_environment_rc()
+            self._finalize()
+        except Exception:
+            self.logger.exception("")
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
 
     @warmup
     @install_required
     def remove(self):
         """ remove the environment """
-        self.phase = "remove"
-        self.logger.info("Removing environment %s..." % self.namespace)
-        self._instantiate_features()
-        self._specialize_contexts()
-        for feature in self._feature_dict_order:
-            self._run_action(feature, 'sync')
-        self.clear_environment_rc()
-        self.directory.remove()
-        self.injections.commit()
+        try:
+            self.phase = "remove"
+            self.logger.info("Removing environment %s..." % self.namespace)
+            self._instantiate_features()
+            self._specialize_contexts()
+            for feature in self._feature_dict_order:
+                self._run_action(feature, 'sync')
+            self.clear_environment_rc()
+            self.directory.remove()
+            self.injections.commit()
+        except Exception:
+            self.logger.exception("")
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
 
     @warmup
     @install_required
@@ -227,6 +239,7 @@ class Environment(object):
         except lib.BadCredentialsException, e:
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
+        self.namespace = self.target.namespace or self.source.namespace
         if not self.directory:
             self.directory = Directory(self.namespace, sprinter_root=self.root)
         self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(), self.namespace))
@@ -243,17 +256,17 @@ class Environment(object):
         if self.target:
             for feature in self.target.formula_sections():
                 feature_key = self._instantiate_feature(
-                    feature, manifest.get_feature_config(feature))
+                    feature, self.target.get_feature_config(feature), 'target')
                 if feature_key:
                     self._feature_dict_order.append(feature_key)
         if self.source:
             for feature in self.source.formula_sections():
                 feature_key = self._instantiate_feature(
-                    feature, manifest.get_feature_config(feature))
+                    feature, self.source.get_feature_config(feature), 'source')
                 if feature_key:
                     self._feature_dict_order.insert(0, feature_key)
 
-    def _instantiate_feature(self, feature, feature_confg):
+    def _instantiate_feature(self, feature, feature_config, kind):
         if feature_config.has('formula'):
             key = (feature, feature_config.get('formula'))
             if key not in self._feature_dict:
