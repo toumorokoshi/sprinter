@@ -22,11 +22,9 @@ class GitFormula(FormulaBase):
         target_directory = self.directory.install_directory(feature_name)
         source_branch = (source_config['branch'] if 'branch' in source_config else "master")
         target_branch = (target_config['branch'] if 'branch' in target_config else "master")
-        if target_config['url'] != source_config['url'] or \
-           not os.path.exists(target_directory):
-            if os.path.exists(target_directory):
-                self.logger.debug("Old git repository Found. Deleting...")
-                shutil.rmtree(target_directory)
+        if source_config != target_config:
+            self.logger.debug("Old git repository Found. Deleting...")
+            shutil.rmtree(target_directory)
             self.__clone_repo(target_config['url'],
                               target_directory,
                               branch=target_branch)
