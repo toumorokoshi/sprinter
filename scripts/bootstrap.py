@@ -63,13 +63,16 @@ options, args = parser.parse_args()
 ######################################################################
 # load/install setuptools
 
-to_reload = False
 # remove osx's 'extras', which install a bad setuptools.
-sys.path[:] = [x for x in sys.path if 'Extras/lib/python' not in x]
+sys.path[:] = [x for x in sys.path if 'Extras/lib/python' not in x
+               if '/dist-packages/' not in x]
+
+to_reload = False
 try:
     import pkg_resources
     import setuptools
 except ImportError:
+    to_reload = True
     ez = {}
 
     try:
