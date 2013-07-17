@@ -90,7 +90,7 @@ class Environment(object):
             self.logger.info("Installing environment %s..." % self.namespace)
             self.directory.initialize()
             self.install_sandboxes()
-            self._instantiate_features()
+            self.instantiate_features()
             self._specialize_contexts()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
@@ -113,7 +113,7 @@ class Environment(object):
             self.phase = PHASE.UPDATE
             self.logger.info("Updating environment %s..." % self.namespace)
             self.install_sandboxes()
-            self._instantiate_features()
+            self.instantiate_features()
             self.grab_inputs(force_prompt=reconfigure)
             self._specialize_contexts()
             for feature in self._feature_dict_order:
@@ -132,7 +132,7 @@ class Environment(object):
         try:
             self.phase = "remove"
             self.logger.info("Removing environment %s..." % self.namespace)
-            self._instantiate_features()
+            self.instantiate_features()
             self._specialize_contexts()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
@@ -151,7 +151,7 @@ class Environment(object):
         self.phase = "deactivate"
         self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
-        self._instantiate_features()
+        self.instantiate_features()
         self._specialize_contexts()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'deactivate')
@@ -203,6 +203,11 @@ class Environment(object):
             if self.system.isOSX():
                 self._install_sandbox('brew', brew.install_brew)
 
+    def run_feature(self, feature, action):
+        for k in self._feature_dict_order:
+            if feature in k:
+                self._run_action(k, action, run_if_error=True)
+
     def write_debug_log(self, file_path):
         """ Write the debug log to a file """
         with open(file_path, "w+") as fh:
@@ -248,7 +253,7 @@ class Environment(object):
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
         self.warmed_up = True
 
-    def _instantiate_features(self):
+    def instantiate_features(self):
         """ Create and instantiate the feature dictionary """
         self._feature_dict = {}
         self._feature_dict_order = []
@@ -274,7 +279,10 @@ class Environment(object):
                     formula_class = self._get_formula_class(feature_config.get('formula'))
                     self._feature_dict[key] = formula_class(self, feature, **{kind: feature_config})
                     self._error_dict[key] = []
-                    return key
+                    if self._feature_dict[key].should_run():
+                        return key
+                    else:
+                        del(self._feature_dict[key])
                 except SprinterException:
                     self._log_error("Invalid formula %s for %s feature %s!" 
                                     % (feature_config.get('formula'), kind, feature))
@@ -342,7 +350,7 @@ class Environment(object):
         self._errors += [error_message]
         self.logger.error(error_message)
 
-    def _log_feature_error(self, feature, error_message):
+    def log_feature_error(self, feature, error_message):
         self.error_occured = True
         self._error_dict[feature] += [error_message]
         self.logger.error(error_message)
@@ -353,14 +361,20 @@ class Environment(object):
             return
         instance = self._feature_dict[feature]
         try:
-            self._error_dict[feature] += getattr(instance, action)()
+            result = getattr(instance, action)()
+            if result:
+                if type(result) != list:
+                    self.log_feature_error(feature, 
+                                           "Error occurred! %s" % str(result))
+                else:
+                    self._error_dict[feature] += result
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
         except Exception, e:
             self.logger.exception("An exception occurred!")
-            self._log_feature_error(feature, str(e))
+            self.log_feature_error(feature, str(e))
 
-    def _specialize_contexts(self):
+    def _specialize(self):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
         self.grab_inputs()

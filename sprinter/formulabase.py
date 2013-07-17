@@ -12,6 +12,8 @@ from sprinter.exceptions import FormulaException
 
 class FormulaBase(object):
 
+    valid_options = ['rc', 'command']
+
     def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
         """
         In most cases, it is not a good idea to override the formulabase
@@ -38,10 +40,7 @@ class FormulaBase(object):
 
         prompt's are brought up at the beginning of sprinter's
         instantiation, before any action's are taken.
-
-        prompt, as with all sprinter actions, should return a list of errors
         """
-        return []
 
     def install(self):
         """
@@ -52,7 +51,7 @@ class FormulaBase(object):
         
         Installs are only guaranteed to have the 'target' config set.
 
-        install, as with all sprinter actions, should return a list of errors
+        errors should either be reported via self._log_error(), or raise an exception
         """
         install_directory = self.directory.install_directory(self.feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
@@ -60,7 +59,6 @@ class FormulaBase(object):
             self.directory.add_to_rc(self.target.get('rc'))
         if self.target.has('command'):
             self.lib.call(self.target.get('command'), shell=True, cwd=cwd)
-        return []
 
     def update(self):
         """ 
@@ -68,7 +66,7 @@ class FormulaBase(object):
 
         Updates are guaranteed to have both the 'source' and 'target' configs set
 
-        update, as with all sprinter actions, should return a list of errors
+        errors should either be reported via self._log_error(), or raise an exception
         """
         return self.install()
 
@@ -81,9 +79,8 @@ class FormulaBase(object):
 
         remove is guaranteed to have only the 'source' config.
 
-        remove, as with all sprinter actions, should return a list of errors
+        errors should either be reported via self._log_error(), or raise an exception
         """
-        return []
 
     def deactivate(self):
         """ 
@@ -94,9 +91,8 @@ class FormulaBase(object):
 
         * configuration in a global location, such as an ssh configuration
 
-        deactivate, as with all sprinter actions, should return a list of errors
+        errors should either be reported via self._log_error(), or raise an exception
         """
-        return []
 
     def activate(self):
         """ 
@@ -106,10 +102,9 @@ class FormulaBase(object):
         so any extra functionality should be added here:
 
         * configuration in a global location, such as an ssh configuration
-
-        activate, as with all sprinter actions, should return a list of errors
+        
+        errors should either be reported via self._log_error(), or raise an exception
         """
-        return []
 
     def validate(self):
         """
@@ -120,21 +115,25 @@ class FormulaBase(object):
         * required variables
         * warn on unused variables
 
-        validate, as with all sprinter actions, should return a list of errors
+        errors should either be reported via self._log_error(), or raise an exception
         """
-        return []
+        for k in config.keys():
+            if k not in self.valid_options:
+                self.logger.warn("Unused option %s in %s!" % (k, feature_name))
 
     # these methods are overwritten less often, and are not recommended to do so.
     def should_run(self):
         """ Returns true if the feature should run """
+        should_run = True
         config = self.target or self.source
         if config.has('systems'):
+            should_run = False
             valid_systems = [s.lower() for s in config.get('systems').split(",")]
             for system_type, param in [('isOSX', 'osx'),
                                        ('isDebianBased', 'debian')]:
                 if param in valid_systems and getattr(self.system, system_type)() is True:
                     should_run = True
-        return False
+        return should_run
             
     def sync_phase(self):
         """ Says whether a sync is an install, update, or delete """
@@ -155,3 +154,8 @@ class FormulaBase(object):
         if self.source and self.target:
             for k in (k for k in self.source.keys() if not self.target.has(k)):
                 self.target.set(k, self.source.get(k))
+
+    def _log_error(self, message):
+        """ Log an error for the feature """
+        key = (self.feature_name, self.target.get('formula'))
+        self.environment.log_feature_error(key, message)
