@@ -25,16 +25,16 @@ class EggscriptFormula(FormulaBase):
 
     def install(self, feature_name, config):
         create_virtualenv(self.directory.install_directory(feature_name))
-        self.__install_eggs(config)
-        self.__add_paths(config)
-        return FormulaBase.install(self)
+        self.__install_eggs(feature_name, config)
+        self.__add_paths(feature_name, config)
+        return FormulaBase.install(self, feature_name, config)
 
     def update(self, feature_name, source_config, target_config):
-        self.__install_eggs(self.target)
-        self.__add_paths(self.target)
-        return FormulaBase.update(self)
+        self.__install_eggs(feature_name, target_config)
+        self.__add_paths(feature_name, target_config)
+        return FormulaBase.update(self, feature_name, source_config, target_config)
 
-    def __install_eggs(self, config):
+    def __install_eggs(self, feature_name, config):
         """ Install eggs for a particular configuration """
         eggs = []
         if config.has('egg'):
@@ -42,15 +42,15 @@ class EggscriptFormula(FormulaBase):
         if config.has('eggs'):
             eggs += [egg.strip() for egg in re.split(',|\n', config.get('eggs'))]
         self.logger.debug("Installing eggs %s..." % eggs)
-        with open(os.path.join(self.directory.install_directory(self.feature_name), 'requirements.txt'),
+        with open(os.path.join(self.directory.install_directory(feature_name), 'requirements.txt'),
                   'w+') as fh:
             fh.write('\n'.join(eggs))
         lib.call("bin/pip install -r requirements.txt --upgrade",
-                 cwd=self.directory.install_directory(self.feature_name))
+                 cwd=self.directory.install_directory(feature_name))
 
-    def __add_paths(self, config):
+    def __add_paths(self, feature_name, config):
         """ add the proper resources into the environment """
-        bin_path = os.path.join(self.directory.install_directory(self.feature_name), 'bin')
+        bin_path = os.path.join(self.directory.install_directory(feature_name), 'bin')
         for f in os.listdir(bin_path):
             symlink = True
             for pattern in BLACKLISTED_EXECUTABLES:
