@@ -1,10 +1,12 @@
 """
 The egg formula will install scripts from an egg (including dependencies) into a sandboxed directory.
 [eggs]
-formula = sprinter.formulas.eggscript
+formula = sprinter.formulas.egg
 egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc
+links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
+redownload = true
 """
 import os
 import re
@@ -23,17 +25,27 @@ BLACKLISTED_EXECUTABLES = [
 
 class EggscriptFormula(FormulaBase):
 
-    def install(self, feature_name, config):
-        create_virtualenv(self.directory.install_directory(feature_name))
-        self.__install_eggs(config)
-        self.__add_paths(config)
-        return FormulaBase.install(self)
+    valid_options = FormulaBase.valid_options + ['egg', 'eggs']
 
-    def update(self, feature_name, source_config, target_config):
+    def install(self):
+        create_virtualenv(self.directory.install_directory(self.feature_name))
         self.__install_eggs(self.target)
         self.__add_paths(self.target)
+        return FormulaBase.install(self)
+
+    def update(self):
+        if (self.source.get('egg', '') != self.target.get('egg', '') or
+           self.source.get('eggs', '') != self.target.get('eggs', '')):
+                self.__install_eggs(self.target)
+                self.__add_paths(self.target)
         return FormulaBase.update(self)
 
+    def validate(self):
+        if self.target:
+            if not (self.target.has('egg') or self.target.has('eggs')):
+                self.logger.warn("No eggs will be installed! 'egg' or 'eggs' parameter not set!")
+        return FormulaBase.validate(self)
+                
     def __install_eggs(self, config):
         """ Install eggs for a particular configuration """
         eggs = []
