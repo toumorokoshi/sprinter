@@ -3,8 +3,10 @@ import copy
 from sprinter.core import LOGGER
 from sprinter import lib
 
+
 class ParamNotFoundException(Exception):
     """ Exception for a parameter not being found """
+
 
 class FeatureConfig(object):
 
@@ -17,7 +19,7 @@ class FeatureConfig(object):
         self.logger = logger
 
     def get(self, param, default=None):
-        """ 
+        """
         Returns the param value, and returns the default if it doesn't exist.
         If default is none, an exception will be raised instead.
         
