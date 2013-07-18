@@ -27,9 +27,8 @@ class FormulaTest(object):
             source_config=source_config,
             target_config=target_config
         )
-        self.environment.lib = Mock(spec=self.environment.lib)
         self.environment.directory = Mock(spec=self.environment.directory)
-        self.lib = self.environment.lib
         self.directory = self.environment.directory
         self.directory.bin_path = Mock(return_value="dummy")
         self.directory.install_directory = Mock(return_value="/tmp/")
+        self.environment.instantiate_features()

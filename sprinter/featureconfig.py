@@ -1,6 +1,7 @@
 import copy
 
 from sprinter.core import LOGGER
+from sprinter import lib
 
 class ParamNotFoundException(Exception):
     """ Exception for a parameter not being found """
@@ -55,7 +56,7 @@ class FeatureConfig(object):
         return self.raw_dict.keys()
 
     def is_affirmative(self, param):
-        return lib.is_affirmative(self.get('param'))
+        return lib.is_affirmative(self.get(param))
 
     def prompt(self, param, message, default=None, only_if_empty=False):
         """ Prompts the user for a value, passing a default if it exists """

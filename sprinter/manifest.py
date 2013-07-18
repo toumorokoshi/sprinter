@@ -10,6 +10,7 @@ The manifest can take a source and/or a target manifest
 """
 
 from ConfigParser import RawConfigParser
+import copy
 import logging
 import re
 import urllib
@@ -19,6 +20,7 @@ from sprinter import lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.system import System
 from sprinter.featureconfig import FeatureConfig
+from sprinter.core import LOGGER
 
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
@@ -41,25 +43,19 @@ class Manifest(object):
     the string representation of the target object
     """
     dtree = None  # dependency tree object to ascertain order
-    invalidations = []   # a list of the invalidation of the Manifest. Aggregated while parsing
     additional_context_variables = {}  # a list of the additional context variables available
+    temporary_config_variables = []  # a list of the temporary keys, such as password
 
-    def __init__(self, raw_manifest, namespace=None, logger=None,
-                 username=None, password=None):
-        self.logger = logger if logger else logging.getLogger('sprinter')
+    def __init__(self, raw_manifest, namespace=None, 
+                 logger=LOGGER, username=None, password=None):
+        self.logger = logger
         self.manifest = self.__load_manifest(raw_manifest,
                                              username=username,
                                              password=password)
-        self.namespace = namespace if namespace else self.__parse_namespace()
+        self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
         self.system = System(logger=self.logger)
 
-    def source(self):
-        """
-        Return the manifest source
-        """
-        return self.get('config', 'source') if \
-            self.has_option('config', 'source') else None
 
     def formula_sections(self):
         """
@@ -70,23 +66,61 @@ class Manifest(object):
         else:
             return [s for s in self.manifest.sections() if s != "config"]
 
-    def is_true(self, section, option):
+    def grab_inputs(self, force_prompt=False):
+        for s in self.manifest.sections():
+            if self.has_option(s, 'inputs'):
+                for param, attributes in \
+                        self.__parse_input_string(manifest.get(s, 'inputs')):
+                    default = attributes.get('default', None)
+                    secret = attributes.get('secret', False)
+                    self.get_config(param, default=default, secret=secret, force_prompt=force_prompt)
+
+    def source(self):
+        """
+        Return the manifest source
+        """
+        return self.get('config', 'source') if \
+            self.has_option('config', 'source') else None
+
+    def set_source(self, source):
+        """ Set the manifest source """
+        self.set('config', 'source', source)
+
+    def is_affirmative(self, section, option):
         """
         Return true if the section option combo exists and it is set
         to a truthy value.
         """
         return self.has_option(section, option) and \
-            self.get(section, option).lower().startswith('t')
+            lib.is_affirmative(self.get(section, option))
+    
+    def write(self, file_handle):
+        """ write the current state to a file manifest """
+        temp_variables = {}
+        for k, v in self.items('config'):
+            if k in self.temporary_config_variables:
+                temp_variables[k] = v
+                self.remove_option('config', k)
+        self.set('config', 'namespace', self.namespace)
+        self.manifest.write(file_handle)
+        for k, v in temp_variables:
+            self.set('config', k, v)
+
+    def get_config(self, param_name, default=None, secret=False, force_prompt=False):
+        """
+        grabs a config from the user space; if it doesn't exist, it will prompt for it.
+        """
+        if param_name not in self.config or force_prompt:
+            self.config[param_name] = self.lib.prompt("please enter your %s" % param_name,
+                                                      default=default,
+                                                      secret=secret)
+        if secret:
+            self.temporary_sections.append(param_name)
+        return self.config[param_name]
 
     def get_feature_config(self, feature_name):
         """ Return a FeatureConfig for the feature name provided """
         return FeatureConfig(self, feature_name)
-
-    def get_feature_class(self, section):
-        if (section not in self.formula_sections() or
-           not self.manifest.has_option(section, 'formula')):
-            raise ManifestException("Cannot get formula %s!" % section)
-        return self.manifest.get(section, 'formula')
 
     def get_context_dict(self):
         """ return a context dict of the desired state """
@@ -98,21 +132,6 @@ class Manifest(object):
         return_dict_escaped = dict([("%s|escaped" % k, re.escape(v or "")) for k, v in return_dict.items()])
         return dict(return_dict.items() + return_dict_escaped.items())
 
-    def run_phase(self, feature, phase_name):
-        """ Determine if the feature should run in the given phase """
-        should_run = True
-        if(self.manifest.has_option(feature, 'phases') and
-                phase_name not in [x.strip() for x in self.manifest.get(feature, 'phases').split(",")]):
-            return False
-        if self.manifest.has_option(feature, 'systems'):
-            should_run = False
-            valid_systems = [s.lower() for s in self.manifest.get(feature, 'systems').split(",")]
-            for system_type, param in [('isOSX', 'osx'),
-                                       ('isDebianBased', 'debian')]:
-                if param in valid_systems and getattr(self.system, system_type)() is True:
-                    should_run = True
-        return should_run
-                    
     def add_additional_context(self, additonal_context):
         """ Add additional context variable """
         self.additional_context_variables = dict(self.additional_context_variables.items() + additonal_context.items())
@@ -147,7 +166,7 @@ class Manifest(object):
         elif self.manifest.has_option('config', 'source'):
             return NAMESPACE_REGEX.search(self.manifest.get('config', 'source')).groups()[0]
         else:
-            self.logger.error('Could not parse namespace implicitely!')
+            self.environment.log_error('Could not parse namespace implicitely')
             return None
 
     def __generate_dependency_tree(self):
@@ -165,8 +184,7 @@ class Manifest(object):
         try:
             return DependencyTree(dependency_dict)
         except DependencyTreeException as dte:
-            self.logger.error("Dependency tree for manifest is invalid! %s" % str(dte))
-            self.invalidations.append("Issue with building dependency tree: %s" % str(dte))
+            self.environment.log_error("Dependency tree for manifest is invalid! %s" % str(dte))
             return None
 
     def __substitute_objects(self, value, context_dict):
@@ -201,179 +219,6 @@ class Manifest(object):
     def __getattr__(self, name):
         return getattr(self.manifest, name)
 
-
-class ConfigException(Exception):
-    """ Specifies exception is with a config """
-
-
-class Config(object):
-    """
-    Class to reconcile manifests
-
-    >>> c.namespace
-    'sprinter'
-    """
-
-    #source_dict = {}  # source is manipulated as dict until deserialized as a config file
-    #target_dict = {}  # target is manipulated as dict until deserialized as a config file
-    # a list of values to not save into the config.
-    # e.g. passwords
-    temporary_sections = []
-    config = {}
-
-    def __init__(self, source=None, target=None, namespace=None, lib=lib):
-        """
-        Takes in a source and target Manifest object, with a namespace
-        to override if it is desired.
-        """
-        self.lib = lib
-        self.source = source
-        self.target = target
-        # store raws to use on write
-        self.source_raw = source
-        self.target_raw = target
-        if not namespace:
-            if target and target.namespace:
-                self.namespace = target.namespace
-            elif source and source.namespace:
-                self.namespace = source.namespace
-        else:
-            self.namespace = namespace
-        if self.source:
-            self.__load_configs(self.source)
-
-    def installs(self):
-        """ Return a list of the features which need to be installed. """
-        if not self.target:
-            raise ConfigException("Install method requires a target manifest!")
-        return [s for s in self.target.formula_sections()
-                if self.target.run_phase(s, "setup")
-                if not self.source or not self.source.has_section(s)]
-
-    def updates(self):
-        """ Return a list of features which need to be updated. """
-        if not self.target:
-            raise ConfigException("Update method requires a target manifest!")
-        if not self.source:
-            raise ConfigException("Update method requires a source manifest!")
-        return [s for s in self.target.formula_sections()
-                if self.target.run_phase(s, "update")
-                if self.source.has_section(s)]
-
-    def removes(self):
-        """ Return a list of features which need to be destroyed. """
-        if not self.source:
-            raise ConfigException("Remove method requires a source manifest!")
-        return [s for s in self.source.formula_sections()
-                if self.source.run_phase(s, "remove")
-                if not self.target or not self.target.has_section(s)]
-
-    def deactivations(self):
-        """ Return a list of the features which need to be deactivated. """
-        if not self.source:
-            raise ConfigException("Deactivations method requires a source manifest!")
-        return [s for s in self.source.formula_sections()
-                if self.source.run_phase(s, "deactivate")]
-
-    def activations(self):
-        """ Return a list of the features which need to be deactivated. """
-        if not self.source:
-            raise ConfigException("Activations method requires a source manifest!")
-        return [s for s in self.source.formula_sections()
-                if self.source.run_phase(s, "activate")]
-
-    def reconfigures(self):
-        """ Return a list of the features which need to be deactivated. """
-        if not self.source:
-            raise ConfigException("Activations method requires a source manifest!")
-        return [s for s in self.source.formula_sections()
-                if self.source.run_phase(s, "reconfigure")]
-
-    def grab_inputs(self, manifest=None, force_prompt=False):
-        """
-        Look for any inputs not already accounted for in the manifest, and
-        query the user for them.
-        """
-        if not manifest:
-            manifest = self.target if self.target else self.source
-        old_manifest = self.source if manifest is self.target else None
-        if manifest:
-            for s in manifest.sections():
-                if manifest.has_option(s, 'inputs'):
-                    for param, attributes in \
-                            self.__parse_input_string(manifest.get(s, 'inputs')):
-                        if old_manifest and old_manifest.has_option('config', param) and not force_prompt:
-                            self.config[param] = old_manifest.get('config', param)
-                        else:
-                            default = (attributes['default'] if 'default' in attributes else None)
-                            secret = (attributes['secret'] if 'secret' in attributes else False)
-                            self.get_config(param, default=default, secret=secret, force_prompt=force_prompt)
-            if self.target:
-                self.set_additional_context('target')
-            if self.source:
-                self.set_additional_context('source')
-
-    def write(self, file_handle):
-        """
-        write the current state to a file manifest
-        """
-        if not self.target:
-            self.target = self.source
-        if not self.target.has_section('config'):
-            self.target.add_section('config')
-        for k, v in self.config.items():
-            if k not in self.temporary_sections:
-                self.target.set('config', k, v)
-        self.target.set('config', 'namespace', self.namespace)
-        self.target.write(file_handle)
-
-    def get_config(self, param_name, default=None, secret=False, force_prompt=False):
-        """
-        grabs a config from the user space; if it doesn't exist, it will prompt for it.
-        """
-        if param_name not in self.config or force_prompt:
-            self.config[param_name] = self.lib.prompt("please enter your %s" % param_name,
-                                                      default=default,
-                                                      secret=secret)
-        if secret:
-            self.temporary_sections.append(param_name)
-        return self.config[param_name]
-
-    def set_additional_context(self, manifest_type='target', additional_context={}):
-        """
-        return a context dict of the desired state
-        """
-        if not hasattr(self, manifest_type):
-            raise ConfigException("manifest_type '%s' doesn't exist!" % manifest_type)
-        manifest = getattr(self, manifest_type)
-        context_dict = manifest.additional_context_variables
-        for k, v in self.config.items():
-                context_dict["config:%s" % k] = v
-        manifest.additional_context_variables = dict(context_dict.items() +
-                                                     additional_context.items())
-
-    def __load_configs(self, config):
-        if config.has_section('config'):
-            for k, v in config.items('config'):
-                self.config[k] = v
-
-    def __detect_namespace(self, manifest_object):
-        """
-        Find a manifest object
-        """
-        namespace = ""
-        if self.target and self.target.has_section('config') and \
-                self.target.has_option('config', 'namespace'):
-                namespace = self.target.get('config', 'namespace')
-        else:
-            s = str(manifest_object)
-            if s.endswith(".cfg"):
-                s = s[:-4]
-            if s.startswith("http"):
-                s = s.split("/")[-1]
-            namespace = s
-        return namespace
-
     def __parse_input_string(self, input_string):
         """
         parse an attribute in a given input string format:
@@ -401,18 +246,3 @@ class Config(object):
                 attribute_dict['secret'] = True
             return (value, attribute_dict)
         return None
-
-    def context(self, manifest_type=None):
-        """ get the context dictionary desired """
-        manifest = None
-        if manifest_type is None:
-            manifest = self.target if self.target else self.source
-        else:
-            manifest = getattr(self, manifest_type)
-        return manifest.get_context_dict()
-
-    def set_source(self, source_manifest):
-        """ Set the source manifest """
-        self.source = source_manifest
-        self.set_additional_context('source')
-        return source_manifest

@@ -93,9 +93,7 @@ class PerforceFormula(FormulaBase):
         for required in ['root_path', 'port', 'client', 'username', 'password']:
             if not config.has(required):
                 errors.append("%s must be set!" % required)
-        for k in config.keys():
-            if k not in valid_options:
-                self.logger.warn("Unused option %s in %s!" % (k, feature_name)
+        super(PerforceFormula, self).validate()
 
     def reconfigure(self, feature_name, config):
         self.prompt(feature_name, config, reconfigure=True)
