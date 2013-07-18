@@ -91,7 +91,6 @@ class FeatureConfig(object):
         except ParamNotFoundException, e:
             raise KeyError(str(e))
         
-
     def __setitem__(self, key, value):
         self.set(key, value)
 

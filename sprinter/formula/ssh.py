@@ -8,7 +8,6 @@ nopassphrase = true
 type = rsa
 hostname = github.com
 user = toumorokoshi
-ssh_path = 
 create = false
 """
 import os
@@ -28,38 +27,32 @@ ssh_config_path = os.path.expanduser('~/.ssh/config')
 
 class SSHFormula(FormulaBase):
 
-    def install(self, feature_name, config):
-        ssh_path = self.__generate_key(feature_name, config)
-        self.__install_ssh_config(config, ssh_path)
-        if 'command' in config:
-            self.__call_command(config['command'], ssh_path)
+    def install(self):
+        ssh_path = self.__generate_key(self.target)
+        self.__install_ssh_config(self.target, ssh_path)
+        if self.target.has('command'):
+            self.__call_command(self.target.get('command'), ssh_path)
 
-    def update(self, feature_name, source_config, target_config):
-        ssh_path = self.__generate_key(feature_name, target_config)
-        self.__install_ssh_config(target_config, ssh_path)
-        #super(SSHFormula, self).update(feature_name, source_config, target_config)
+    def update(self):
+        ssh_path = self.__generate_key(self.target)
+        self.__install_ssh_config(self.target, ssh_path)
 
-    def remove(self, feature_name, config):
-        super(SSHFormula, self).remove(feature_name, config)
+    def deactivate(self):
+        ssh_path = os.path.join(self.directory.install_directory(self.feature_name),
+                                self.source.get('keyname'))
+        self.__install_ssh_config(self.source, ssh_path)
 
-    def deactivate(self, feature_name, config):
-        ssh_path = os.path.join(self.directory.install_directory(feature_name),
-                                config['keyname'])
-        self.__install_ssh_config(config, ssh_path)
-        #super(SSHFormula, self).deactivate(feature_name, config)
+    def activate(self):
+        ssh_path = os.path.join(self.directory.install_directory(self.feature_name),
+                                self.source.get('keyname'))
+        self.__install_ssh_config(self.source, ssh_path)
 
-    def activate(self, feature_name, config):
-        ssh_path = os.path.join(self.directory.install_directory(feature_name),
-                                config['keyname'])
-        self.__install_ssh_config(config, ssh_path)
-        #super(SSHFormula, self).activate(feature_name, config)
-
-    def __generate_key(self, feature_name, config):
+    def __generate_key(self, config):
         """
         Generate the ssh key, and return the ssh config location
         """
         command = "ssh-keygen -t %(type)s -f %(keyname)s -N  " % config
-        cwd = self.directory.install_directory(feature_name)
+        cwd = self.directory.install_directory(self.feature_name)
         if 'ssh_path' in config:
             cwd = config['ssh_path']
         if 'create' not in config or config['create'].lower().startswith('t'):
