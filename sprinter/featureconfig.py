@@ -57,8 +57,8 @@ class FeatureConfig(object):
         """ return all of the keys in the config """
         return self.raw_dict.keys()
 
-    def is_affirmative(self, param):
-        return lib.is_affirmative(self.get(param))
+    def is_affirmative(self, param, default=None):
+        return lib.is_affirmative(self.get(param, default=default))
 
     def prompt(self, param, message, default=None, only_if_empty=False):
         """ Prompts the user for a value, passing a default if it exists """

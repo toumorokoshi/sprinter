@@ -3,7 +3,7 @@ Roadmap
 
 Refactor:
 
-* handle depedency trees
+* unpack has a bug with not symlinking to the proper directory
 
 TODO:
 * Directory behavior changed to warn if a directory is not a symlink, not throw an error.
@@ -14,10 +14,7 @@ This page highlights Sprinter's roadmap to reach 1.0
 release. Currently sprinter is at version 0.6
 
 ### 0.7
-* Refactor config resolution
-* Refactor methodology to prompt user for input
 * Migrate 'sprinter.formulas' to 'sprinter.formula'
-* Investigate integrating buildout recipe compatability?
 
 # Before 1.0
 The documentation needs to properly and completely document
@@ -33,3 +30,4 @@ Success! A Stable library that can be used to install environments to machines w
 
 ### Post 1.0
 * Move all formulas out of the core sprinter repository
+* Investigate integrating buildout recipe compatability?

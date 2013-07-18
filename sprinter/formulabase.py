@@ -12,7 +12,7 @@ from sprinter import lib
 
 class FormulaBase(object):
 
-    valid_options = ['rc', 'command']
+    valid_options = ['rc', 'command', 'systems']
     required_options = []
 
     def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
@@ -25,6 +25,9 @@ class FormulaBase(object):
         self.source = source
         self.target = target
         self.environment = environment
+        self.directory = environment.directory
+        self.system = environment.system
+        self.injections = environment.injections
         if not (source or target):
             raise FormulaException("A formula requires a source and/or a target!")
         self.logger = LOGGER
@@ -117,7 +120,7 @@ class FormulaBase(object):
         errors should either be reported via self._log_error(), or raise an exception
         """
         for k in self.target.keys():
-            if k not in self.valid_options:
+            if k not in self.valid_options or k not in self.required_options:
                 self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
         for k in self.required_options:
             if not self.target.has(k):
@@ -133,7 +136,7 @@ class FormulaBase(object):
             valid_systems = [s.lower() for s in config.get('systems').split(",")]
             for system_type, param in [('isOSX', 'osx'),
                                        ('isDebianBased', 'debian')]:
-                if param in valid_systems and getattr(self.system, system_type)() is True:
+                if param in valid_systems and getattr(self.system, system_type)():
                     should_run = True
         return should_run
             
@@ -156,15 +159,6 @@ class FormulaBase(object):
         if self.source and self.target:
             for k in (k for k in self.source.keys() if not self.target.has(k)):
                 self.target.set(k, self.source.get(k))
-
-    def directory(self):
-        return self.environment.directory
-
-    def injections(self):
-        return self.environment.injections
-
-    def system(self):
-        return self.environment.system
 
     def _log_error(self, message):
         """ Log an error for the feature """

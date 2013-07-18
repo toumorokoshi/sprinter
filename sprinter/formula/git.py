@@ -9,7 +9,6 @@ rc = . %(sub:root_dir)s/libexec/sub-init
 """
 import logging
 import os
-import shutil
 
 from sprinter.formulabase import FormulaBase
 from sprinter import lib
@@ -26,19 +25,19 @@ class GitFormula(FormulaBase):
 
     def install(self):
         self.__clone_repo(self.target.get('url'),
-                          self.directory().install_directory(self.feature_name),
+                          self.directory.install_directory(self.feature_name),
                           branch=self.target.get('branch', 'master'))
         FormulaBase.install(self)
 
     def update(self):
-        target_directory = self.directory().install_directory(self.feature_name)
+        target_directory = self.directory.install_directory(self.feature_name)
         source_branch = self.source.get('branch', 'master')
         target_branch = self.target.get('branch', 'master')
         if self.target.get('url') != self.source.get('url') or \
            not os.path.exists(target_directory):
             if os.path.exists(target_directory):
                 self.logger.debug("Old git repository Found. Deleting...")
-                shutil.rmtree(target_directory)
+                self.directory.remove_feature(self.feature_name)
             self.__clone_repo(self.target.get('url'),
                               target_directory,
                               branch=self.target.get('branch', 'master'))
@@ -59,7 +58,7 @@ class GitFormula(FormulaBase):
 
     def remove(self, feature_name, config):
         FormulaBase.remove(self)
-        shutil.rmtree(self.directory().install_directory(feature_name))
+        self.directory.remove_feature(self.feature_name)
 
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)

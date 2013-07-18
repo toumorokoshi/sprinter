@@ -16,6 +16,8 @@ class PackageFormulaException(Exception):
 
 class PackageFormula(FormulaBase):
 
+    valid_options = FormulaBase.valid_options + ['apt-get', 'brew', 'yum']
+
     def install(self):
         self.__get_package_manager()
         self.__install_package(self.target)
@@ -50,13 +52,13 @@ class PackageFormula(FormulaBase):
         package_manager = ""
         args = ""
         sudo_required = True
-        if self.system().isOSX():
+        if self.system.isOSX():
             package_manager = "brew"
             sudo_required = False
-        elif self.system().isDebianBased():
+        elif self.system.isDebianBased():
             package_manager = "apt-get"
             args = " -y"
-        elif self.system().isFedoraBased():
+        elif self.system.isFedoraBased():
             package_manager = "yum"
         if lib.which(package_manager) is None:
             raise PackageFormulaException("Package manager %s not installed!"
