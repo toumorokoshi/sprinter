@@ -37,6 +37,8 @@ class SSHFormula(FormulaBase):
     def update(self, feature_name, source_config, target_config):
         ssh_key_path = self.__generate_key(feature_name, target_config)
         self.__install_ssh_config(target_config, ssh_key_path)
+        if 'command' in config:
+            self.__call_command(config['command'], ssh_key_path)
         #super(SSHFormula, self).update(feature_name, source_config, target_config)
 
     def remove(self, feature_name, config):
