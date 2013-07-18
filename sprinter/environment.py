@@ -91,7 +91,7 @@ class Environment(object):
             self.directory.initialize()
             self.install_sandboxes()
             self.instantiate_features()
-            self._specialize_contexts()
+            self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
             self.inject_environment_rc()
@@ -115,7 +115,7 @@ class Environment(object):
             self.install_sandboxes()
             self.instantiate_features()
             self.grab_inputs(force_prompt=reconfigure)
-            self._specialize_contexts()
+            self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
             self.inject_environment_rc()
@@ -133,7 +133,7 @@ class Environment(object):
             self.phase = "remove"
             self.logger.info("Removing environment %s..." % self.namespace)
             self.instantiate_features()
-            self._specialize_contexts()
+            self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
             self.clear_environment_rc()
@@ -165,7 +165,7 @@ class Environment(object):
         self.phase = "activate"
         self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
-        self._specialize_contexts()
+        self._specialize()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'activate')
         self.inject_environment_rc()
