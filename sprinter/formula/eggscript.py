@@ -13,7 +13,6 @@ import re
 
 from sprinter import lib
 from sprinter.formulabase import FormulaBase
-from sprinter.buildoutpuppet import BuildoutPuppet
 from sprinter.virtualenv import create_environment as create_virtualenv
 
 # a list of regex's that should no be symlinked to the bin path
@@ -35,8 +34,6 @@ class EggscriptFormula(FormulaBase):
         return FormulaBase.install(self)
 
     def update(self):
-        self.bp = BuildoutPuppet(
-            root_path=self.directory.install_directory(self.feature_name))
         if (self.source.get('egg', '') != self.target.get('egg', '') or
            self.source.get('eggs', '') != self.target.get('eggs', '')):
                 self.__install_eggs(self.target)
@@ -60,7 +57,8 @@ class EggscriptFormula(FormulaBase):
         with open(os.path.join(self.directory.install_directory(self.feature_name), 'requirements.txt'),
                   'w+') as fh:
             fh.write('\n'.join(eggs))
-        lib.call("bin/pip install -r requirements.txt", cwd=self.directory.install_directory(self.feature_name))
+        lib.call("bin/pip install -r requirements.txt --upgrade",
+                 cwd=self.directory.install_directory(self.feature_name))
 
     def __add_paths(self, config):
         """ add the proper resources into the environment """
