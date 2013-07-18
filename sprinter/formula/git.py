@@ -26,12 +26,12 @@ class GitFormula(FormulaBase):
 
     def install(self):
         self.__clone_repo(self.target.get('url'),
-                          self.directory.install_directory(self.feature_name),
+                          self.directory().install_directory(self.feature_name),
                           branch=self.target.get('branch', 'master'))
         FormulaBase.install(self)
 
     def update(self):
-        target_directory = self.directory.install_directory(self.feature_name)
+        target_directory = self.directory().install_directory(self.feature_name)
         source_branch = self.source.get('branch', 'master')
         target_branch = self.target.get('branch', 'master')
         if self.target.get('url') != self.source.get('url') or \
@@ -59,7 +59,7 @@ class GitFormula(FormulaBase):
 
     def remove(self, feature_name, config):
         FormulaBase.remove(self)
-        shutil.rmtree(self.directory.install_directory(feature_name))
+        shutil.rmtree(self.directory().install_directory(feature_name))
 
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)

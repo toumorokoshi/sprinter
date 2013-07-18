@@ -3,11 +3,11 @@
 Formula base is an abstract base class outlining the method required
 and some documentation on what they should provide.
 """
-import logging
 import os
 
 from sprinter.core import LOGGER, PHASE
 from sprinter.exceptions import FormulaException
+from sprinter import lib
 
 
 class FormulaBase(object):
@@ -24,12 +24,9 @@ class FormulaBase(object):
         self.feature_name = feature_name
         self.source = source
         self.target = target
+        self.environment = environment
         if not (source or target):
             raise FormulaException("A formula requires a source and/or a target!")
-        self.environment = environment
-        self.directory = environment.directory
-        self.injections = environment.injections
-        self.system = environment.system
         self.logger = LOGGER
 
     def prompt(self):
@@ -45,7 +42,7 @@ class FormulaBase(object):
 
     def install(self):
         """
-        Install is called when a feature does not previously exist. 
+        Install is called when a feature does not previously exist.
 
         In the case of a feature changing formulas, the old feature/formula is
         removed, then the new feature/formula is installed.
@@ -54,15 +51,15 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        install_directory = self.directory.install_directory(self.feature_name)
+        install_directory = self.directory().install_directory(self.feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
         if self.target.has('rc'):
-            self.directory.add_to_rc(self.target.get('rc'))
+            self.directory().add_to_rc(self.target.get('rc'))
         if self.target.has('command'):
-            self.lib.call(self.target.get('command'), shell=True, cwd=cwd)
+            lib.call(self.target.get('command'), shell=True, cwd=cwd)
 
     def update(self):
-        """ 
+        """
         Update is called when a feature previously exists, with the same formula
 
         Updates are guaranteed to have both the 'source' and 'target' configs set
@@ -73,7 +70,7 @@ class FormulaBase(object):
 
     def remove(self):
         """
-        Remove is called when a feature no longer exists. 
+        Remove is called when a feature no longer exists.
 
         remove will delete the feature directory before it is
         done. Most of the time, no other action should be necessary.
@@ -84,11 +81,12 @@ class FormulaBase(object):
         """
 
     def deactivate(self):
-        """ 
-        Deactivate is called when a user deactivates the environment. 
+        """
+        Deactivate is called when a user deactivates the environment.
 
-        deactivate will deactivate an environment. Deactivate disables the .rc file for a sprinter install, 
-        so any extra functionality should be removed here:
+        deactivate will deactivate an environment. Deactivate disables
+        the .rc file for a sprinter install, so any extra functionality
+        should be removed here:
 
         * configuration in a global location, such as an ssh configuration
 
@@ -96,8 +94,8 @@ class FormulaBase(object):
         """
 
     def activate(self):
-        """ 
-        Activate is called when a user activates the environment. 
+        """
+        Activate is called when a user activates the environment.
         
         activate should inject configuration into the environment. Activate enables the .rc file for a sprinter install,
         so any extra functionality should be added here:
@@ -158,6 +156,15 @@ class FormulaBase(object):
         if self.source and self.target:
             for k in (k for k in self.source.keys() if not self.target.has(k)):
                 self.target.set(k, self.source.get(k))
+
+    def directory(self):
+        return self.environment.directory
+
+    def injections(self):
+        return self.environment.injections
+
+    def system(self):
+        return self.environment.system
 
     def _log_error(self, message):
         """ Log an error for the feature """
