@@ -37,6 +37,7 @@ def install_required(f):
         return f(self, *args, **kwargs)
     return wrapped
 
+
 class Environment(object):
 
     source = None  # the path to the source handle, the handle itself, or a manifest instance
@@ -52,15 +53,15 @@ class Environment(object):
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
     error_occured = False
-    # a dictionary of the feature objects. 
+    # a dictionary of the feature objects.
     # The key is a tuple of feature name and formula, while the value is an instance.
-    _feature_dict = {} 
+    _feature_dict = {}
     # the order of the feature dict.
-    _feature_dict_order = [] 
-    # a dictionary of the errors associated with features. 
+    _feature_dict_order = []
+    # a dictionary of the errors associated with features.
     # The key is a tuple of feature name and formula, while the value is an instance.
     _error_dict = {}
-    _errors = [] # list to keep all the errors
+    _errors = []  # list to keep all the errors
     # a pip puppet used to install eggs and add it to the classpath
     _pip = None
     sandboxes = []  # a list of package managers to sandbox (brew)
@@ -284,7 +285,7 @@ class Environment(object):
                     else:
                         del(self._feature_dict[key])
                 except SprinterException:
-                    self._log_error("Invalid formula %s for %s feature %s!" 
+                    self._log_error("Invalid formula %s for %s feature %s!"
                                     % (feature_config.get('formula'), kind, feature))
             else:
                 setattr(self._feature_dict[key], kind, feature_config)

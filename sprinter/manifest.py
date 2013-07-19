@@ -46,7 +46,7 @@ class Manifest(object):
     additional_context_variables = {}  # a list of the additional context variables available
     temporary_config_variables = []  # a list of the temporary keys, such as password
 
-    def __init__(self, raw_manifest, namespace=None, 
+    def __init__(self, raw_manifest, namespace=None,
                  logger=LOGGER, username=None, password=None):
         self.logger = logger
         self.manifest = self.__load_manifest(raw_manifest,
@@ -55,7 +55,6 @@ class Manifest(object):
         self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
         self.system = System(logger=self.logger)
-
 
     def formula_sections(self):
         """
@@ -70,7 +69,7 @@ class Manifest(object):
         for s in self.manifest.sections():
             if self.has_option(s, 'inputs'):
                 for param, attributes in \
-                        self.__parse_input_string(manifest.get(s, 'inputs')):
+                        self.__parse_input_string(self.get(s, 'inputs')):
                     default = attributes.get('default', None)
                     secret = attributes.get('secret', False)
                     self.get_config(param, default=default, secret=secret, force_prompt=force_prompt)
@@ -110,13 +109,13 @@ class Manifest(object):
         """
         grabs a config from the user space; if it doesn't exist, it will prompt for it.
         """
-        if param_name not in self.config or force_prompt:
-            self.config[param_name] = self.lib.prompt("please enter your %s" % param_name,
+        if not self.has_option('config', param_name) or force_prompt:
+            self.set('config', param_name, lib.prompt("please enter your %s" % param_name,
                                                       default=default,
-                                                      secret=secret)
+                                                      secret=secret))
         if secret:
             self.temporary_sections.append(param_name)
-        return self.config[param_name]
+        return self.get('config', param_name)
 
     def get_feature_config(self, feature_name):
         """ Return a FeatureConfig for the feature name provided """
@@ -125,7 +124,7 @@ class Manifest(object):
     def get_context_dict(self):
         """ return a context dict of the desired state """
         context_dict = {}
-        for s in self.formula_sections():
+        for s in self.sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
         return_dict = dict(context_dict.items() + self.additional_context_variables.items())
@@ -166,7 +165,7 @@ class Manifest(object):
         elif self.manifest.has_option('config', 'source'):
             return NAMESPACE_REGEX.search(self.manifest.get('config', 'source')).groups()[0]
         else:
-            self.environment.log_error('Could not parse namespace implicitely')
+            self.logger.warn('Could not parse namespace implicitely')
             return None
 
     def __generate_dependency_tree(self):
@@ -184,8 +183,7 @@ class Manifest(object):
         try:
             return DependencyTree(dependency_dict)
         except DependencyTreeException as dte:
-            self.environment.log_error("Dependency tree for manifest is invalid! %s" % str(dte))
-            return None
+            raise ManifestException("Dependency tree for manifest is invalid! %s" % str(dte))
 
     def __substitute_objects(self, value, context_dict):
         """

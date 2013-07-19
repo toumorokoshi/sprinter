@@ -14,7 +14,7 @@ import os
 import urllib
 
 from sprinter.formulabase import FormulaBase
-from sprinter.core import PHASES
+from sprinter.core import PHASE
 
 
 class TemplateFormula(FormulaBase):
@@ -22,7 +22,7 @@ class TemplateFormula(FormulaBase):
     required_options = FormulaBase.required_options + ['source', 'target']
 
     def prompt(self):
-        if self.environment.phase == PHASES.remove:
+        if self.environment.phase == PHASE.remove:
             self.source.prompt('remove_file_on_delete',
                                "Would you like to remove %s?" % self.source.get('target'),
                                default="yes")

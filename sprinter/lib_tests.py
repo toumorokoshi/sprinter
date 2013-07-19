@@ -12,7 +12,7 @@ from nose import tools
 
 from sprinter.formulabase import FormulaBase
 from sprinter.environment import Environment
-from sprinter.formulas.env import EnvFormula
+from sprinter.formula.env import EnvFormula
 from sprinter import lib
 from sprinter.lib import CommandMissingException
 
@@ -26,13 +26,15 @@ class TestLib(object):
 
         def test_get_formula_class(self):
             """ Test if a formula class is grabbed """
-            class_instance = lib.get_formula_class("sprinter.formulas.unpack", self.environment)
-            assert issubclass(class_instance.__class__, FormulaBase)
+            class_object = lib.get_subclass_from_module("sprinter.formula.unpack",
+                                                        FormulaBase)
+            assert issubclass(class_object, FormulaBase)
 
         def test_get_formulabase(self):
             """ Test if formulabase can be grabbed"""
-            class_instance = lib.get_formula_class("sprinter.formulabase", self.environment)
-            assert issubclass(class_instance.__class__, FormulaBase)
+            class_object = lib.get_subclass_from_module("sprinter.formulabase",
+                                                        FormulaBase)
+            assert issubclass(class_object, FormulaBase)
 
         # can't get this test to work right...
         def skip_get_formula_class_correct_import(self):
@@ -53,8 +55,10 @@ class TestLib(object):
 
         def test_lib_sprinterpip(self):
             """ Pip install command should work """
-            tools.eq_(lib.whitespace_smart_split("pip install http://github.com/toumorokoshi/sprinter/tarball/master"),
-                                                 ['pip', 'install', 'http://github.com/toumorokoshi/sprinter/tarball/master'])
+            tools.eq_(
+                lib.whitespace_smart_split(
+                    "pip install http://github.com/toumorokoshi/sprinter/tarball/master"),
+                ['pip', 'install', 'http://github.com/toumorokoshi/sprinter/tarball/master'])
 
         def test_call_error(self):
             """ Test an exception is thrown for a non-existent command """
@@ -173,5 +177,3 @@ class TestLib(object):
             assert not lib.is_affirmative("gibberish")
             assert not lib.is_affirmative("coto")
             assert not lib.is_affirmative("eslaf")
-
-    
