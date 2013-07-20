@@ -1,5 +1,6 @@
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
+from sprinter.formulabase import FormulaBase
 from sprinter import lib
 
 source_config = """
@@ -16,11 +17,15 @@ command = echo 'helloworld'
 
 [osx]
 systems = osx
-formula = sprinter.formulas.template
+formula = sprinter.formulabase
 
 [osx2]
 systems = OsX
-formula = sprinter.formulas.template
+formula = sprinter.formulabase
+
+[debian]
+systems = debian
+formula = sprinter.formulabase
 """
 
 
@@ -38,27 +43,31 @@ class TestFormulaBase(FormulaTest):
         self.directory.add_to_rc.assert_called_once_with('teststring')
         call.called, "lib call was called when it was not specified"
 
-    def test_install_with_command(self):
+    @patch.object(lib, 'call')
+    def test_install_with_command(self, call):
         """ Test install with rc """
         self.environment.run_feature("install_with_command", 'sync')
-        self.lib.call.assert_called_once_with("echo 'helloworld'", cwd="/tmp/", shell=True)
+        call.assert_called_once_with("echo 'helloworld'", cwd="/tmp/", shell=True)
         assert not self.directory.add_to_rc.called, "add to rc called when rc not enabled!"
 
-    def skip_osx_only(self):
+    def test_osx_only(self):
         """ Test a feature that should only occur on osx """
-        self.environment.system.isOSX = Mock(return_value=True)
-        assert test_manifest.run_phase('osx', 'install')
-        assert test_manifest.run_phase('osx2', 'install')
-        test_manifest.system.isOSX = Mock(return_value=False)
-        assert not test_manifest.run_phase('osx', 'install')
-        assert not test_manifest.run_phase('osx2', 'install')
+        fb = FormulaBase(self.environment, 'osx',
+                         target=self.environment.target.get_feature_config('osx'))
+        fb2 = FormulaBase(self.environment, 'osx2',
+                          target=self.environment.target.get_feature_config('osx2'))
+        self.system.isOSX = Mock(return_value=True)
+        assert fb.should_run()
+        assert fb2.should_run()
+        self.system.isOSX = Mock(return_value=False)
+        assert not fb.should_run()
+        assert not fb2.should_run()
 
-    def skip_debianbased_only(self):
+    def test_debianbased_only(self):
         """ Test a feature that should only occur on debian-based distributions """
-        test_manifest = Manifest(StringIO(debian_only_manifest))
-        test_manifest.system = Mock(spec=System)
-        test_manifest.system.isDebianBased = Mock(return_value=True)
-        assert test_manifest.run_phase('debian', 'install')
-        test_manifest.system.isDebianBased = Mock(return_value=False)
-        assert not test_manifest.run_phase('debian', 'install')
-        assert not test_manifest.run_phase('debian', 'update')
+        fb = FormulaBase(self.environment, 'debian',
+                         target=self.environment.target.get_feature_config('debian'))
+        self.system.isDebianBased = Mock(return_value=True)
+        assert fb.should_run()
+        self.system.isDebianBased = Mock(return_value=False)
+        assert not fb.should_run()

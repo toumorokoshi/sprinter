@@ -1,9 +1,8 @@
 import logging
 import os.path
-from mock import Mock, patch, call
+from mock import patch
 from sprinter.testtools import FormulaTest
 from sprinter import lib
-from nose.plugins.attrib import attr
 
 vals = {
     'repoA': 'git://github.com/toumorokoshi/sprinter.git'
@@ -33,6 +32,10 @@ class TestGitFormula(FormulaTest):
     def setup(self):
         super(TestGitFormula, self).setup(source_config=source_config,
                                           target_config=target_config)
+        self.curdir = os.path.abspath(os.curdir)
+
+    def teardown(self):
+        os.chdir(self.curdir)
 
     @patch.object(lib, 'call')
     def test_simple_example(self, call):

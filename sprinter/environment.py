@@ -365,7 +365,7 @@ class Environment(object):
             result = getattr(instance, action)()
             if result:
                 if type(result) != list:
-                    self.log_feature_error(feature, 
+                    self.log_feature_error(feature,
                                            "Error occurred! %s" % str(result))
                 else:
                     self._error_dict[feature] += result

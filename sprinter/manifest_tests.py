@@ -38,16 +38,6 @@ password?
 main_branch==comp_main
 """
 
-osx_only_manifest = """
-"""
-
-debian_only_manifest = """
-[debian]
-systems = debian
-formula = sprinter.formulas.template
-
-"""
-
 http_manifest = """
 [sub]
 formula = sprinter.formulas.git

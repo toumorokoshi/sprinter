@@ -5,7 +5,6 @@ Tests for the library
 import os
 import shutil
 import tempfile
-from StringIO import StringIO
 
 import httpretty
 from nose import tools
@@ -36,12 +35,11 @@ class TestLib(object):
                                                         FormulaBase)
             assert issubclass(class_object, FormulaBase)
 
-        # can't get this test to work right...
         def skip_get_formula_class_correct_import(self):
             """ This test a bug with importing the proper class"""
-            class_instance = lib.get_formula_class("sprinter.formulas.env", self.environment)
-            assert class_instance.__class__ == EnvFormula,\
-                "%s class is not equal to %s" % (class_instance, EnvFormula)
+            class_object = lib.get_subclass_from_module("sprinter.formula.env", FormulaBase)
+            assert class_object == EnvFormula, \
+                "%s class is not equal to %s" % (class_object, EnvFormula)
 
         def test_lib_errorcode(self):
             """ Test a proper error code is returned """

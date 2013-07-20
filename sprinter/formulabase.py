@@ -13,7 +13,7 @@ from sprinter import lib
 class FormulaBase(object):
 
     valid_options = ['rc', 'command', 'systems']
-    required_options = []
+    required_options = ['formula']
 
     def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
         """
@@ -54,10 +54,10 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        install_directory = self.directory().install_directory(self.feature_name)
+        install_directory = self.directory.install_directory(self.feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
         if self.target.has('rc'):
-            self.directory().add_to_rc(self.target.get('rc'))
+            self.directory.add_to_rc(self.target.get('rc'))
         if self.target.has('command'):
             lib.call(self.target.get('command'), shell=True, cwd=cwd)
 

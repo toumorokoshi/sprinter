@@ -1,31 +1,36 @@
 import httpretty
-from sprinter.environment import populate_formula_instance
+from mock import patch, Mock, call
+from sprinter.testtools import FormulaTest
+from sprinter import lib
 
+source_config = """
+[config]
+test = hi
 """
+
+target_config = """
+[config]
+inputs = password?
+         main_branch?==comp_main
+
 [noformula]
 blank = thishasnoformula
 """
 
 
-class TestEnvironmentDecorators(object):
-    """ Tests for the environment decorators """
+class TestEnvironment(FormulaTest):
+    """ Tests for the environment """
 
-    def skip_grab_inputs_existing_source(self):
+    def setup(self):
+        super(TestEnvironment, self).setup(source_config=source_config,
+                                           target_config=target_config)
+
+    def test_grab_inputs_existing_source(self):
         """ Grabbing inputs should source from source first, if it exists """
-        source_manifest = Manifest(StringIO(manifest_input_params))
-        config = Config(source=source_manifest,
-                        target=self.new_manifest)
-        config.get_config = Mock()
-        config.grab_inputs()
-        config.get_config.assert_has_calls([
+        self.environment.target.get_config = Mock()
+        self.environment.grab_inputs()
+        self.environment.target.get_config.assert_has_calls([
             call("password", default=None, secret=True, force_prompt=False),
             call("main_branch", default="comp_main", secret=True, force_prompt=False)
         ])
-        assert config.get_config.call_count == 2, "More calls were called!"
-
-    def skip_grab_inputs_source(self):
-        """ Test grabbing inputs from source """
-        self.config_source_only.get_config = Mock(return_value="no")
-        self.config_source_only.grab_inputs()
-        self.config_source_only.get_config.assert_called_once_with(
-            "sourceonly", default=None, secret=False, force_prompt=False)
+        assert self.environment.target.get_config.call_count == 2, "More calls were called!"

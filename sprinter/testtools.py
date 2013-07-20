@@ -32,3 +32,4 @@ class FormulaTest(object):
         self.directory.bin_path = Mock(return_value="dummy")
         self.directory.install_directory = Mock(return_value="/tmp/")
         self.environment.instantiate_features()
+        self.system = self.environment.system
