@@ -245,7 +245,10 @@ class Environment(object):
         except lib.BadCredentialsException, e:
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
-        self.namespace = self.target.namespace or self.source.namespace
+        if self.target:
+            self.namespace = self.target.namespace
+        if not self.namespace and self.source:
+            self.namespace = self.source.namespace
         if not self.directory:
             self.directory = Directory(self.namespace, sprinter_root=self.root)
         self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(), self.namespace))

@@ -35,7 +35,7 @@ class SSHFormula(FormulaBase):
     valid_options = ['override', 'install_command']
 
     def prompt(self):
-        if self.environment.phase in (PHASE.install, PHASE.update):
+        if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
                 if (self.injections.in_noninjected_file(
                         ssh_config_path, "Host %s" % self.target.get('host')) and
@@ -70,12 +70,14 @@ class SSHFormula(FormulaBase):
         Generate the ssh key, and return the ssh config location
         """
         command = "ssh-keygen -t %(type)s -f %(keyname)s -N  " % config.to_dict()
-        cwd = config.get('ssh_path', None) or self.directory.install_directory(self.feature_name)
+        cwd = config.get('ssh_path', self.directory.install_directory(self.feature_name))
         if not config.has('create') or config.is_affirmative('create'):
             if not os.path.exists(cwd):
                 os.makedirs(cwd)
             if not os.path.exists(os.path.join(cwd, config.get('keyname'))):
                 lib.call(command, cwd=cwd, output_log_level=logging.DEBUG)
+        if not config.has('ssh_path'):
+            config.set('ssh_path', cwd)
         return os.path.join(cwd, config.get('keyname'))
 
     def __install_ssh_config(self, config, ssh_key_path):

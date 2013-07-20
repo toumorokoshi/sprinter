@@ -22,7 +22,7 @@ class TemplateFormula(FormulaBase):
     required_options = FormulaBase.required_options + ['source', 'target']
 
     def prompt(self):
-        if self.environment.phase == PHASE.remove:
+        if self.environment.phase == PHASE.REMOVE:
             self.source.prompt('remove_file_on_delete',
                                "Would you like to remove %s?" % self.source.get('target'),
                                default="yes")
