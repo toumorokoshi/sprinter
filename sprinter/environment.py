@@ -53,6 +53,8 @@ class Environment(object):
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
     error_occured = False
+    # A dictionary for class object instances. Exists Mainly for testability + injection
+    formula_dict = {}
     # a dictionary of the feature objects.
     # The key is a tuple of feature name and formula, while the value is an instance.
     _feature_dict = {}
@@ -339,18 +341,20 @@ class Environment(object):
         get a formula class object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        try:
-            return lib.get_subclass_from_module(formula, FormulaBase)
-        except (SprinterException, ImportError):
-            self.logger.info("Downloading %s..." % formula)
+        if formula not in self.formula_dict:
             try:
-                self._pip.install_egg(formula)
-            except PipException:
-                self.logger.error("ERROR: Unable to download %s!" % formula)
-            try:
-                return lib.get_subclass_from_module(formula, FormulaBase)
-            except ImportError:
-                raise SprinterException("Error: Unable to retrieve formula %s!" % formula)
+                self.formula_dict[formula] = lib.get_subclass_from_module(formula, FormulaBase)
+            except (SprinterException, ImportError):
+                self.logger.info("Downloading %s..." % formula)
+                try:
+                    self._pip.install_egg(formula)
+                except PipException:
+                    self.logger.error("ERROR: Unable to download %s!" % formula)
+                try:
+                    self.formula_dict[formula] = lib.get_subclass_from_module(formula, FormulaBase)
+                except ImportError:
+                    raise SprinterException("Error: Unable to retrieve formula %s!" % formula)
+        return self.formula_dict[formula]
 
     def log_error(self, error_message):
         self.error_occured = True
