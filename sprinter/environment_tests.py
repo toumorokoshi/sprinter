@@ -1,7 +1,5 @@
-import httpretty
-from mock import patch, Mock, call
+from mock import Mock, call
 from sprinter.testtools import FormulaTest
-from sprinter import lib
 
 source_config = """
 [config]
@@ -34,3 +32,6 @@ class TestEnvironment(FormulaTest):
             call("main_branch", default="comp_main", secret=True, force_prompt=False)
         ])
         assert self.environment.target.get_config.call_count == 2, "More calls were called!"
+
+    def test_running_missing_formula(self):
+        """ When a formula is missing, an error is thrown but execution continued. """

@@ -11,7 +11,7 @@ from sprinter.formulabase import FormulaBase
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
-from sprinter.manifest import Manifest, ManifestException
+from sprinter.manifest import Manifest
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
 
@@ -99,7 +99,7 @@ class Environment(object):
             self._finalize()
         except Exception:
             self.logger.exception("")
-            self.log.info("An error occured during installation!")
+            self.logger.info("An error occured during installation!")
             self.clear_environment_rc()
             self.logger.info("Removing installation %s..." % self.namespace)
             self.directory.remove()
@@ -131,7 +131,7 @@ class Environment(object):
     def remove(self):
         """ remove the environment """
         try:
-            self.phase = "remove"
+            self.phase = PHASE.REMOVE
             self.logger.info("Removing environment %s..." % self.namespace)
             self.instantiate_features()
             self._specialize()
@@ -149,7 +149,7 @@ class Environment(object):
     @install_required
     def deactivate(self):
         """ deactivate the environment """
-        self.phase = "deactivate"
+        self.phase = PHASE.DEACTIVATE
         self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self.instantiate_features()
@@ -163,7 +163,7 @@ class Environment(object):
     @install_required
     def activate(self):
         """ activate the environment """
-        self.phase = "activate"
+        self.phase = PHASE.ACTIVATE
         self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self._specialize()
@@ -176,7 +176,7 @@ class Environment(object):
     @install_required
     def reconfigure(self):
         """ reconfigure the environment """
-        self.phase = "reconfigure"
+        self.phase = PHASE.RECONFIGURE
         self.grab_inputs(force_prompt=True)
         if os.path.exists(self.directory.manifest_path):
             self.source.write(open(self.directory.manifest_path, "w+"))
@@ -288,8 +288,8 @@ class Environment(object):
                     else:
                         del(self._feature_dict[key])
                 except SprinterException:
-                    self._log_error("Invalid formula %s for %s feature %s!"
-                                    % (feature_config.get('formula'), kind, feature))
+                    self.log_error("ERROR: Invalid formula %s for %s feature %s!"
+                                   % (feature_config.get('formula'), kind, feature))
             else:
                 setattr(self._feature_dict[key], kind, feature_config)
         else:
@@ -346,8 +346,11 @@ class Environment(object):
             try:
                 self._pip.install_egg(formula)
             except PipException:
-                self.logger.error("Unable to download %s!" % formula)
-            return lib.get_subclass_from_module(formula, FormulaBase)
+                self.logger.error("ERROR: Unable to download %s!" % formula)
+            try:
+                return lib.get_subclass_from_module(formula, FormulaBase)
+            except ImportError:
+                raise SprinterException("Error: Unable to retrieve formula %s!" % formula)
 
     def log_error(self, error_message):
         self.error_occured = True
