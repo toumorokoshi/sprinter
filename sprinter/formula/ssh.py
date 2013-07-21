@@ -18,8 +18,7 @@ from sprinter.formulabase import FormulaBase
 from sprinter.core import PHASE
 from sprinter import lib
 
-ssh_config_template = \
-    """
+ssh_config_template = """
 Host %(host)s
   HostName %(hostname)s
   IdentityFile %(ssh_path)s

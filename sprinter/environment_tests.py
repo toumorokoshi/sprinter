@@ -1,5 +1,6 @@
 from mock import Mock, call
-from sprinter.testtools import FormulaTest
+from sprinter.testtools import create_mock_environment
+from sprinter.exceptions import SprinterException
 
 source_config = """
 [config]
@@ -16,15 +17,15 @@ blank = thishasnoformula
 """
 
 
-class TestEnvironment(FormulaTest):
+class TestEnvironment(object):
     """ Tests for the environment """
-
-    def setup(self):
-        super(TestEnvironment, self).setup(source_config=source_config,
-                                           target_config=target_config)
 
     def test_grab_inputs_existing_source(self):
         """ Grabbing inputs should source from source first, if it exists """
+        self.environment = create_mock_environment(
+            source_config=source_config,
+            target_config=target_config
+        )
         self.environment.target.get_config = Mock()
         self.environment.grab_inputs()
         self.environment.target.get_config.assert_has_calls([
@@ -34,4 +35,19 @@ class TestEnvironment(FormulaTest):
         assert self.environment.target.get_config.call_count == 2, "More calls were called!"
 
     def test_running_missing_formula(self):
-        """ When a formula is missing, an error is thrown but execution continued. """
+        """ When a formula is missing, a sprinter exception should be thrown at the end """
+        self.environment = create_mock_environment(
+            target_config=missing_formula_config)
+        try:
+            self.environment.install()
+            raise Exception("Exception not raised!")
+        except SprinterException:
+            pass
+
+
+missing_formula_config = """
+[missingformula]
+
+[otherformula]
+formula = sprinter.formulabase
+"""
