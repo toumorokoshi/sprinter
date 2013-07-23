@@ -15,13 +15,13 @@ from sprinter.exceptions import SprinterException, BadCredentialsException
 
 env = None
 
-description = \
-"""
+description = """
 Install an environment as specified in a sprinter config file
 """
 
-VALID_COMMANDS = ["install", "update", "remove", "deactivate", "activate",
-                  "environments", "reconfigure", "validate"]
+VALID_COMMANDS = ["install", "update", "remove",
+                  "deactivate", "activate", "validate",
+                  "environments"]
 
 parser = OptionParser(description=description)
 # parser = argparse.ArgumentParser(description=description)
