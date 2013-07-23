@@ -80,6 +80,7 @@ class Environment(object):
         self._pip = Pip(self.global_path)
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
+        self.formula_dict = {}
 
     @warmup
     def install(self):

@@ -45,7 +45,7 @@ class TestFormulaBase(FormulaTest):
 
     @patch.object(lib, 'call')
     def test_install_with_command(self, call):
-        """ Test install with rc """
+        """ Test install with command """
         self.environment.run_feature("install_with_command", 'sync')
         call.assert_called_once_with("echo 'helloworld'", cwd="/tmp/", shell=True)
         assert not self.directory.add_to_rc.called, "add to rc called when rc not enabled!"
