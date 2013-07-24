@@ -33,7 +33,7 @@ class SSHFormula(FormulaBase):
     required_options = FormulaBase.required_options + ['keyname']
     valid_options = ['override', 'install_command']
 
-    def prompt(self):
+    def prompt(self, reconfigure=False):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
                 if (self.injections.in_noninjected_file(

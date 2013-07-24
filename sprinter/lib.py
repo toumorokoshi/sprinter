@@ -28,7 +28,7 @@ from sprinter.exceptions import (CommandMissingException,
                                  ExtractException,
                                  SprinterException)
 
-from core import logger
+from core import LOGGER
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
@@ -57,7 +57,8 @@ def get_subclass_from_module(module, parent_class):
         raise e
 
 
-def call(command, stdin=None, env=os.environ, cwd=None, shell=False, output_log_level=logging.INFO, logger=logger):
+def call(command, stdin=None, env=os.environ, cwd=None, shell=False,
+         output_log_level=logging.INFO, logger=LOGGER):
     """ Better, smarter call logic """
     args = command if shell else whitespace_smart_split(command)
     kw = {}
@@ -324,7 +325,3 @@ def _determine_overwrite(prompt, overwrite, path):
     elif prompt:
         return prompt("Path %s already exist! Overwrite?" % path, boolean=True)
     return True
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

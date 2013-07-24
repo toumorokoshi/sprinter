@@ -156,7 +156,7 @@ class Environment(object):
         self.logger.info("Deactivating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
         self.instantiate_features()
-        self._specialize_contexts()
+        self._specialize()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'deactivate')
         self.clear_environment_rc()
@@ -169,23 +169,12 @@ class Environment(object):
         self.phase = PHASE.ACTIVATE
         self.logger.info("Activating environment %s..." % self.namespace)
         self.directory.rewrite_rc = False
+        self.instantiate_features()
         self._specialize()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'activate')
         self.inject_environment_rc()
         self._finalize()
-
-    @warmup
-    @install_required
-    def reconfigure(self):
-        """ reconfigure the environment """
-        self.phase = PHASE.RECONFIGURE
-        self.grab_inputs(force_prompt=True)
-        if os.path.exists(self.directory.manifest_path):
-            self.source.write(open(self.directory.manifest_path, "w+"))
-        for feature in self._feature_dict_order:
-            self._run_action(feature, 'reconfigure')
-        self.logger.info("Reconfigured! Note: It's recommended to update after a configure")
 
     @warmup
     def inject_environment_rc(self):
@@ -225,6 +214,12 @@ class Environment(object):
                     for error in v:
                         fh.write(error + "\n")
 
+    def write_manifest(self):
+        """ Write the manifest to the file """
+        if os.path.exists(self.directory.manifest_path):
+            manifest = self.target or self.source
+            manifest.write(open(self.directory.manifest_path, "w+"))
+
     def message_failure(self):
         """ return a failure message, if one exists """
         manifest = self.target or self.source
@@ -254,7 +249,9 @@ class Environment(object):
             self.namespace = self.source.namespace
         if not self.directory:
             self.directory = Directory(self.namespace, sprinter_root=self.root)
-        self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(), self.namespace))
+        if not self.injections:
+            self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
+                                                            self.namespace))
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
@@ -302,9 +299,7 @@ class Environment(object):
     def _finalize(self):
         """ command to run at the end of sprinter's run """
         self.logger.info("Finalizing...")
-        if os.path.exists(self.directory.manifest_path):
-            manifest = self.target or self.source
-            manifest.write(open(self.directory.manifest_path, "w+"))
+        self.write()
         if self.directory.rewrite_rc:
             self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
             self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
@@ -392,6 +387,7 @@ class Environment(object):
         self.grab_inputs()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'validate', run_if_error=True)
+            self._run_action(feature, 'resolve')
             self._run_action(feature, 'prompt')
         for manifest in [self.source, self.target]:
             context_dict = {}

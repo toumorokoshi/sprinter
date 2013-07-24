@@ -32,7 +32,7 @@ class FormulaBase(object):
             raise FormulaException("A formula requires a source and/or a target!")
         self.logger = LOGGER
 
-    def prompt(self):
+    def prompt(self, reconfigure=False):
         """
         This call should contain as much of the user input as possible. Examples include:
 

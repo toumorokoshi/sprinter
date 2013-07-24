@@ -1,4 +1,5 @@
 from mock import Mock, call
+from nose import tools
 from sprinter.testtools import create_mock_environment
 from sprinter.exceptions import SprinterException
 from sprinter.formulabase import FormulaBase
@@ -52,9 +53,9 @@ class TestEnvironment(object):
         """
 
     def test_feature_run_order_install(self):
-        """ A feature should have it's methods run in the proper order """
+        """ A feature install should have it's methods run in the proper order """
         environment = create_mock_environment(
-            target_config=install_feature
+            target_config=test_target
         )
         mock_formulabase = Mock(spec=FormulaBase)
         mock_formulabase.resolve.return_value = None
@@ -62,42 +63,89 @@ class TestEnvironment(object):
         mock_formulabase.prompt.return_value = None
         mock_formulabase.sync.return_value = None
         environment.formula_dict['sprinter.formulabase'] = Mock(return_value=mock_formulabase)
-        environment.instantiate_features()
         environment.install()
-        import pdb; pdb.set_trace()
-        assert mock_formulabase.resolve.called
-        assert mock_formulabase.validate.called
-        assert mock_formulabase.prompt.called
-        assert mock_formulabase.sync.called
-        # resolve
-        # validate
-        # prompt
-        # sync
+        tools.eq_(mock_formulabase.method_calls, [call.should_run(),
+                                                  call.validate(),
+                                                  call.resolve(),
+                                                  call.prompt(),
+                                                  call.sync()])
 
     def test_feature_run_order_update(self):
-        """ A feature should have it's methods run in the proper order """
-        # resolve
-        # validate
-        # prompt
-        # sync
+        """ A feature update should have it's methods run in the proper order """
+        environment = create_mock_environment(
+            source_config=test_source,
+            target_config=test_target,
+            installed=True
+        )
+        mock_formulabase = Mock(spec=FormulaBase)
+        mock_formulabase.resolve.return_value = None
+        mock_formulabase.validate.return_value = None
+        mock_formulabase.prompt.return_value = None
+        mock_formulabase.sync.return_value = None
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=mock_formulabase)
+        environment.update()
+        tools.eq_(mock_formulabase.method_calls, [call.should_run(),
+                                                  call.validate(),
+                                                  call.resolve(),
+                                                  call.prompt(),
+                                                  call.sync()])
 
     def test_feature_run_order_remove(self):
-        """ A feature should have it's methods run in the proper order """
-        # resolve
-        # prompt
-        # sync
+        """ A feature remove should have it's methods run in the proper order """
+        environment = create_mock_environment(
+            source_config=test_source,
+            installed=True
+        )
+        mock_formulabase = Mock(spec=FormulaBase)
+        mock_formulabase.resolve.return_value = None
+        mock_formulabase.validate.return_value = None
+        mock_formulabase.prompt.return_value = None
+        mock_formulabase.sync.return_value = None
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=mock_formulabase)
+        environment.remove()
+        tools.eq_(mock_formulabase.method_calls, [call.should_run(),
+                                                  call.validate(),
+                                                  call.resolve(),
+                                                  call.prompt(),
+                                                  call.sync()])
 
     def test_feature_run_order_deactivate(self):
-        """ A feature should have it's methods run in the proper order """
-        # resolve
-        # prompt
-        # deactivate
+        """ A feature deactivate should have it's methods run in the proper order """
+        environment = create_mock_environment(
+            source_config=test_source,
+            installed=True
+        )
+        mock_formulabase = Mock(spec=FormulaBase)
+        mock_formulabase.resolve.return_value = None
+        mock_formulabase.validate.return_value = None
+        mock_formulabase.prompt.return_value = None
+        mock_formulabase.deactivate.return_value = None
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=mock_formulabase)
+        environment.deactivate()
+        tools.eq_(mock_formulabase.method_calls, [call.should_run(),
+                                                  call.validate(),
+                                                  call.resolve(),
+                                                  call.prompt(),
+                                                  call.deactivate()])
 
     def test_feature_run_order_activate(self):
         """ A feature should have it's methods run in the proper order """
-        # resolve
-        # prompt
-        # activate
+        environment = create_mock_environment(
+            source_config=test_source,
+            installed=True
+        )
+        mock_formulabase = Mock(spec=FormulaBase)
+        mock_formulabase.resolve.return_value = None
+        mock_formulabase.validate.return_value = None
+        mock_formulabase.prompt.return_value = None
+        mock_formulabase.activate.return_value = None
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=mock_formulabase)
+        environment.activate()
+        tools.eq_(mock_formulabase.method_calls, [call.should_run(),
+                                                  call.validate(),
+                                                  call.resolve(),
+                                                  call.prompt(),
+                                                  call.activate()])
 
 
 missing_formula_config = """
@@ -107,7 +155,12 @@ missing_formula_config = """
 formula = sprinter.formulabase
 """
 
-install_feature = """
-[installfeature]
+test_source = """
+[testfeature]
+formula = sprinter.formulabase
+"""
+
+test_target = """
+[testfeature]
 formula = sprinter.formulabase
 """
