@@ -149,7 +149,8 @@ class Manifest(object):
                 manifest.readfp(manifest_file_handler)
             else:
                 manifest.read(raw_manifest)
-            manifest.set('config', 'source', str(raw_manifest))
+            if not manifest.has_option('config', 'source'):
+                manifest.set('config', 'source', str(raw_manifest))
         elif raw_manifest.__class__ == RawConfigParser:
             return raw_manifest
         else:

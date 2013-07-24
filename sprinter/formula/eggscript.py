@@ -25,7 +25,7 @@ BLACKLISTED_EXECUTABLES = [
 
 class EggscriptFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['egg', 'eggs']
+    valid_options = FormulaBase.valid_options + ['egg', 'eggs', 'redownload']
 
     def install(self):
         create_virtualenv(self.directory.install_directory(self.feature_name))
@@ -35,7 +35,8 @@ class EggscriptFormula(FormulaBase):
 
     def update(self):
         if (self.source.get('egg', '') != self.target.get('egg', '') or
-           self.source.get('eggs', '') != self.target.get('eggs', '')):
+            self.source.get('eggs', '') != self.target.get('eggs', '') or
+            (self.target.has('redownload') and self.target.is_affirmative('redownload'))):
                 self.__install_eggs(self.target)
                 self.__add_paths(self.target)
         return FormulaBase.update(self)

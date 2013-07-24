@@ -119,12 +119,13 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        for k in self.target.keys():
-            if k not in self.valid_options or k not in self.required_options:
-                self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
-        for k in self.required_options:
-            if not self.target.has(k):
-                self._log_error("Required option %s not present in feature %s!" % (k, self.feature_name))
+        if self.target:
+            for k in self.target.keys():
+                if k not in self.valid_options and k not in self.required_options:
+                    self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
+            for k in self.required_options:
+                if not self.target.has(k):
+                    self._log_error("Required option %s not present in feature %s!" % (k, self.feature_name))
 
     # these methods are overwritten less often, and are not recommended to do so.
     def should_run(self):

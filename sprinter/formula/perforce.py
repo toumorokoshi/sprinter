@@ -35,7 +35,7 @@ class PerforceFormula(FormulaBase):
             config.prompt('write_p4settings', 'Write a p4settings file?', default='yes')
         config.set_if_empty('write_p4settings', True)
 
-        phase == "install" or reconfigure:
+        if phase == "install" or reconfigure:
             if config.is_affirmative('write_p4settings'):
                 p4settings_path = os.path.join(config.get('root_path'), '.p4settings')
 
