@@ -10,15 +10,22 @@ version = r10.1
 root_path = ~/p4/
 username = %(config:p4username)s
 password = %(config:p4password)s
-port = perforce.local:1666 
+port = perforce.local:1666
 client = %(config:node)s
 write_password_p4settings = true
 overwrite_p4settings = false
 overwrite_client = false
 
 """
+import os
+import re
+import shutil
+import urllib
+from sprinter import lib
+from sprinter.core import PHASE
+from sprinter.formulabase import FormulaBase
 
-valid_options = ['version', 'root_path', 'username', 'password', 'port', 
+valid_options = ['version', 'root_path', 'username', 'password', 'port',
                  'client', 'write_p4settings', 'write_password_p4settings', 'overwrite_p4settings',
                  'overwrite_client']
 
@@ -26,41 +33,41 @@ url_template = "http://filehost.perforce.com/perforce/%s/%s/p4"
 exec_dict = {"r10.1": {"mac": "bin.macosx104u",
                        "linux": "bin.linux26x86_64"}}
 
-from sprinter import lib
 
 class PerforceFormula(FormulaBase):
 
-    def prompt(self, feature_name, config, reconfigure=False):
-        if reconfigure:
-            config.prompt('write_p4settings', 'Write a p4settings file?', default='yes')
-        config.set_if_empty('write_p4settings', True)
+    def prompt(self, reconfigure=False):
+        if self.target:
+            if reconfigure:
+                self.target.prompt('write_p4settings', 'Write a p4settings file?', default='yes')
+                self.target.set_if_empty('write_p4settings', True)
 
-        if phase == "install" or reconfigure:
-            if config.is_affirmative('write_p4settings'):
-                p4settings_path = os.path.join(config.get('root_path'), '.p4settings')
+            if self.environment.phase == PHASE.INSTALL or reconfigure:
+                if self.target.is_affirmative('write_p4settings'):
+                    p4settings_path = os.path.join(self.target.get('root_path'), '.p4settings')
 
                 if os.path.exists(p4settings_path):
-                    config.prompt_if_empty(
+                    self.target.prompt_if_empty(
                         "overwrite_p4settings",
-                        "p4settings already exists at %s. Overwrite?" % config.get('root_path'),
+                        "p4settings already exists at %s. Overwrite?" % self.target.get('root_path'),
                         default="no", only_if_empty=(not reconfigure))
 
-                if lib.is_affirmative(config.get('overwrite_p4settings')):
-                    config.prompt_if_empty(
+                if lib.is_affirmative(self.target.get('overwrite_p4settings')):
+                    self.target.prompt_if_empty(
                         "write_password_p4settings",
                         "Insert the perforce password to your p4settings?" +
                         "(password will be stored in plaintext in a file in your perforce root)",
                         default="no", only_if_empty=(not reconfigure))
 
-            config.prompt_if_empty(
+            self.target.prompt_if_empty(
                 "overwrite_client",
                 "Would you like to overwrite the client workspace in perforce?",
                 default="yes", only_if_empty=(not reconfigure))
 
-        elif phase == "remove":
-                config.prompt_if_empty(
+        elif self.environment.phase == PHASE.REMOVE:
+                self.target.prompt_if_empty(
                     "remove_p4root",
-                    "Would you like to completely remove the p4 directory?" +
+                    "Would you like to completely remove the p4 directory?",
                     default="no", only_if_empty=True)
 
     def install(self, feature_name, config):
@@ -78,7 +85,7 @@ class PerforceFormula(FormulaBase):
         self.__add_p4_env(config)
 
     def update(self, feature_name, source_config, target_config):
-        super(PerforceFormula, self).update(feature_name, config)
+        FormulaBase.update(self)
         if source_config.get('version', 'r10.1') != target_config.get('version', 'r10.1'):
             os.remove(os.path.join(self.directory.install_directory(feature_name), 'p4'))
             self.__install_perforce(self, feature_name, target_config)
@@ -102,8 +109,8 @@ class PerforceFormula(FormulaBase):
     def __install_perforce(self, feature_name, config):
         """ install perforce binary """
         version = config.get('version', 'r10.1')
-        exec_dir = exec_dict[version]['mac'] if self.system.isOSX() else \
-                   exec_dict[version]['linux']
+        exec_dir = (exec_dict[version]['mac'] if self.system.isOSX() else
+                    exec_dict[version]['linux'])
         url = url_template % (version, exec_dir)
         d = self.directory.install_directory(feature_name)
         if not os.path.exists(d):
@@ -150,7 +157,7 @@ class PerforceFormula(FormulaBase):
     def __destroy_perforce(self, config):
         """ destroy the perforce root """
         self.logger.info("Removing %s..." % config.get('root_path'))
-        shutil.rmtree(os.path.expanduser(config.get('root_path'))
+        shutil.rmtree(os.path.expanduser(config.get('root_path')))
 
 p4settings_template = """
 P4USER=%(username)s
