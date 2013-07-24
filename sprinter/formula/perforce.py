@@ -69,7 +69,7 @@ class PerforceFormula(FormulaBase):
                                                     ('P4PASSWD', config['password']),
                                                     ('P4CLIENT', config['client'])])
         self.__install_perforce(feature_name, config)
-        if not os.path.exists(os.path.expanduser(config.get('root_path')):
+        if not os.path.exists(os.path.expanduser(config.get('root_path'))):
             os.makedirs(os.path.expanduser(config['root_path']))
         if config.is_affirmative('write_p4settings'):
             self.__write_p4settings(config)
