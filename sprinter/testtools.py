@@ -25,7 +25,7 @@ def create_mock_environment(source_config=None, target_config=None,
     environment.directory.new = not installed
     # mocking injections
     environment.injections = Mock(spec=environment.injections)
-    environment.write = Mock()
+    environment.write_manifest = Mock()
     return environment
 
 

@@ -299,7 +299,7 @@ class Environment(object):
     def _finalize(self):
         """ command to run at the end of sprinter's run """
         self.logger.info("Finalizing...")
-        self.write()
+        self.write_manifest()
         if self.directory.rewrite_rc:
             self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
             self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
