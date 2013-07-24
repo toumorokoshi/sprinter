@@ -21,7 +21,7 @@ from sprinter import lib
 ssh_config_template = """
 Host %(host)s
   HostName %(hostname)s
-  IdentityFile %(ssh_path)s
+  IdentityFile %(ssh_key_path)s
   User %(user)s
 """
 
@@ -30,8 +30,9 @@ ssh_config_path = os.path.expanduser('~/.ssh/config')
 
 class SSHFormula(FormulaBase):
 
-    required_options = FormulaBase.required_options + ['keyname']
-    valid_options = ['override', 'install_command']
+    required_options = FormulaBase.required_options + ['keyname', 'hostname', 'user', 'host']
+    valid_options = FormulaBase.valid_options + ['override', 'install_command', 'create',
+                                                 'nopassphrase', 'type', 'ssh_path']
 
     def prompt(self, reconfigure=False):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
@@ -48,7 +49,7 @@ class SSHFormula(FormulaBase):
         ssh_key_path = self.__generate_key(self.target)
         self.__install_ssh_config(self.target, ssh_key_path)
         if self.target.has('install_command'):
-            self.__call_command(self.target.get('command'), ssh_key_path)
+            self.__call_command(self.target.get('install_command'), ssh_key_path)
 
     def update(self):
         ssh_key_path = self.__generate_key(self.target)
@@ -58,6 +59,9 @@ class SSHFormula(FormulaBase):
         ssh_key_path = os.path.join(self.directory.install_directory(self.feature_name),
                                     self.source.get('keyname'))
         self.__install_ssh_config(self.source, ssh_key_path)
+
+    def remove(self):
+        self.injections.inject(ssh_config_path, "")
 
     def activate(self):
         ssh_key_path = os.path.join(self.directory.install_directory(self.feature_name),

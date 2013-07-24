@@ -68,7 +68,7 @@ class Directory(object):
         self.__remove_path(os.path.join(self.root_dir, "bin", name))
 
     def remove_feature(self, feature_name):
-        """ Remove an object from the bin folder. """
+        """ Remove an feature from the environment root folder. """
         self.__remove_path(self.install_directory(feature_name))
 
     def symlink_to_lib(self, name, path):

@@ -103,7 +103,7 @@ class Environment(object):
         except Exception:
             self.logger.exception("")
             self.logger.info("An error occured during installation!")
-            self.clear_environment_rc()
+            self.clear_all()
             self.logger.info("Removing installation %s..." % self.namespace)
             self.directory.remove()
             et, ei, tb = sys.exc_info()
@@ -140,7 +140,7 @@ class Environment(object):
             self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
-            self.clear_environment_rc()
+            self.clear_all()
             self.directory.remove()
             self.injections.commit()
         except Exception:
@@ -159,7 +159,7 @@ class Environment(object):
         self._specialize()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'deactivate')
-        self.clear_environment_rc()
+        self.clear_all()
         self._finalize()
 
     @warmup
@@ -186,7 +186,9 @@ class Environment(object):
                                (self.directory.root_dir, self.directory.root_dir))
 
     @warmup
-    def clear_environment_rc(self):
+    def clear_all(self):
+        """ clear all files that were to be injected """
+        self.injections.clear_all()
         self.injections.clear("~/.profile")
         self.injections.clear("~/.bash_profile")
         self.injections.clear("~/.bashrc")
@@ -312,7 +314,7 @@ class Environment(object):
 
     def _install_sandbox(self, name, call, kwargs={}):
         if (self.target.is_affirmative('config', name) and
-           (not self.source or not self.source.is_true('config', name))):
+           (not self.source or not self.source.is_affirmative('config', name))):
             self.logger.info("Installing %s..." % name)
             call(self.directory.root_dir, **kwargs)
 
@@ -378,7 +380,8 @@ class Environment(object):
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
         except Exception, e:
-            self.logger.exception("An exception occurred!")
+            self.logger.exception("An exception occurred with action %s in feature %s!" %
+                                  (action, feature))
             self.log_feature_error(feature, str(e))
 
     def _specialize(self):

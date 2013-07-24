@@ -44,6 +44,11 @@ class Injections(object):
         """ add the file to the list of files to clear """
         self.clear_set.add(filename)
 
+    def clear_all(self):
+        """ Clear all files that are currently prepped to be injected """
+        for filename in self.inject_dict:
+            self.clear_set.add(filename)
+
     def commit(self):
         """ commit the injections desired, overwriting any previous injections in the file. """
         self.logger.debug("Starting injections...")

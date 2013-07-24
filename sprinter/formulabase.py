@@ -12,7 +12,7 @@ from sprinter import lib
 
 class FormulaBase(object):
 
-    valid_options = ['rc', 'command', 'systems']
+    valid_options = ['rc', 'command', 'systems', 'depends', 'inputs']
     required_options = ['formula']
 
     def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
@@ -164,4 +164,4 @@ class FormulaBase(object):
     def _log_error(self, message):
         """ Log an error for the feature """
         key = (self.feature_name, self.target.get('formula'))
-        self.environment.log_feature_error(key, message)
+        self.environment.log_feature_error(key, "ERROR: " + message)

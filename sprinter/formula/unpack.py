@@ -25,10 +25,8 @@ class UnpackFormulaException(Exception):
 class UnpackFormula(FormulaBase):
     """ A sprinter formula for unpacking a compressed package and extracting it"""
 
-    valid_options = FormulaBase.valid_options + ['executable',
-                                                 'symlink',
-                                                 'target',
-                                                 'remove_common_prefix']
+    valid_options = FormulaBase.valid_options + ['executable', 'symlink', 'target',
+                                                 'remove_common_prefix', 'type']
     required_options = FormulaBase.required_options + ['url']
 
     def install(self):
@@ -36,7 +34,7 @@ class UnpackFormula(FormulaBase):
         if self.target.has('executable'):
             symlink_target = self.target.get('symlink',
                                              self.target.get('executable'))
-            self.__symlink_executable(os.path.self.target.get('executable'),
+            self.__symlink_executable(self.target.get('executable'),
                                       symlink_target)
         FormulaBase.install(self)
 
@@ -49,7 +47,7 @@ class UnpackFormula(FormulaBase):
                     self.logger.error("Unable to remove old directory!")
             self.__install(self.target)
         if self.source.has('executable'):
-            symlink = self.source('symlink', self.source.get('executable'))
+            symlink = self.source.get('symlink', self.source.get('executable'))
             if os.path.exists(symlink) and os.path.islink(symlink):
                 try:
                     self.directory.remove_from_bin(
@@ -57,16 +55,15 @@ class UnpackFormula(FormulaBase):
                 except DirectoryException:
                     pass
         if self.target.has('executable'):
-            symlink = self.target.get('symlink', self.target('executable'))
+            symlink = self.target.get('symlink', self.target.get('executable'))
             if not os.path.exists(symlink):
-                self.__symlink_executable(self.feature_name,
-                                          self.target.get('executable'),
+                self.__symlink_executable(self.target.get('executable'),
                                           symlink)
         FormulaBase.update(self)
 
     def remove(self):
         if self.source.has('executable'):
-            symlink = self.source('symlink', self.source.get('executable'))
+            symlink = self.source.get('symlink', self.source.get('executable'))
             if os.path.exists(symlink) and os.path.islink(symlink):
                 try:
                     self.directory.remove_from_bin(

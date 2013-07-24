@@ -8,6 +8,7 @@ brew = git
 """
 from sprinter.formulabase import FormulaBase
 from sprinter import lib
+import logging
 
 
 class PackageFormulaException(Exception):
@@ -43,7 +44,7 @@ class PackageFormula(FormulaBase):
             if self.sudo_required:
                 call_command = "sudo " + call_command
             self.logger.debug("Calling command: %s" % call_command)
-            lib.call(call_command)
+            lib.call(call_command, output_log_level=logging.DEBUG)
 
     def __get_package_manager(self):
         """

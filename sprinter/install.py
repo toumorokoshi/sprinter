@@ -8,6 +8,7 @@ import sys
 from optparse import OptionParser
 
 from sprinter import lib
+from sprinter.core import PHASE
 from sprinter.environment import Environment
 from sprinter.manifest import Manifest
 from sprinter.directory import Directory
@@ -86,10 +87,10 @@ def parse_args(argv, Environment=Environment):
     try:
         if command == "install":
             def handle_install_shutdown(signal, frame):
-                if env.phase == "install":
+                if env.phase == PHASE.INSTALL:
                     print "Removing install..."
                     env.directory.remove()
-                    env.clear_environment_rc()
+                    env.clear_all()
                 signal_handler(signal, frame)
             signal.signal(signal.SIGINT, handle_install_shutdown)
             if options.username or options.auth:
@@ -135,7 +136,7 @@ def parse_args(argv, Environment=Environment):
         env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
         env.write_debug_log("/tmp/sprinter.log")
         if env.message_failure():
-            env.logger.info(env.message_failure)
+            env.logger.info(env.message_failure())
 
 
 def parse_domain(url):

@@ -102,7 +102,7 @@ class Manifest(object):
                 self.remove_option('config', k)
         self.set('config', 'namespace', self.namespace)
         self.manifest.write(file_handle)
-        for k, v in temp_variables:
+        for k, v in temp_variables.items():
             self.set('config', k, v)
 
     def get_config(self, param_name, default=None, secret=False, force_prompt=False):
@@ -114,7 +114,7 @@ class Manifest(object):
                                                       default=default,
                                                       secret=secret))
         if secret:
-            self.temporary_sections.append(param_name)
+            self.temporary_config_variables.append(param_name)
         return self.get('config', param_name)
 
     def get_feature_config(self, feature_name):

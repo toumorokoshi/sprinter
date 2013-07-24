@@ -21,7 +21,7 @@ class GitException(Exception):
 class GitFormula(FormulaBase):
     """ A sprinter formula for git"""
 
-    required_options = ['url']
+    required_options = FormulaBase.required_options + ['url']
 
     def install(self):
         self.__clone_repo(self.target.get('url'),
