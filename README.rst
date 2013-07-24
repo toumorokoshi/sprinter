@@ -16,11 +16,11 @@ Or use a sandboxed install:
 
 OSX::
 
-    $ curl -s https://raw.github.com/toumorokoshi/sprinter/master/scripts/sprinter_sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
+    $ curl -s https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
 
 Debian-Based (e.g. Ubuntu)::
     
-    $ cd /tmp/; rm sprinter_sandbox.sh; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sprinter_sandbox.sh -O sprinter_sandbox.sh; bash sprinter_sandbox.sh
+    $ cd /tmp/; rm sandbox.sh; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
    
 
 A cross-platform environment bootstrapping framework!
@@ -47,15 +47,15 @@ Install an environment::
 
 Install the environment specified in the environment.cfg file. It will update an environment if it already exists.::
 
-    $ sprinter activate MY_ENVIRONMENT
+    $ sprinter update MY_ENVIRONMENT
 
 Activate MY_ENVIRONMENT::
 
-    $ sprinter deaactivate MY_ENVIRONMENT
+    $ sprinter activate MY_ENVIRONMENT
 
 deactivate MY_ENVIRONMENT::
 
-    $ sprinter update MY_ENVIRONMENT
+    $ sprinter deactivate MY_ENVIRONMENT
 
 remove MY_ENVIRONMENT::
 

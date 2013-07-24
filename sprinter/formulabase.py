@@ -69,7 +69,7 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        return self.install()
+        return FormulaBase.install(self)
 
     def remove(self):
         """
