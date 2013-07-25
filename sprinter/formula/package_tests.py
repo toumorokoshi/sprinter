@@ -1,3 +1,4 @@
+import logging
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
 from sprinter import lib
@@ -49,21 +50,21 @@ class TestPackageFormula(FormulaTest):
         """ A brew package should install on osx """
         self.environment.system.isOSX = Mock(return_value=True)
         self.environment.run_feature('simple_example', 'sync')
-        call.assert_called_with("brew install git")
+        call.assert_called_with("brew install git", output_log_level=logging.DEBUG, stdout=None)
 
     @patch.object(lib, 'call')
     def test_simple_example_debian(self, call):
         """ An apt-get package should install on debian """
         self.environment.system.isDebianBased = Mock(return_value=True)
         self.environment.run_feature('simple_example', 'sync')
-        call.assert_called_with("sudo apt-get -y install git-core")
+        call.assert_called_with("sudo apt-get -y install git-core", output_log_level=logging.DEBUG, stdout=None)
 
     @patch.object(lib, 'call')
     def test_simple_example_fedora(self, call):
         """ A yum package should install properly on fedora """
         self.environment.system.isFedoraBased = Mock(return_value=True)
         self.environment.run_feature('simple_example', 'sync')
-        call.assert_called_with("sudo yum install git-core")
+        call.assert_called_with("sudo yum install git-core", output_log_level=logging.DEBUG, stdout=None)
 
     @patch.object(lib, 'call')
     def test_no_update(self, call):
@@ -76,4 +77,4 @@ class TestPackageFormula(FormulaTest):
         """ An feature with a new formula """
         self.environment.system.isDebianBased = Mock(return_value=True)
         self.environment.run_feature('update_new_package', 'sync')
-        call.assert_called_with("sudo apt-get -y install gitB")
+        call.assert_called_with("sudo apt-get -y install gitB", output_log_level=logging.DEBUG, stdout=None)
