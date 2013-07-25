@@ -396,11 +396,6 @@ class Environment(object):
     def _specialize(self):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
-        self.grab_inputs()
-        for feature in self._feature_dict_order:
-            self._run_action(feature, 'validate', run_if_error=True)
-            self._run_action(feature, 'resolve')
-            self._run_action(feature, 'prompt')
         for manifest in [self.source, self.target]:
             context_dict = {}
             if manifest:
@@ -409,6 +404,11 @@ class Environment(object):
                     context_dict['config:root_dir'] = self.directory.root_dir
                     context_dict['config:node'] = self.system.node
                 manifest.add_additional_context(context_dict)
+        self.grab_inputs()
+        for feature in self._feature_dict_order:
+            self._run_action(feature, 'validate', run_if_error=True)
+            self._run_action(feature, 'resolve')
+            self._run_action(feature, 'prompt')
 
     def grab_inputs(self, force_prompt=False):
         """ Resolve the source and target config section """
