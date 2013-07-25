@@ -70,7 +70,7 @@ class PerforceFormula(FormulaBase):
                 self.target.prompt(
                     "client",
                     "Please choose your perforce client",
-                    default=config.get('client'))
+                    default=self.target.get('client'))
             self.target.prompt(
                 "overwrite_client",
                 "Would you like to overwrite the client workspace in perforce?",
