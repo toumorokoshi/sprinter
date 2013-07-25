@@ -69,7 +69,8 @@ class Directory(object):
 
     def remove_feature(self, feature_name):
         """ Remove an feature from the environment root folder. """
-        self.__remove_path(self.install_directory(feature_name))
+        if os.path.exists(self.install_directory(feature_name)):
+            self.__remove_path(self.install_directory(feature_name))
 
     def symlink_to_lib(self, name, path):
         """ Symlink an object at path to name in the lib folder. """

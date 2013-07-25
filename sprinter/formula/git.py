@@ -56,10 +56,6 @@ class GitFormula(FormulaBase):
                 raise GitException("An error occurred when pulling!")
         FormulaBase.update(self)
 
-    def remove(self, feature_name, config):
-        FormulaBase.remove(self)
-        self.directory.remove_feature(self.feature_name)
-
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)
         os.chdir(target_directory)

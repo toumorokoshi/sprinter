@@ -44,7 +44,9 @@ class PackageFormula(FormulaBase):
             if self.sudo_required:
                 call_command = "sudo " + call_command
             self.logger.debug("Calling command: %s" % call_command)
-            lib.call(call_command, output_log_level=logging.DEBUG)
+            # it's not possible to retain remember sudo privileges across shells unless they pipe
+            # to STDOUT. Nothing we can do about that for now.
+            lib.call(call_command, output_log_level=logging.DEBUG, stdout=None)
 
     def __get_package_manager(self):
         """

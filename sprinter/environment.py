@@ -196,7 +196,16 @@ class Environment(object):
     def install_sandboxes(self):
         if self.target:
             if self.system.isOSX():
-                self._install_sandbox('brew', brew.install_brew)
+                if not self.target.is_affirmative('config', 'use_global_packagemanagers'):
+                    self._install_sandbox('brew', brew.install_brew)
+                elif lib.which('brew') is None:
+                    install_brew = lib.prompt(
+                        "Looks like you don't have brew, " +
+                        "which is sprinter's package manager of choice for OSX.\n"
+                        "Would you like sprinter to install brew for you?",
+                        default="yes", boolean=True)
+                    if install_brew:
+                        brew.install_brew('/usr/local')
 
     def run_feature(self, feature, action):
         for k in self._feature_dict_order:
@@ -403,11 +412,11 @@ class Environment(object):
 
     def grab_inputs(self, force_prompt=False):
         """ Resolve the source and target config section """
-        if self.target and self.source:
-            for k, v in self.source.items('config'):
-                if not self.target.has_option('config', k):
-                    self.target.set('config', k, v)
-        if self.target:
-            self.target.grab_inputs(force_prompt=force_prompt)
         if self.source:
             self.source.grab_inputs(force_prompt=force_prompt)
+            if self.target:
+                for k, v in self.source.items('config'):
+                    if not self.target.has_option('config', k):
+                        self.target.set('config', k, v)
+        if self.target:
+            self.target.grab_inputs(force_prompt=force_prompt)

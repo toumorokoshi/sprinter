@@ -82,6 +82,7 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
+        self.directory.remove_feature(self.feature_name)
 
     def deactivate(self):
         """

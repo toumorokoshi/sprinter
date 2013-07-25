@@ -57,7 +57,7 @@ def get_subclass_from_module(module, parent_class):
         raise e
 
 
-def call(command, stdin=None, env=os.environ, cwd=None, shell=False,
+def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False,
          output_log_level=logging.INFO, logger=LOGGER):
     """ Better, smarter call logic """
     args = command if shell else whitespace_smart_split(command)
@@ -66,7 +66,7 @@ def call(command, stdin=None, env=os.environ, cwd=None, shell=False,
         raise CommandMissingException(args[0])
     if shell:
         kw['shell'] = True
-    process = subprocess.Popen(args, stdin=PIPE, stdout=PIPE, stderr=STDOUT,
+    process = subprocess.Popen(args, stdin=PIPE, stdout=stdout, stderr=STDOUT,
                                env=env, cwd=cwd, **kw)
     output = process.communicate(input=stdin)[0]
     logger.log(output_log_level, output)
