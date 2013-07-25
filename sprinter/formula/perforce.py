@@ -66,7 +66,11 @@ class PerforceFormula(FormulaBase):
                         "Insert the perforce password to your p4settings?\n" +
                         "(password will be stored in plaintext in a file in your perforce root)\n",
                         default="no", only_if_empty=(not reconfigure))
-
+            if self.environment.phase == PHASE.INSTALL or reconfigure:
+                self.target.prompt(
+                    "client",
+                    "Please choose your perforce client",
+                    default=config.get('client'))
             self.target.prompt(
                 "overwrite_client",
                 "Would you like to overwrite the client workspace in perforce?",
