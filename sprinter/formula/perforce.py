@@ -125,11 +125,12 @@ class PerforceFormula(FormulaBase):
         self.logger.info("Writing p4settings...")
         root_dir = os.path.expanduser(config.get('root_path'))
         p4settings_path = os.path.join(root_dir, ".p4settings")
-        if not os.path.exists(p4settings_path) or self.target.get('overwrite_p4settings', False):
-            self.logger.info("Overwriting existing p4settings...")
-            os.remove(p4settings_path)
-        else:
-            return
+        if os.path.exists(p4settings_path): 
+            if self.target.get('overwrite_p4settings', False):
+                self.logger.info("Overwriting existing p4settings...")
+                os.remove(p4settings_path)
+            else:
+                return
         with open(p4settings_path, "w+") as p4settings_file:
             p4settings_file.write(p4settings_template % config.to_dict())
             if config.get('write_password_p4settings'):
