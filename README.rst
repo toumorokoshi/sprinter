@@ -5,6 +5,7 @@ sprinter
 
 .. image:: https://travis-ci.org/toumorokoshi/sprinter.png
    :alt: build status
+   :target: https://travis-ci.org/toumorokoshi/sprinter
 
 Installation
 ------------

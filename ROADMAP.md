@@ -13,9 +13,6 @@ TODO:
 This page highlights Sprinter's roadmap to reach 1.0
 release. Currently sprinter is at version 0.6
 
-### 0.7
-* Migrate 'sprinter.formulas' to 'sprinter.formula'
-
 # Before 1.0
 The documentation needs to properly and completely document
 the sprinter libraries and extension design:
@@ -23,7 +20,6 @@ the sprinter libraries and extension design:
 * All formulas sufficiently tested
 * ensure proper coverage for environment
 * Add doc section for 'phases' and phases keyword in config
-* Finish up formula functionality
 
 ### 1.0
 Success! A Stable library that can be used to install environments to machines with ease

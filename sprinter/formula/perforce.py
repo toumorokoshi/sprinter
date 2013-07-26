@@ -15,7 +15,6 @@ client = %(config:node)s
 write_password_p4settings = true
 overwrite_p4settings = false
 overwrite_client = false
-
 """
 import os
 import re
