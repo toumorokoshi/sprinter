@@ -25,7 +25,8 @@ Host %(host)s
   User %(user)s
 """
 
-ssh_config_path = os.path.expanduser('~/.ssh/config')
+user_ssh_path = os.path.expanduser("~/.ssh")
+ssh_config_path = os.path.join(user_ssh_path, "config")
 
 
 class SSHFormula(FormulaBase):
@@ -37,7 +38,7 @@ class SSHFormula(FormulaBase):
     def prompt(self, reconfigure=False):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
-                if not self.has('use_global_ssh') and self.__global_ssh_key_exists():
+                if not self.target.has('use_global_ssh') and self.__global_ssh_key_exists():
                     self.target.prompt("use_global_ssh",
                                        "A standard global ssh key was detected! Would you like to use the global ssh key?",
                                        default="no")
@@ -91,7 +92,7 @@ class SSHFormula(FormulaBase):
         """
         Install the ssh configuration
         """
-        if not self.__global_ssh_key_exists() or not self.target.config('use_global_ssh', default=False):
+        if not self.__global_ssh_key_exists() or not self.target.get('use_global_ssh', default=False):
             config.set('ssh_key_path', ssh_key_path)
             ssh_config_injection = ssh_config_template % config.to_dict()
             if os.path.exists(ssh_config_path):
@@ -112,6 +113,6 @@ class SSHFormula(FormulaBase):
 
     def __global_ssh_key_exists(self):
         """ Check if the global ssh keys exists """
-        return (os.path.exists(os.path.join(ssh_config_path, "id_dsa")) or 
-                os.path.exists(os.path.join(ssh_config_path, "id_ecdsa")) or 
-                os.path.exists(os.path.join(ssh_config_path, "id_rsa")))
+        return (os.path.exists(os.path.join(user_ssh_path, "id_dsa")) or 
+                os.path.exists(os.path.join(user_ssh_path, "id_ecdsa")) or 
+                os.path.exists(os.path.join(user_ssh_path, "id_rsa")))
