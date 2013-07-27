@@ -32,11 +32,15 @@ class SSHFormula(FormulaBase):
 
     required_options = FormulaBase.required_options + ['keyname', 'hostname', 'user', 'host']
     valid_options = FormulaBase.valid_options + ['override', 'install_command', 'create',
-                                                 'nopassphrase', 'type', 'ssh_path']
+                                                 'nopassphrase', 'type', 'ssh_path', 'use_global_ssh']
 
     def prompt(self, reconfigure=False):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
+                if not self.has('use_global_ssh') and self.__global_ssh_key_exists():
+                    self.target.prompt("use_global_ssh",
+                                       "A standard global ssh key was detected! Would you like to use the global ssh key?",
+                                       default="no")
                 if (self.injections.in_noninjected_file(
                         ssh_config_path, "Host %s" % self.target.get('host')) and
                    not self.target.has('override')):
@@ -87,20 +91,27 @@ class SSHFormula(FormulaBase):
         """
         Install the ssh configuration
         """
-        config.set('ssh_key_path', ssh_key_path)
-        ssh_config_injection = ssh_config_template % config.to_dict()
-        if os.path.exists(ssh_config_path):
-            if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config.get('host')):
-                if config.is_affirmative('override'):
+        if not self.__global_ssh_key_exists() or not self.target.config('use_global_ssh', default=False):
+            config.set('ssh_key_path', ssh_key_path)
+            ssh_config_injection = ssh_config_template % config.to_dict()
+            if os.path.exists(ssh_config_path):
+                if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config.get('host')):
+                    if config.is_affirmative('override'):
+                        self.injections.inject(ssh_config_path, ssh_config_injection)
+                else:
                     self.injections.inject(ssh_config_path, ssh_config_injection)
             else:
                 self.injections.inject(ssh_config_path, ssh_config_injection)
-        else:
-            self.injections.inject(ssh_config_path, ssh_config_injection)
-        self.injections.commit()
+            self.injections.commit()
 
     def __call_command(self, command, ssh_path):
         ssh_path += ".pub"  # make this the public key
         ssh_contents = open(ssh_path, 'r').read().rstrip('\n')
         command = command.replace('{{ssh}}', ssh_contents)
         lib.call(command, shell=True, output_log_level=logging.DEBUG)
+
+    def __global_ssh_key_exists(self):
+        """ Check if the global ssh keys exists """
+        return (os.path.exists(os.path.join(ssh_config_path, "id_dsa")) or 
+                os.path.exists(os.path.join(ssh_config_path, "id_ecdsa")) or 
+                os.path.exists(os.path.join(ssh_config_path, "id_rsa")))
