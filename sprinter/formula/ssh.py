@@ -92,7 +92,7 @@ class SSHFormula(FormulaBase):
         """
         Install the ssh configuration
         """
-        if not self.__global_ssh_key_exists() or not self.target.get('use_global_ssh', default=False):
+        if not self.__global_ssh_key_exists() or not self.target.is_affirmative('use_global_ssh', default="no"):
             config.set('ssh_key_path', ssh_key_path)
             ssh_config_injection = ssh_config_template % config.to_dict()
             if os.path.exists(ssh_config_path):
