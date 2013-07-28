@@ -5,6 +5,7 @@ Tests for the library
 import os
 import shutil
 import tempfile
+from base64 import b64encode
 
 import httpretty
 from nose import tools
@@ -13,7 +14,8 @@ from sprinter.formulabase import FormulaBase
 from sprinter.environment import Environment
 from sprinter.formula.env import EnvFormula
 from sprinter import lib
-from sprinter.lib import CommandMissingException
+from sprinter.lib import (BadCredentialsException,
+                          CommandMissingException)
 
 TEST_TARGZ = "http://github.com/toumorokoshi/sprinter/tarball/master"
 
@@ -175,3 +177,26 @@ class TestLib(object):
             assert not lib.is_affirmative("gibberish")
             assert not lib.is_affirmative("coto")
             assert not lib.is_affirmative("eslaf")
+
+        @httpretty.activate
+        def test_authenticated_get(self):
+            """ The authenticated get should pass in authentication headers """
+            TEST_URI = "http://testme.com/test.html"
+            CONTENT = "hello world"
+            httpretty.register_uri(httpretty.GET, TEST_URI,
+                                   body=CONTENT)
+            returned_content = lib.authenticated_get("username", "password", TEST_URI)
+            tools.eq_(returned_content, CONTENT)
+            tools.ok_("Authorization" in httpretty.last_request().headers)
+            tools.eq_(httpretty.last_request().headers["Authorization"],
+                      "Basic %s" % b64encode(b"%s:%s" % ("username", "password")).decode("ascii"))
+
+        @httpretty.activate
+        @tools.raises(BadCredentialsException)
+        def test_authenticated_failed_get(self):
+            """ The authenticated failed get should throw a BadCredentials exception """
+            TEST_URI = "http://testme.com/test.html"
+            CONTENT = "hello world"
+            httpretty.register_uri(httpretty.GET, TEST_URI,
+                                   body=CONTENT, status=401)
+            lib.authenticated_get("username", "password", TEST_URI)

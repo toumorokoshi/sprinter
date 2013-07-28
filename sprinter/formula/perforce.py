@@ -48,7 +48,7 @@ class PerforceFormula(FormulaBase):
 
             if self.environment.phase == PHASE.INSTALL or reconfigure:
                 if self.target.is_affirmative('write_p4settings'):
-                    p4settings_path = os.path.join(os.path.expanduser(self.target.get('root_path')), 
+                    p4settings_path = os.path.join(os.path.expanduser(self.target.get('root_path')),
                                                    '.p4settings')
 
                 if os.path.exists(p4settings_path):
@@ -57,8 +57,8 @@ class PerforceFormula(FormulaBase):
                         "p4settings already exists at %s. Overwrite?" % self.target.get('root_path'),
                         default="no", only_if_empty=(not reconfigure))
 
-                if (self.target.is_affirmative('write_p4settings') and 
-                    (not os.path.exists(p4settings_path) 
+                if (self.target.is_affirmative('write_p4settings') and
+                    (not os.path.exists(p4settings_path)
                      or self.target.is_affirmative('overwrite_p4settings', default=False))):
                     self.target.prompt(
                         "write_password_p4settings",

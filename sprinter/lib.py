@@ -17,6 +17,7 @@ import tarfile
 import tempfile
 import urllib2
 import urllib
+import requests
 from StringIO import StringIO
 from base64 import b64encode
 
@@ -143,17 +144,12 @@ def authenticated_get(username, password, url):
     """
     Perform an authorized query to the url, and return the result
     """
-    try:
-        request = urllib2.Request(url)
-        base64string = b64encode((b"%s:%s" % (username, password)).decode("ascii"))
-        request.add_header("Authorization", "Basic %s" % base64string)
-        result = urllib2.urlopen(request)
-    except urllib2.HTTPError, e:
-        if e.code == 401:
-            raise BadCredentialsException(
-                "Unable to authenticate user %s to %s with password provided!"
-                % (username, url))
-    return result.read()
+    response = requests.get(url, auth=(username, password))
+    if response.status_code == 401:
+        raise BadCredentialsException(
+            "Unable to authenticate user %s to %s with password provided!"
+            % (username, url))
+    return response.content
 
 
 def prompt(prompt_string, default=None, secret=False, boolean=False):
