@@ -51,27 +51,23 @@ class SSHFormula(FormulaBase):
                     self.target.set('override', lib.prompt("Override?", boolean=True, default="no"))
 
     def install(self):
-        ssh_key_path = self.__generate_key(self.target)
-        self.__install_ssh_config(self.target, ssh_key_path)
+        self.__generate_key(self.target)
+        self.__install_ssh_config(self.target)
         if self.target.has('install_command'):
-            self.__call_command(self.target.get('install_command'), ssh_key_path)
+            self.__call_command(self.target.get('install_command'), self.target.get('ssh_key_path'))
 
     def update(self):
-        ssh_key_path = self.__generate_key(self.target)
-        self.__install_ssh_config(self.target, ssh_key_path)
+        self.__generate_key(self.target)
+        self.__install_ssh_config(self.target)
 
     def deactivate(self):
-        ssh_key_path = os.path.join(self.directory.install_directory(self.feature_name),
-                                    self.source.get('keyname'))
         self.injections.inject(ssh_config_path, "")
 
     def remove(self):
         self.injections.inject(ssh_config_path, "")
 
     def activate(self):
-        ssh_key_path = os.path.join(self.directory.install_directory(self.feature_name),
-                                    self.source.get('keyname'))
-        self.__install_ssh_config(self.source, ssh_key_path)
+        self.__install_ssh_config(self.source)
 
     def __generate_key(self, config):
         """
@@ -86,14 +82,13 @@ class SSHFormula(FormulaBase):
                 lib.call(command, cwd=cwd, output_log_level=logging.DEBUG)
         if not config.has('ssh_path'):
             config.set('ssh_path', cwd)
-        return os.path.join(cwd, config.get('keyname'))
+        config.set('ssh_key_path', os.path.join(config.get('ssh_path'), config.get('keyname')))
 
-    def __install_ssh_config(self, config, ssh_key_path):
+    def __install_ssh_config(self, config):
         """
         Install the ssh configuration
         """
         if not self.__global_ssh_key_exists() or not config.is_affirmative('use_global_ssh', default="no"):
-            config.set('ssh_key_path', ssh_key_path)
             ssh_config_injection = ssh_config_template % config.to_dict()
             if os.path.exists(ssh_config_path):
                 if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config.get('host')):
