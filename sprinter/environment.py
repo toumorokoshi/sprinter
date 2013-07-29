@@ -237,7 +237,7 @@ class Environment(object):
     def message_failure(self):
         """ return a failure message, if one exists """
         manifest = self.target or self.source
-        if manifest.has_option('config', 'message_failure'):
+        if manifest and manifest.has_option('config', 'message_failure'):
             return manifest.get('config', 'message_failure')
 
     def message_success(self):

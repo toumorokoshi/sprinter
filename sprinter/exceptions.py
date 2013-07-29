@@ -22,5 +22,9 @@ class BadCredentialsException(Exception):
     """ Returned if the credentials are incorrect """
 
 
+class CertificateException(Exception):
+    """ Returned if the certificates are incorrect """
+
+
 class ExtractException(Exception):
     """ Returned if there was an issue with extracting a package """

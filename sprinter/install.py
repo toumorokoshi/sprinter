@@ -40,6 +40,8 @@ parser.add_option('--password', dest='password', default=None,
 parser.add_option('-v', dest='verbose', action='store_true', help="Make output verbose")
 parser.add_option('--reconfigure', dest='reconfigure', default=False, action="store_true",
                   help="if true, a sprinter update will reconfigure the existing environment specified")
+parser.add_option('--allow-bad-certificate', dest='allow_bad_certificate', default=False, action="store_true",
+                  help="if true, a sprinter update will not verify the ssl certificate for pulling remote configuration")
 # not implemented yet
 """
 parser.add_option('--sandboxbrew', dest='sandbox_brew', default=False,
@@ -95,7 +97,10 @@ def parse_args(argv, Environment=Environment):
             signal.signal(signal.SIGINT, handle_install_shutdown)
             if options.username or options.auth:
                 options = get_credentials(options, parse_domain(target))
-                target = Manifest(target, username=options.username, password=options.password)
+                target = Manifest(target,
+                                  username=options.username,
+                                  password=options.password,
+                                  verify_certificate=(not options.allow_bad_certificate))
             env.target = target
             env.namespace = options.namespace
             env.install()
@@ -107,7 +112,8 @@ def parse_args(argv, Environment=Environment):
                 options = get_credentials(options, target)
             env.target = Manifest(env.source.source(),
                                   username=options.username,
-                                  password=options.password)
+                                  password=options.password,
+                                  verify_certificate=(not options.allow_bad_certificate))
             env.update(reconfigure=options.reconfigure)
 
         elif command in ["remove", "deactivate", "activate", "reconfigure"]:

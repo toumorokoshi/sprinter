@@ -26,6 +26,7 @@ from subprocess import PIPE, STDOUT
 
 from sprinter.exceptions import (CommandMissingException,
                                  BadCredentialsException,
+                                 CertificateException,
                                  ExtractException,
                                  SprinterException)
 
@@ -140,15 +141,18 @@ def whitespace_smart_split(command):
     return return_array
 
 
-def authenticated_get(username, password, url):
+def authenticated_get(username, password, url, verify=True):
     """
     Perform an authorized query to the url, and return the result
     """
-    response = requests.get(url, auth=(username, password))
-    if response.status_code == 401:
-        raise BadCredentialsException(
-            "Unable to authenticate user %s to %s with password provided!"
-            % (username, url))
+    try:
+        response = requests.get(url, auth=(username, password), verify=verify)
+        if response.status_code == 401:
+            raise BadCredentialsException(
+                "Unable to authenticate user %s to %s with password provided!"
+                % (username, url))
+    except requests.exceptions.SSLError:
+        raise CertificateException("Unable to verify certificate at %s!" % url)
     return response.content
 
 

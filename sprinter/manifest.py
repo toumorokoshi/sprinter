@@ -47,11 +47,13 @@ class Manifest(object):
     temporary_config_variables = []  # a list of the temporary keys, such as password
 
     def __init__(self, raw_manifest, namespace=None,
-                 logger=LOGGER, username=None, password=None):
+                 logger=LOGGER, username=None, password=None, 
+                 verify_certificate=True):
         self.logger = logger
         self.manifest = self.__load_manifest(raw_manifest,
                                              username=username,
-                                             password=password)
+                                             password=password,
+                                             verify_certificate=verify_certificate)
         self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
         self.system = System(logger=self.logger)
@@ -135,7 +137,7 @@ class Manifest(object):
         """ Add additional context variable """
         self.additional_context_variables = dict(self.additional_context_variables.items() + additonal_context.items())
 
-    def __load_manifest(self, raw_manifest, username=None, password=None):
+    def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
         manifest = RawConfigParser()
         manifest.add_section('config')
         if type(raw_manifest) == str:
@@ -143,7 +145,8 @@ class Manifest(object):
                 if username and password:
                     manifest_file_handler = StringIO(lib.authenticated_get(username,
                                                                            password,
-                                                                           raw_manifest))
+                                                                           raw_manifest,
+                                                                           verify=verify_certificate))
                 else:
                     manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
                 manifest.readfp(manifest_file_handler)
