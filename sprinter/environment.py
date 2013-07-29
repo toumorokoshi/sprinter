@@ -38,6 +38,9 @@ def install_required(f):
     return wrapped
 
 
+RC_FILES = ['.bashrc', '.zshrc', '.bash_profile']
+
+
 class Environment(object):
 
     source = None  # the path to the source handle, the handle itself, or a manifest instance
@@ -158,6 +161,7 @@ class Environment(object):
         self.instantiate_features()
         self._specialize()
         for feature in self._feature_dict_order:
+            self.logger.info("Deactivating %s..." % feature[0])
             self._run_action(feature, 'deactivate')
         self.clear_all()
         self._finalize()
@@ -172,6 +176,7 @@ class Environment(object):
         self.instantiate_features()
         self._specialize()
         for feature in self._feature_dict_order:
+            self.logger.info("Activating %s..." % feature[0])
             self._run_action(feature, 'activate')
         self.inject_environment_rc()
         self._finalize()
@@ -180,18 +185,16 @@ class Environment(object):
     def inject_environment_rc(self):
         # clearing profile for now, to make sure
         # profile injections are cleared for sprinter installs
-        self.injections.inject("~/.bash_profile", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
-        self.injections.inject("~/.bashrc", "[ -d %s ] && . %s/.rc" %
-                               (self.directory.root_dir, self.directory.root_dir))
+        for rc_file in RC_FILES:
+            self.injections.inject(os.path.join("~", rc_file), "[ -d %s ] && . %s/.rc" %
+                                   (self.directory.root_dir, self.directory.root_dir))
 
     @warmup
     def clear_all(self):
         """ clear all files that were to be injected """
         self.injections.clear_all()
-        self.injections.clear("~/.profile")
-        self.injections.clear("~/.bash_profile")
-        self.injections.clear("~/.bashrc")
+        for rc_file in RC_FILES:
+            self.injections.clear(os.path.join("~", rc_file))
 
     def install_sandboxes(self):
         if self.target:

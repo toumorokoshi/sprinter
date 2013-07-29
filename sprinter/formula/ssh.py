@@ -63,7 +63,7 @@ class SSHFormula(FormulaBase):
     def deactivate(self):
         ssh_key_path = os.path.join(self.directory.install_directory(self.feature_name),
                                     self.source.get('keyname'))
-        self.__install_ssh_config(self.source, ssh_key_path)
+        self.injections.inject(ssh_config_path, "")
 
     def remove(self):
         self.injections.inject(ssh_config_path, "")
@@ -92,7 +92,7 @@ class SSHFormula(FormulaBase):
         """
         Install the ssh configuration
         """
-        if not self.__global_ssh_key_exists() or not self.target.is_affirmative('use_global_ssh', default="no"):
+        if not self.__global_ssh_key_exists() or not config.is_affirmative('use_global_ssh', default="no"):
             config.set('ssh_key_path', ssh_key_path)
             ssh_config_injection = ssh_config_template % config.to_dict()
             if os.path.exists(ssh_config_path):
