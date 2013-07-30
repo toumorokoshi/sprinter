@@ -136,7 +136,7 @@ class PerforceFormula(FormulaBase):
                 return
         with open(p4settings_path, "w+") as p4settings_file:
             p4settings_file.write(p4settings_template % config.to_dict())
-            if config.get('write_password_p4settings'):
+            if config.get('write_password_p4settings', 'no'):
                 p4settings_file.write("\nP4PASSWD=%s" % config['password'])
 
     def __add_p4_env(self, config):
