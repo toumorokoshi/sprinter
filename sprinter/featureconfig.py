@@ -33,7 +33,7 @@ class FeatureConfig(object):
         for k, v in self.raw_dict.items():
             context_dict["%s:%s" % (self.feature_name, k)] = v
         try:
-            return self.raw_dict[param] % context_dict
+            return str(self.raw_dict[param]) % context_dict
         except KeyError, e:
             self.logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
             return self.raw_dict[param]
@@ -74,7 +74,7 @@ class FeatureConfig(object):
             
     def to_dict(self):
         """ Returns the context, fully specialized, as a dictionary """
-        return dict((k, self.get(k)) for k in self.raw_dict)
+        return dict((k, str(self.get(k))) for k in self.raw_dict)
 
     def write_to_manifest(self):
         """ Overwrites the section of the manifest with the featureconfig's value """
