@@ -64,8 +64,8 @@ class PackageFormula(FormulaBase):
         elif self.system.isFedoraBased():
             package_manager = "yum"
         if lib.which(package_manager) is None:
-            raise PackageFormulaException("Package manager %s not installed!"
-                                          % self.package_manager)
+            self.logger.warn("Package manager %s not installed! Packages will not be installed."
+                             % package_manager)
         self.package_manager = package_manager
         self.sudo_required = sudo_required
         self.args = args
