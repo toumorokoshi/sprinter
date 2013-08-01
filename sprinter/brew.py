@@ -8,7 +8,7 @@ from sprinter.lib import extract_targz
 from sprinter.core import LOGGER
 from sprinter import lib
 
-HOMEBREW_URL = "https://github.com/mxcl/homebrew/tarball/master"
+HOMEBREW_URL = "http://github.com/mxcl/homebrew/tarball/master"
 
 
 def install_brew(target_path):
