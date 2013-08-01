@@ -27,7 +27,7 @@ class PackageFormula(FormulaBase):
     def update(self):
         self.__get_package_manager()
         install_package = False
-        if self.target.has(self.package_manager):
+        if self.package_manager and self.target.has(self.package_manager):
             if not self.source.has(self.package_manager):
                 install_package = True
             if self.source.get(self.package_manager) != self.target.get(self.package_manager):
@@ -37,7 +37,7 @@ class PackageFormula(FormulaBase):
         FormulaBase.update(self)
 
     def __install_package(self, config):
-        if config.has(self.package_manager):
+        if self.package_manager and config.has(self.package_manager):
             package = config.get(self.package_manager)
             self.logger.info("Installing %s..." % package)
             call_command = "%s%s install %s" % (self.package_manager, self.args, package)
@@ -66,6 +66,7 @@ class PackageFormula(FormulaBase):
         if lib.which(package_manager) is None:
             self.logger.warn("Package manager %s not installed! Packages will not be installed."
                              % package_manager)
+            self.package_manager = None
         self.package_manager = package_manager
         self.sudo_required = sudo_required
         self.args = args
