@@ -22,6 +22,7 @@ class GitFormula(FormulaBase):
     """ A sprinter formula for git"""
 
     required_options = FormulaBase.required_options + ['url']
+    valid_options = FormulaBase.valid_options + ['branch']
 
     def install(self):
         self.__clone_repo(self.target.get('url'),
