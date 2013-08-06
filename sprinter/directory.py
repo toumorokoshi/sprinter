@@ -12,6 +12,11 @@ rc_template = """
 export PATH=%s:$PATH
 """
 
+env_template = """
+if [ ! -d "$%(root_var)s" ]; then
+    export %(root_var)s="$( cd "$( dirname "${BASH_SOURCE[0]:-$0}" > /dev/null )" && pwd )"
+fi
+"""
 
 class DirectoryException(Exception):
     """ An exception to specify it's a directory """
@@ -22,18 +27,19 @@ class Directory(object):
     root_dir = None  # path to the root directory
     manifest_path = None  # path to the manifest file
     new = False  # determines if the directory is for a new environment or not
-    rewrite_rc = True  # if set to false, the existing rc file will be
+    rewrite_config = True  # if set to false, the existing rc and env files will be
                        # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
 
-    def __init__(self, namespace, rewrite_rc=True, sprinter_root=os.path.join("~", ".sprinter"),
+    def __init__(self, namespace, rewrite_config=True, sprinter_root=os.path.join("~", ".sprinter"),
                  logger=logging.getLogger('sprinter')):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = os.path.expanduser(os.path.join(sprinter_root, namespace))
+        self.root_var = '$SP_%s_DIR' % namespace.upper()
         self.logger = logger
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
-        self.rewrite_rc = rewrite_rc
+        self.rewrite_config = rewrite_config
 
     def __del__(self):
         if self.rc_file:
@@ -98,12 +104,22 @@ class Directory(object):
         """
         return os.path.join(self.root_dir, "features", feature_name)
 
+    def add_to_env(self, content):
+        """
+        add content to the env script.
+        """
+        if not self.rewrite_config:
+            raise DirectoryException("Error! Directory was not intialized w/ rewrite_config.")
+        if not self.env_file:
+            self.env_path, self.env_file = self.__get_env_handle(self.root_dir)
+        self.env_file.write(content + '\n')
+
     def add_to_rc(self, content):
         """
         add content to the rc script.
         """
-        if not self.rewrite_rc:
-            raise DirectoryException("Error! Directory was not intialized w/ rewrite_rc.")
+        if not self.rewrite_config:
+            raise DirectoryException("Error! Directory was not intialized w/ rewrite_config.")
         if not self.rc_file:
             self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
         self.rc_file.write(content + '\n')
@@ -121,6 +137,14 @@ class Directory(object):
         except OSError:
             self.logger.error("Unable to remove object at path %s" % path)
             raise DirectoryException("Unable to remove object at path %s" % path)
+
+    def __get_env_handle(self, root_dir):
+        """ get the filepath and filehandle to the .env file for the environment """
+        env_path = os.path.join(root_dir, '.env')
+        if not os.path.exists(env_path):
+            fh = open(env_path, "w+")
+            fh.write(env_template % {"root_var": self.root_var})
+        return (env_path, open(env_path, "w+"))
 
     def __get_rc_handle(self, root_dir):
         """ get the filepath and filehandle to the rc file for the environment """

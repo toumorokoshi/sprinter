@@ -157,7 +157,7 @@ class Environment(object):
         """ deactivate the environment """
         self.phase = PHASE.DEACTIVATE
         self.logger.info("Deactivating environment %s..." % self.namespace)
-        self.directory.rewrite_rc = False
+        self.directory.rewrite_config = False
         self.instantiate_features()
         self._specialize()
         for feature in self._feature_dict_order:
@@ -172,7 +172,7 @@ class Environment(object):
         """ activate the environment """
         self.phase = PHASE.ACTIVATE
         self.logger.info("Activating environment %s..." % self.namespace)
-        self.directory.rewrite_rc = False
+        self.directory.rewrite_config = False
         self.instantiate_features()
         self._specialize()
         for feature in self._feature_dict_order:
@@ -314,10 +314,11 @@ class Environment(object):
         """ command to run at the end of sprinter's run """
         self.logger.info("Finalizing...")
         self.write_manifest()
-        if self.directory.rewrite_rc:
-            self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
-            self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
-            self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
+        if self.directory.rewrite_config:
+            self.directory.add_to_env(". $SP_SPRINTER_DIR/utils.sh" % self.sprinter_namespace)
+            self.directory.add_to_env("export PATH=%s:$PATH" % self.directory.bin_path())
+            self.directory.add_to_env("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
+            self.directory.add_to_env("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
         self.injections.commit()
         if self.error_occured:
             raise SprinterException("Error occured!")

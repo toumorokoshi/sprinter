@@ -15,13 +15,13 @@ class EnvFormula(FormulaBase):
     """ A sprinter formula for git"""
 
     def install(self):
-        for c in (c for c in self.target.keys() if c != 'formula'):
-            self.directory.add_to_rc('export %s=%s' % (c.upper(), self.target.get(c)))
+        for c in (c for c in self.target.keys() if c != 'formula' && c != 'depends'):
+            self.directory.add_to_env('export %s=%s' % (c.upper(), self.target.get(c)))
         FormulaBase.install(self)
 
     def update(self):
-        for c in (c for c in self.target.keys() if c != 'formula'):
-            self.directory.add_to_rc('export %s=%s' % (c.upper(), self.target.get(c)))
+        for c in (c for c in self.target.keys() if c != 'formula' && c != 'depends'):
+            self.directory.add_to_env('export %s=%s' % (c.upper(), self.target.get(c)))
         FormulaBase.update(self)
 
     def validate(self):
