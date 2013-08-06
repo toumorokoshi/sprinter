@@ -13,9 +13,21 @@ export PATH=%s:$PATH
 """
 
 env_template = """
-if [ ! -d "$%(root_var)s" ]; then
-    export %(root_var)s="$( cd "$( dirname "${BASH_SOURCE[0]:-$0}" > /dev/null )" && pwd )"
+declare -f path_prepend > /dev/null
+if [ $? -ne 0 ]; then
+    . %s
 fi
+"""
+
+utils_template="""
+path_prepend() {
+    local path="${2:-PATH}"
+    local list=$(eval echo '$'$path)
+    if [ -d "$1" ] && [[ ":$list:" != *":$1:"* ]]; then
+        # :+ syntax avoids dangling ":" in exported var
+        export $path="${1}${list:+":$list"}"
+    fi
+}
 """
 
 class DirectoryException(Exception):
@@ -35,10 +47,10 @@ class Directory(object):
                  logger=logging.getLogger('sprinter')):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = os.path.expanduser(os.path.join(sprinter_root, namespace))
-        self.root_var = '$SP_%s_DIR' % namespace.upper()
         self.logger = logger
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
+        self.utils_path = os.path.join(self.root_dir, "utils.sh")
         self.rewrite_config = rewrite_config
 
     def __del__(self):
@@ -56,6 +68,8 @@ class Directory(object):
                 os.makedirs(target_path)
         if not os.path.exists(self.manifest_path):
             open(self.manifest_path, "w+").close()
+        if not os.path.exists(self.utils_path):
+            open(self.manifest_path, "w+").write(utils_template).close()
         self.new = False
 
     def remove(self):
@@ -143,7 +157,7 @@ class Directory(object):
         env_path = os.path.join(root_dir, '.env')
         if not os.path.exists(env_path):
             fh = open(env_path, "w+")
-            fh.write(env_template % {"root_var": self.root_var})
+            fh.write(env_template % self.utils_path)
         return (env_path, open(env_path, "w+"))
 
     def __get_rc_handle(self, root_dir):
