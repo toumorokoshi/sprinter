@@ -140,9 +140,9 @@ class PerforceFormula(FormulaBase):
                 p4settings_file.write("\nP4PASSWD=%s" % config['password'])
 
     def __add_p4_env(self, config):
-        self.directory.add_to_rc('export P4PORT=%s' % config['port'])
+        self.directory.add_to_env('export P4PORT=%s' % config['port'])
         if config.get('write_p4settings'):
-            self.directory.add_to_rc('export P4CONFIG=.p4settings')
+            self.directory.add_to_env('export P4CONFIG=.p4settings')
 
     def __configure_client(self, config):
         """ write the perforce client """
