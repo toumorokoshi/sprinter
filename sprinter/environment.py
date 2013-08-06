@@ -316,9 +316,9 @@ class Environment(object):
         self.write_manifest()
         if self.directory.rewrite_config:
             self.directory.add_to_env(". $SP_SPRINTER_DIR/utils.sh" % self.sprinter_namespace)
-            self.directory.add_to_env("export PATH=%s:$PATH" % self.directory.bin_path())
-            self.directory.add_to_env("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
-            self.directory.add_to_env("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
+            self.directory.add_to_env('prepend_path "%s"' % self.directory.bin_path())
+            self.directory.add_to_env('prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
+            self.directory.add_to_env('prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         self.injections.commit()
         if self.error_occured:
             raise SprinterException("Error occured!")
