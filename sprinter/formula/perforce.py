@@ -24,10 +24,34 @@ from sprinter import lib
 from sprinter.core import PHASE
 from sprinter.formulabase import FormulaBase
 
-
-url_template = "http://filehost.perforce.com/perforce/%s/%s/p4"
+P4V_APPLICATIONS = ['p4v', 'p4admin', 'p4merge']
+url_prefix = "http://filehost.perforce.com/perforce/"
+package_dict = {
+    "r10.1": {
+        "osx": {
+            "p4": "r10.1/bin.macosx104u/p4",
+            "p4v": "r10.1/bin.macosx104u/P4V.dmg"},
+        "linux": {
+            "p4": "r10.1/bin.linux26x86_64/p4",
+            "p4v": "r10.1/bin.linux26x86_64/p4v.tgz"}
+    },
+    "r13.2": {
+        "osx": {
+            "p4": "r13.2/bin.macosx105x86_64/p4",
+            "p4v": "r13.2/bin.macosx106x86_64/P4V.dmg"},
+        "linux": {
+            "p4": "r13.2/bin.linux26x86_64/p4",
+            "p4v": "r13.2/bin.linux26x86_64/p4v.tgz"}
+    }
+}
+                
+    
 exec_dict = {"r10.1": {"mac": "bin.macosx104u",
                        "linux": "bin.linux26x86_64"}}
+
+
+class PerforceFormulaException(Exception):
+    """Exceptions for perforce formula"""
 
 
 class PerforceFormula(FormulaBase):
@@ -97,7 +121,7 @@ class PerforceFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
-        if self.source.get('version', 'r10.1') != self.target.get('version', 'r10.1'):
+        if self.source.get('version', 'r13.2') != self.target.get('version', 'r13.2'):
             os.unlink(os.path.join(self.directory.install_directory(self.feature_name), 'p4'))
             self.__install_perforce(self.target)
         self.__add_p4_env(self.target)
@@ -109,26 +133,59 @@ class PerforceFormula(FormulaBase):
             shutil.rmtree(os.path.expanduser(self.source.get('root_path')))
         FormulaBase.remove(self)
 
+    def validate(self):
+        FormulaBase.validate(self)
+        config = self.target or self.source
+        version = config.get('version', 'r13.2')
+        if version not in package_dict:
+            raise PerforceFormulaException("Version %s in not supported by perforce formula!\n" % version +
+                                           "Supported versions are: %s" % ", ".join(package_dict.keys()))
+        
     def __install_perforce(self, config):
         """ install perforce binary """
-        version = config.get('version', 'r10.1')
-        exec_dir = (exec_dict[version]['mac'] if self.system.isOSX() else
-                    exec_dict[version]['linux'])
-        url = url_template % (version, exec_dir)
+        version = config.get('version', 'r13.2')
+        key = 'osx' if self.system.isOSX() else 'linux'
+        perforce_packages = package_dict[version][key]
         d = self.directory.install_directory(self.feature_name)
         if not os.path.exists(d):
             os.makedirs(d)
         self.logger.info("Downloading p4 executable...")
-        urllib.urlretrieve(url, os.path.join(d, "p4"))
+        urllib.urlretrieve(url_prefix + perforce_packages['p4'],
+                           os.path.join(d, "p4"))
         self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
         self.p4_command = os.path.join(d, "p4")
+        self.logger.info("Installing p4v...")
+        if self.system.isOSX():
+            self.__install_p4v_osx(url_prefix + perforce_packages['p4v'])
+        else:
+            self.__install_p4v_linux(url_prefix + perforce_packages['p4v'])
+
+    def __install_p4v_osx(self, url, overwrite=False):
+        """ Install perforce applications and binaries for mac """
+        package_exists = False
+        root_dir = os.path.expanduser(os.path.join("~", "Applications"))
+        package_exists = len(filter(lambda x: os.path.exists(os.path.join(root_dir, x)),
+                                    P4V_APPLICATIONS))
+        if not package_exists or overwrite:
+            lib.extract_dmg(url, root_dir, remove_common_prefix=True)
+        else:
+            self.logger.warn("P4V exists already in %s! Not overwriting..." % root_dir)
+
+    def __install_p4v_linux(self, url):
+        """ Install perforce applications and binaries for linux """
+        lib.extract_targz(url,
+                          self.directory.install_directory(self.feature_name),
+                          remove_common_prefix=True)
+        bin_path = os.path.join(self.directory.install_directory(self.feature_name), 'bin')
+        for f in os.listdir(bin_path):
+            self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
 
     def __write_p4settings(self, config):
         """ write perforce settings """
         self.logger.info("Writing p4settings...")
         root_dir = os.path.expanduser(config.get('root_path'))
         p4settings_path = os.path.join(root_dir, ".p4settings")
-        if os.path.exists(p4settings_path): 
+        if os.path.exists(p4settings_path):
             if self.target.get('overwrite_p4settings', False):
                 self.logger.info("Overwriting existing p4settings...")
                 os.remove(p4settings_path)

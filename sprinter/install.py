@@ -128,13 +128,17 @@ def parse_args(argv, Environment=Environment):
 
         elif command == "validate":
             if options.username or options.auth:
-                options = get_credentials(parse_domain(target))
-            errors = env.validate_manifest(target, username=options.username, password=options.password)
-            if len(errors) > 0:
-                print "Manifest is invalid!"
-                print "\n".join(errors)
+                options = get_credentials(options, parse_domain(target))
+                target = Manifest(target,
+                                  username=options.username,
+                                  password=options.password,
+                                  verify_certificate=(not options.allow_bad_certificate))
+            env.target = target
+            env.validate()
+            if not env.error_occured:
+                print "No errors! Manifest is valid!"
             else:
-                print "Manifest is valid!"
+                "Manifest is invalid! Please see errors above."
     except BadCredentialsException, e:
         raise e
     except Exception, e:

@@ -75,7 +75,7 @@ class Environment(object):
                  root=None, sprinter_namespace='sprinter'):
         self.system = System()
         if not logger:
-            logger = self._build_logger(level=logging.INFO)
+            logger = self._build_logger(level=logging_level)
         self.logger = logger
         self.sprinter_namespace = sprinter_namespace
         self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
@@ -104,7 +104,7 @@ class Environment(object):
             self.inject_environment_rc()
             self._finalize()
         except Exception:
-            self.logger.exception("")
+            self.logger.debug("", exc_info=sys.exc_info())
             self.logger.info("An error occured during installation!")
             self.clear_all()
             self.logger.info("Removing installation %s..." % self.namespace)
@@ -128,7 +128,7 @@ class Environment(object):
             self.inject_environment_rc()
             self._finalize()
         except Exception:
-            self.logger.exception("")
+            self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
             raise et, ei, tb
 
@@ -147,7 +147,7 @@ class Environment(object):
             self.directory.remove()
             self.injections.commit()
         except Exception:
-            self.logger.exception("")
+            self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
             raise et, ei, tb
 
@@ -155,31 +155,57 @@ class Environment(object):
     @install_required
     def deactivate(self):
         """ deactivate the environment """
-        self.phase = PHASE.DEACTIVATE
-        self.logger.info("Deactivating environment %s..." % self.namespace)
-        self.directory.rewrite_rc = False
-        self.instantiate_features()
-        self._specialize()
-        for feature in self._feature_dict_order:
-            self.logger.info("Deactivating %s..." % feature[0])
-            self._run_action(feature, 'deactivate')
-        self.clear_all()
-        self._finalize()
+        try:
+            self.phase = PHASE.DEACTIVATE
+            self.logger.info("Deactivating environment %s..." % self.namespace)
+            self.directory.rewrite_rc = False
+            self.instantiate_features()
+            self._specialize()
+            for feature in self._feature_dict_order:
+                self.logger.info("Deactivating %s..." % feature[0])
+                self._run_action(feature, 'deactivate')
+            self.clear_all()
+            self._finalize()
+        except Exception:
+            self.logger.debug("", exc_info=sys.exc_info())
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
 
     @warmup
     @install_required
     def activate(self):
         """ activate the environment """
-        self.phase = PHASE.ACTIVATE
-        self.logger.info("Activating environment %s..." % self.namespace)
-        self.directory.rewrite_rc = False
+        try:
+            self.phase = PHASE.ACTIVATE
+            self.logger.info("Activating environment %s..." % self.namespace)
+            self.directory.rewrite_rc = False
+            self.instantiate_features()
+            self._specialize()
+            for feature in self._feature_dict_order:
+                self.logger.info("Activating %s..." % feature[0])
+                self._run_action(feature, 'activate')
+            self.inject_environment_rc()
+            self._finalize()
+        except Exception:
+            self.logger.debug("", exc_info=sys.exc_info())
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
+
+    @warmup
+    def validate(self):
+        """ Validate the target environment """
+        self.phase = PHASE.VALIDATE
+        self.logger.info("Validating %s..." % self.namespace)
         self.instantiate_features()
-        self._specialize()
+        context_dict = {}
+        if self.target:
+            for s in self.target.formula_sections():
+                context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+                context_dict['config:root_dir'] = self.directory.root_dir
+                context_dict['config:node'] = self.system.node
+                self.target.add_additional_context(context_dict)
         for feature in self._feature_dict_order:
-            self.logger.info("Activating %s..." % feature[0])
-            self._run_action(feature, 'activate')
-        self.inject_environment_rc()
-        self._finalize()
+            self._run_action(feature, 'validate', run_if_error=True)
 
     @warmup
     def inject_environment_rc(self):
@@ -392,8 +418,9 @@ class Environment(object):
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
         except Exception, e:
-            self.logger.exception("An exception occurred with action %s in feature %s!" %
-                                  (action, feature))
+            self.logger.info("An exception occurred with action %s in feature %s!" %
+                             (action, feature))
+            self.logger.debug("Exception", exc_info=sys.exc_info())
             self.log_feature_error(feature, str(e))
 
     def _specialize(self):

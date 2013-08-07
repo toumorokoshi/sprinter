@@ -17,10 +17,10 @@ def install_brew(target_path):
         try:
             os.makedirs(target_path)
         except OSError:
-            LOGGER.warn("Unable to create directory %s for brew." % target_path + 
+            LOGGER.warn("Unable to create directory %s for brew." % target_path +
                         " Trying sudo...")
             lib.call("sudo mkdir -p %s" % target_path, stdout=None,
                      output_log_level=logging.DEBUG)
-            lib.call("sudo chown %s %s" % (getpass.getuser(), target_path), 
+            lib.call("sudo chown %s %s" % (getpass.getuser(), target_path),
                      output_log_level=logging.DEBUG, stdout=None)
     extract_targz(HOMEBREW_URL, target_path, remove_common_prefix=True)
