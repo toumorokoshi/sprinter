@@ -134,6 +134,9 @@ class Directory(object):
         """
         Symlink an object at path to name in the dir_name folder. remove it if it already exists.
         """
+        target_dir = os.path.join(self.root_dir, dir_name)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
         target_path = os.path.join(self.root_dir, dir_name, name)
         self.logger.debug("Attempting to symlink %s to %s..." % (path, target_path))
         if os.path.exists(target_path):
