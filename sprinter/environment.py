@@ -315,7 +315,6 @@ class Environment(object):
         self.logger.info("Finalizing...")
         self.write_manifest()
         if self.directory.rewrite_config:
-            self.directory.add_to_env(". $SP_SPRINTER_DIR/utils.sh" % self.sprinter_namespace)
             self.directory.add_to_env('prepend_path "%s"' % self.directory.bin_path())
             self.directory.add_to_env('prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
