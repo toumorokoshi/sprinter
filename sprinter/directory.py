@@ -41,8 +41,9 @@ class Directory(object):
     utils_path = None  # path to utils.sh file
     new = False  # determines if the directory is for a new environment or not
     rewrite_config = True  # if set to false, the existing rc and env files will be
-                       # preserved, and will not be modifiable
+                           # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
+    env_file = None  # file handler for env file
 
     def __init__(self, namespace, rewrite_config=True, sprinter_root=os.path.join("~", ".sprinter"),
                  logger=logging.getLogger('sprinter')):
@@ -57,6 +58,8 @@ class Directory(object):
     def __del__(self):
         if self.rc_file:
             self.rc_file.close()
+        if self.env_file:
+            self.env_file.close()
 
     def initialize(self):
         """ Generate the root directory root if it doesn't already exist """
@@ -77,6 +80,8 @@ class Directory(object):
         """ Removes the sprinter directory, if it exists """
         if self.rc_file:
             self.rc_file.close()
+        if self.env_file:
+            self.env_file.close()
         shutil.rmtree(self.root_dir)
 
     def symlink_to_bin(self, name, path):
