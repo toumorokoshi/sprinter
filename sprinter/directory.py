@@ -21,12 +21,14 @@ export %s=1
 
 # utils.sh is the same for every namespace, only sourced once
 utils_template="""
+# don't add paths repeatedly to env vars
 path_prepend() {
+    local dirp="$1"
     local path="${2:-PATH}"
     local list=$(eval echo '$'$path)
-    if [ -d "$1" ] && [[ ":$list:" != *":$1:"* ]]; then
+    if [ -d "$dirp" ] && [[ ":$list:" != *":$dirp:"* ]]; then
         # :+ syntax avoids dangling ":" in exported var
-        export $path="${1}${list:+":$list"}"
+        export $path="${dirp}${list:+":$list"}"
     fi
 }
 """
