@@ -251,10 +251,10 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
                     else:
                         return
                 tf.extract(tfile, target_dir)
-    except OSError:
-        raise ExtractException()
-    except IOError:
-        raise ExtractException()
+    except OSError, e:
+        raise ExtractException(str(e))
+    except IOError, e:
+        raise ExtractException(str(e))
 
 
 def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
