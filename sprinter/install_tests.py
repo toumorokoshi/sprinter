@@ -64,9 +64,7 @@ class TestInstall(unittest.TestCase):
         environment.configure_mock(**config)
         args = ['validate', self.temp_file_path]
         calls = [call(logging_level=logging.INFO),
-                 call().validate_manifest(self.temp_file_path,
-                                username=None,
-                                password=None)]
+                 call().validate()]
         parse_args(args, Environment=environment)
         environment.assert_has_calls(calls)
 
