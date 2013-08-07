@@ -38,6 +38,7 @@ class Directory(object):
 
     root_dir = None  # path to the root directory
     manifest_path = None  # path to the manifest file
+    utils_path = None  # path to utils.sh file
     new = False  # determines if the directory is for a new environment or not
     rewrite_config = True  # if set to false, the existing rc and env files will be
                        # preserved, and will not be modifiable
@@ -69,7 +70,7 @@ class Directory(object):
         if not os.path.exists(self.manifest_path):
             open(self.manifest_path, "w+").close()
         if not os.path.exists(self.utils_path):
-            open(self.manifest_path, "w+").write(utils_template).close()
+            open(self.utils_path, "w+").write(utils_template).close()
         self.new = False
 
     def remove(self):
