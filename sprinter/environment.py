@@ -296,7 +296,8 @@ class Environment(object):
             self.directory = Directory(self.namespace, sprinter_root=self.root)
         if not self.injections:
             self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
-                                                            self.namespace))
+                                                            self.namespace),
+                                         override="SPRINTER_OVERRIDES")
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
