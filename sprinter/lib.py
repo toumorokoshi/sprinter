@@ -232,6 +232,8 @@ def which(program, cwd=None):
 def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     """ extract a targz and install to the target directory """
     try:
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
         gz = gzip.GzipFile(fileobj=StringIO(requests.get(url).content))
         tf = tarfile.TarFile(fileobj=gz)
         if not os.path.exists(target_dir):
@@ -258,6 +260,8 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
 
 def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
         memory_file = io.BytesIO(urllib.urlopen(url).read())
         zip_file = zipfile.ZipFile(memory_file)
         common_prefix = os.path.commonprefix(zip_file.namelist())
@@ -284,6 +288,8 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
         raise Exception("Remove common prefix for zip not implemented yet!")
     tmpdir = tempfile.mkdtemp()
     try:
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
         urllib.urlretrieve(url, temp_file)
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
