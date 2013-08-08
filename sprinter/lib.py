@@ -281,7 +281,7 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
 
 def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
     if remove_common_prefix:
-        raise("Remove common prefix for zip not implemented yet!")
+        raise Exception("Remove common prefix for zip not implemented yet!")
     tmpdir = tempfile.mkdtemp()
     try:
         temp_file = os.path.join(tmpdir, "temp.dmg")

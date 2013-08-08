@@ -168,7 +168,7 @@ class PerforceFormula(FormulaBase):
         package_exists = len(filter(lambda x: os.path.exists(os.path.join(root_dir, x)),
                                     P4V_APPLICATIONS))
         if not package_exists or overwrite:
-            lib.extract_dmg(url, root_dir, remove_common_prefix=True)
+            lib.extract_dmg(url, root_dir)
         else:
             self.logger.warn("P4V exists already in %s! Not overwriting..." % root_dir)
 
