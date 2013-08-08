@@ -53,6 +53,7 @@ Contents
    :maxdepth: 2
 
    tutorial
+   faq
    formulas
    manifests
    lifecycle
