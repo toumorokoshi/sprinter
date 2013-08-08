@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import getpass
 from StringIO import StringIO
 from functools import wraps
 
@@ -234,6 +235,10 @@ class Environment(object):
                         "Would you like sprinter to install brew for you?",
                         default="yes", boolean=True)
                     if install_brew:
+                        lib.call("sudo mkdir -p /usr/local/", stdout=None,
+                                 output_log_level=logging.DEBUG)
+                        lib.call("sudo chown -R %s /usr/local/" % getpass.getuser(),
+                                 output_log_level=logging.DEBUG, stdout=None)
                         brew.install_brew('/usr/local')
 
     def run_feature(self, feature, action):
