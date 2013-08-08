@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Formula Guidelines &mdash; Sprinter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Sprinter 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="formula-guidelines">
+<h1>Formula Guidelines<a class="headerlink" href="#formula-guidelines" title="Permalink to this headline">¶</a></h1>
+<p>Sprinter provides a lot of flexibility for a variety of use
+cases. This page will hopefully explain some the more hidden, nuanced
+factors and functionality in writing formulas.</p>
+<div class="section" id="prompting-for-values">
+<h2>Prompting for values<a class="headerlink" href="#prompting-for-values" title="Permalink to this headline">¶</a></h2>
+<p>There are two accepted ways to prompt users for values:</p>
+<ul class="simple">
+<li>using the reserved &#8216;input&#8217; keyword in a formula to define inputs</li>
+<li>overriding the &#8216;prompt&#8217; method in formulabase</li>
+</ul>
+<p>The &#8216;input&#8217; keyword should be used for values that are always needed
+(such as a username/password for version control). The prompt method
+should be used for optional configuration or for configuration based
+up on the system being installed (such as overwriting existing values)</p>
+<dl class="docutils">
+<dt><em>NOTE</em> The only way to share state between phases is through</dt>
+<dd>configuration. A new instance of an object is instantiated for every
+method every time, so it is not possible to save state between say,
+the prompt method and the update method later on.</dd>
+</dl>
+</div>
+<div class="section" id="config-behaviour">
+<h2>Config behaviour<a class="headerlink" href="#config-behaviour" title="Permalink to this headline">¶</a></h2>
+<p><em>Config Resolution</em> for any values in the &#8216;config&#8217; section of the
+manifest, the target manifest will override source manifest values. This
+includes:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Values obtained from user input</li>
+</ul>
+</div></blockquote>
+<p><em>Feature Config Resolution</em> Config resolution for a particular feature
+is dictated by the formula&#8217;s static &#8216;resolve&#8217; method, but this
+typically utilizes the base classes resolution method, which is target
+overriding source values explicitely referenced. Any values that are
+not in the target feature config are left alone.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Formula Guidelines</a><ul>
+<li><a class="reference internal" href="#prompting-for-values">Prompting for values</a></li>
+<li><a class="reference internal" href="#config-behaviour">Config behaviour</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/contributing.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">Sprinter 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Yusuke Tsutsumi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

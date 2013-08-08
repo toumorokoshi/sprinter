@@ -57,18 +57,41 @@
 <p>The following sections have a special meaning in a manifest:</p>
 <div class="section" id="config">
 <h3>config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h3>
-<p>The config section is where all user variables are stored. in addition, it can also house the name of the environment, input variables, and any standard confguration you need in your environment.</p>
+<p>The config section is where all user variables are stored. in
+addition, it can also house the name of the environment, input
+variables, and any standard confguration you need in your environment.</p>
+<p>One can also add messages to the beginnig and the end of sprinter with the following variables:</p>
+<ul class="simple">
+<li>message_success: print a message at the end of a sprinter command, on success</li>
+<li>message_failure: print a message at the end of a sprinter command, on failure</li>
+</ul>
 </div>
 </div>
 <div class="section" id="variable-substitution">
 <h2>Variable substitution<a class="headerlink" href="#variable-substitution" title="Permalink to this headline">¶</a></h2>
-<p>Feature configurations in a manifest have the ability to reference each other: specifically, they utilized the following format:</p>
+<p>Feature configurations in a manifest have the ability to reference
+each other: specifically, they utilized the following format:</p>
 <div class="highlight-python"><pre>%(FEATURE:PROPERTY)s</pre>
 </div>
-<p>E.G. something like <cite>%(git:configpath)s</cite> will reference the &#8216;configpath&#8217; property of the &#8216;git&#8217; feature. In addition to other features, it is also possible to reference the config sections as well, with:</p>
-<blockquote>
+<dl class="docutils">
+<dt>E.G. something like <cite>%(git:configpath)s</cite> will reference the</dt>
+<dd><p class="first">&#8216;configpath&#8217; property of the &#8216;git&#8217; feature. In addition to other
+features, it is also possible to reference the config sections as
+well, with:</p>
+<blockquote class="last">
 <div>%(config:PROPERTY)</div></blockquote>
-<p>Common usage examples for this include having a single username variable in the input, then resolving it into subsequent features with: <cite>%(config:username)s</cite></p>
+</dd>
+</dl>
+<p>Common usage examples for this include having a single username
+variable in the input, then resolving it into subsequent features
+with: <cite>%(config:username)s</cite></p>
+<div class="section" id="filters">
+<h3>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h3>
+<p>Sprinter also supports some filters, to convert strings into a desired
+format. For example, to escape special characters, you can use:</p>
+<p>%(config:password|escaped)</p>
+<p>To reference the password variable, escaped. The escaped function uses the &#8216;re.escape&#8217; method in python.</p>
+</div>
 </div>
 </div>
 
@@ -85,7 +108,10 @@
 <li><a class="reference internal" href="#config">config</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#variable-substitution">Variable substitution</a></li>
+<li><a class="reference internal" href="#variable-substitution">Variable substitution</a><ul>
+<li><a class="reference internal" href="#filters">Filters</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
