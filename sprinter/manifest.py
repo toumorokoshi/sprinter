@@ -10,8 +10,7 @@ The manifest can take a source and/or a target manifest
 """
 
 from ConfigParser import RawConfigParser
-import copy
-import logging
+import os
 import re
 import urllib
 from StringIO import StringIO
@@ -25,6 +24,7 @@ from sprinter.core import LOGGER
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
+
 
 class ManifestException(Exception):
     pass
@@ -47,7 +47,7 @@ class Manifest(object):
     temporary_config_variables = []  # a list of the temporary keys, such as password
 
     def __init__(self, raw_manifest, namespace=None,
-                 logger=LOGGER, username=None, password=None, 
+                 logger=LOGGER, username=None, password=None,
                  verify_certificate=True):
         self.logger = logger
         self.manifest = self.__load_manifest(raw_manifest,
@@ -142,6 +142,7 @@ class Manifest(object):
         manifest.add_section('config')
         if type(raw_manifest) == str:
             if raw_manifest.startswith("http"):
+                # raw_manifest is a url
                 if username and password:
                     manifest_file_handler = StringIO(lib.authenticated_get(username,
                                                                            password,
@@ -151,6 +152,9 @@ class Manifest(object):
                     manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
                 manifest.readfp(manifest_file_handler)
             else:
+                # raw_manifest is a filepath
+                if not os.path.exists(os.path.expanduser(raw_manifest)):
+                    raise ManifestException("Manifest does not exist at %s!" % raw_manifest)
                 manifest.read(raw_manifest)
             if not manifest.has_option('config', 'source'):
                 manifest.set('config', 'source', str(raw_manifest))

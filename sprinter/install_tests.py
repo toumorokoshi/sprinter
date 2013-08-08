@@ -58,7 +58,7 @@ class TestInstall(unittest.TestCase):
         environment.assert_has_calls(calls)
 
     @patch('sprinter.environment.Environment')
-    def test_errors_(self, environment):
+    def test_errors(self, environment):
         """ Test if validate catches an invalid manifest """
         config = {'validate_manifest.return_value': ['this is funky']}
         environment.configure_mock(**config)
@@ -76,4 +76,5 @@ class TestInstall(unittest.TestCase):
         ]
         for in_string, out_string in match_tuples:
             self.assertEqual(parse_domain(in_string), out_string,
-                             "%s did not result in %s! Resulted in %s instead." % (in_string, out_string, parse_domain(in_string)))
+                             "%s did not result in %s! Resulted in %s instead."
+                             % (in_string, out_string, parse_domain(in_string)))

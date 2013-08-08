@@ -187,19 +187,11 @@ class TestManifest(object):
         self.new_manifest.write(new_manifest)
         assert not Manifest(new_manifest).has_option('config', 'hobopopo'), \
             "A secret value was written to the config!"
-
-    def skip_additional_context(self):
-        """ Ensure that additional context variables are configured correctly """
-        additional_context_variables = {"sub:root_dir": "teststring"}
-        self.config.set_additional_context('source', additional_context_variables)
-        sub_values = self.config.source.get_feature_config("sub")
-        assert sub_values['rc'].find("teststring") != -1, "teststring is not substituted in"
-        # should add to context
-        additional_context_variables = {"sub:testvar": "teststring2"}
-        self.config.set_additional_context('source', additional_context_variables)
-        sub_values = self.config.source.get_feature_config("sub")
-        assert sub_values['rc'].find("teststring") != -1, "teststring is not substituted in"
-        assert sub_values['bc'].find("teststring2") != -1, "teststring2 is not substituted in"
+        
+    @tools.raises(ManifestException)
+    def test_invalid_manifest_filepath(self):
+        """ The manifest should throw an exception on an invalid manifest path """
+        Manifest("./ehiiehaiehnatheita")
 
 old_manifest = """
 [config]

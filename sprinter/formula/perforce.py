@@ -59,18 +59,20 @@ class PerforceFormula(FormulaBase):
     valid_options = FormulaBase.valid_options + ['write_p4settings',
                                                  'write_password_p4settings',
                                                  'overwrite_p4settings',
-                                                 'overwrite_client']
+                                                 'overwrite_client',
+                                                 'client_default',
+                                                 'client']
 
     required_options = FormulaBase.required_options + ['version', 'root_path', 'username',
-                                                       'password', 'port', 'client', 'p4view']
+                                                       'password', 'port', 'p4view']
 
-    def prompt(self, reconfigure=False):
+    def prompt(self):
         if self.target:
-            if reconfigure or not self.target.has('write_p4settings'):
+            if not self.target.has('write_p4settings'):
                 self.target.prompt('write_p4settings', 'Write a p4settings file?', default='yes')
                 self.target.set_if_empty('write_p4settings', True)
 
-            if self.environment.phase == PHASE.INSTALL or reconfigure:
+            if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
                 if self.target.is_affirmative('write_p4settings'):
                     p4settings_path = os.path.join(os.path.expanduser(self.target.get('root_path')),
                                                    '.p4settings')
@@ -79,7 +81,7 @@ class PerforceFormula(FormulaBase):
                         self.target.prompt(
                             "overwrite_p4settings",
                             "p4settings already exists at %s. Overwrite?" % self.target.get('root_path'),
-                            default="no", only_if_empty=(not reconfigure))
+                            default="no", only_if_empty=True)
 
                     if (self.target.is_affirmative('write_p4settings') and
                         (not os.path.exists(p4settings_path)
@@ -88,16 +90,15 @@ class PerforceFormula(FormulaBase):
                             "write_password_p4settings",
                             "Insert the perforce password to your p4settings?\n" +
                             "(password will be stored in plaintext in a file in your perforce root)\n",
-                            default="no", only_if_empty=(not reconfigure))
-            if self.environment.phase == PHASE.INSTALL or reconfigure:
+                            default="no", only_if_empty=True)
                 self.target.prompt(
                     "client",
                     "Please choose your perforce client",
-                    default=self.target.get('client'))
+                    default=self.target.get('client_default', ''), only_if_empty=True)
             self.target.prompt(
                 "overwrite_client",
                 "Would you like to overwrite the client workspace in perforce?",
-                default="yes", only_if_empty=(not reconfigure))
+                default="yes", only_if_empty=True)
 
         elif self.environment.phase == PHASE.REMOVE:
                 self.source.prompt(

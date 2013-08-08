@@ -121,8 +121,8 @@ class Environment(object):
             self.logger.info("Updating environment %s..." % self.namespace)
             self.install_sandboxes()
             self.instantiate_features()
-            self.grab_inputs(force_prompt=reconfigure)
-            self._specialize()
+            self.grab_inputs(reconfigure=reconfigure)
+            self._specialize(reconfigure=reconfigure)
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
             self.inject_environment_rc()
@@ -423,7 +423,7 @@ class Environment(object):
             self.logger.debug("Exception", exc_info=sys.exc_info())
             self.log_feature_error(feature, str(e))
 
-    def _specialize(self):
+    def _specialize(self, reconfigure=False):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
         for manifest in [self.source, self.target]:
@@ -437,16 +437,16 @@ class Environment(object):
         self.grab_inputs()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'validate', run_if_error=True)
-            self._run_action(feature, 'resolve')
+            if not reconfigure:
+                self._run_action(feature, 'resolve')
             self._run_action(feature, 'prompt')
 
-    def grab_inputs(self, force_prompt=False):
+    def grab_inputs(self, reconfigure=False):
         """ Resolve the source and target config section """
         if self.source:
-            self.source.grab_inputs(force_prompt=force_prompt)
             if self.target:
                 for k, v in self.source.items('config'):
                     if not self.target.has_option('config', k):
                         self.target.set('config', k, v)
         if self.target:
-            self.target.grab_inputs(force_prompt=force_prompt)
+            self.target.grab_inputs(force_prompt=reconfigure)

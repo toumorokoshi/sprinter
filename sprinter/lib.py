@@ -324,3 +324,16 @@ def _determine_overwrite(prompt, overwrite, path):
     elif prompt:
         return prompt("Path %s already exist! Overwrite?" % path, boolean=True)
     return True
+
+
+"""
+def get_file_owner_group()
+    stat_info = os.stat('/path')
+    uid = stat_info.st_uid
+    gid = stat_info.st_gid
+    print uid, gid
+
+    user = pwd.getpwuid(uid)[0]
+    group = grp.getgrgid(gid)[0]
+    print user, group
+"""
