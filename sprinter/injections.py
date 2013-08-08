@@ -109,7 +109,9 @@ class Injections(object):
         """ Checks if a string exists in the file, sans the injected """
         if os.path.exists(file_path):
             file_content = open(file_path).read()
-        file_content = self.wrapper_match.sub("", file_content)
+            file_content = self.wrapper_match.sub("", file_content)
+        else:
+            file_content = ""
         return file_content.find(content) != -1
 
     def inject_content(self, content, inject_string):

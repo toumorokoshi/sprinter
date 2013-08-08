@@ -321,8 +321,10 @@ class Environment(object):
         Inject existing environmental config with namespace sourcing.
         Returns a tuple of the first file name and path found.
         """
-        src_path = os.path.join(self.directory.root_dir, source_filename)
-        src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
+        # src_path = os.path.join(self.directory.root_dir, source_filename)
+        # src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
+        src_exec = "[ -r %s/%s ] && . %s/%s" % (self.directory.root_dir, source_filename, self.directory.root_dir, source_filename)
+        # The ridiculous construction above is necessary to avoid failing tests(!)
 
         for config_file in files_to_inject:
             config_path = os.path.join("~", config_file)
