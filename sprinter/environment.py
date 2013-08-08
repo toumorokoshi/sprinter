@@ -37,8 +37,10 @@ def install_required(f):
         return f(self, *args, **kwargs)
     return wrapped
 
-
-RC_FILES = ['.bashrc', '.zshrc', '.bash_profile']
+# http://www.gnu.org/software/bash/manual/bashref.html#Bash-Startup-Files
+# http://zsh.sourceforge.net/Guide/zshguide02.html
+RC_FILES = ['.bashrc', '.zshrc']
+LOGIN_FILES = ['.bash_profile', '.bash_login', '.profile', '.zprofile', '.zlogin']
 
 
 class Environment(object):
@@ -101,7 +103,7 @@ class Environment(object):
             self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
-            self.inject_environment_rc()
+            self.inject_environment_config()
             self._finalize()
         except Exception:
             self.logger.exception("")
@@ -125,7 +127,7 @@ class Environment(object):
             self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
-            self.inject_environment_rc()
+            self.inject_environment_config()
             self._finalize()
         except Exception:
             self.logger.exception("")
@@ -178,23 +180,27 @@ class Environment(object):
         for feature in self._feature_dict_order:
             self.logger.info("Activating %s..." % feature[0])
             self._run_action(feature, 'activate')
-        self.inject_environment_rc()
+        self.inject_environment_config()
         self._finalize()
 
     @warmup
-    def inject_environment_rc(self):
-        # clearing profile for now, to make sure
-        # profile injections are cleared for sprinter installs
-        for rc_file in RC_FILES:
-            self.injections.inject(os.path.join("~", rc_file), "[ -d %s ] && . %s/.rc" %
-                                   (self.directory.root_dir, self.directory.root_dir))
+    def inject_environment_config(self):
+        rc_file, _  = self._inject_config_source(".rc", RC_FILES)
+        _, env_path = self._inject_config_source(".env", LOGIN_FILES)
+        # If an rc file is sourced by an env file, we should avoid duplication.
+        # (rc files already have a backstop for missing env)
+        if self.injections.in_noninjected_file(env_path, rc_file):
+            self.injections.clear(env_path)
 
     @warmup
     def clear_all(self):
         """ clear all files that were to be injected """
         self.injections.clear_all()
+        # the following loops remain just for back-compat
         for rc_file in RC_FILES:
             self.injections.clear(os.path.join("~", rc_file))
+        for login_file in LOGIN_FILES:
+            self.injections.clear(os.path.join("~", login_file))
 
     def install_sandboxes(self):
         if self.target:
@@ -309,6 +315,27 @@ class Environment(object):
         else:
             self.log_error('feature %s has no formula!' % feature)
         return None
+
+    def _inject_config_source(self, source_filename, files_to_inject):
+        """
+        Inject existing environmental config with namespace sourcing.
+        Returns a tuple of the first file name and path found.
+        """
+        src_path = os.path.join(self.directory.root_dir, source_filename)
+        src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
+
+        for config_file in files_to_inject:
+            config_path = os.path.join("~", config_file)
+            if os.path.exists(config_path):
+                self.injections.inject(config_path, src_exec)
+                break
+        else:
+            config_file = files_to_inject[0]
+            config_path = os.path.join("~", config_file)
+            self.logger.info("No config files found to source %s, creating ~/%s!" % (source_filename, config_file))
+            self.injections.inject(config_path, src_exec)
+
+        return (config_file, config_path)
 
     def _finalize(self):
         """ command to run at the end of sprinter's run """
