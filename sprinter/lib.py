@@ -59,19 +59,25 @@ def get_subclass_from_module(module, parent_class):
 
 
 def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False,
-         output_log_level=logging.INFO, logger=LOGGER):
+         output_log_level=logging.INFO, logger=LOGGER, sensitive_info=False):
     """ Better, smarter call logic """
-    args = command if shell else whitespace_smart_split(command)
-    kw = {}
-    if not shell and not which(args[0], cwd=cwd):
-        raise CommandMissingException(args[0])
-    if shell:
-        kw['shell'] = True
-    process = subprocess.Popen(args, stdin=PIPE, stdout=stdout, stderr=STDOUT,
-                               env=env, cwd=cwd, **kw)
-    output = process.communicate(input=stdin)[0]
-    logger.log(output_log_level, output)
-    return (process.returncode, output)
+    try:
+        args = command if shell else whitespace_smart_split(command)
+        kw = {}
+        if not shell and not which(args[0], cwd=cwd):
+            raise CommandMissingException(args[0])
+        if shell:
+            kw['shell'] = True
+        process = subprocess.Popen(args, stdin=PIPE, stdout=stdout, stderr=STDOUT,
+                                   env=env, cwd=cwd, **kw)
+        output = process.communicate(input=stdin)[0]
+        logger.log(output_log_level, output)
+        return (process.returncode, output)
+    except OSError, e:
+        if not sensitive_info:
+            logger.exception("Error running command: %s")
+            logger.error("Root directory: %s" % cwd)
+        raise e
 
 
 def __process(arg):
