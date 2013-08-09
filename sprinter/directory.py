@@ -82,9 +82,8 @@ class Directory(object):
         if not os.path.exists(self.manifest_path):
             open(self.manifest_path, "w+").close()
         if not os.path.exists(self.utils_path):
-            fh = open(self.utils_path, "w+")
-            fh.write(utils_template)
-            fh.close()
+            with open(self.utils_path, "w+") as fh:
+                fh.write(utils_template)
         self.new = False
 
     def remove(self):
