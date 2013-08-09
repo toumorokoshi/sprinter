@@ -15,7 +15,6 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
-import urllib2
 import urllib
 import requests
 from StringIO import StringIO
@@ -233,7 +232,9 @@ def which(program, cwd=None):
 def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     """ extract a targz and install to the target directory """
     try:
-        gz = gzip.GzipFile(fileobj=StringIO(urllib.urlopen(url).read()))
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        gz = gzip.GzipFile(fileobj=StringIO(requests.get(url).content))
         tf = tarfile.TarFile(fileobj=gz)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
@@ -251,14 +252,16 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
                     else:
                         return
                 tf.extract(tfile, target_dir)
-    except OSError:
-        raise ExtractException()
-    except IOError:
-        raise ExtractException()
+    except OSError, e:
+        raise ExtractException(str(e))
+    except IOError, e:
+        raise ExtractException(str(e))
 
 
 def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
         memory_file = io.BytesIO(urllib.urlopen(url).read())
         zip_file = zipfile.ZipFile(memory_file)
         common_prefix = os.path.commonprefix(zip_file.namelist())
@@ -282,9 +285,11 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
 
 def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
     if remove_common_prefix:
-        raise("Remove common prefix for zip not implemented yet!")
+        raise Exception("Remove common prefix for zip not implemented yet!")
     tmpdir = tempfile.mkdtemp()
     try:
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
         urllib.urlretrieve(url, temp_file)
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
@@ -325,3 +330,16 @@ def _determine_overwrite(prompt, overwrite, path):
     elif prompt:
         return prompt("Path %s already exist! Overwrite?" % path, boolean=True)
     return True
+
+
+"""
+def get_file_owner_group()
+    stat_info = os.stat('/path')
+    uid = stat_info.st_uid
+    gid = stat_info.st_gid
+    print uid, gid
+
+    user = pwd.getpwuid(uid)[0]
+    group = grp.getgrgid(gid)[0]
+    print user, group
+"""

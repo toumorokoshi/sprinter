@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import getpass
 from StringIO import StringIO
 from functools import wraps
 
@@ -77,7 +78,7 @@ class Environment(object):
                  root=None, sprinter_namespace='sprinter'):
         self.system = System()
         if not logger:
-            logger = self._build_logger(level=logging.INFO)
+            logger = self._build_logger(level=logging_level)
         self.logger = logger
         self.sprinter_namespace = sprinter_namespace
         self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
@@ -106,7 +107,7 @@ class Environment(object):
             self.inject_environment_config()
             self._finalize()
         except Exception:
-            self.logger.exception("")
+            self.logger.debug("", exc_info=sys.exc_info())
             self.logger.info("An error occured during installation!")
             self.clear_all()
             self.logger.info("Removing installation %s..." % self.namespace)
@@ -123,14 +124,14 @@ class Environment(object):
             self.logger.info("Updating environment %s..." % self.namespace)
             self.install_sandboxes()
             self.instantiate_features()
-            self.grab_inputs(force_prompt=reconfigure)
-            self._specialize()
+            self.grab_inputs(reconfigure=reconfigure)
+            self._specialize(reconfigure=reconfigure)
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
             self.inject_environment_config()
             self._finalize()
         except Exception:
-            self.logger.exception("")
+            self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
             raise et, ei, tb
 
@@ -149,7 +150,7 @@ class Environment(object):
             self.directory.remove()
             self.injections.commit()
         except Exception:
-            self.logger.exception("")
+            self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
             raise et, ei, tb
 
@@ -157,31 +158,57 @@ class Environment(object):
     @install_required
     def deactivate(self):
         """ deactivate the environment """
-        self.phase = PHASE.DEACTIVATE
-        self.logger.info("Deactivating environment %s..." % self.namespace)
-        self.directory.rewrite_config = False
-        self.instantiate_features()
-        self._specialize()
-        for feature in self._feature_dict_order:
-            self.logger.info("Deactivating %s..." % feature[0])
-            self._run_action(feature, 'deactivate')
-        self.clear_all()
-        self._finalize()
+        try:
+            self.phase = PHASE.DEACTIVATE
+            self.logger.info("Deactivating environment %s..." % self.namespace)
+            self.directory.rewrite_config = False
+            self.instantiate_features()
+            self._specialize()
+            for feature in self._feature_dict_order:
+                self.logger.info("Deactivating %s..." % feature[0])
+                self._run_action(feature, 'deactivate')
+            self.clear_all()
+            self._finalize()
+        except Exception:
+            self.logger.debug("", exc_info=sys.exc_info())
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
 
     @warmup
     @install_required
     def activate(self):
         """ activate the environment """
-        self.phase = PHASE.ACTIVATE
-        self.logger.info("Activating environment %s..." % self.namespace)
-        self.directory.rewrite_config = False
+        try:
+            self.phase = PHASE.ACTIVATE
+            self.logger.info("Activating environment %s..." % self.namespace)
+            self.directory.rewrite_config = False
+            self.instantiate_features()
+            self._specialize()
+            for feature in self._feature_dict_order:
+                self.logger.info("Activating %s..." % feature[0])
+                self._run_action(feature, 'activate')
+            self.inject_environment_config()
+            self._finalize()
+        except Exception:
+            self.logger.debug("", exc_info=sys.exc_info())
+            et, ei, tb = sys.exc_info()
+            raise et, ei, tb
+
+    @warmup
+    def validate(self):
+        """ Validate the target environment """
+        self.phase = PHASE.VALIDATE
+        self.logger.info("Validating %s..." % self.namespace)
         self.instantiate_features()
-        self._specialize()
+        context_dict = {}
+        if self.target:
+            for s in self.target.formula_sections():
+                context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
+                context_dict['config:root_dir'] = self.directory.root_dir
+                context_dict['config:node'] = self.system.node
+                self.target.add_additional_context(context_dict)
         for feature in self._feature_dict_order:
-            self.logger.info("Activating %s..." % feature[0])
-            self._run_action(feature, 'activate')
-        self.inject_environment_config()
-        self._finalize()
+            self._run_action(feature, 'validate', run_if_error=True)
 
     @warmup
     def inject_environment_config(self):
@@ -214,6 +241,10 @@ class Environment(object):
                         "Would you like sprinter to install brew for you?",
                         default="yes", boolean=True)
                     if install_brew:
+                        lib.call("sudo mkdir -p /usr/local/", stdout=None,
+                                 output_log_level=logging.DEBUG)
+                        lib.call("sudo chown -R %s /usr/local/" % getpass.getuser(),
+                                 output_log_level=logging.DEBUG, stdout=None)
                         brew.install_brew('/usr/local')
 
     def run_feature(self, feature, action):
@@ -271,7 +302,8 @@ class Environment(object):
             self.directory = Directory(self.namespace, sprinter_root=self.root)
         if not self.injections:
             self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
-                                                            self.namespace))
+                                                            self.namespace),
+                                         override="SPRINTER_OVERRIDES")
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
@@ -421,11 +453,12 @@ class Environment(object):
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
         except Exception, e:
-            self.logger.exception("An exception occurred with action %s in feature %s!" %
-                                  (action, feature))
+            self.logger.info("An exception occurred with action %s in feature %s!" %
+                             (action, feature))
+            self.logger.debug("Exception", exc_info=sys.exc_info())
             self.log_feature_error(feature, str(e))
 
-    def _specialize(self):
+    def _specialize(self, reconfigure=False):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
         for manifest in [self.source, self.target]:
@@ -439,16 +472,16 @@ class Environment(object):
         self.grab_inputs()
         for feature in self._feature_dict_order:
             self._run_action(feature, 'validate', run_if_error=True)
-            self._run_action(feature, 'resolve')
+            if not reconfigure:
+                self._run_action(feature, 'resolve')
             self._run_action(feature, 'prompt')
 
-    def grab_inputs(self, force_prompt=False):
+    def grab_inputs(self, reconfigure=False):
         """ Resolve the source and target config section """
         if self.source:
-            self.source.grab_inputs(force_prompt=force_prompt)
             if self.target:
                 for k, v in self.source.items('config'):
                     if not self.target.has_option('config', k):
                         self.target.set('config', k, v)
         if self.target:
-            self.target.grab_inputs(force_prompt=force_prompt)
+            self.target.grab_inputs(force_prompt=reconfigure)

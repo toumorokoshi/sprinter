@@ -35,7 +35,7 @@ class SSHFormula(FormulaBase):
     valid_options = FormulaBase.valid_options + ['override', 'install_command', 'create',
                                                  'nopassphrase', 'type', 'ssh_path', 'use_global_ssh']
 
-    def prompt(self, reconfigure=False):
+    def prompt(self):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
                 if not self.target.has('use_global_ssh') and self.__global_ssh_key_exists():

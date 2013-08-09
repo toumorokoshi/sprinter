@@ -10,7 +10,7 @@ from optparse import OptionParser
 from sprinter import lib
 from sprinter.core import PHASE
 from sprinter.environment import Environment
-from sprinter.manifest import Manifest
+from sprinter.manifest import Manifest, ManifestException
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException, BadCredentialsException
 
@@ -42,15 +42,6 @@ parser.add_option('--reconfigure', dest='reconfigure', default=False, action="st
                   help="if true, a sprinter update will reconfigure the existing environment specified")
 parser.add_option('--allow-bad-certificate', dest='allow_bad_certificate', default=False, action="store_true",
                   help="if true, a sprinter update will not verify the ssl certificate for pulling remote configuration")
-# not implemented yet
-"""
-parser.add_option('--sandboxbrew', dest='sandbox_brew', default=False,
-                  help="if true, sandbox a brew installation, alternatively, " +
-                  "false will disable brew sandboxes for configuration that request it.")
-parser.add_option('--sandboxaptget', dest='sandbox_aptget', default=False,
-                  help="if true, sandbox an apt-get installation, alternatively, " +
-                  "false will disable apt-get sandboxes for configuration that request it.")
-"""
 
 
 def signal_handler(signal, frame):
@@ -81,7 +72,7 @@ def parse_args(argv, Environment=Environment):
         error("Please enter a sprinter action: %s" % str(VALID_COMMANDS))
     command = args[0].lower()
     if command not in VALID_COMMANDS:
-        error("Please enter a valid sprinter action: %s" % ",".join(VALID_COMMANDS))
+        error("Please enter a valid sprinter action: %s" % ", ".join(VALID_COMMANDS))
     target = args[1] if len(args) > 1 else None
     logging_level = logging.DEBUG if options.verbose else logging.INFO
     # start processing commands
@@ -124,19 +115,27 @@ def parse_args(argv, Environment=Environment):
         elif command == "environments":
             SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
             for env in os.listdir(SPRINTER_ROOT):
-                print "%s" % env
+                if env != ".global":
+                    print "%s" % env
 
         elif command == "validate":
             if options.username or options.auth:
-                options = get_credentials(parse_domain(target))
-            errors = env.validate_manifest(target, username=options.username, password=options.password)
-            if len(errors) > 0:
-                print "Manifest is invalid!"
-                print "\n".join(errors)
+                options = get_credentials(options, parse_domain(target))
+                target = Manifest(target,
+                                  username=options.username,
+                                  password=options.password,
+                                  verify_certificate=(not options.allow_bad_certificate))
+            env.target = target
+            env.validate()
+            if not env.error_occured:
+                print "No errors! Manifest is valid!"
             else:
-                print "Manifest is valid!"
+                "Manifest is invalid! Please see errors above."
     except BadCredentialsException, e:
         raise e
+    except ManifestException, e:
+        print str(e)
+        print "Could not find Manifest!"
     except Exception, e:
         env.log_error(str(e))
         env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
