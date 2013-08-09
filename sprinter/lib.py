@@ -61,6 +61,7 @@ def get_subclass_from_module(module, parent_class):
 def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False,
          output_log_level=logging.INFO, logger=LOGGER, sensitive_info=False):
     """ Better, smarter call logic """
+    logger.debug("calling command: %s" % command)
     try:
         args = command if shell else whitespace_smart_split(command)
         kw = {}
