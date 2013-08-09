@@ -10,19 +10,23 @@ import stat
 
 # .rc sources .env if necessary (sentinel not set)
 rc_template = """
-[ -z "$%s" ] && . %s
+if [ -z "$%s" -a -r "%s" ]; then
+    . %s
+fi
 """
 
 # .env sources util.sh if necessary, then exports sentinel
 env_template = """
-declare -f path_prepend > /dev/null || . %s
+declare -f sprinter_prepend_path > /dev/null || . %s
 export %s=1
 """
 
 # utils.sh is the same for every namespace, only sourced once
 utils_template="""
 # don't add paths repeatedly to env vars
-path_prepend() {
+sprinter_prepend_path() {
+    # $0 "/foo"         => "/foo:$PATH"
+    # $0 "/foo" MANPATH => "/foo:$MANPATH"
     local dirp="$1"
     local path="${2:-PATH}"
     local list=$(eval echo '$'$path)
@@ -180,7 +184,8 @@ class Directory(object):
         if not os.path.exists(rc_path):
             fh = open(rc_path, "w+")
             # .rc will source .env if it hasn't already
-            fh.write(rc_template % (self.sentinel_var, os.path.join(root_dir, '.env')))
+            env_path = os.path.join(root_dir, '.env')
+            fh.write(rc_template % (self.sentinel_var, env_path, env_path))
         return (rc_path, open(rc_path, "w+"))
 
     def __symlink_dir(self, dir_name, name, path):
