@@ -231,7 +231,7 @@ class Environment(object):
         rc_file,  rc_path  = self._inject_config_source(".rc", RC_FILES)
         env_file, env_path = self._inject_config_source(".env", ENV_FILES)
         # If an rc file is sourced by an env file, we should alert the user.
-        if self.injections.in_noninjected_file(env_path, rc_file):
+        if self.phase is PHASE.INSTALL and self.injections.in_noninjected_file(env_path, rc_file):
             self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
             self.logger.info("Please ensure it is wrapped in a #SPRINTER_OVERRIDES block to avoid repetitious operations!")
 
