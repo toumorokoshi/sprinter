@@ -40,8 +40,24 @@ def install_required(f):
 
 # http://www.gnu.org/software/bash/manual/bashref.html#Bash-Startup-Files
 # http://zsh.sourceforge.net/Guide/zshguide02.html
-RC_FILES = ['.bashrc', '.zshrc']
-LOGIN_FILES = ['.bash_profile', '.bash_login', '.profile', '.zprofile', '.zlogin']
+SHELL_CONFIG = {
+    BASH: {
+        rc: ['.bashrc'],
+        env: ['.bash_profile', '.bash_login', '.profile']
+    },
+    ZSH: {
+        rc: ['.zshrc'],
+        env: ['.zprofile', '.zlogin']
+    },
+    GUI: {
+        debian: ['.profile'],
+        osx: ['.MacOSX/environment.plist']
+    }
+}
+# for now, they are all still dealt with en masse
+RC_FILES = SHELL_CONFIG.BASH.rc + SHELL_CONFIG.ZSH.rc
+ENV_FILES = SHELL_CONFIG.BASH.env + SHELL_CONFIG.ZSH.env
+CONFIG_FILES = RC_FILES + ENV_FILES
 
 
 class Environment(object):
@@ -213,7 +229,7 @@ class Environment(object):
     @warmup
     def inject_environment_config(self):
         rc_file,  rc_path  = self._inject_config_source(".rc", RC_FILES)
-        env_file, env_path = self._inject_config_source(".env", LOGIN_FILES)
+        env_file, env_path = self._inject_config_source(".env", ENV_FILES)
         # If an rc file is sourced by an env file, we should alert the user.
         if self.injections.in_noninjected_file(env_path, rc_file):
             self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
@@ -223,11 +239,8 @@ class Environment(object):
     def clear_all(self):
         """ clear all files that were to be injected """
         self.injections.clear_all()
-        # the following loops remain just for back-compat
-        for rc_file in RC_FILES:
-            self.injections.clear(os.path.join("~", rc_file))
-        for login_file in LOGIN_FILES:
-            self.injections.clear(os.path.join("~", login_file))
+        for config_file in CONFIG_FILES:
+            self.injections.clear(os.path.join("~", config_file))
 
     def install_sandboxes(self):
         if self.target:
