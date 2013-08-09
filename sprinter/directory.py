@@ -8,17 +8,14 @@ import os
 import shutil
 import stat
 
-# .rc sources .env if necessary (sentinel not set)
+# .rc always sources .env
 rc_template = """
-if [ -z "$%s" -a -r "%s" ]; then
-    . %s
-fi
+[ -r "%s" ] && . %s
 """
 
-# .env sources util.sh if necessary, then exports sentinel
+# .env sources util.sh if necessary
 env_template = """
 declare -f sprinter_prepend_path > /dev/null || . %s
-export %s=1
 """
 
 # utils.sh is the same for every namespace, only sourced once
@@ -51,7 +48,6 @@ class Directory(object):
                            # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
     env_file = None  # file handler for env file
-    sentinel_var = None  # env var used by .rc to indicate if .env has been sourced
 
     def __init__(self, namespace, rewrite_config=True, sprinter_root=os.path.join("~", ".sprinter"),
                  logger=logging.getLogger('sprinter')):
@@ -62,7 +58,6 @@ class Directory(object):
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
         self.utils_path = os.path.join(self.root_dir, "utils.sh")
         self.rewrite_config = rewrite_config
-        self.sentinel_var = "SPRINTER_INIT_%s" % namespace.upper()
 
     def __del__(self):
         if self.rc_file:
@@ -174,7 +169,7 @@ class Directory(object):
         if not os.path.exists(env_path):
             fh = open(env_path, "w+")
             # .env will source utils.sh if it hasn't already
-            fh.write(env_template % (self.utils_path, self.sentinel_var))
+            fh.write(env_template % self.utils_path)
         return (env_path, open(env_path, "w+"))
 
     def __get_rc_handle(self, root_dir):
@@ -182,9 +177,9 @@ class Directory(object):
         rc_path = os.path.join(root_dir, '.rc')
         if not os.path.exists(rc_path):
             fh = open(rc_path, "w+")
-            # .rc will source .env if it hasn't already
+            # .rc will always source .env
             env_path = os.path.join(root_dir, '.env')
-            fh.write(rc_template % (self.sentinel_var, env_path, env_path))
+            fh.write(rc_template % (env_path, env_path))
         return (rc_path, open(rc_path, "w+"))
 
     def __symlink_dir(self, dir_name, name, path):
