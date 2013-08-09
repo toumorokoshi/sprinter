@@ -41,22 +41,22 @@ def install_required(f):
 # http://www.gnu.org/software/bash/manual/bashref.html#Bash-Startup-Files
 # http://zsh.sourceforge.net/Guide/zshguide02.html
 SHELL_CONFIG = {
-    BASH: {
-        rc: ['.bashrc'],
-        env: ['.bash_profile', '.bash_login', '.profile']
+    'BASH': {
+        'rc': ['.bashrc'],
+        'env': ['.bash_profile', '.bash_login', '.profile']
     },
-    ZSH: {
-        rc: ['.zshrc'],
-        env: ['.zprofile', '.zlogin']
+    'ZSH': {
+        'rc': ['.zshrc'],
+        'env': ['.zprofile', '.zlogin']
     },
-    GUI: {
-        debian: ['.profile'],
-        osx: ['.MacOSX/environment.plist']
+    'GUI': {
+        'debian': ['.profile'],
+        'osx': ['.MacOSX/environment.plist']
     }
 }
 # for now, they are all still dealt with en masse
-RC_FILES = SHELL_CONFIG.BASH.rc + SHELL_CONFIG.ZSH.rc
-ENV_FILES = SHELL_CONFIG.BASH.env + SHELL_CONFIG.ZSH.env
+RC_FILES = SHELL_CONFIG['BASH']['rc'] + SHELL_CONFIG['ZSH']['rc']
+ENV_FILES = SHELL_CONFIG['BASH']['env'] + SHELL_CONFIG['ZSH']['env']
 CONFIG_FILES = RC_FILES + ENV_FILES
 
 
