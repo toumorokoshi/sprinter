@@ -61,7 +61,6 @@ class Injections(object):
             self.destructive_inject(filename, content)
         for filename in self.clear_set:
             self.logger.info("Clearing injection from %s..." % filename)
-            self.__generate_file(filename)
             self.destructive_clear(filename)
 
     def injected(self, filename):
