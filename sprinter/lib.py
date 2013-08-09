@@ -76,8 +76,10 @@ def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False
         return (process.returncode, output)
     except OSError, e:
         if not sensitive_info:
-            logger.exception("Error running command: %s")
+            logger.exception("Error running command: %s" % command)
             logger.error("Root directory: %s" % cwd)
+            if stdin:
+                logger.error("stdin: %s" % stdin)
         raise e
 
 

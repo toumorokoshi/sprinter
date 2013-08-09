@@ -213,6 +213,7 @@ class PerforceFormula(FormulaBase):
         client = re.sub('//depot', '    //depot', p4client_template % client_dict)
         self.logger.info(lib.call("%s client -i" % self.p4_command,
                                   stdin=client,
+                                  shell=True,
                                   env=self.p4environ,
                                   cwd=client_dict['root_path']))
 
