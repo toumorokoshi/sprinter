@@ -372,13 +372,13 @@ class Environment(object):
         # The ridiculous construction above is necessary to avoid failing tests(!)
 
         for config_file in files_to_inject:
-            config_path = os.path.join("~", config_file)
+            config_path = os.path.expanduser(os.path.join("~", config_file))
             if os.path.exists(config_path):
                 self.injections.inject(config_path, src_exec)
                 break
         else:
             config_file = files_to_inject[0]
-            config_path = os.path.join("~", config_file)
+            config_path = os.path.expanduser(os.path.join("~", config_file))
             self.logger.info("No config files found to source %s, creating ~/%s!" % (source_filename, config_file))
             self.injections.inject(config_path, src_exec)
 
@@ -389,6 +389,8 @@ class Environment(object):
         self.logger.info("Finalizing...")
         self.write_manifest()
         if self.directory.rewrite_config:
+            # always ensure .rc is written (sourcing .env)
+            self.directory.add_to_rc('')
             self.directory.add_to_env('sprinter_prepend_path "%s"' % self.directory.bin_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())

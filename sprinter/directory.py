@@ -166,21 +166,19 @@ class Directory(object):
     def __get_env_handle(self, root_dir):
         """ get the filepath and filehandle to the .env file for the environment """
         env_path = os.path.join(root_dir, '.env')
-        if not os.path.exists(env_path):
-            fh = open(env_path, "w+")
-            # .env will source utils.sh if it hasn't already
-            fh.write(env_template % self.utils_path)
-        return (env_path, open(env_path, "w+"))
+        fh = open(env_path, "w+")
+        # .env will source utils.sh if it hasn't already
+        fh.write(env_template % self.utils_path)
+        return (env_path, fh)
 
     def __get_rc_handle(self, root_dir):
         """ get the filepath and filehandle to the rc file for the environment """
         rc_path = os.path.join(root_dir, '.rc')
-        if not os.path.exists(rc_path):
-            fh = open(rc_path, "w+")
-            # .rc will always source .env
-            env_path = os.path.join(root_dir, '.env')
-            fh.write(rc_template % (env_path, env_path))
-        return (rc_path, open(rc_path, "w+"))
+        env_path = os.path.join(root_dir, '.env')
+        fh = open(rc_path, "w+")
+        # .rc will always source .env
+        fh.write(rc_template % (env_path, env_path))
+        return (rc_path, fh)
 
     def __symlink_dir(self, dir_name, name, path):
         """
