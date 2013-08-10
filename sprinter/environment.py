@@ -38,8 +38,26 @@ def install_required(f):
         return f(self, *args, **kwargs)
     return wrapped
 
-
-RC_FILES = ['.bashrc', '.zshrc', '.bash_profile']
+# http://www.gnu.org/software/bash/manual/bashref.html#Bash-Startup-Files
+# http://zsh.sourceforge.net/Guide/zshguide02.html
+SHELL_CONFIG = {
+    'BASH': {
+        'rc': ['.bashrc'],
+        'env': ['.bash_profile', '.bash_login', '.profile']
+    },
+    'ZSH': {
+        'rc': ['.zshrc'],
+        'env': ['.zprofile', '.zlogin']
+    },
+    'GUI': {
+        'debian': ['.profile'],
+        'osx': ['.MacOSX/environment.plist']
+    }
+}
+# for now, they are all still dealt with en masse
+RC_FILES = SHELL_CONFIG['BASH']['rc'] + SHELL_CONFIG['ZSH']['rc']
+ENV_FILES = SHELL_CONFIG['BASH']['env'] + SHELL_CONFIG['ZSH']['env']
+CONFIG_FILES = RC_FILES + ENV_FILES
 
 
 class Environment(object):
@@ -102,7 +120,7 @@ class Environment(object):
             self._specialize()
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
-            self.inject_environment_rc()
+            self.inject_environment_config()
             self._finalize()
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
@@ -126,7 +144,7 @@ class Environment(object):
             self._specialize(reconfigure=reconfigure)
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
-            self.inject_environment_rc()
+            self.inject_environment_config()
             self._finalize()
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
@@ -159,7 +177,7 @@ class Environment(object):
         try:
             self.phase = PHASE.DEACTIVATE
             self.logger.info("Deactivating environment %s..." % self.namespace)
-            self.directory.rewrite_rc = False
+            self.directory.rewrite_config = False
             self.instantiate_features()
             self._specialize()
             for feature in self._feature_dict_order:
@@ -179,13 +197,13 @@ class Environment(object):
         try:
             self.phase = PHASE.ACTIVATE
             self.logger.info("Activating environment %s..." % self.namespace)
-            self.directory.rewrite_rc = False
+            self.directory.rewrite_config = False
             self.instantiate_features()
             self._specialize()
             for feature in self._feature_dict_order:
                 self.logger.info("Activating %s..." % feature[0])
                 self._run_action(feature, 'activate')
-            self.inject_environment_rc()
+            self.inject_environment_config()
             self._finalize()
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
@@ -209,19 +227,20 @@ class Environment(object):
             self._run_action(feature, 'validate', run_if_error=True)
 
     @warmup
-    def inject_environment_rc(self):
-        # clearing profile for now, to make sure
-        # profile injections are cleared for sprinter installs
-        for rc_file in RC_FILES:
-            self.injections.inject(os.path.join("~", rc_file), "[ -d %s ] && . %s/.rc" %
-                                   (self.directory.root_dir, self.directory.root_dir))
+    def inject_environment_config(self):
+        rc_file,  rc_path  = self._inject_config_source(".rc", RC_FILES)
+        env_file, env_path = self._inject_config_source(".env", ENV_FILES)
+        # If an rc file is sourced by an env file, we should alert the user.
+        if self.phase is PHASE.INSTALL and self.injections.in_noninjected_file(env_path, rc_file):
+            self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
+            self.logger.info("Please ensure it is wrapped in a #SPRINTER_OVERRIDES block to avoid repetitious operations!")
 
     @warmup
     def clear_all(self):
         """ clear all files that were to be injected """
         self.injections.clear_all()
-        for rc_file in RC_FILES:
-            self.injections.clear(os.path.join("~", rc_file))
+        for config_file in CONFIG_FILES:
+            self.injections.clear(os.path.join("~", config_file))
 
     def install_sandboxes(self):
         if self.target:
@@ -342,14 +361,39 @@ class Environment(object):
             self.log_error('feature %s has no formula!' % feature)
         return None
 
+    def _inject_config_source(self, source_filename, files_to_inject):
+        """
+        Inject existing environmental config with namespace sourcing.
+        Returns a tuple of the first file name and path found.
+        """
+        # src_path = os.path.join(self.directory.root_dir, source_filename)
+        # src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
+        src_exec = "[ -r %s/%s ] && . %s/%s" % (self.directory.root_dir, source_filename, self.directory.root_dir, source_filename)
+        # The ridiculous construction above is necessary to avoid failing tests(!)
+
+        for config_file in files_to_inject:
+            config_path = os.path.expanduser(os.path.join("~", config_file))
+            if os.path.exists(config_path):
+                self.injections.inject(config_path, src_exec)
+                break
+        else:
+            config_file = files_to_inject[0]
+            config_path = os.path.expanduser(os.path.join("~", config_file))
+            self.logger.info("No config files found to source %s, creating ~/%s!" % (source_filename, config_file))
+            self.injections.inject(config_path, src_exec)
+
+        return (config_file, config_path)
+
     def _finalize(self):
         """ command to run at the end of sprinter's run """
         self.logger.info("Finalizing...")
         self.write_manifest()
-        if self.directory.rewrite_rc:
-            self.directory.add_to_rc("export PATH=%s:$PATH" % self.directory.bin_path())
-            self.directory.add_to_rc("export LIBRARY_PATH=%s:$LIBRARY_PATH" % self.directory.lib_path())
-            self.directory.add_to_rc("export C_INCLUDE_PATH=%s:$C_INCLUDE_PATH" % self.directory.include_path())
+        if self.directory.rewrite_config:
+            # always ensure .rc is written (sourcing .env)
+            self.directory.add_to_rc('')
+            self.directory.add_to_env('sprinter_prepend_path "%s"' % self.directory.bin_path())
+            self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
+            self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         self.injections.commit()
         if self.error_occured:
             raise SprinterException("Error occured!")

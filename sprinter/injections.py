@@ -26,19 +26,20 @@ class Injections(object):
 
     def __init__(self, wrapper, override=None, logger='sprinter'):
         if override:
-            self.override_match = re.compile("(\n?#%s.*#%s)" % (override, override), re.DOTALL)
+            self.override_match = re.compile("(\n?#%s.*#%s\n?)" % (override, override), re.DOTALL)
         else:
             self.override_match = None
         self.wrapper = "#%s" % wrapper
-        self.wrapper_match = re.compile("\n?#%s.*#%s" % (wrapper, wrapper), re.DOTALL)
+        self.wrapper_match = re.compile("\n?#%s.*#%s\n?" % (wrapper, wrapper), re.DOTALL)
         self.logger = logging.getLogger(logger)
 
     def inject(self, filename, content):
         """ add the injection content to the dictionary """
-        if filename in self.inject_dict:
-            self.inject_dict[filename] += ("\n" + content)
-        else:
-            self.inject_dict[filename] = content
+        # ensure content always has one trailing newline
+        content = content.rstrip() + "\n"
+        if not filename in self.inject_dict:
+            self.inject_dict[filename] = ""
+        self.inject_dict[filename] += content
 
     def clear(self, filename):
         """ add the file to the list of files to clear """
@@ -61,7 +62,6 @@ class Injections(object):
             self.destructive_inject(filename, content)
         for filename in self.clear_set:
             self.logger.info("Clearing injection from %s..." % filename)
-            self.__generate_file(filename)
             self.destructive_clear(filename)
 
     def injected(self, filename):
@@ -109,7 +109,9 @@ class Injections(object):
         """ Checks if a string exists in the file, sans the injected """
         if os.path.exists(file_path):
             file_content = open(file_path).read()
-        file_content = self.wrapper_match.sub("", file_content)
+            file_content = self.wrapper_match.sub("", file_content)
+        else:
+            file_content = ""
         return file_content.find(content) != -1
 
     def inject_content(self, content, inject_string):
@@ -130,9 +132,10 @@ class Injections(object):
         content += """
 %s
 %s
-%s""" % (self.wrapper, inject_string, self.wrapper)
+%s
+""" % (self.wrapper, inject_string.rstrip(), self.wrapper)
         if self.override_match:
-            content += "\n" + sprinter_overrides
+            content += sprinter_overrides.rstrip() + "\n"
         return content
 
     def clear_content(self, content):
