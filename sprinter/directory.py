@@ -9,13 +9,11 @@ import shutil
 import stat
 
 # .rc always sources .env
-rc_template = """
-[ -r "%s" ] && . %s
+rc_template = """[ -r "%s" ] && . %s
 """
 
 # .env sources util.sh if necessary
-env_template = """
-declare -f sprinter_prepend_path > /dev/null || . %s
+env_template = """declare -f sprinter_prepend_path > /dev/null || . %s
 """
 
 # utils.sh is the same for every namespace, only sourced once

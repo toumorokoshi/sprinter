@@ -26,19 +26,20 @@ class Injections(object):
 
     def __init__(self, wrapper, override=None, logger='sprinter'):
         if override:
-            self.override_match = re.compile("(\n?#%s.*#%s)" % (override, override), re.DOTALL)
+            self.override_match = re.compile("(\n?#%s.*#%s\n?)" % (override, override), re.DOTALL)
         else:
             self.override_match = None
         self.wrapper = "#%s" % wrapper
-        self.wrapper_match = re.compile("\n?#%s.*#%s" % (wrapper, wrapper), re.DOTALL)
+        self.wrapper_match = re.compile("\n?#%s.*#%s\n?" % (wrapper, wrapper), re.DOTALL)
         self.logger = logging.getLogger(logger)
 
     def inject(self, filename, content):
         """ add the injection content to the dictionary """
-        if filename in self.inject_dict:
-            self.inject_dict[filename] += ("\n" + content)
-        else:
-            self.inject_dict[filename] = content
+        # ensure content always has one trailing newline
+        content = content.rstrip() + "\n"
+        if not filename in self.inject_dict:
+            self.inject_dict[filename] = ""
+        self.inject_dict[filename] += content
 
     def clear(self, filename):
         """ add the file to the list of files to clear """
@@ -131,9 +132,10 @@ class Injections(object):
         content += """
 %s
 %s
-%s""" % (self.wrapper, inject_string, self.wrapper)
+%s
+""" % (self.wrapper, inject_string.rstrip(), self.wrapper)
         if self.override_match:
-            content += "\n" + sprinter_overrides
+            content += sprinter_overrides.rstrip() + "\n"
         return content
 
     def clear_content(self, content):
