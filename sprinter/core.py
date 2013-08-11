@@ -2,11 +2,11 @@
 Contains core dependencies
 """
 import logging
-from sprinter.structures import enum, EnumInstance
+from sprinter.structures import Enum, EnumInstance
 
 LOGGER = logging.getLogger('sprinter')
 
-PHASE = enum(
+PHASE = Enum(
     INSTALL=EnumInstance(name='install', verb='installing'),
     UPDATE=EnumInstance(name='update', verb='updating'),
     REMOVE=EnumInstance(name='remove', verb='removing'),
@@ -14,4 +14,4 @@ PHASE = enum(
     DEACTIVATE=EnumInstance(name='deactivate', verb='deactivating'),
     RECONFIGURE=EnumInstance(name='reconfigure', verb='reconfiguring'),
     VALIDATE=EnumInstance(name='validate', verb='validating')
-    )
+)

@@ -32,6 +32,8 @@ class Injections(object):
         self.wrapper = "#%s" % wrapper
         self.wrapper_match = re.compile("\n?#%s.*#%s\n?" % (wrapper, wrapper), re.DOTALL)
         self.logger = logging.getLogger(logger)
+        self.inject_dict = {}
+        self.clear_set = set()
 
     def inject(self, filename, content):
         """ add the injection content to the dictionary """

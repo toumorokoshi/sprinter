@@ -22,15 +22,19 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+
 class EnumInstance(object):
 
     def __init__(self, **kw):
         for k in kw:
             setattr(self, k, kw[k])
 
+
 # credit goes to http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
-def enum(*sequential, **named):
+def Enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     reverse = dict((value, key) for key, value in enums.iteritems())
+    values = enums.values()
+    enums['values'] = values
     enums['value'] = reverse
     return type('Enum', (), enums)

@@ -332,6 +332,10 @@ def remove_path(target_path):
         os.unlink(target_path)
 
 
+def insert_environment_osx(**environment_variables):
+    """ Inject the environment variables desired into the osx environment """
+
+
 def _determine_overwrite(prompt, overwrite, path):
     """ Determines if an overwrite is desired """
     if overwrite:

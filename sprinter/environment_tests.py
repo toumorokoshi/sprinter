@@ -1,7 +1,12 @@
+import os
+import shutil
+import tempfile
 from mock import Mock, call
 from nose import tools
-from sprinter.testtools import create_mock_environment
+from sprinter.testtools import (create_mock_environment,
+                                create_mock_formulabase)
 from sprinter.exceptions import SprinterException
+from sprinter.environment import Environment
 from sprinter.formulabase import FormulaBase
 
 source_config = """
@@ -147,6 +152,77 @@ class TestEnvironment(object):
                                                   call.prompt(),
                                                   call.activate()])
 
+    def test_global_shell_configuration_bash(self):
+        """ The global shell should dictate what files are injected (bash, gui, no zsh)"""
+        # test bash, gui, no zshell
+        global_shell_configuration_bash = """[shell]
+bash = true
+zsh = false
+gui = true
+        """
+        environment = create_mock_environment(
+            target_config=test_target,
+            global_config=global_shell_configuration_bash,
+            mock_injections=False)
+        environment.warmup()
+        environment.injections.commit = Mock()
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=create_mock_formulabase())
+        environment.install()
+        assert filter(lambda x: x.endswith('.bashrc'), environment.injections.inject_dict.keys())
+        env_injected = False
+        for profile in ['.bash_profile', '.bash_login', '.profile']:
+            env_injected = env_injected or filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
+        assert env_injected
+        assert not filter(lambda x: x.endswith('.zshrc'), environment.injections.inject_dict.keys())
+        for profile in ['.zprofile', '.zlogin']:
+            assert not filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
+
+    def test_global_shell_configuration_zshell(self):
+        """ The global shell should dictate what files are injected (zsh, no bash, no gui)"""
+        # test zshell, no bash, no gui
+        global_shell_configuration_zshell = """[shell]
+bash = false
+zsh = true
+gui = false
+        """
+        environment = create_mock_environment(
+            target_config=test_target,
+            global_config=global_shell_configuration_zshell,
+            mock_injections=False)
+        environment.warmup()
+        environment.injections.commit = Mock()
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=create_mock_formulabase())
+        environment.install()
+        assert filter(lambda x: x.endswith('.zshrc'), environment.injections.inject_dict.keys())
+        env_injected = False
+        for profile in ['.zprofile', '.zlogin']:
+            env_injected = env_injected or filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
+        assert env_injected
+        assert not filter(lambda x: x.endswith('.bashrc'), environment.injections.inject_dict.keys())
+        for profile in ['.bash_profile', '.bash_login']:
+            assert not filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
+
+    def test_global_config(self):
+        """ Global config should accept a file-like object, or default to ROOT/.sprinter/.global/config.cfg """
+        temp_dir = tempfile.mkdtemp()
+        os.makedirs(os.path.join(temp_dir, ".global"))
+        with open(os.path.join(temp_dir, ".global", "config.cfg"), 'w+') as fh:
+            fh.write("""[shell]
+bash = true
+            """)
+        try:
+            env = Environment(root=temp_dir)
+            assert env.global_config.get('shell', 'bash') == "true"
+            env = Environment(root=temp_dir,
+                              global_config="""[shell]
+bash = false
+zsh = true
+                              """)
+            assert env.global_config.get('shell', 'bash') == "false"
+            assert env.global_config.get('shell', 'zsh') == "true"
+        finally:
+            shutil.rmtree(temp_dir)
+        
 
 missing_formula_config = """
 [missingformula]

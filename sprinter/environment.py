@@ -4,7 +4,7 @@ import sys
 import getpass
 from StringIO import StringIO
 from functools import wraps
-
+from ConfigParser import ConfigParser
 from sprinter.core import PHASE
 from sprinter import brew
 from sprinter import lib
@@ -23,7 +23,7 @@ def warmup(f):
     @wraps(f)
     def wrapped(self, *args, **kwargs):
         if not self.warmed_up:
-            self._warmup()
+            self.warmup()
         return f(self, *args, **kwargs)
     return wrapped
 
@@ -41,22 +41,29 @@ def install_required(f):
 # http://www.gnu.org/software/bash/manual/bashref.html#Bash-Startup-Files
 # http://zsh.sourceforge.net/Guide/zshguide02.html
 SHELL_CONFIG = {
-    'BASH': {
+    'bash': {
         'rc': ['.bashrc'],
         'env': ['.bash_profile', '.bash_login', '.profile']
     },
-    'ZSH': {
+    'zsh': {
         'rc': ['.zshrc'],
         'env': ['.zprofile', '.zlogin']
     },
-    'GUI': {
+    'gui': {
         'debian': ['.profile'],
-        'osx': ['.MacOSX/environment.plist']
+        'osx': lib.insert_environment_osx
     }
 }
+
 # for now, they are all still dealt with en masse
-RC_FILES = SHELL_CONFIG['BASH']['rc'] + SHELL_CONFIG['ZSH']['rc']
-ENV_FILES = SHELL_CONFIG['BASH']['env'] + SHELL_CONFIG['ZSH']['env']
+RC_FILES = []
+ENV_FILES = []
+
+for shell, shell_config in SHELL_CONFIG.items():
+    if shell != 'gui':
+        RC_FILES += shell_config['rc']
+        ENV_FILES += shell_config['env']
+
 CONFIG_FILES = RC_FILES + ENV_FILES
 
 
@@ -89,9 +96,12 @@ class Environment(object):
     # a pip puppet used to install eggs and add it to the classpath
     _pip = None
     sandboxes = []  # a list of package managers to sandbox (brew)
+    # specifies where to get the global sprinter root
+    global_config = None  # configuration file, which defaults to loading from SPRINTER_ROOT/.global/config.cfg
 
     def __init__(self, logger=None, logging_level=logging.INFO,
-                 root=None, sprinter_namespace='sprinter'):
+                 root=None, sprinter_namespace='sprinter',
+                 global_config=None):
         self.system = System()
         if not logger:
             logger = self._build_logger(level=logging_level)
@@ -103,7 +113,8 @@ class Environment(object):
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
         self.formula_dict = {}
-
+        self.load_global_config(global_config)
+        
     @warmup
     def install(self):
         """ Install the environment """
@@ -228,12 +239,21 @@ class Environment(object):
 
     @warmup
     def inject_environment_config(self):
-        rc_file,  rc_path  = self._inject_config_source(".rc", RC_FILES)
-        env_file, env_path = self._inject_config_source(".env", ENV_FILES)
-        # If an rc file is sourced by an env file, we should alert the user.
-        if self.phase is PHASE.INSTALL and self.injections.in_noninjected_file(env_path, rc_file):
-            self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
-            self.logger.info("Please ensure it is wrapped in a #SPRINTER_OVERRIDES block to avoid repetitious operations!")
+        for shell in SHELL_CONFIG:
+            if shell == 'gui':
+                if self.system.isDebianBased():
+                    self._inject_config_source(".env", SHELL_CONFIG['gui']['debian'])
+            else:
+                if (self.global_config.has_option('shell', shell)
+                   and lib.is_affirmative(self.global_config.get('shell', shell))):
+
+                    rc_file, rc_path = self._inject_config_source(".rc", SHELL_CONFIG[shell]['rc'])
+                    env_file, env_path = self._inject_config_source(".env", SHELL_CONFIG[shell]['env'])
+                    # If an rc file is sourced by an env file, we should alert the user.
+                    if self.phase is PHASE.INSTALL and self.injections.in_noninjected_file(env_path, rc_file):
+                        self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
+                        self.logger.info("Please ensure it is wrapped in a #SPRINTER_OVERRIDES block " +
+                                         "to avoid repetitious operations!")
 
     @warmup
     def clear_all(self):
@@ -296,7 +316,7 @@ class Environment(object):
         if manifest.has_option('config', 'message_success'):
             return manifest.get('config', 'message_success')
 
-    def _warmup(self):
+    def warmup(self):
         """ initialize variables necessary to perform a sprinter action """
         self.logger.debug("Warming up...")
         try:
@@ -368,7 +388,8 @@ class Environment(object):
         """
         # src_path = os.path.join(self.directory.root_dir, source_filename)
         # src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
-        src_exec = "[ -r %s/%s ] && . %s/%s" % (self.directory.root_dir, source_filename, self.directory.root_dir, source_filename)
+        src_exec = "[ -r %s/%s ] && . %s/%s" % (self.directory.root_dir, source_filename,
+                                                self.directory.root_dir, source_filename)
         # The ridiculous construction above is necessary to avoid failing tests(!)
 
         for config_file in files_to_inject:
@@ -500,3 +521,16 @@ class Environment(object):
                         self.target.set('config', k, v)
         if self.target:
             self.target.grab_inputs(force_prompt=reconfigure)
+
+    def load_global_config(self, global_config_string):
+        if self.global_config:
+            return self.global_config
+        self.global_config = ConfigParser()
+        if global_config_string:
+            self.global_config.readfp(StringIO(global_config_string))
+        else:
+            global_config_path = os.path.join(self.root, ".global", "config.cfg")
+            if os.path.exists(global_config_path):
+                self.global_config.read(global_config_path)
+            else:
+                raise SprinterException("Not implemented yet!")

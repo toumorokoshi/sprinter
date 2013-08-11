@@ -9,9 +9,9 @@ from base64 import b64encode
 
 import httpretty
 from nose import tools
+from mock import patch
 
 from sprinter.formulabase import FormulaBase
-from sprinter.environment import Environment
 from sprinter.formula.env import EnvFormula
 from sprinter import lib
 from sprinter.lib import (BadCredentialsException,
@@ -21,9 +21,6 @@ TEST_TARGZ = "http://github.com/toumorokoshi/sprinter/tarball/master"
 
 
 class TestLib(object):
-
-        def setUp(self):
-            self.environment = Environment()
 
         def test_get_formula_class(self):
             """ Test if a formula class is grabbed """
@@ -200,3 +197,8 @@ class TestLib(object):
             httpretty.register_uri(httpretty.GET, TEST_URI,
                                    body=CONTENT, status=401)
             lib.authenticated_get("username", "password", TEST_URI)
+
+        @patch.object(lib, 'call')
+        def test_insert_environment_osx(self, call):
+            """ Insert environment gui should inject variables into the environment """
+            # TODO: write this test after functionality exists
