@@ -32,16 +32,16 @@ class TestEnvFormula(FormulaTest):
 
     def test_simple_example(self):
         """ The env formula should set environment variables """
-        self.environment.directory.add_to_rc = Mock()
+        self.environment.directory.add_to_env = Mock()
         self.environment.run_feature("simple_example", "sync")
-        self.environment.directory.add_to_rc.assert_any_call("export USER=toumorokoshi")
-        self.environment.directory.add_to_rc.assert_any_call("export MAVEN_HOME=~/bin/mvn")
-        self.environment.directory.add_to_rc.assert_any_call("export M2_PATH=~/.m2/")
+        self.environment.directory.add_to_env.assert_any_call("export USER=toumorokoshi")
+        self.environment.directory.add_to_env.assert_any_call("export MAVEN_HOME=~/bin/mvn")
+        self.environment.directory.add_to_env.assert_any_call("export M2_PATH=~/.m2/")
 
     def test_simple_update(self):
         """ The env formula should set environment variables on update """
-        self.environment.directory.add_to_rc = Mock()
+        self.environment.directory.add_to_env = Mock()
         self.environment.run_feature("simple_update", "sync")
-        self.environment.directory.add_to_rc.assert_any_call("export A=b")
-        self.environment.directory.add_to_rc.assert_any_call("export C=dd")
-        self.environment.directory.add_to_rc.assert_any_call("export E=fgh")
+        self.environment.directory.add_to_env.assert_any_call("export A=b")
+        self.environment.directory.add_to_env.assert_any_call("export C=dd")
+        self.environment.directory.add_to_env.assert_any_call("export E=fgh")

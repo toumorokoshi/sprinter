@@ -12,7 +12,7 @@ from sprinter import lib
 
 class FormulaBase(object):
 
-    valid_options = ['rc', 'command', 'systems', 'depends', 'inputs']
+    valid_options = ['rc', 'env', 'command', 'systems', 'depends', 'inputs']
     required_options = ['formula']
 
     def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
@@ -56,6 +56,8 @@ class FormulaBase(object):
         """
         install_directory = self.directory.install_directory(self.feature_name)
         cwd = install_directory if os.path.exists(install_directory) else None
+        if self.target.has('env'):
+            self.directory.add_to_env(self.target.get('env'))
         if self.target.has('rc'):
             self.directory.add_to_rc(self.target.get('rc'))
         if self.target.has('command'):

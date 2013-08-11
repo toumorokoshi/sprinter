@@ -15,14 +15,14 @@ here is an override string. it should appear at the bottom.
 TEST_OVERRIDE_CONTENT = """
 Testing abc.
 
-
 #testinjection
 injectme
 #testinjection
 
 #OVERRIDE
 here is an override string. it should appear at the bottom.
-#OVERRIDE"""
+#OVERRIDE
+"""
 
 
 class TestInjections(object):
