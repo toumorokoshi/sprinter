@@ -19,10 +19,11 @@ The 'input' keyword should be used for values that are always needed
 should be used for optional configuration or for configuration based
 up on the system being installed (such as overwriting existing values)
 
-*NOTE* The only way to share state between phases is through
- configuration. A new instance of an object is instantiated for every
- method every time, so it is not possible to save state between say,
- the prompt method and the update method later on.
+*NOTE* It is not reccomended to maintain state within an
+ object. (e.g. defining a variable self.myvar in the prompt method and
+ then using it in the install method). Although this may work
+ currently, there is no specification that dictates that the order on
+ which methods are called against an object will be constant.
 
 Config behaviour
 ----------------
