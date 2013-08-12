@@ -19,15 +19,17 @@ env_template = """declare -f sprinter_prepend_path > /dev/null || . %s
 # utils.sh is the same for every namespace, only sourced once
 utils_template="""
 # don't add paths repeatedly to env vars
+# sprinter_prepend_path "/foo"         => "/foo:$PATH"
+# sprinter_prepend_path "/foo" MANPATH => "/foo:$MANPATH"
 sprinter_prepend_path() {
-    # $0 "/foo"         => "/foo:$PATH"
-    # $0 "/foo" MANPATH => "/foo:$MANPATH"
-    local dirp="$1"
-    local path="${2:-PATH}"
-    local list=$(eval echo '$'$path)
-    if [ -d "$dirp" ] && [[ ":$list:" != *":$dirp:"* ]]; then
+    local sp_dir="$1"
+    local sp_var="${2:-PATH}"
+    local sp_list=$(eval echo '$'$sp_var)
+    if [ -d "$sp_dir" ]; then
+        # strip sp_dir from sp_list
+        sp_list=`echo -n $sp_list | awk -v RS=: -v ORS=: '$0 != "'$sp_dir'"' | sed 's/:$//'`
         # :+ syntax avoids dangling ":" in exported var
-        export $path="${dirp}${list:+":$list"}"
+        export $sp_var="${sp_dir}${sp_list:+":$sp_list"}"
     fi
 }
 """
