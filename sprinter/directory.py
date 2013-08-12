@@ -74,9 +74,6 @@ class Directory(object):
                 os.makedirs(target_path)
         if not os.path.exists(self.manifest_path):
             open(self.manifest_path, "w+").close()
-        if not os.path.exists(self.utils_path):
-            with open(self.utils_path, "w+") as fh:
-                fh.write(utils_template)
         self.new = False
 
     def remove(self):
@@ -126,6 +123,13 @@ class Directory(object):
         return a path to the install directory that the feature should install to.
         """
         return os.path.join(self.root_dir, "features", feature_name)
+
+    def install_utils(self):
+        """
+        Install utils.sh
+        """
+        with open(self.utils_path, "w+") as fh:
+            fh.write(utils_template)
 
     def add_to_env(self, content):
         """

@@ -239,6 +239,7 @@ class Environment(object):
 
     @warmup
     def inject_environment_config(self):
+        self.directory.install_utils()
         for shell in SHELL_CONFIG:
             if shell == 'gui':
                 if self.system.isDebianBased():
