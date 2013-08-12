@@ -416,6 +416,7 @@ class Environment(object):
             self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         self.injections.commit()
+        self.global_config.write(open(os.path.join(self.root, ".global", "config.cfg"), 'w+'))
         if self.error_occured:
             raise SprinterException("Error occured!")
         if self.message_success():
@@ -533,4 +534,22 @@ class Environment(object):
             if os.path.exists(global_config_path):
                 self.global_config.read(global_config_path)
             else:
-                raise SprinterException("Not implemented yet!")
+                self.logger.info("Unable to find a global sprinter configuration!")
+                self.logger.info("Creating one now. Please answer some questions" +
+                                 " about what you would like sprinter to do.")
+                self.logger.info("")
+                # shell configuration
+                self.logger.info("What shells or environments would you like sprinter to work with?")
+                self.logger.info("(Sprinter will not try to inject into environments not specified here.)")
+                self.logger.info("If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.")
+                self.logger.info("i.e. environment variables sprinter set will affect programs as well, not just shells")
+                environments = enumerate(SHELL_CONFIG, start=1)
+                self.logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
+                desired_environments = lib.prompt("type the environment, comma-separated", default="0")
+                self.global_config.add_section('shell')
+                if "0" in desired_environments:
+                    for k in SHELL_CONFIG.keys():
+                        self.global_config.set('shell', k, 'true')
+                for index, val in environments:
+                    if index in desired_environments:
+                        self.global_config.set('shell', val, 'true')

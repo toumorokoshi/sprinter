@@ -18,7 +18,6 @@ import tempfile
 import urllib
 import requests
 from StringIO import StringIO
-from base64 import b64encode
 
 from getpass import getpass
 from subprocess import PIPE, STDOUT

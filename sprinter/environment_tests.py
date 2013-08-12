@@ -1,7 +1,7 @@
 import os
 import shutil
 import tempfile
-from mock import Mock, call
+from mock import Mock, call, patch
 from nose import tools
 from sprinter.testtools import (create_mock_environment,
                                 create_mock_formulabase)
@@ -220,6 +220,19 @@ zsh = true
                               """)
             assert env.global_config.get('shell', 'bash') == "false"
             assert env.global_config.get('shell', 'zsh') == "true"
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def test_global_config_prompt(self):
+        """ If no global config exists, it should prompt for the values it needs, and create a file """
+        temp_dir = tempfile.mkdtemp()
+        try:
+            with patch('sprinter.lib.prompt') as prompt:
+                prompt.return_value = "0"
+                env = Environment(root=temp_dir)
+                assert env.global_config.get('shell', 'bash') == "true"
+                assert env.global_config.get('shell', 'zsh') == "true"
+                assert env.global_config.get('shell', 'gui') == "true"
         finally:
             shutil.rmtree(temp_dir)
         
