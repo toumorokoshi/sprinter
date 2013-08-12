@@ -24,7 +24,7 @@ from sprinter import lib
 from sprinter.core import PHASE
 from sprinter.formulabase import FormulaBase
 
-P4V_APPLICATIONS = ['p4v', 'p4admin', 'p4merge']
+P4V_APPLICATIONS = ['p4v.app', 'p4admin.app', 'p4merge.app']
 url_prefix = "http://filehost.perforce.com/perforce/"
 package_dict = {
     "r10.1": {
