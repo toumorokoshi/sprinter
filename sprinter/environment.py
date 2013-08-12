@@ -416,6 +416,8 @@ class Environment(object):
             self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         self.injections.commit()
+        if not os.path.exists(os.path.join(self.root, ".global")):
+            os.makedirs(os.path.join(self.root, ".global"))
         self.global_config.write(open(os.path.join(self.root, ".global", "config.cfg"), 'w+'))
         if self.error_occured:
             raise SprinterException("Error occured!")
