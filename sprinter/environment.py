@@ -545,13 +545,12 @@ class Environment(object):
                 self.logger.info("(Sprinter will not try to inject into environments not specified here.)")
                 self.logger.info("If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.")
                 self.logger.info("i.e. environment variables sprinter set will affect programs as well, not just shells")
-                environments = enumerate(SHELL_CONFIG, start=1)
+                environments = [(index, val) for index, val in enumerate(SHELL_CONFIG, start=1)]
                 self.logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
                 desired_environments = lib.prompt("type the environment, comma-separated", default="0")
                 self.global_config.add_section('shell')
-                if "0" in desired_environments:
-                    for k in SHELL_CONFIG.keys():
-                        self.global_config.set('shell', k, 'true')
                 for index, val in environments:
-                    if index in desired_environments:
+                    if str(index) in desired_environments or "0" in desired_environments:
                         self.global_config.set('shell', val, 'true')
+                    else:
+                        self.global_config.set('shell', val, 'false')

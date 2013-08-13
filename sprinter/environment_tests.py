@@ -235,6 +235,19 @@ zsh = true
                 assert env.global_config.get('shell', 'gui') == "true"
         finally:
             shutil.rmtree(temp_dir)
+
+    def test_global_config_prompt_special_configs(self):
+        """ If no global config exists, it should prompt for the values it needs, and create a file """
+        temp_dir = tempfile.mkdtemp()
+        try:
+            with patch('sprinter.lib.prompt') as prompt:
+                prompt.return_value = "1,2"
+                env = Environment(root=temp_dir)
+                assert env.global_config.get('shell', 'bash') == "false"
+                assert env.global_config.get('shell', 'zsh') == "true"
+                assert env.global_config.get('shell', 'gui') == "true"
+        finally:
+            shutil.rmtree(temp_dir)
         
 
 missing_formula_config = """
