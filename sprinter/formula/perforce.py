@@ -32,24 +32,20 @@ package_dict = {
             "p4": "r10.1/bin.macosx104u/p4",
             "p4v": "r10.1/bin.macosx104u/P4V.dmg"},
         "linux": {
-            "p4": "r10.1/bin.linux26x86/p4",
-            "p4v": "r10.1/bin.linux26x86/p4v.tgz"}
+            "p4": "r10.1/bin.linux26x86_64/p4",
+            "p4v": "r10.1/bin.linux26x86_64/p4v.tgz"}
     },
     "r13.2": {
         "osx": {
-            "p4": "r13.2/bin.macosx105x86/p4",
-            "p4v": "r13.2/bin.macosx106x86/P4V.dmg"},
+            "p4": "r13.2/bin.macosx105x86_64/p4",
+            "p4v": "r13.2/bin.macosx106x86_64/P4V.dmg"},
         "linux": {
-            "p4": "r13.2/bin.linux26x86/p4",
-            "p4v": "r13.2/bin.linux26x86/p4v.tgz"}
+            "p4": "r13.2/bin.linux26x86_64/p4",
+            "p4v": "r13.2/bin.linux26x86_64/p4v.tgz"}
     }
 }
                 
     
-exec_dict = {"r10.1": {"mac": "bin.macosx104u",
-                       "linux": "bin.linux26x86_64"}}
-
-
 class PerforceFormulaException(Exception):
     """Exceptions for perforce formula"""
 
