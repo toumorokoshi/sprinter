@@ -239,7 +239,6 @@ class Environment(object):
 
     @warmup
     def inject_environment_config(self):
-        self.directory.install_utils()
         for shell in SHELL_CONFIG:
             if shell == 'gui':
                 if self.system.isDebianBased():
@@ -413,7 +412,7 @@ class Environment(object):
         if self.directory.rewrite_config:
             # always ensure .rc is written (sourcing .env)
             self.directory.add_to_rc('')
-            self.directory.add_to_env('sprinter_prepend_path "%s"' % self.directory.bin_path())
+            self.directory.add_to_env('sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         self.injections.commit()
