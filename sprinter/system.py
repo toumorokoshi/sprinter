@@ -21,7 +21,6 @@ class System(object):
         self.node = node
         self.processor = processor
         self.version = version
-        self.processor = processor
 
     def isDebianBased(self):
         """ returns true if the system is debian based """
@@ -36,3 +35,6 @@ class System(object):
 
     def isLinux(self):
         return self.system.lower() == "linux"
+
+    def is64bit(self):
+        return self.system.process == "x86_64"

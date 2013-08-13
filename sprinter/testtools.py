@@ -23,7 +23,8 @@ def create_mock_environment(source_config=None,
                             mock_system=True,
                             mock_directory=True):
     """ Create and return a mock environment instance """
-    environment = Environment(global_config=global_config)
+    environment = Environment(global_config=global_config,
+                              write_files=False)
     environment.source = (None if not source_config else
                           Manifest(StringIO(source_config), namespace="test"))
     environment.target = (None if not target_config else

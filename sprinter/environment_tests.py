@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from StringIO import StringIO
 from mock import Mock, call, patch
 from nose import tools
 from sprinter.testtools import (create_mock_environment,
@@ -248,6 +249,36 @@ zsh = true
                 assert env.global_config.get('shell', 'gui') == "true"
         finally:
             shutil.rmtree(temp_dir)
+
+    def test_write_utilssh(self):
+        """ If no global config exists, it should prompt for the values it needs, and create a file """
+        temp_dir = tempfile.mkdtemp()
+        try:
+            with patch('sprinter.lib.prompt') as prompt:
+                prompt.return_value = "1,2"
+                env = Environment(root=temp_dir)
+                assert env.global_config.get('shell', 'bash') == "false"
+                assert env.global_config.get('shell', 'zsh') == "true"
+                assert env.global_config.get('shell', 'gui') == "true"
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def test_utilssh_file_written(self):
+        """ The latest utilssh file should be written at the end of an install """
+        temp_dir = tempfile.mkdtemp()
+        try:
+            with patch('sprinter.lib.prompt') as prompt:
+                prompt.return_value = "1,2"
+                env = Environment(root=temp_dir)
+                env.formula_dict['sprinter.formulabase'] = Mock(return_value=create_mock_formulabase())
+                env.target = StringIO(test_target)
+                env.warmup()
+                env.injections.commit = Mock()
+                env.install()
+                global_path = os.path.join(temp_dir, '.global')
+                assert os.path.exists(os.path.join(global_path, 'utils.sh'))
+        finally:
+            shutil.rmtree(temp_dir)
         
 
 missing_formula_config = """
@@ -263,6 +294,9 @@ formula = sprinter.formulabase
 """
 
 test_target = """
+[config]
+namespace = testsprinter
+
 [testfeature]
 formula = sprinter.formulabase
 """

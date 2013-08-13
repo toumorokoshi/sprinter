@@ -15,6 +15,7 @@ from sprinter.injections import Injections
 from sprinter.manifest import Manifest
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
+from sprinter.templates import shell_utils_template
 
 
 def warmup(f):
@@ -81,6 +82,7 @@ class Environment(object):
     system = None  # stores utility methods to determine system specifics
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
+    shell_util_path = None  # the path to the shell utils file
     error_occured = False
     # A dictionary for class object instances. Exists Mainly for testability + injection
     formula_dict = {}
@@ -98,10 +100,11 @@ class Environment(object):
     sandboxes = []  # a list of package managers to sandbox (brew)
     # specifies where to get the global sprinter root
     global_config = None  # configuration file, which defaults to loading from SPRINTER_ROOT/.global/config.cfg
+    write_files = True  # write files to the filesystem.
 
     def __init__(self, logger=None, logging_level=logging.INFO,
                  root=None, sprinter_namespace='sprinter',
-                 global_config=None):
+                 global_config=None, write_files=True):
         self.system = System()
         if not logger:
             logger = self._build_logger(level=logging_level)
@@ -113,7 +116,9 @@ class Environment(object):
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
         self.formula_dict = {}
+        self.shell_util_path = os.path.join(self.global_path, "utils.sh")
         self.load_global_config(global_config)
+        self.write_files = write_files
         
     @warmup
     def install(self):
@@ -287,20 +292,21 @@ class Environment(object):
 
     def write_debug_log(self, file_path):
         """ Write the debug log to a file """
-        with open(file_path, "w+") as fh:
-            fh.write(self._debug_stream.getvalue())
-            fh.write("The following errors occured:\n")
-            for error in self._errors:
-                fh.write(error + "\n")
-            for k, v in self._error_dict.items():
-                if len(v) > 0:
-                    fh.write("Error(s) in %s with formula %s:\n" % k)
-                    for error in v:
-                        fh.write(error + "\n")
+        if self.write_files:
+            with open(file_path, "w+") as fh:
+                fh.write(self._debug_stream.getvalue())
+                fh.write("The following errors occured:\n")
+                for error in self._errors:
+                    fh.write(error + "\n")
+                for k, v in self._error_dict.items():
+                    if len(v) > 0:
+                        fh.write("Error(s) in %s with formula %s:\n" % k)
+                        for error in v:
+                            fh.write(error + "\n")
 
     def write_manifest(self):
         """ Write the manifest to the file """
-        if os.path.exists(self.directory.manifest_path):
+        if os.path.exists(self.directory.manifest_path) and self.write_files:
             manifest = self.target or self.source
             manifest.write(open(self.directory.manifest_path, "w+"))
 
@@ -332,7 +338,9 @@ class Environment(object):
         if not self.namespace and self.source:
             self.namespace = self.source.namespace
         if not self.directory:
-            self.directory = Directory(self.namespace, sprinter_root=self.root)
+            self.directory = Directory(self.namespace,
+                                       sprinter_root=self.root,
+                                       shell_util_path=self.shell_util_path)
         if not self.injections:
             self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
                                                             self.namespace),
@@ -416,9 +424,15 @@ class Environment(object):
             self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         self.injections.commit()
-        if not os.path.exists(os.path.join(self.root, ".global")):
-            os.makedirs(os.path.join(self.root, ".global"))
-        self.global_config.write(open(os.path.join(self.root, ".global", "config.cfg"), 'w+'))
+        if self.write_files:
+            if not os.path.exists(os.path.join(self.root, ".global")):
+                self.logger.debug("Global directoy doesn't exist! creating...")
+                os.makedirs(os.path.join(self.root, ".global"))
+            self.logger.debug("Writing global config...")
+            self.global_config.write(open(os.path.join(self.root, ".global", "config.cfg"), 'w+'))
+            self.logger.debug("Writing shell util file...")
+            with open(self.shell_util_path, 'w+') as fh:
+                fh.write(shell_utils_template)
         if self.error_occured:
             raise SprinterException("Error occured!")
         if self.message_success():

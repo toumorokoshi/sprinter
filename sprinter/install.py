@@ -97,7 +97,9 @@ def parse_args(argv, Environment=Environment):
             env.install()
 
         elif command == "update":
-            env.directory = Directory(target)
+            env.directory = Directory(target,
+                                      sprinter_root=env.root,
+                                      shell_util_path=env.shell_util_path)
             env.source = Manifest(env.directory.manifest_path)
             if options.username or options.auth:
                 options = get_credentials(options, target)
@@ -108,7 +110,9 @@ def parse_args(argv, Environment=Environment):
             env.update(reconfigure=options.reconfigure)
 
         elif command in ["remove", "deactivate", "activate", "reconfigure"]:
-            env.directory = Directory(target)
+            env.directory = Directory(target,
+                                      sprinter_root=env.root,
+                                      shell_util_path=env.shell_util_path)
             env.source = Manifest(env.directory.manifest_path, namespace=target)
             getattr(env, command)()
 

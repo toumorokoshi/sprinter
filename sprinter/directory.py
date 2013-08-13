@@ -9,30 +9,10 @@ import shutil
 import stat
 
 # .rc always sources .env
-rc_template = """[ -r "%s" ] && . %s
-"""
+rc_template = """[ -r "%s" ] && . %s\n"""
 
 # .env sources util.sh if necessary
-env_template = """%s
-"""
-
-# utils.sh is the same for every namespace, only sourced once
-shell_utils = """
-# don't add paths repeatedly to env vars
-# sprinter_prepend_path "/foo"         => "/foo:$PATH"
-# sprinter_prepend_path "/foo" MANPATH => "/foo:$MANPATH"
-sprinter_prepend_path() {
-    local sp_dir="$1"
-    local sp_var="${2:-PATH}"
-    local sp_list=$(eval echo '$'$sp_var)
-    if [ -d "$sp_dir" ]; then
-        # strip sp_dir from sp_list
-        sp_list=`echo -n $sp_list | awk -v RS=: -v ORS=: '$0 != "'$sp_dir'"' | sed 's/:$//'`
-        # :+ syntax avoids dangling ":" in exported var
-        export $sp_var="${sp_dir}${sp_list:+":$sp_list"}"
-    fi
-}
-"""
+env_template = ". %s\n"
 
 
 class DirectoryException(Exception):
@@ -48,17 +28,20 @@ class Directory(object):
                            # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
     env_file = None  # file handler for env file
+    shell_util_path = None  # the path to the shell utils file
 
     def __init__(self, namespace,
                  rewrite_config=True,
                  sprinter_root=os.path.join("~", ".sprinter"),
-                 logger=logging.getLogger('sprinter')):
+                 logger=logging.getLogger('sprinter'),
+                 shell_util_path=None):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = os.path.expanduser(os.path.join(sprinter_root, namespace))
         self.logger = logger
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
         self.rewrite_config = rewrite_config
+        self.shell_util_path = shell_util_path
 
     def __del__(self):
         if self.rc_file:
@@ -173,7 +156,7 @@ class Directory(object):
         env_path = os.path.join(root_dir, '.env')
         fh = open(env_path, "w+")
         # .env will source utils.sh if it hasn't already
-        fh.write(env_template % shell_utils)
+        fh.write(env_template % self.shell_util_path)
         return (env_path, fh)
 
     def __get_rc_handle(self, root_dir):

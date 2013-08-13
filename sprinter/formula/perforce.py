@@ -32,24 +32,20 @@ package_dict = {
             "p4": "r10.1/bin.macosx104u/p4",
             "p4v": "r10.1/bin.macosx104u/P4V.dmg"},
         "linux": {
-            "p4": "r10.1/bin.linux26x86/p4",
-            "p4v": "r10.1/bin.linux26x86/p4v.tgz"}
+            "p4": "r10.1/bin.linux26x86_64/p4",
+            "p4v": "r10.1/bin.linux26x86_64/p4v.tgz"}
     },
     "r13.2": {
         "osx": {
-            "p4": "r13.2/bin.macosx105x86/p4",
-            "p4v": "r13.2/bin.macosx106x86/P4V.dmg"},
+            "p4": "r13.2/bin.macosx105x86_64/p4",
+            "p4v": "r13.2/bin.macosx106x86_64/P4V.dmg"},
         "linux": {
-            "p4": "r13.2/bin.linux26x86/p4",
-            "p4v": "r13.2/bin.linux26x86/p4v.tgz"}
+            "p4": "r13.2/bin.linux26x86_64/p4",
+            "p4v": "r13.2/bin.linux26x86_64/p4v.tgz"}
     }
 }
                 
     
-exec_dict = {"r10.1": {"mac": "bin.macosx104u",
-                       "linux": "bin.linux26x86_64"}}
-
-
 class PerforceFormulaException(Exception):
     """Exceptions for perforce formula"""
 
@@ -111,12 +107,12 @@ class PerforceFormula(FormulaBase):
         self.p4environ = dict(os.environ.items() + [('P4USER', config.get('username')),
                                                     ('P4PASSWD', config.get('password')),
                                                     ('P4CLIENT', config.get('client'))])
-        self.__install_perforce(config)
+        installed = self.__install_perforce(config)
         if not os.path.exists(os.path.expanduser(config.get('root_path'))):
             os.makedirs(os.path.expanduser(config['root_path']))
         if config.is_affirmative('write_p4settings'):
             self.__write_p4settings(config)
-        if config.is_affirmative('overwrite_client'):
+        if config.is_affirmative('overwrite_client') and installed:
             self.__configure_client(config)
         self.__add_p4_env(config)
         FormulaBase.install(self)
@@ -144,6 +140,9 @@ class PerforceFormula(FormulaBase):
         
     def __install_perforce(self, config):
         """ install perforce binary """
+        if not self.system.is64bit():
+            self.logger.warn("Perforce formula is only designed for 64 bit systems! Not install executables...")
+            return False
         version = config.get('version', 'r13.2')
         key = 'osx' if self.system.isOSX() else 'linux'
         perforce_packages = package_dict[version][key]
@@ -157,9 +156,9 @@ class PerforceFormula(FormulaBase):
         self.p4_command = os.path.join(d, "p4")
         self.logger.info("Installing p4v...")
         if self.system.isOSX():
-            self.__install_p4v_osx(url_prefix + perforce_packages['p4v'])
+            return self.__install_p4v_osx(url_prefix + perforce_packages['p4v'])
         else:
-            self.__install_p4v_linux(url_prefix + perforce_packages['p4v'])
+            return self.__install_p4v_linux(url_prefix + perforce_packages['p4v'])
 
     def __install_p4v_osx(self, url, overwrite=False):
         """ Install perforce applications and binaries for mac """
@@ -171,6 +170,7 @@ class PerforceFormula(FormulaBase):
             lib.extract_dmg(url, root_dir)
         else:
             self.logger.warn("P4V exists already in %s! Not overwriting..." % root_dir)
+        return True
 
     def __install_p4v_linux(self, url):
         """ Install perforce applications and binaries for linux """
@@ -180,6 +180,7 @@ class PerforceFormula(FormulaBase):
         bin_path = os.path.join(self.directory.install_directory(self.feature_name), 'bin')
         for f in os.listdir(bin_path):
             self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
+        return True
 
     def __write_p4settings(self, config):
         """ write perforce settings """
