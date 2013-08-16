@@ -8,6 +8,7 @@ from mock import Mock
 
 from sprinter.environment import Environment
 from sprinter.formulabase import FormulaBase
+from sprinter.injections import Injections
 from sprinter.manifest import Manifest
 from sprinter.core import PHASE
 
@@ -20,6 +21,7 @@ def create_mock_environment(source_config=None,
                             installed=False,
                             global_config=MOCK_GLOBAL_CONFIGURATION,
                             mock_injections=True,
+                            mock_global_injections=True,
                             mock_system=True,
                             mock_directory=True):
     """ Create and return a mock environment instance """
@@ -37,7 +39,10 @@ def create_mock_environment(source_config=None,
         environment.directory.new = not installed
     # mocking injections
     if mock_injections:
-        environment.injections = Mock(spec=environment.injections)
+        environment.injections = Mock(spec=Injections)
+    # mocking global injections
+    if mock_global_injections:
+        environment.global_injections = Mock(spec=Injections)
     # mocking system (we will always test as if the system is debian, unless explicitly specified)
     if mock_system:
         environment.system = Mock(spec=environment.system)

@@ -15,7 +15,7 @@ from sprinter.injections import Injections
 from sprinter.manifest import Manifest
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
-from sprinter.templates import shell_utils_template
+from sprinter.templates import shell_utils_template, source_template
 
 
 def warmup(f):
@@ -79,6 +79,7 @@ class Environment(object):
     # the libraries that environment utilizes
     directory = None  # handles interactions with the environment directory
     injections = None  # handles injections
+    global_injections = None  # handles injections for the global sprinter configuration
     system = None  # stores utility methods to determine system specifics
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
@@ -255,10 +256,23 @@ class Environment(object):
                     rc_file, rc_path = self._inject_config_source(".rc", SHELL_CONFIG[shell]['rc'])
                     env_file, env_path = self._inject_config_source(".env", SHELL_CONFIG[shell]['env'])
                     # If an rc file is sourced by an env file, we should alert the user.
-                    if self.phase is PHASE.INSTALL and self.injections.in_noninjected_file(env_path, rc_file):
+                    if (self.phase is PHASE.INSTALL
+                       and self.injections.in_noninjected_file(env_path, rc_file)
+                       and self.global_injections.in_noninjected_file(env_path, rc_file)):
                         self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
                         self.logger.info("Please ensure it is wrapped in a #SPRINTER_OVERRIDES block " +
                                          "to avoid repetitious operations!")
+                    full_rc_path = os.path.expanduser(os.path.join("~", rc_file))
+                    full_env_path = os.path.expanduser(os.path.join("~", env_file))
+                    if lib.is_affirmative(self.global_config.get('global', 'env_source_rc')):
+                        self.global_injections.inject(
+                            full_env_path,
+                            source_template % (full_rc_path, full_rc_path))
+                    else:
+                        self.global_injections.inject(full_env_path, '')
+                    if self.system.isOSX() and not self.injections.in_noninjected_file(env_path, rc_file):
+                        if self.phase is PHASE.INSTALL:
+                            self.logger.info("On OSX, login shell are the default, which only source config files")
 
     @warmup
     def clear_all(self):
@@ -345,6 +359,9 @@ class Environment(object):
             self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
                                                             self.namespace),
                                          override="SPRINTER_OVERRIDES")
+        if not self.global_injections:
+            self.global_injections = Injections(wrapper="%s" % self.sprinter_namespace.upper() + "GLOBALS",
+                                                override="SPRINTER_OVERRIDES")
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
         os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
@@ -423,8 +440,9 @@ class Environment(object):
             self.directory.add_to_env('sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
-        self.injections.commit()
         if self.write_files:
+            self.injections.commit()
+            self.global_injections.commit()
             if not os.path.exists(os.path.join(self.root, ".global")):
                 self.logger.debug("Global directoy doesn't exist! creating...")
                 os.makedirs(os.path.join(self.root, ".global"))
@@ -549,22 +567,37 @@ class Environment(object):
             global_config_path = os.path.join(self.root, ".global", "config.cfg")
             if os.path.exists(global_config_path):
                 self.global_config.read(global_config_path)
+                self.logger.info("Checking and setting global parameters...")
             else:
                 self.logger.info("Unable to find a global sprinter configuration!")
                 self.logger.info("Creating one now. Please answer some questions" +
                                  " about what you would like sprinter to do.")
                 self.logger.info("")
+            if not self.global_config.has_section('shell'):
                 # shell configuration
+                self.global_config.add_section('shell')
                 self.logger.info("What shells or environments would you like sprinter to work with?")
                 self.logger.info("(Sprinter will not try to inject into environments not specified here.)")
                 self.logger.info("If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.")
                 self.logger.info("i.e. environment variables sprinter set will affect programs as well, not just shells")
-                environments = [(index, val) for index, val in enumerate(SHELL_CONFIG, start=1)]
+                environments = list(enumerate(SHELL_CONFIG, start=1))
                 self.logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
                 desired_environments = lib.prompt("type the environment, comma-separated", default="0")
-                self.global_config.add_section('shell')
                 for index, val in environments:
                     if str(index) in desired_environments or "0" in desired_environments:
                         self.global_config.set('shell', val, 'true')
                     else:
                         self.global_config.set('shell', val, 'false')
+            if not self.global_config.has_section('global'):
+                self.global_config.add_section('global')
+            if not self.global_config.has_option('global', 'env_source_rc'):
+                self.global_config.set('global', 'env_source_rc', False)
+                if self.system.isOSX():
+                    self.logger.info("On OSX, login shells are default, which only source sprinter's 'env' configuration.")
+                    self.logger.info("I.E. environment variables would be sourced, but not shell functions "
+                                     + "or terminal status lines.")
+                    self.logger.info("The typical solution to get around this is to source your rc file (.bashrc, .zshrc) "
+                                     + "from your login shell.")
+                    env_source_rc = lib.prompt("would you like sprinter to source the rc file too?", default="yes",
+                                               boolean=True)
+                    self.global_config.set('global', 'env_source_rc', env_source_rc)

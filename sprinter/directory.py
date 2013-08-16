@@ -8,11 +8,7 @@ import os
 import shutil
 import stat
 
-# .rc always sources .env
-rc_template = """[ -r "%s" ] && . %s\n"""
-
-# .env sources util.sh if necessary
-env_template = ". %s\n"
+from sprinter.templates import source_template
 
 
 class DirectoryException(Exception):
@@ -156,7 +152,7 @@ class Directory(object):
         env_path = os.path.join(root_dir, '.env')
         fh = open(env_path, "w+")
         # .env will source utils.sh if it hasn't already
-        fh.write(env_template % self.shell_util_path)
+        fh.write(source_template % (self.shell_util_path, self.shell_util_path))
         return (env_path, fh)
 
     def __get_rc_handle(self, root_dir):
@@ -165,7 +161,7 @@ class Directory(object):
         env_path = os.path.join(root_dir, '.env')
         fh = open(rc_path, "w+")
         # .rc will always source .env
-        fh.write(rc_template % (env_path, env_path))
+        fh.write(source_template % (env_path, env_path))
         return (rc_path, fh)
 
     def __symlink_dir(self, dir_name, name, path):

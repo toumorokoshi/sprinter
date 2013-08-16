@@ -19,3 +19,5 @@ sprinter_prepend_path() {
     fi
 }
 """
+
+source_template = """[ -r "%s" ] && . %s\n"""

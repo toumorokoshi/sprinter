@@ -9,6 +9,7 @@ from sprinter.testtools import (create_mock_environment,
 from sprinter.exceptions import SprinterException
 from sprinter.environment import Environment
 from sprinter.formulabase import FormulaBase
+from sprinter.templates import source_template
 
 source_config = """
 [config]
@@ -160,6 +161,9 @@ class TestEnvironment(object):
 bash = true
 zsh = false
 gui = true
+
+[global]
+env_source_rc = False
         """
         environment = create_mock_environment(
             target_config=test_target,
@@ -178,6 +182,52 @@ gui = true
         for profile in ['.zprofile', '.zlogin']:
             assert not filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
 
+    def test_env_to_rc_injection(self):
+        """ If env_source_rc is set to true, the env environments should source the rc """
+        # test bash, gui, no zshell
+        global_shell_configuration_bash = """[shell]
+bash = true
+zsh = true
+gui = false
+
+[global]
+env_source_rc = True
+        """
+        environment = create_mock_environment(
+            target_config=test_target,
+            global_config=global_shell_configuration_bash,
+            mock_injections=False,
+            mock_global_injections=False)
+        environment.warmup()
+        environment.injections.commit = Mock()
+        environment.global_injections.commit = Mock()
+        environment.formula_dict['sprinter.formulabase'] = Mock(return_value=create_mock_formulabase())
+        environment.install()
+
+        # bash
+        env_injected = False
+        full_rc_path = os.path.expanduser(os.path.join("~", ".bashrc"))
+        for profile in ['.bash_profile', '.bash_login', '.profile']:
+            full_profile_path = os.path.expanduser(os.path.join("~", profile))
+            specific_env_injected = full_profile_path in environment.global_injections.inject_dict
+            if specific_env_injected:
+                env_injected = True
+                assert (source_template % (full_rc_path, full_rc_path) in
+                        environment.global_injections.inject_dict[full_profile_path])
+        assert env_injected
+
+        # zshell
+        env_injected = False
+        full_rc_path = os.path.expanduser(os.path.join("~", ".zshrc"))
+        for profile in ['.zprofile', '.zlogin']:
+            full_profile_path = os.path.expanduser(os.path.join("~", profile))
+            specific_env_injected = full_profile_path in environment.global_injections.inject_dict
+            if specific_env_injected:
+                env_injected = True
+                assert (source_template % (full_rc_path, full_rc_path) in
+                        environment.global_injections.inject_dict[full_profile_path])
+        assert env_injected
+
     def test_global_shell_configuration_zshell(self):
         """ The global shell should dictate what files are injected (zsh, no bash, no gui)"""
         # test zshell, no bash, no gui
@@ -185,6 +235,9 @@ gui = true
 bash = false
 zsh = true
 gui = false
+
+[global]
+env_source_rc = False
         """
         environment = create_mock_environment(
             target_config=test_target,
@@ -210,6 +263,9 @@ gui = false
         with open(os.path.join(temp_dir, ".global", "config.cfg"), 'w+') as fh:
             fh.write("""[shell]
 bash = true
+
+[global]
+env_source_rc = False
             """)
         try:
             env = Environment(root=temp_dir)
@@ -218,6 +274,9 @@ bash = true
                               global_config="""[shell]
 bash = false
 zsh = true
+
+[global]
+env_source_rc = False
                               """)
             assert env.global_config.get('shell', 'bash') == "false"
             assert env.global_config.get('shell', 'zsh') == "true"
