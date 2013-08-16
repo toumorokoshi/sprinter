@@ -9,11 +9,8 @@ sprinter
 
 Installation
 ------------
-You can install sprinter using easy_install::
 
-    $ (sudo) easy_install http://github.com/toumorokoshi/sprinter/tarball/master
-
-Or use a sandboxed install:
+It's recommended to use Sprinter's standalone installer:
 
 OSX::
 
@@ -24,19 +21,24 @@ Debian-Based (e.g. Ubuntu)::
     $ cd /tmp/; rm sandbox.sh; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
    
 
+You can also install sprinter using easy_install or pip (not recommended, it's easier to update with the standalone)::
+
+    $ (sudo) easy_install http://github.com/toumorokoshi/sprinter/tarball/master
+
+    $ (sudo) pip install http://github.com/toumorokoshi/sprinter/tarball/master
+
+What is it?
+-----------
+
 A cross-platform environment bootstrapping framework!
 
 Sprinter is a framework designed to making bootstrapping development
 environments easier. There are three main components to a usable
-sprinter script:
+sprinter environment:
 
 * This python egg, to fully utilize the framework
 * a sprinter.cfg file, which contains the configuration necessary to install features
-* sprinter recipes, which each feature uses as it's instruction manual on how to setup, update, and remove itself 
-
-This will install the sprinter command line to your machine. Easy
-install needs to be installed for now. Conversely, you can use the
-sandboxer to use sprinter once. (look under examples)
+* sprinter formulas, which each feature uses as it's instruction manual on how to setup, update, and remove itself 
 
 Command list
 ------------

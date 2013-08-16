@@ -1,11 +1,28 @@
+"""Sprinter, an environment installation and management tool.
+Usage:
+  sprinter install <environment_source> [options]
+  sprinter update <environment_name> [-rav -u <username> -p <password> --allow-bad-certificate]
+  sprinter (remove | deactivate | activate) <environment_name> [-v]
+  sprinter validate <environment_source> [-av -u <username> -p <password> --allow-bad-certificate]
+  sprinter environments
+  sprinter (-h | --help)
+
+Options:
+  -h --help                                Show this usage guide.
+  -v --verbose                             Sprinter output is verbose
+  -n <namespace>, --namespace <namespace>  Explicitely specify a namespace to name the environment, on install
+  -r --reconfigure                         During an update, ask the user again for customization parameters
+  -a --auth                                When pulling environment configurations, attempt basic authentication
+  -u <username>, --username <username>     When using basic authentication, this is the username used
+  -p <password>, --password <password>     When using basic authentication, this is the password used
+  --allow-bad-certificate                  Do not verify ssl certificates when pulling environment configurations
 """
-The install script for a sprinter-based setup script.
-"""
+
 import logging
 import os
 import signal
 import sys
-from optparse import OptionParser
+from docopt import docopt
 
 from sprinter import lib
 from sprinter.core import PHASE
@@ -14,38 +31,9 @@ from sprinter.manifest import Manifest, ManifestException
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException, BadCredentialsException
 
-env = None
-
-description = """
-Install an environment as specified in a sprinter config file
-"""
-
-VALID_COMMANDS = ["install", "update", "remove",
-                  "deactivate", "activate", "validate",
-                  "environments"]
-
-parser = OptionParser(description=description)
-# parser = argparse.ArgumentParser(description=description)
-# parser.add_option('command', metavar='C',
-#                     help="The operation that sprinter should run (install, deactivate, activate, switch)")
-# parser.add_option('target', metavar='T', help="The path to the manifest file to install", nargs='?')
-parser.add_option('--namespace', dest='namespace', default=None,
-                  help="Namespace to check environment against")
-parser.add_option('--username', dest='username', default=None,
-                  help="Username if the url requires authentication")
-parser.add_option('--auth', dest='auth', action='store_true',
-                  help="Specifies authentication is required")
-parser.add_option('--password', dest='password', default=None,
-                  help="Password if the url requires authentication")
-parser.add_option('-v', dest='verbose', action='store_true', help="Make output verbose")
-parser.add_option('--reconfigure', dest='reconfigure', default=False, action="store_true",
-                  help="if true, a sprinter update will reconfigure the existing environment specified")
-parser.add_option('--allow-bad-certificate', dest='allow_bad_certificate', default=False, action="store_true",
-                  help="if true, a sprinter update will not verify the ssl certificate for pulling remote configuration")
-
 
 def signal_handler(signal, frame):
-    print "Shutting down sprinter..."
+    print "\nShutting down sprinter..."
     sys.exit(0)
 
 
@@ -67,18 +55,14 @@ def error(message):
 
 
 def parse_args(argv, Environment=Environment):
-    options, args = parser.parse_args(argv)
-    if len(args) == 0:
-        error("Please enter a sprinter action: %s" % str(VALID_COMMANDS))
-    command = args[0].lower()
-    if command not in VALID_COMMANDS:
-        error("Please enter a valid sprinter action: %s" % ", ".join(VALID_COMMANDS))
-    target = args[1] if len(args) > 1 else None
-    logging_level = logging.DEBUG if options.verbose else logging.INFO
+    options = docopt(__doc__, argv=argv, version="Sprinter 1.0")
+    logging_level = logging.DEBUG if options['--verbose'] else logging.INFO
     # start processing commands
     env = Environment(logging_level=logging_level)
     try:
-        if command == "install":
+        if options['install']:
+            target = options['<environment_source>']
+
             def handle_install_shutdown(signal, frame):
                 if env.phase == PHASE.INSTALL:
                     print "Removing install..."
@@ -86,50 +70,67 @@ def parse_args(argv, Environment=Environment):
                     env.clear_all()
                 signal_handler(signal, frame)
             signal.signal(signal.SIGINT, handle_install_shutdown)
-            if options.username or options.auth:
-                options = get_credentials(options, parse_domain(target))
+            if options['--username'] or options['--auth']:
+                options = get_credentials(options, parse_domain())
                 target = Manifest(target,
-                                  username=options.username,
-                                  password=options.password,
-                                  verify_certificate=(not options.allow_bad_certificate))
+                                  username=options['<username>'],
+                                  password=options['<password>'],
+                                  verify_certificate=(not options['--allow-bad-certificate']))
             env.target = target
-            env.namespace = options.namespace
+            if options['--namespace']:
+                env.namespace = options['<namespace>']
             env.install()
 
-        elif command == "update":
+        elif options['update']:
+            target = options['<environment_name>']
             env.directory = Directory(target,
                                       sprinter_root=env.root,
                                       shell_util_path=env.shell_util_path)
             env.source = Manifest(env.directory.manifest_path)
-            if options.username or options.auth:
+            use_auth = options['--username'] or options['--auth']
+            if use_auth:
                 options = get_credentials(options, target)
             env.target = Manifest(env.source.source(),
-                                  username=options.username,
-                                  password=options.password,
-                                  verify_certificate=(not options.allow_bad_certificate))
-            env.update(reconfigure=options.reconfigure)
+                                  username=options['<username>'] if use_auth else None,
+                                  password=options['<password>'] if use_auth else None,
+                                  verify_certificate=(not options['--allow-bad-certificate']))
+            env.update(reconfigure=options['--reconfigure'])
 
-        elif command in ["remove", "deactivate", "activate", "reconfigure"]:
-            env.directory = Directory(target,
+        elif options["remove"]:
+            env.directory = Directory(options['<environment_name>'],
                                       sprinter_root=env.root,
                                       shell_util_path=env.shell_util_path)
-            env.source = Manifest(env.directory.manifest_path, namespace=target)
-            getattr(env, command)()
+            env.source = Manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.remove()
 
-        elif command == "environments":
+        elif options['deactivate']:
+            env.directory = Directory(options['<environment_name>'],
+                                      sprinter_root=env.root,
+                                      shell_util_path=env.shell_util_path)
+            env.source = Manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.deactivate()
+
+        elif options['activate']:
+            env.directory = Directory(options['<environment_name>'],
+                                      sprinter_root=env.root,
+                                      shell_util_path=env.shell_util_path)
+            env.source = Manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.activate()
+
+        elif options['environments']:
             SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
             for env in os.listdir(SPRINTER_ROOT):
                 if env != ".global":
                     print "%s" % env
 
-        elif command == "validate":
-            if options.username or options.auth:
+        elif options['validate']:
+            if options['--username'] or options['--auth']:
                 options = get_credentials(options, parse_domain(target))
-                target = Manifest(target,
-                                  username=options.username,
-                                  password=options.password,
-                                  verify_certificate=(not options.allow_bad_certificate))
-            env.target = target
+                target = Manifest(options['<environment_source>'],
+                                  username=options['<username>'],
+                                  password=options['<password>'],
+                                  verify_certificate=(not options['--allow-bad-certificate']))
+            env.target = options['<environment_source>']
             env.validate()
             if not env.error_occured:
                 print "No errors! Manifest is valid!"
@@ -157,11 +158,11 @@ def parse_domain(url):
 
 def get_credentials(options, environment):
     """ Get credentials or prompt for them from options """
-    if options.username or options.auth:
-        if not options.username:
-            options.username = lib.prompt("Please enter the username for %s..." % environment)
-        if not options.password:
-            options.password = lib.prompt("Please enter the password for %s..." % environment, secret=True)
+    if options['--username'] or options['--auth']:
+        if not options['--username']:
+            options['<username>'] = lib.prompt("Please enter the username for %s..." % environment)
+        if not options['--password']:
+            options['<password>'] = lib.prompt("Please enter the password for %s..." % environment, secret=True)
     return options
 
 if __name__ == '__main__':

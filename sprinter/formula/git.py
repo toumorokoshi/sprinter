@@ -25,12 +25,18 @@ class GitFormula(FormulaBase):
     valid_options = FormulaBase.valid_options + ['branch']
 
     def install(self):
+        if not lib.which('git'):
+            self.logger.warn("git is not installed! Please install git to install this feature.")
+            return
         self.__clone_repo(self.target.get('url'),
                           self.directory.install_directory(self.feature_name),
                           branch=self.target.get('branch', 'master'))
         FormulaBase.install(self)
 
     def update(self):
+        if not lib.which('git'):
+            self.logger.warn("git is not installed! Please install git to install this feature.")
+            return
         target_directory = self.directory.install_directory(self.feature_name)
         source_branch = self.source.get('branch', 'master')
         target_branch = self.target.get('branch', 'master')

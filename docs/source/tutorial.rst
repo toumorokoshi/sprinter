@@ -9,37 +9,107 @@ In this tutorial, you will learn:
 * How to ask for user input (username, password, etc)
 * How to use user input
 
+
+Installation
+------------
+
+First, you need to install sprinter. You can find install instructions
+'here<https://github.com/toumorokoshi/sprinter/blob/develop/README.rst>`_
+
+
 Build a sprinter configuration file
 -----------------------------------
 
-Each sprinter environment is completely defined by a sprinter configuration file. Think of this file as your main way of managing your sprinter environment: any changes you make here will be picked up next time you update your environment. Here's a good starting point for a sprinter config::
+Each sprinter environment is completely defined by a sprinter
+configuration file. Think of this file as your main way of managing
+your sprinter environment: any changes you make here will be picked up
+next time you update your environment. Here's a good starting point
+for a sprinter config::
+
+    [config]
+    namespace = myenvironment
+
+    [git]
+    formula = sprinter.formula.package
+    apt-get = git-core
+    brew = git
+
+    [github]
+    formula = sprinter.formula.ssh
+    keyname = github.com
+    nopassphrase = true
+    type = rsa
+    host = github.com
+    user = git
+    hostname = github.com
+
+What does this do? Well, give it a shot! Write this to a file called
+myenvironment.cfg (you should replace myenvironment with your username
+or whatever makes sense to describe your own personal environment), and install it with:
+
+    sprinter install myenvironment.cfg
+
+When you run the above command, you will first be prompted to configure sprinter if you haven't already.
+
+The next thing sprinter will do is install the 'myenvironment' environment. As defined above, this consists of:
+
+* install brew if you don't have it already (OSX Users)
+* use brew or apt-get to install git
+* create an ssh key just for github, and add it to the ssh configuration file
+
+Now you just add the ssh key to github, and you're done!
+(Unfortunately it's not possible to add the key to github
+programatically)
 
 .. Add in sprinter configuration tutorial.cfg
 
 This outlines a lot of the basic functionality that sprinter provides:
 
-* Namespacing an environment (in this case, it's 'mysprinter').
-* Using the "inputs" property to get user input we want
-    * username asks for the username
-    * password? asks for the password, but makes the input hidden (desired for a password field)
-* Adding pieces of an environment through 'features', which utilize templates known as recipes. In this example, the 'sub' feature is installed through git, using the 'sprinter.recipes.git' recipe.
+* Namespacing an environment (in this case, it's 'myenvironment').
+* adding environment configuration through 'features'. In this example, we have two features:
 
-Features are the core piece of functionality for sprinter. The way you add or modify what your environment is by adding, removing, and changing the feature configuration in a configuration file.
+    * 'git', which installs git
+    * 'github', which generates an sshkey and sets up the git configuration
 
-You can get more information about each of the recipes, and what they do, on the :ref:`recipes` page.
+Now that's not super difficult, so let's try something more complicated.
 
-Installing a sprinter environment
----------------------------------
+`sub<https://github.com/37signals/sub>`_ is a command namespacing tool
+that allows the creation of subcommands. (e.g. moving to your
+workspace directory or running your server). Let's try adding this to our configuration.
 
-Now, if you want to install this enviroment:
+Every feature needs a formula to define what the actual feature is
+going to do. sprinter.formula.ssh, as show above, generates ssh
+keys. sprinter.formula.package, install packages from the appropriate
+package managers. So how about git? Luckily, sprinter has a formula
+for this as well: sprinter.formula.git. We can add a new feature by
+adding it's configuration into the environment config. We'll add a
+section to myenvironment.cfg now:
 
-* write the config to a file
-* install sprinter::
+    [config]
+    namespace = myenvironment
 
-    $ (sudo) easy_install sprinter
+    [git]
+    formula = sprinter.formula.package
+    apt-get = git-core
+    brew = git
 
-* and install this environment::
+    [github]
+    formula = sprinter.formula.ssh
+    keyname = github.com
+    nopassphrase = true
+    type = rsa
+    host = github.com
+    user = git
+    hostname = github.com
 
-    $ sprinter install PATH_TO_MY_CONFIG
+    [sub]
+    formula = sprinter.formulas.git
+    depends = github
+    url = git://github.com/mygithub/sub.git
+    branch = mybranch
+    rc = eval "$(%(sub:root_dir)/bin/sub init -)"
 
-So what actually happenned?
+Now remember at this point, sprinter already knows that you have an environment 'myenvironment' installed. 
+At this point, you can run an 'update' command on the environment.
+
+You can get more information about each of the formulas, and what they do, on the :ref:`formulas` page.

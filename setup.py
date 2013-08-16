@@ -15,7 +15,8 @@ setup(name='sprinter',
       packages=['sprinter', 'sprinter.formula'],
       install_requires=[
           'requests>=1.2.3',
-          'pip>=1.3.1'
+          'pip>=1.3.1',
+          'docopt>=0.6.1'
       ],
       classifiers=[
           'Development Status :: 4 - Beta',
