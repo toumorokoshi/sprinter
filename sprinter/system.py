@@ -37,4 +37,4 @@ class System(object):
         return self.system.lower() == "linux"
 
     def is64bit(self):
-        return self.system.processor == "x86_64"
+        return self.processor == "x86_64"
