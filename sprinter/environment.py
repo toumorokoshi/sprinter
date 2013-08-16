@@ -4,7 +4,7 @@ import sys
 import getpass
 from StringIO import StringIO
 from functools import wraps
-from ConfigParser import ConfigParser
+from ConfigParser import RawConfigParser
 from sprinter.core import PHASE
 from sprinter import brew
 from sprinter import lib
@@ -560,7 +560,7 @@ class Environment(object):
     def load_global_config(self, global_config_string):
         if self.global_config:
             return self.global_config
-        self.global_config = ConfigParser()
+        self.global_config = RawConfigParser()
         if global_config_string:
             self.global_config.readfp(StringIO(global_config_string))
         else:
