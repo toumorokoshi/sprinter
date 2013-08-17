@@ -32,9 +32,9 @@ class TestDirectory(object):
         assert not self.directory.new,\
             "new variable should be set to false for existing directory!"
         assert os.path.exists(self.directory.bin_path()),\
-                              "bin directory should exist after initialize!"
+            "bin directory should exist after initialize!"
         assert os.path.exists(self.directory.lib_path()),\
-                              "lib directory should exist after initialize!"
+            "lib directory should exist after initialize!"
 
     def test_initialize_new(self):
         """ The initialize method should return new for a non-existent directory """
@@ -47,6 +47,19 @@ class TestDirectory(object):
         finally:
             if os.path.exists(new_temp_dir):
                 shutil.rmtree(new_temp_dir)
+
+    def test_clear_feature_symlinks(self):
+        """ clear feature symlinks """
+        test_feature = 'woops'
+        os.makedirs(self.directory.install_directory(test_feature))
+        test_file = os.path.join(self.directory.install_directory(test_feature), 'test_file')
+        with open(test_file, 'w+') as temp_file:
+            temp_file.write('hobo')
+        self.directory.symlink_to_bin('test_file', test_file)
+        self.directory.symlink_to_lib('test_file', test_file)
+        self.directory.clear_feature_symlinks(test_feature)
+        assert not os.path.exists(os.path.join(self.directory.bin_path(), 'test_file'))
+        assert not os.path.exists(os.path.join(self.directory.lib_path(), 'test_file'))
 
     def test_symlink_to_bin(self):
         """ symlink to bin should symlink to the bin sprinter environment folder """

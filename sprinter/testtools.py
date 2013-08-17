@@ -20,13 +20,15 @@ def create_mock_environment(source_config=None,
                             target_config=None,
                             installed=False,
                             global_config=MOCK_GLOBAL_CONFIGURATION,
+                            root=None,
                             mock_injections=True,
                             mock_global_injections=True,
                             mock_system=True,
                             mock_directory=True):
     """ Create and return a mock environment instance """
     environment = Environment(global_config=global_config,
-                              write_files=False)
+                              write_files=False,
+                              root=root)
     environment.source = (None if not source_config else
                           Manifest(StringIO(source_config), namespace="test"))
     environment.target = (None if not target_config else

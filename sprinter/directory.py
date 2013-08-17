@@ -75,8 +75,13 @@ class Directory(object):
         """ Remove an object from the bin folder. """
         self.__remove_path(os.path.join(self.root_dir, "bin", name))
 
+    def remove_from_lib(self, name):
+        """ Remove an object from the bin folder. """
+        self.__remove_path(os.path.join(self.root_dir, "lib", name))
+
     def remove_feature(self, feature_name):
         """ Remove an feature from the environment root folder. """
+        self.clear_feature_symlinks(feature_name)
         if os.path.exists(self.install_directory(feature_name)):
             self.__remove_path(self.install_directory(feature_name))
 
@@ -100,6 +105,16 @@ class Directory(object):
         """ return the include directory path """
         return os.path.join(self.root_dir, "include")
 
+    def clear_feature_symlinks(self, feature_name):
+        """ Clear the symlinks for a feature in the symlinked path """
+        self.logger.debug("Clearing feature symlinks for %s" % feature_name)
+        feature_path = self.install_directory(feature_name)
+        for d in ('bin', 'lib'):
+            for link in os.listdir(os.path.join(self.root_dir, d)):
+                path = os.path.join(self.root_dir, d, link)
+                if feature_path in os.path.realpath(path):
+                    getattr(self, 'remove_from_%s' % d)(link)
+        
     def install_directory(self, feature_name):
         """
         return a path to the install directory that the feature should install to.
