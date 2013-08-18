@@ -110,10 +110,11 @@ class Directory(object):
         self.logger.debug("Clearing feature symlinks for %s" % feature_name)
         feature_path = self.install_directory(feature_name)
         for d in ('bin', 'lib'):
-            for link in os.listdir(os.path.join(self.root_dir, d)):
-                path = os.path.join(self.root_dir, d, link)
-                if feature_path in os.path.realpath(path):
-                    getattr(self, 'remove_from_%s' % d)(link)
+            if os.path.exists(os.path.join(self.root_dir, d)):
+                for link in os.listdir(os.path.join(self.root_dir, d)):
+                    path = os.path.join(self.root_dir, d, link)
+                    if feature_path in os.path.realpath(path):
+                        getattr(self, 'remove_from_%s' % d)(link)
         
     def install_directory(self, feature_name):
         """

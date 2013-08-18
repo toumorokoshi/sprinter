@@ -487,20 +487,23 @@ class Environment(object):
         get a formula class object if it exists, else
         create one, add it to the dict, and pass return it.
         """
-        if formula not in self.formula_dict:
+        formula_class, formula_url = formula, None
+        if ':' in formula:
+            formula_class, formula_url = formula.split(":", 1)
+        if formula_class not in self.formula_dict:
             try:
-                self.formula_dict[formula] = lib.get_subclass_from_module(formula, FormulaBase)
+                self.formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
             except (SprinterException, ImportError):
-                self.logger.info("Downloading %s..." % formula)
+                self.logger.info("Downloading %s..." % formula_class)
                 try:
-                    self._pip.install_egg(formula)
+                    self._pip.install_egg(formula_url or formula_class)
                 except PipException:
-                    self.logger.error("ERROR: Unable to download %s!" % formula)
+                    self.logger.error("ERROR: Unable to download %s!" % formula_class)
                 try:
-                    self.formula_dict[formula] = lib.get_subclass_from_module(formula, FormulaBase)
+                    self.formula_dict[formula] = lib.get_subclass_from_module(formula_class, FormulaBase)
                 except ImportError:
-                    raise SprinterException("Error: Unable to retrieve formula %s!" % formula)
-        return self.formula_dict[formula]
+                    raise SprinterException("Error: Unable to retrieve formula %s!" % formula_class)
+        return self.formula_dict[formula_class]
 
     def log_error(self, error_message):
         self.error_occured = True
