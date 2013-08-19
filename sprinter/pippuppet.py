@@ -6,8 +6,10 @@ from pip.req import InstallRequirement, RequirementSet
 from pip.locations import build_prefix, src_prefix
 from pip.exceptions import DistributionNotFound
 
+
 class PipException(Exception):
     """ Pip exception """
+
 
 class Pip(object):
     """
@@ -36,8 +38,8 @@ class Pip(object):
         self.requirement_set.add_requirement(
             InstallRequirement.from_line(egg_name, None))
         try:
-            self.requirement_set.prepare_files(self.finder, 
-                                               force_root_egg_info=False, 
+            self.requirement_set.prepare_files(self.finder,
+                                               force_root_egg_info=False,
                                                bundle=False)
             self.requirement_set.install(self.install_options,
                                          self.global_options)
