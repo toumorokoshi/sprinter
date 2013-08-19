@@ -1,6 +1,6 @@
 """Sprinter, an environment installation and management tool.
 Usage:
-  sprinter install <environment_source> [options]
+  sprinter install <environment_source> [-av -n <namespace> -u <username> -p <password> --allow-bad-certificate]
   sprinter update <environment_name> [-rav -u <username> -p <password> --allow-bad-certificate]
   sprinter (remove | deactivate | activate) <environment_name> [-v]
   sprinter validate <environment_source> [-av -u <username> -p <password> --allow-bad-certificate]
@@ -8,14 +8,14 @@ Usage:
   sprinter (-h | --help)
 
 Options:
-  -h --help                                Show this usage guide.
-  -v --verbose                             Sprinter output is verbose
-  -n <namespace>, --namespace <namespace>  Explicitely specify a namespace to name the environment, on install
-  -r --reconfigure                         During an update, ask the user again for customization parameters
-  -a --auth                                When pulling environment configurations, attempt basic authentication
-  -u <username>, --username <username>     When using basic authentication, this is the username used
-  -p <password>, --password <password>     When using basic authentication, this is the password used
-  --allow-bad-certificate                  Do not verify ssl certificates when pulling environment configurations
+  -h, --help                                Show this usage guide.
+  -v, --verbose                             Sprinter output is verbose
+  -n <namespace>, --namespace <namespace>   Explicitely specify a namespace to name the environment, on install
+  -r, --reconfigure                         During an update, ask the user again for customization parameters
+  -a, --auth                                When pulling environment configurations, attempt basic authentication
+  -u <username>, --username <username>      When using basic authentication, this is the username used
+  -p <password>, --password <password>      When using basic authentication, this is the password used
+  --allow-bad-certificate                   Do not verify ssl certificates when pulling environment configurations
 """
 
 import logging
@@ -71,7 +71,7 @@ def parse_args(argv, Environment=Environment):
                 signal_handler(signal, frame)
             signal.signal(signal.SIGINT, handle_install_shutdown)
             if options['--username'] or options['--auth']:
-                options = get_credentials(options, parse_domain())
+                options = get_credentials(options, parse_domain(target))
                 target = Manifest(target,
                                   username=options['<username>'],
                                   password=options['<password>'],
