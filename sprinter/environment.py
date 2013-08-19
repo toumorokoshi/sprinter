@@ -500,7 +500,6 @@ class Environment(object):
                     try:
                         self.formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
                     except ImportError:
-                        import pdb; pdb.set_trace()
                         raise SprinterException("Error: Unable to retrieve formula %s!" % formula_class)
                 except PipException:
                     self.logger.error("ERROR: Unable to download %s!" % formula_class)
