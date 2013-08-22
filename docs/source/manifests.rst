@@ -15,7 +15,7 @@ The config section is where all user variables are stored. in
 addition, it can also house the name of the environment, input
 variables, and any standard confguration you need in your environment.
 
-One can also add messages to the beginnig and the end of sprinter with the following variables:
+One can also add messages to the beginning and the end of sprinter with the following variables:
 
 * message_success: print a message at the end of a sprinter command, on success
 * message_failure: print a message at the end of a sprinter command, on failure
@@ -33,7 +33,7 @@ E.G. something like `%(git:configpath)s` will reference the
   features, it is also possible to reference the config sections as
   well, with:
 
-	%(config:PROPERTY)
+	%(config:PROPERTY)s
 
 Common usage examples for this include having a single username
 variable in the input, then resolving it into subsequent features
@@ -48,5 +48,3 @@ format. For example, to escape special characters, you can use:
 %(config:password|escaped)
 
 To reference the password variable, escaped. The escaped function uses the 're.escape' method in python.
-
-

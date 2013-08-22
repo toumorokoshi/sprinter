@@ -3,48 +3,75 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Sprinter's documentation!
-====================================
+Sprinter: environment bootsrapping made easy
+============================================
 
 Sprinter is a tool to help create environment bootstrapping scripts for developer environments.
+
+Here are some problems that sprinter was designed to solve:
+
+* syncing up personal development environments across computers
+
+    * syncing rc files
+    * installing packages
+    * configuring systems (e.g. git or ssh configs, setting up the PS1/shell prompt)
+
+* distributing standard development tools and helpers across a company or organization
+
+    * distributing common shell scripts
+    * distributing third-party packages
+    * distributing internal packages
+    * performing strange on-time-setup quirks and workarounds when you
+      can't get around to fixing it
+
+* managing multiple development environments on a single machine
+
+    * need to switch between personal and company-specific environment
+    * need to switch between environments for open-source projects
 
 Sprinter was designed with modularity, adaption, and cross-compability in mind. Some of the features of sprinter include:
 
 * Installing environments directly from configs on the web
 * Updating existing environments
 * Managing several environments, activating and deactivating as needed
-* Sandboxing common package managers such as brew and easy_install
+* Dynamically installing new functionality via formulas
+* Sandboxing environments as necessary, such as brew or node.js
 
-To Install: ::
+Install Instructions
+--------------------
 
-  $ (sudo) easy_install sprinter
+Please refer to the `readme <https://github.com/toumorokoshi/sprinter/blob/develop/README.rst>`_ for instructions on installing sprinter.
 
-In your console. Alternatively, a sandboxed version of sprinter
-exists, which will install a sprinter environment containing
-sprinter. (Holy recursion, Batman!). You can do this with the following one-liner:
-
-OSX::
-
-    $ curl -s https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter_sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
-
-Debian-Based (e.g. Ubuntu)::
-    
-    $ cd /tmp/; wget https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter_sandbox.sh; bash sprinter_sandbox.sh
 
 Compatible Systems
 ------------------
 
-Sprinter is currently actively developed against the following:
+Sprinter is currently actively developed against the following operating systems:
 
 * OSX
 * Ubuntu
+
+And the following shells:
+
+* bash
+* zsh
 
 However, Sprinter should work against Debian distributions, and most Ubuntu-based distributions.
 
 Feel free to `make a ticket <https://github.com/toumorokoshi/sprinter/issues?state=open>`_ with
 your difficulties with other unix-based operating systems.
 
-There are currently no plans to develop sprinter against non-unix based operating systems.
+There are currently no plans to develop sprinter against non-unix
+based operating systems (such as Windows). However, if you're feeling
+ambitious, post your thoughts in the `Google Group
+<https://groups.google.com/forum/#!forum/sprinter-dev>`_.
+
+Questions?
+----------
+
+Try our :doc:`faq`, or post a topic in the
+`Google Group
+<https://groups.google.com/forum/#!forum/sprinter-dev>`_.
 
 Contents
 ========
@@ -54,10 +81,13 @@ Contents
 
    tutorial
    faq
+   examples
+   formulalist
    formulas
    manifests
    lifecycle
    internals
+   osx
    glossary
 
 
@@ -68,4 +98,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

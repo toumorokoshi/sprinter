@@ -6,7 +6,10 @@ Here are some cool ways to use sprinter!
 Sprinter patterns
 -----------------
 
-A good pattern that developers tend to follow is to store all of their environment rc files (.emacs, .vimrc, etc) in a git repository, and clone and symlink the result. sprinter can automate that pattern. Look at this example section below::
+A good pattern that developers tend to follow is to store all of their
+environment rc files (.emacs, .vimrc, etc) in a git repository, and
+clone and symlink the result. sprinter can automate that pattern. Look
+at this example section below::
 
     [ytrc]
     formula = sprinter.formula.git
@@ -27,3 +30,21 @@ A good pattern that developers tend to follow is to store all of their environme
               ln -s %(ytrc:root_dir)s/.tmux.conf $HOME/.tmux.conf
     rc = . %(ytrc:root_dir)s/rc
 
+Installing Sub
+--------------
+
+`sub <https://github.com/37signals/sub>`_ is a command namespacing tool
+that allows the creation of subcommands. (e.g. moving to your
+workspace directory or running your server). This works well with sprinter because:
+
+* sub creates a clear, understandable namespace for shell commands
+* sprinter downloads executable and dependencies, and updates the environment needed for those commands
+
+Here's an example sub configuration section::
+
+    [sub]
+    formula = sprinter.formulas.git
+    depends = github
+    url = git://github.com/mygithub/sub.git
+    branch = mybranch
+    rc = eval "$(%(sub:root_dir)/bin/sub init -)"
