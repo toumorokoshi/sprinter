@@ -40,6 +40,8 @@ sprinter environment:
 * a sprinter.cfg file, which contains the configuration necessary to install features
 * sprinter formulas, which each feature uses as it's instruction manual on how to setup, update, and remove itself 
 
+Read more about Sprinter on the `docs <http://sprinter.readthedocs.org/en/latest/>`_
+
 Command list
 ------------
 
