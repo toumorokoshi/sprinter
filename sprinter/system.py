@@ -19,7 +19,8 @@ class System(object):
         (system, node, release, version, machine, processor) = platform.uname()
         self.system = system
         self.node = node
-        self.processor = processor
+        # processor is a misnomer, it
+        self.architecture = machine
         self.version = version
 
     def isDebianBased(self):
@@ -37,4 +38,4 @@ class System(object):
         return self.system.lower() == "linux"
 
     def is64bit(self):
-        return self.processor == "x86_64"
+        return self.architecture == "x86_64"
