@@ -119,7 +119,7 @@ The git formula clones a git repository into sprinter's directory
 init script by injecting 'eval "$(%(sub:root_dir)/bin/sub init -)"' into one's .bashrc or .zshrc file.
 
 You can get more information about each of the formulas, and what they
-do, on the:ref:`formulas` page.
+do, on the :doc:`formulalist` page.
 
 Now remember at this point, sprinter already knows that you have an
 environment 'myenvironment' installed.
