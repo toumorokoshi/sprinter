@@ -459,6 +459,7 @@ class Environment(object):
             raise SprinterException("Error occured!")
         if self.message_success():
             self.logger.info(self.message_success())
+        self.logger.info("NOTE: Please remember to open new shells/terminals to use the modified environment")
 
     def _install_sandbox(self, name, call, kwargs={}):
         if (self.target.is_affirmative('config', name) and
