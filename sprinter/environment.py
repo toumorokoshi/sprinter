@@ -15,7 +15,7 @@ from sprinter.injections import Injections
 from sprinter.manifest import Manifest
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
-from sprinter.templates import shell_utils_template, source_template
+from sprinter.templates import shell_utils_template, source_template, warning_template
 
 
 def warmup(f):
@@ -577,6 +577,7 @@ class Environment(object):
                 self.global_config.read(global_config_path)
                 self.logger.info("Checking and setting global parameters...")
             else:
+                self.initial_run()  # it's probably the first run, so stick initial run logic in here
                 self.logger.info("Unable to find a global sprinter configuration!")
                 self.logger.info("Creating one now. Please answer some questions" +
                                  " about what you would like sprinter to do.")
@@ -584,10 +585,10 @@ class Environment(object):
             if not self.global_config.has_section('shell'):
                 # shell configuration
                 self.global_config.add_section('shell')
-                self.logger.info("What shells or environments would you like sprinter to work with?")
-                self.logger.info("(Sprinter will not try to inject into environments not specified here.)")
-                self.logger.info("If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.")
-                self.logger.info("i.e. environment variables sprinter set will affect programs as well, not just shells")
+                self.logger.info("What shells or environments would you like sprinter to work with?\n" +
+                                 "(Sprinter will not try to inject into environments not specified here.)\n" +
+                                 "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n" +
+                                 "i.e. environment variables sprinter set will affect programs as well, not just shells")
                 environments = list(enumerate(SHELL_CONFIG, start=1))
                 self.logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
                 desired_environments = lib.prompt("type the environment, comma-separated", default="0")
@@ -609,3 +610,16 @@ class Environment(object):
                     env_source_rc = lib.prompt("would you like sprinter to source the rc file too?", default="yes",
                                                boolean=True)
                     self.global_config.set('global', 'env_source_rc', env_source_rc)
+
+    def initial_run(self):
+        """ A method that only runs during the initial run of sprinter """
+        #if not self.system.is_officially_supported():
+        if True:
+            self.logger.warn(warning_template
+                             + "===========================================================\n"
+                             + "Sprinter is not officially supported on {0}! Please use at your own risk.\n\n".format(self.system.operating_system())
+                             + "You can find the supported platforms here:\n"
+                             + "(http://sprinter.readthedocs.org/en/latest/index.html#compatible-systems)\n\n"
+                             + "Conversely, please help us support your system by reporting on issues\n"
+                             + "(http://sprinter.readthedocs.org/en/latest/faq.html#i-need-help-who-do-i-talk-to)\n"
+                             + "===========================================================")

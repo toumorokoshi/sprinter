@@ -22,14 +22,20 @@ class System(object):
         # processor is a misnomer, it
         self.architecture = machine
         self.version = version
+        self.dist = platform.dist()
+        self.linux_distro, self.linux_version, self.linux_version_name = self.dist
 
     def isDebianBased(self):
         """ returns true if the system is debian based """
-        return debian_match.match(self.version) is not None
+        return self.linux_distro.lower() in ['ubuntu', 'debian']
 
     def isFedoraBased(self):
         """ returns true if the system is fedora based """
-        return fedora_match.match(self.version) is not None
+        return self.linux_distro.lower() in ['centos', 'redhat', 'fedora']
+
+    def isSUSEBased(self):
+        """ returns true if the system is suse based """
+        return self.linux_distro.lower() in ['suse']
 
     def isOSX(self):
         return self.system.lower() == "darwin"
@@ -39,3 +45,15 @@ class System(object):
 
     def is64bit(self):
         return self.architecture == "x86_64"
+
+    def operating_system(self):
+        """ return the name of the operating system """
+        return self.linux_distro or self.system
+
+    def is_officially_supported(self):
+        """
+        Returns true if the current system is officially supported by
+        sprinter
+        """
+        # TODO: Get the shell name and check that as well
+        return self.isOSX() or self.isDebianBased()
