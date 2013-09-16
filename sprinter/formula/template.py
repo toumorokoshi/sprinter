@@ -36,11 +36,11 @@ class TemplateFormula(FormulaBase):
             self.__install_file(self.target)
         FormulaBase.update(self)
 
-    def remove(self, feature_name, config):
+    def remove(self):
         if self.source.is_affirmative('remove_file_on_delete', False):
             os.path.unlink(
                 os.path.expanduser(self.source.get('target')))
-        FormulaBase.remove(feature_name, config)
+        FormulaBase.remove(self)
 
     def validate(self):
         if self.target:
