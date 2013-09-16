@@ -613,8 +613,7 @@ class Environment(object):
 
     def initial_run(self):
         """ A method that only runs during the initial run of sprinter """
-        #if not self.system.is_officially_supported():
-        if self.system.is_officially_supported():
+        if not self.system.is_officially_supported():
             self.logger.warn(warning_template
                              + "===========================================================\n"
                              + "Sprinter is not officially supported on {0}! Please use at your own risk.\n\n".format(self.system.operating_system())
