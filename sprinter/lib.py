@@ -13,11 +13,12 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import urllib
 import requests
-from StringIO import StringIO
+from io import StringIO
 
 from getpass import getpass
 from subprocess import PIPE, STDOUT
@@ -53,7 +54,8 @@ def get_subclass_from_module(module, parent_class):
         if sprinter_class is None:
             raise SprinterException("No subclass %s that extends %s exists in classpath!" % (module, str(parent_class)))
         return sprinter_class
-    except ImportError as e:
+    except ImportError:
+        e = sys.exc_info()[1]
         raise e
 
 
@@ -73,7 +75,8 @@ def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False
         output = process.communicate(input=stdin)[0]
         logger.log(output_log_level, output)
         return (process.returncode, output)
-    except OSError, e:
+    except OSError:
+        e = sys.exc_info()[1]
         if not sensitive_info:
             logger.exception("Error running command: %s" % command)
             logger.error("Root directory: %s" % cwd)
@@ -260,9 +263,11 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
                     else:
                         return
                 tf.extract(tfile, target_dir)
-    except OSError, e:
+    except OSError:
+        e = sys.exc_info()[1]
         raise ExtractException(str(e))
-    except IOError, e:
+    except IOError:
+        e = sys.exc_info()[1]
         raise ExtractException(str(e))
 
 

@@ -1,7 +1,7 @@
 import os
 import shutil
 import tempfile
-from StringIO import StringIO
+from io import StringIO
 from mock import Mock, call, patch
 from nose import tools
 from sprinter.testtools import (create_mock_environment,

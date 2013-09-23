@@ -9,17 +9,18 @@ version = {{ manifest_version }}
 The manifest can take a source and/or a target manifest
 """
 
-from ConfigParser import RawConfigParser
 import os
 import re
+import sys
 import urllib
-from StringIO import StringIO
+from io import StringIO
 
 from sprinter import lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.system import System
 from sprinter.featureconfig import FeatureConfig
 from sprinter.core import LOGGER
+from sprinter.compat.configparser import RawConfigParser
 
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
@@ -190,7 +191,8 @@ class Manifest(object):
                     dependency_dict[s] = []
         try:
             return DependencyTree(dependency_dict)
-        except DependencyTreeException as dte:
+        except DependencyTreeException:
+            dte = sys.exc_info()[1]
             raise ManifestException("Dependency tree for manifest is invalid! %s" % str(dte))
 
     def __substitute_objects(self, value, context_dict):
@@ -202,7 +204,8 @@ class Manifest(object):
         elif type(value) == str:
             try:
                 return value % context_dict
-            except KeyError as e:
+            except KeyError:
+                e = sys.exc_info()[1]
                 self.logger.warn("Could not specialize %s! Error: %s" % (value, e))
                 return value
         else:

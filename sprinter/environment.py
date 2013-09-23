@@ -2,9 +2,9 @@ import logging
 import os
 import sys
 import getpass
-from StringIO import StringIO
+from io import StringIO
 from functools import wraps
-from ConfigParser import RawConfigParser
+from sprinter.compat.configparser import RawConfigParser
 from sprinter.core import PHASE
 from sprinter import brew
 from sprinter import lib
@@ -16,6 +16,7 @@ from sprinter.manifest import Manifest
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
 from sprinter.templates import shell_utils_template, source_template, warning_template
+from sprinter.compat import raise_exception
 
 
 def warmup(f):
@@ -146,7 +147,7 @@ class Environment(object):
             self.logger.info("Removing installation %s..." % self.namespace)
             self.directory.remove()
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            raise_exception(et, ei, tb)
         
     @warmup
     @install_required
@@ -166,7 +167,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            raise_exception(et, ei, tb)
 
     @warmup
     @install_required
@@ -185,7 +186,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            raise_exception(et, ei, tb)
 
     @warmup
     @install_required
@@ -205,7 +206,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            raise_exception(et, ei, tb)
 
     @warmup
     @install_required
@@ -225,7 +226,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            raise_exception(et, ei, tb)
 
     @warmup
     def validate(self):
@@ -344,7 +345,8 @@ class Environment(object):
                 self.source = Manifest(self.source)
             if not isinstance(self.target, Manifest) and self.target:
                 self.target = Manifest(self.target)
-        except lib.BadCredentialsException, e:
+        except lib.BadCredentialsException:
+            e = sys.exc_info()[1]
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
         if self.target:
@@ -531,7 +533,8 @@ class Environment(object):
                     self._error_dict[feature] += result
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
-        except Exception, e:
+        except Exception:
+            e = sys.exc_info()[1]
             self.logger.info("An exception occurred with action %s in feature %s!" %
                              (action, feature))
             self.logger.debug("Exception", exc_info=sys.exc_info())
