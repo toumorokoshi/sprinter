@@ -1,5 +1,5 @@
-from mock import Mock, patch
-
+from __future__ import unicode_literals
+from mock import patch
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib
 

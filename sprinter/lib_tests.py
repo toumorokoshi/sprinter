@@ -93,7 +93,7 @@ class TestLib(object):
             """ Test if the targz extract works """
             TEST_URI = "http://testme.com/test.tar.gz"
             httpretty.register_uri(httpretty.GET, TEST_URI,
-                                   body=open("./test_data/test_tar.tar.gz").read())
+                                   body=open("./test_data/test_tar.tar.gz", 'rb').read())
             test_dir = tempfile.mkdtemp()
             try:
                 lib.extract_targz(TEST_URI, test_dir, remove_common_prefix=True)
@@ -107,7 +107,7 @@ class TestLib(object):
             """ Test if the targz extract works, and overwrites """
             TEST_URI = "http://testme.com/test.tar.gz"
             httpretty.register_uri(httpretty.GET, TEST_URI,
-                                   body=open("./test_data/test_tar.tar.gz").read())
+                                   body=open("./test_data/test_tar.tar.gz", 'rb').read())
             test_dir = tempfile.mkdtemp()
             try:
                 os.mkdir(os.path.join(test_dir, "sprinter"))
@@ -123,7 +123,7 @@ class TestLib(object):
             """ Test if the zip extract works """
             TEST_URI = "http://testme.com/test.zip"
             httpretty.register_uri(httpretty.GET, TEST_URI,
-                                   body=open("./test_data/test_zip.zip").read())
+                                   body=open("./test_data/test_zip.zip", 'rb').read())
             test_dir = tempfile.mkdtemp()
             try:
                 lib.extract_zip(TEST_URI, test_dir, remove_common_prefix=True)
@@ -137,7 +137,7 @@ class TestLib(object):
             """ Test if the zip extract works, and overwrites """
             TEST_URI = "http://testme.com/test.zip"
             httpretty.register_uri(httpretty.GET, TEST_URI,
-                                   body=open("./test_data/test_zip.zip").read())
+                                   body=open("./test_data/test_zip.zip", 'rb').read())
             test_dir = tempfile.mkdtemp()
             try:
                 os.mkdir(os.path.join(test_dir, "sprinter"))
@@ -183,10 +183,10 @@ class TestLib(object):
             httpretty.register_uri(httpretty.GET, TEST_URI,
                                    body=CONTENT)
             returned_content = lib.authenticated_get("username", "password", TEST_URI)
-            tools.eq_(returned_content, CONTENT)
+            tools.eq_(returned_content.decode("utf-8"), CONTENT)
             tools.ok_("Authorization" in httpretty.last_request().headers)
             tools.eq_(httpretty.last_request().headers["Authorization"],
-                      "Basic %s" % b64encode(b"%s:%s" % ("username", "password")).decode("ascii"))
+                      "Basic %s" % b64encode(('%s:%s' % ("username", "password")).encode("latin1")).strip().decode("utf-8"))
 
         @httpretty.activate
         @tools.raises(BadCredentialsException)

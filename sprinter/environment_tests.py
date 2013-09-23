@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
@@ -173,14 +174,14 @@ env_source_rc = False
         environment.injections.commit = Mock()
         environment.formula_dict['sprinter.formulabase'] = Mock(return_value=create_mock_formulabase())
         environment.install()
-        assert filter(lambda x: x.endswith('.bashrc'), environment.injections.inject_dict.keys())
+        assert [x for x in environment.injections.inject_dict.keys() if x.endswith('.bashrc')]
         env_injected = False
         for profile in ['.bash_profile', '.bash_login', '.profile']:
             env_injected = env_injected or filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
         assert env_injected
-        assert not filter(lambda x: x.endswith('.zshrc'), environment.injections.inject_dict.keys())
+        assert not [x for x in environment.injections.inject_dict.keys() if x.endswith('.zshrc')]
         for profile in ['.zprofile', '.zlogin']:
-            assert not filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
+            assert not [x for x in environment.injections.inject_dict.keys() if x.endswith(profile)]
 
     def test_env_to_rc_injection(self):
         """ If env_source_rc is set to true, the env environments should source the rc """
@@ -247,14 +248,14 @@ env_source_rc = False
         environment.injections.commit = Mock()
         environment.formula_dict['sprinter.formulabase'] = Mock(return_value=create_mock_formulabase())
         environment.install()
-        assert filter(lambda x: x.endswith('.zshrc'), environment.injections.inject_dict.keys())
+        assert [x for x in environment.injections.inject_dict.keys() if x.endswith('.zshrc')]
         env_injected = False
         for profile in ['.zprofile', '.zlogin']:
             env_injected = env_injected or filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
         assert env_injected
-        assert not filter(lambda x: x.endswith('.bashrc'), environment.injections.inject_dict.keys())
+        assert not [x for x in environment.injections.inject_dict.keys() if x.endswith('.bashrc')]
         for profile in ['.bash_profile', '.bash_login']:
-            assert not filter(lambda x: x.endswith(profile), environment.injections.inject_dict.keys())
+            assert not [x for x in environment.injections.inject_dict.keys() if x.endswith(profile)]
 
     def test_global_config(self):
         """ Global config should accept a file-like object, or default to ROOT/.sprinter/.global/config.cfg """
@@ -301,20 +302,7 @@ env_source_rc = False
         temp_dir = tempfile.mkdtemp()
         try:
             with patch('sprinter.lib.prompt') as prompt:
-                prompt.return_value = "1,2"
-                env = Environment(root=temp_dir)
-                assert env.global_config.get('shell', 'bash') == "false"
-                assert env.global_config.get('shell', 'zsh') == "true"
-                assert env.global_config.get('shell', 'gui') == "true"
-        finally:
-            shutil.rmtree(temp_dir)
-
-    def test_write_utilssh(self):
-        """ If no global config exists, it should prompt for the values it needs, and create a file """
-        temp_dir = tempfile.mkdtemp()
-        try:
-            with patch('sprinter.lib.prompt') as prompt:
-                prompt.return_value = "1,2"
+                prompt.return_value = "2,3"
                 env = Environment(root=temp_dir)
                 assert env.global_config.get('shell', 'bash') == "false"
                 assert env.global_config.get('shell', 'zsh') == "true"

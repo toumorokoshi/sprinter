@@ -8,14 +8,15 @@ version = {{ manifest_version }}
 
 The manifest can take a source and/or a target manifest
 """
+from __future__ import unicode_literals
 
 import os
 import re
 import sys
-import urllib
 from io import StringIO
 
 from six.moves import configparser
+import requests
 import sprinter.lib as lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.system import System
@@ -131,7 +132,7 @@ class Manifest(object):
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
         context_dict.update(self.additional_context_variables.items())
-        context_dict.update(dict([("%s|escaped" % k, re.escape(v or "")) for k, v in context_dict.items()]))
+        context_dict.update(dict([("%s|escaped" % k, re.escape(str(v) or "")) for k, v in context_dict.items()]))
         return context_dict
 
     def add_additional_context(self, additional_context):
@@ -141,7 +142,7 @@ class Manifest(object):
     def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
         manifest = configparser.RawConfigParser()
         manifest.add_section('config')
-        if type(raw_manifest) == str:
+        if type(raw_manifest) in (str, unicode):
             if raw_manifest.startswith("http"):
                 # raw_manifest is a url
                 if username and password:
@@ -150,7 +151,7 @@ class Manifest(object):
                                                                            raw_manifest,
                                                                            verify=verify_certificate))
                 else:
-                    manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
+                    manifest_file_handler = StringIO(requests.get(raw_manifest).text)
                 manifest.readfp(manifest_file_handler)
             else:
                 # raw_manifest is a filepath

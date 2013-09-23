@@ -34,7 +34,7 @@ class EnumInstance(object):
 def Enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     reverse = dict((value, key) for key, value in enums.items())
-    values = enums.values()
+    values = [v for v in enums.values()]
     enums['values'] = values
     enums['value'] = reverse
     return type('Enum', (), enums)

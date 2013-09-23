@@ -5,7 +5,7 @@ import httpretty
 from nose.plugins.attrib import attr
 from mock import patch
 
-GLOBAL_CONFIG = """
+GLOBAL_CONFIG = u"""
 [shell]
 bash = false
 zsh = false

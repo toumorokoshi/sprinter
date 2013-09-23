@@ -1,10 +1,9 @@
+from __future__ import unicode_literals
 import httpretty
 import os
 import shutil
 import tempfile
-from mock import Mock, patch
 from sprinter.testtools import FormulaTest
-import sprinter.lib as lib
 
 source_config = """
 [update_example]

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib

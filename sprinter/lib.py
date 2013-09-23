@@ -16,7 +16,6 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import urllib
 import requests
 from io import StringIO
 
@@ -244,7 +243,7 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        gz = gzip.GzipFile(fileobj=StringIO(requests.get(url).content))
+        gz = gzip.GzipFile(fileobj=io.BytesIO(requests.get(url).content))
         tf = tarfile.TarFile(fileobj=gz)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
@@ -274,7 +273,7 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        memory_file = io.BytesIO(urllib.urlopen(url).read())
+        memory_file = io.BytesIO(requests.get(url).content)
         zip_file = zipfile.ZipFile(memory_file)
         common_prefix = os.path.commonprefix(zip_file.namelist())
         for zip_file_info in zip_file.infolist():
@@ -303,7 +302,8 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
-        urllib.urlretrieve(url, temp_file)
+        with open(temp_file, 'bw+') as fh:
+            fh.write(requests.get(url).content)
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
         for f in os.listdir("/Volumes/a/"):
             if not f.startswith(".") and f != ' ':
