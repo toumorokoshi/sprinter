@@ -2,12 +2,13 @@ import logging
 import os
 import sys
 import getpass
+from six import reraise
+from six.moves import configparser
 from io import StringIO
 from functools import wraps
-from sprinter.compat.configparser import RawConfigParser
 from sprinter.core import PHASE
-from sprinter import brew
-from sprinter import lib
+import sprinter.brew as brew
+import sprinter.lib as lib
 from sprinter.formulabase import FormulaBase
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
@@ -16,7 +17,6 @@ from sprinter.manifest import Manifest
 from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
 from sprinter.templates import shell_utils_template, source_template, warning_template
-from sprinter.compat import raise_exception
 
 
 def warmup(f):
@@ -147,7 +147,7 @@ class Environment(object):
             self.logger.info("Removing installation %s..." % self.namespace)
             self.directory.remove()
             et, ei, tb = sys.exc_info()
-            raise_exception(et, ei, tb)
+            reraise(et, ei, tb)
         
     @warmup
     @install_required
@@ -167,7 +167,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise_exception(et, ei, tb)
+            reraise(et, ei, tb)
 
     @warmup
     @install_required
@@ -186,7 +186,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise_exception(et, ei, tb)
+            reraise(et, ei, tb)
 
     @warmup
     @install_required
@@ -206,7 +206,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise_exception(et, ei, tb)
+            reraise(et, ei, tb)
 
     @warmup
     @install_required
@@ -226,7 +226,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise_exception(et, ei, tb)
+            reraise(et, ei, tb)
 
     @warmup
     def validate(self):
@@ -571,7 +571,7 @@ class Environment(object):
     def load_global_config(self, global_config_string):
         if self.global_config:
             return self.global_config
-        self.global_config = RawConfigParser()
+        self.global_config = configparser.RawConfigParser()
         if global_config_string:
             self.global_config.readfp(StringIO(global_config_string))
         else:

@@ -1,7 +1,7 @@
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
 from sprinter.formulabase import FormulaBase
-from sprinter import lib
+import sprinter.lib as lib
 
 source_config = """
 """

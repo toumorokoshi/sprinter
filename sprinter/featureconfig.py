@@ -2,7 +2,7 @@ import copy
 import sys
 
 from sprinter.core import LOGGER
-from sprinter import lib
+import sprinter.lib as lib
 
 
 class ParamNotFoundException(Exception):

@@ -7,7 +7,7 @@ apt-get = git
 brew = git
 """
 from sprinter.formulabase import FormulaBase
-from sprinter import lib
+import sprinter.lib as lib
 import logging
 
 

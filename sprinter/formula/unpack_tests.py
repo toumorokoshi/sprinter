@@ -1,6 +1,6 @@
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
-from sprinter import lib
+import sprinter.lib as lib
 
 TEST_TARGZ = "http://github.com/toumorokoshi/sprinter/tarball/master"
 TEST_ZIP = "http://iterm2.com/downloads/stable/iTerm2_v1_0_0.zip"

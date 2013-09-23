@@ -15,12 +15,12 @@ import sys
 import urllib
 from io import StringIO
 
-from sprinter import lib
+from six.moves import configparser
+import sprinter.lib as lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.system import System
 from sprinter.featureconfig import FeatureConfig
 from sprinter.core import LOGGER
-from sprinter.compat.configparser import RawConfigParser
 
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
@@ -130,16 +130,16 @@ class Manifest(object):
         for s in self.sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
-        return_dict = dict(context_dict.items() + self.additional_context_variables.items())
-        return_dict_escaped = dict([("%s|escaped" % k, re.escape(v or "")) for k, v in return_dict.items()])
-        return dict(return_dict.items() + return_dict_escaped.items())
+        context_dict.update(self.additional_context_variables.items())
+        context_dict.update(dict([("%s|escaped" % k, re.escape(v or "")) for k, v in context_dict.items()]))
+        return context_dict
 
-    def add_additional_context(self, additonal_context):
+    def add_additional_context(self, additional_context):
         """ Add additional context variable """
-        self.additional_context_variables = dict(self.additional_context_variables.items() + additonal_context.items())
+        self.additional_context_variables.update(additional_context)
 
     def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
-        manifest = RawConfigParser()
+        manifest = configparser.RawConfigParser()
         manifest.add_section('config')
         if type(raw_manifest) == str:
             if raw_manifest.startswith("http"):
@@ -159,7 +159,7 @@ class Manifest(object):
                 manifest.read(raw_manifest)
             if not manifest.has_option('config', 'source'):
                 manifest.set('config', 'source', str(raw_manifest))
-        elif raw_manifest.__class__ == RawConfigParser:
+        elif raw_manifest.__class__ == configparser.RawConfigParser:
             return raw_manifest
         else:
             manifest.readfp(raw_manifest)

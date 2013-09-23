@@ -11,7 +11,7 @@ import logging
 import os
 
 from sprinter.formulabase import FormulaBase
-from sprinter import lib
+import sprinter.lib as lib
 
 
 class GitException(Exception):

@@ -28,8 +28,7 @@ from sprinter.exceptions import (CommandMissingException,
                                  CertificateException,
                                  ExtractException,
                                  SprinterException)
-
-from core import LOGGER
+from sprinter.core import LOGGER
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]

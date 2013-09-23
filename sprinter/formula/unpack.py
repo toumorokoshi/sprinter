@@ -15,7 +15,7 @@ import os
 from sprinter.formulabase import FormulaBase
 from sprinter.exceptions import ExtractException
 from sprinter.directory import DirectoryException
-from sprinter import lib
+import sprinter.lib as lib
 
 
 class UnpackFormulaException(Exception):

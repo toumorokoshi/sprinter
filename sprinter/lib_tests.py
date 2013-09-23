@@ -13,7 +13,7 @@ from mock import patch
 
 from sprinter.formulabase import FormulaBase
 from sprinter.formula.env import EnvFormula
-from sprinter import lib
+import sprinter.lib as lib
 from sprinter.lib import (BadCredentialsException,
                           CommandMissingException)
 

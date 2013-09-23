@@ -24,7 +24,7 @@ import signal
 import sys
 from docopt import docopt
 
-from sprinter import lib
+import sprinter.lib as lib
 from sprinter.core import PHASE
 from sprinter.environment import Environment
 from sprinter.manifest import Manifest, ManifestException

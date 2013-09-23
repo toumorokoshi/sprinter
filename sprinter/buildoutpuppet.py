@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 import requests
-from sprinter import lib
+import sprinter.lib as lib
 
 BOOTSTRAP_URL = "https://raw.github.com/toumorokoshi/sprinter/master/scripts/bootstrap.py"
 

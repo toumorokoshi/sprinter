@@ -16,7 +16,8 @@ setup(name='sprinter',
       install_requires=[
           'requests>=1.2.3',
           'pip>=1.3.1',
-          'docopt>=0.6.1'
+          'docopt>=0.6.1',
+          'six>=1.4.1'
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',

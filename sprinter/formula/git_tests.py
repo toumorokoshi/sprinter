@@ -2,7 +2,7 @@ import logging
 import os.path
 from mock import patch
 from sprinter.testtools import FormulaTest
-from sprinter import lib
+import sprinter.lib as lib
 
 vals = {
     'repoA': 'git://github.com/toumorokoshi/sprinter.git'
