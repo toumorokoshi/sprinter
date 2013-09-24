@@ -24,7 +24,7 @@ import signal
 import sys
 from docopt import docopt
 
-from sprinter import lib
+import sprinter.lib as lib
 from sprinter.core import PHASE
 from sprinter.environment import Environment
 from sprinter.manifest import Manifest, ManifestException
@@ -33,7 +33,7 @@ from sprinter.exceptions import SprinterException, BadCredentialsException
 
 
 def signal_handler(signal, frame):
-    print "\nShutting down sprinter..."
+    print("\nShutting down sprinter...")
     sys.exit(0)
 
 
@@ -41,16 +41,18 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     try:
         parse_args(sys.argv[1:])
-    except SprinterException, e:
-        print str(e)
-        print "Sprinter shut down with an error!"
-    except BadCredentialsException, e:
-        print str(e)
-        print "Invalid username and password combination!"
+    except SprinterException:
+        e = sys.exc_info()[1]
+        print(str(e))
+        print("Sprinter shut down with an error!")
+    except BadCredentialsException:
+        e = sys.exc_info()[1]
+        print(str(e))
+        print("Invalid username and password combination!")
 
 
 def error(message):
-    print message
+    print(message)
     exit()
 
 
@@ -65,7 +67,7 @@ def parse_args(argv, Environment=Environment):
 
             def handle_install_shutdown(signal, frame):
                 if env.phase == PHASE.INSTALL:
-                    print "Removing install..."
+                    print("Removing install...")
                     env.directory.remove()
                     env.clear_all()
                 signal_handler(signal, frame)
@@ -121,7 +123,7 @@ def parse_args(argv, Environment=Environment):
             SPRINTER_ROOT = os.path.expanduser(os.path.join("~", ".sprinter"))
             for env in os.listdir(SPRINTER_ROOT):
                 if env != ".global":
-                    print "%s" % env
+                    print(env)
 
         elif options['validate']:
             if options['--username'] or options['--auth']:
@@ -133,15 +135,18 @@ def parse_args(argv, Environment=Environment):
             env.target = options['<environment_source>']
             env.validate()
             if not env.error_occured:
-                print "No errors! Manifest is valid!"
+                print("No errors! Manifest is valid!")
             else:
                 "Manifest is invalid! Please see errors above."
-    except BadCredentialsException, e:
+    except BadCredentialsException:
+        e = sys.exc_info()[1]
         raise e
-    except ManifestException, e:
-        print str(e)
-        print "Could not find Manifest!"
-    except Exception, e:
+    except ManifestException:
+        e = sys.exc_info()[1]
+        print(str(e))
+        print("Could not find Manifest!")
+    except Exception:
+        e = sys.exc_info()[1]
         env.log_error(str(e))
         env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
         env.write_debug_log("/tmp/sprinter.log")

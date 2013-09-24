@@ -16,7 +16,7 @@ import logging
 
 from sprinter.formulabase import FormulaBase
 from sprinter.core import PHASE
-from sprinter import lib
+import sprinter.lib as lib
 
 ssh_config_template = """
 Host %(host)s

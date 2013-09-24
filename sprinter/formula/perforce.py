@@ -20,7 +20,7 @@ import os
 import re
 import shutil
 import urllib
-from sprinter import lib
+import sprinter.lib as lib
 from sprinter.core import PHASE
 from sprinter.formulabase import FormulaBase
 

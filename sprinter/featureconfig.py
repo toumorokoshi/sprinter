@@ -1,7 +1,8 @@
 import copy
+import sys
 
 from sprinter.core import LOGGER
-from sprinter import lib
+import sprinter.lib as lib
 
 
 class ParamNotFoundException(Exception):
@@ -34,7 +35,8 @@ class FeatureConfig(object):
             context_dict["%s:%s" % (self.feature_name, k)] = v
         try:
             return str(self.raw_dict[param]) % context_dict
-        except KeyError, e:
+        except KeyError:
+            e = sys.exc_info()[1]
             self.logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
             return self.raw_dict[param]
 
@@ -88,7 +90,8 @@ class FeatureConfig(object):
     def __getitem__(self, key):
         try:
             return self.get(key)
-        except ParamNotFoundException, e:
+        except ParamNotFoundException:
+            e = sys.exc_info()[1]
             raise KeyError(str(e))
         
     def __setitem__(self, key, value):

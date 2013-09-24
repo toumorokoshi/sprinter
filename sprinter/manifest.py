@@ -8,14 +8,17 @@ version = {{ manifest_version }}
 
 The manifest can take a source and/or a target manifest
 """
+from __future__ import unicode_literals
 
-from ConfigParser import RawConfigParser
 import os
 import re
-import urllib
-from StringIO import StringIO
+import sys
+from io import StringIO
 
-from sprinter import lib
+from six.moves import configparser
+from six import string_types
+import requests
+import sprinter.lib as lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.system import System
 from sprinter.featureconfig import FeatureConfig
@@ -129,18 +132,18 @@ class Manifest(object):
         for s in self.sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
-        return_dict = dict(context_dict.items() + self.additional_context_variables.items())
-        return_dict_escaped = dict([("%s|escaped" % k, re.escape(v or "")) for k, v in return_dict.items()])
-        return dict(return_dict.items() + return_dict_escaped.items())
+        context_dict.update(self.additional_context_variables.items())
+        context_dict.update(dict([("%s|escaped" % k, re.escape(str(v) or "")) for k, v in context_dict.items()]))
+        return context_dict
 
-    def add_additional_context(self, additonal_context):
+    def add_additional_context(self, additional_context):
         """ Add additional context variable """
-        self.additional_context_variables = dict(self.additional_context_variables.items() + additonal_context.items())
+        self.additional_context_variables.update(additional_context)
 
     def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
-        manifest = RawConfigParser()
+        manifest = configparser.RawConfigParser()
         manifest.add_section('config')
-        if type(raw_manifest) == str:
+        if isinstance(raw_manifest, string_types):
             if raw_manifest.startswith("http"):
                 # raw_manifest is a url
                 if username and password:
@@ -149,7 +152,7 @@ class Manifest(object):
                                                                            raw_manifest,
                                                                            verify=verify_certificate))
                 else:
-                    manifest_file_handler = StringIO(urllib.urlopen(raw_manifest).read())
+                    manifest_file_handler = StringIO(requests.get(raw_manifest).text)
                 manifest.readfp(manifest_file_handler)
             else:
                 # raw_manifest is a filepath
@@ -158,7 +161,7 @@ class Manifest(object):
                 manifest.read(raw_manifest)
             if not manifest.has_option('config', 'source'):
                 manifest.set('config', 'source', str(raw_manifest))
-        elif raw_manifest.__class__ == RawConfigParser:
+        elif raw_manifest.__class__ == configparser.RawConfigParser:
             return raw_manifest
         else:
             manifest.readfp(raw_manifest)
@@ -190,7 +193,8 @@ class Manifest(object):
                     dependency_dict[s] = []
         try:
             return DependencyTree(dependency_dict)
-        except DependencyTreeException as dte:
+        except DependencyTreeException:
+            dte = sys.exc_info()[1]
             raise ManifestException("Dependency tree for manifest is invalid! %s" % str(dte))
 
     def __substitute_objects(self, value, context_dict):
@@ -202,7 +206,8 @@ class Manifest(object):
         elif type(value) == str:
             try:
                 return value % context_dict
-            except KeyError as e:
+            except KeyError:
+                e = sys.exc_info()[1]
                 self.logger.warn("Could not specialize %s! Error: %s" % (value, e))
                 return value
         else:

@@ -13,22 +13,23 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
-import urllib
 import requests
-from StringIO import StringIO
+from io import StringIO
 
 from getpass import getpass
 from subprocess import PIPE, STDOUT
+
+from six import string_types
 
 from sprinter.exceptions import (CommandMissingException,
                                  BadCredentialsException,
                                  CertificateException,
                                  ExtractException,
                                  SprinterException)
-
-from core import LOGGER
+from sprinter.core import LOGGER
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
@@ -53,7 +54,8 @@ def get_subclass_from_module(module, parent_class):
         if sprinter_class is None:
             raise SprinterException("No subclass %s that extends %s exists in classpath!" % (module, str(parent_class)))
         return sprinter_class
-    except ImportError as e:
+    except ImportError:
+        e = sys.exc_info()[1]
         raise e
 
 
@@ -73,7 +75,8 @@ def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False
         output = process.communicate(input=stdin)[0]
         logger.log(output_log_level, output)
         return (process.returncode, output)
-    except OSError, e:
+    except OSError:
+        e = sys.exc_info()[1]
         if not sensitive_info:
             logger.exception("Error running command: %s" % command)
             logger.error("Root directory: %s" % cwd)
@@ -208,7 +211,7 @@ def is_affirmative(phrase):
     Determine if a phrase is in the affirmative
     * start with a t or y, case insensitive
     """
-    if type(phrase) == str:
+    if isinstance(phrase, string_types):
         return phrase.lower()[0] in ['t', 'y']
     else:
         return phrase
@@ -242,7 +245,7 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        gz = gzip.GzipFile(fileobj=StringIO(requests.get(url).content))
+        gz = gzip.GzipFile(fileobj=io.BytesIO(requests.get(url).content))
         tf = tarfile.TarFile(fileobj=gz)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
@@ -260,9 +263,11 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
                     else:
                         return
                 tf.extract(tfile, target_dir)
-    except OSError, e:
+    except OSError:
+        e = sys.exc_info()[1]
         raise ExtractException(str(e))
-    except IOError, e:
+    except IOError:
+        e = sys.exc_info()[1]
         raise ExtractException(str(e))
 
 
@@ -270,7 +275,7 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        memory_file = io.BytesIO(urllib.urlopen(url).read())
+        memory_file = io.BytesIO(requests.get(url).content)
         zip_file = zipfile.ZipFile(memory_file)
         common_prefix = os.path.commonprefix(zip_file.namelist())
         for zip_file_info in zip_file.infolist():
@@ -299,7 +304,8 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
-        urllib.urlretrieve(url, temp_file)
+        with open(temp_file, 'bw+') as fh:
+            fh.write(requests.get(url).content)
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
         for f in os.listdir("/Volumes/a/"):
             if not f.startswith(".") and f != ' ':

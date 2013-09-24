@@ -10,7 +10,7 @@ activate=echo 'activating...'
 deactivate=echo 'deactivating...'
 """
 from sprinter.formulabase import FormulaBase
-from sprinter import lib
+import sprinter.lib as lib
 
 
 class CommandFormula(FormulaBase):

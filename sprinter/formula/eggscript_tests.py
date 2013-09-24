@@ -1,7 +1,7 @@
 import logging
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
-from sprinter import lib
+import sprinter.lib as lib
 from sprinter.buildoutpuppet import BuildoutPuppet
 from nose.plugins.attrib import attr
 

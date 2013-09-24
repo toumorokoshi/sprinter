@@ -7,7 +7,7 @@ import os
 
 from sprinter.core import LOGGER, PHASE
 from sprinter.exceptions import FormulaException
-from sprinter import lib
+import sprinter.lib as lib
 
 
 class FormulaBase(object):

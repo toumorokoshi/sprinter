@@ -1,4 +1,5 @@
-from StringIO import StringIO
+from __future__ import unicode_literals
+from six import StringIO
 
 import os
 import httpretty
@@ -7,7 +8,7 @@ from nose import tools
 from mock import Mock, call, patch
 
 from sprinter.manifest import Manifest, ManifestException
-from sprinter import lib
+import sprinter.lib as lib
 
 manifest_correct_dependency = """
 [sub]

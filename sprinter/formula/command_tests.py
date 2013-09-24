@@ -1,7 +1,7 @@
-from mock import Mock, patch
-
+from __future__ import unicode_literals
+from mock import patch
 from sprinter.testtools import FormulaTest
-from sprinter import lib
+import sprinter.lib as lib
 
 source_config = """
 [update]

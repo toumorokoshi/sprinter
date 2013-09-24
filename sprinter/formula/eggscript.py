@@ -11,7 +11,7 @@ redownload = true
 import os
 import re
 
-from sprinter import lib
+import sprinter.lib as lib
 from sprinter.formulabase import FormulaBase
 from sprinter.virtualenv import create_environment as create_virtualenv
 

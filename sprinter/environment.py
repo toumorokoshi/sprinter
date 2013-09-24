@@ -2,12 +2,13 @@ import logging
 import os
 import sys
 import getpass
-from StringIO import StringIO
+from six import reraise
+from six.moves import configparser
+from io import StringIO
 from functools import wraps
-from ConfigParser import RawConfigParser
 from sprinter.core import PHASE
-from sprinter import brew
-from sprinter import lib
+import sprinter.brew as brew
+import sprinter.lib as lib
 from sprinter.formulabase import FormulaBase
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
@@ -146,7 +147,7 @@ class Environment(object):
             self.logger.info("Removing installation %s..." % self.namespace)
             self.directory.remove()
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            reraise(et, ei, tb)
         
     @warmup
     @install_required
@@ -166,7 +167,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            reraise(et, ei, tb)
 
     @warmup
     @install_required
@@ -185,7 +186,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            reraise(et, ei, tb)
 
     @warmup
     @install_required
@@ -205,7 +206,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            reraise(et, ei, tb)
 
     @warmup
     @install_required
@@ -225,7 +226,7 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
-            raise et, ei, tb
+            reraise(et, ei, tb)
 
     @warmup
     def validate(self):
@@ -344,7 +345,8 @@ class Environment(object):
                 self.source = Manifest(self.source)
             if not isinstance(self.target, Manifest) and self.target:
                 self.target = Manifest(self.target)
-        except lib.BadCredentialsException, e:
+        except lib.BadCredentialsException:
+            e = sys.exc_info()[1]
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
         if self.target:
@@ -531,7 +533,8 @@ class Environment(object):
                     self._error_dict[feature] += result
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
-        except Exception, e:
+        except Exception:
+            e = sys.exc_info()[1]
             self.logger.info("An exception occurred with action %s in feature %s!" %
                              (action, feature))
             self.logger.debug("Exception", exc_info=sys.exc_info())
@@ -568,7 +571,7 @@ class Environment(object):
     def load_global_config(self, global_config_string):
         if self.global_config:
             return self.global_config
-        self.global_config = RawConfigParser()
+        self.global_config = configparser.RawConfigParser()
         if global_config_string:
             self.global_config.readfp(StringIO(global_config_string))
         else:
@@ -589,7 +592,7 @@ class Environment(object):
                                  "(Sprinter will not try to inject into environments not specified here.)\n" +
                                  "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n" +
                                  "i.e. environment variables sprinter set will affect programs as well, not just shells")
-                environments = list(enumerate(SHELL_CONFIG, start=1))
+                environments = list(enumerate(sorted(SHELL_CONFIG), start=1))
                 self.logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
                 desired_environments = lib.prompt("type the environment, comma-separated", default="0")
                 for index, val in environments:

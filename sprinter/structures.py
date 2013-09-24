@@ -33,8 +33,8 @@ class EnumInstance(object):
 # credit goes to http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
 def Enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
-    reverse = dict((value, key) for key, value in enums.iteritems())
-    values = enums.values()
+    reverse = dict((value, key) for key, value in enums.items())
+    values = [v for v in enums.values()]
     enums['values'] = values
     enums['value'] = reverse
     return type('Enum', (), enums)
