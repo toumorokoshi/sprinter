@@ -18,18 +18,18 @@ It's recommended to use Sprinter's standalone installer:
 
 OSX::
 
-    $ curl -s https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
+    curl -s https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
 
 Debian-Based (e.g. Ubuntu)::
     
-    $ cd /tmp/; rm sandbox.sh; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
+    cd /tmp/; rm sandbox.sh; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
    
 
 You can also install sprinter using easy_install or pip (not recommended, it's easier to update with the standalone)::
 
-    $ (sudo) easy_install http://github.com/toumorokoshi/sprinter/tarball/master
+    (sudo) easy_install http://github.com/toumorokoshi/sprinter/tarball/master
 
-    $ (sudo) pip install http://github.com/toumorokoshi/sprinter/tarball/master
+    (sudo) pip install http://github.com/toumorokoshi/sprinter/tarball/master
 
 What is it?
 -----------
@@ -51,21 +51,21 @@ Command list
 
 Install an environment::
 
-  $ sprinter install ENVIRONMENT.cfg
-  $ sprinter install http://myenvironment.cfg
+  sprinter install ENVIRONMENT.cfg
+  sprinter install http://myenvironment.cfg
 
 Install the environment specified in the environment.cfg file. It will update an environment if it already exists.::
 
-    $ sprinter update MY_ENVIRONMENT
+    sprinter update MY_ENVIRONMENT
 
 Activate MY_ENVIRONMENT::
 
-    $ sprinter activate MY_ENVIRONMENT
+    sprinter activate MY_ENVIRONMENT
 
 deactivate MY_ENVIRONMENT::
 
-    $ sprinter deactivate MY_ENVIRONMENT
+    sprinter deactivate MY_ENVIRONMENT
 
 remove MY_ENVIRONMENT::
 
-    $ sprinter remove MY_ENVIRONMENT
+    sprinter remove MY_ENVIRONMENT
