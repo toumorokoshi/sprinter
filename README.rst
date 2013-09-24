@@ -7,6 +7,10 @@ sprinter
    :alt: build status
    :target: https://travis-ci.org/toumorokoshi/sprinter
 
+.. image:: https://d2weczhvl823v0.cloudfront.net/toumorokoshi/sprinter/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
 Installation
 ------------
 
