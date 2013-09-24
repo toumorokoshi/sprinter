@@ -65,3 +65,9 @@ deactivate MY_ENVIRONMENT::
 remove MY_ENVIRONMENT::
 
     $ sprinter remove MY_ENVIRONMENT
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/toumorokoshi/sprinter/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
