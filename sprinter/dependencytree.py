@@ -1,6 +1,7 @@
 """
 dependencytree.py handles the dependency tree of sprinter formulas. It attempts to validate a dependency tree
 """
+from __future__ import unicode_literals
 
 
 class DependencyTreeException(Exception):

@@ -3,6 +3,7 @@ directory.py stores methodology to install various files and
 packages to different locations.
 
 """
+from __future__ import unicode_literals
 import logging
 import os
 import shutil

@@ -8,6 +8,7 @@ eggs = pelican, pelican-gist
 links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
 redownload = true
 """
+from __future__ import unicode_literals
 import os
 import re
 

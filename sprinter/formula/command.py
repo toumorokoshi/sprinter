@@ -9,6 +9,7 @@ remove=echo 'destroying...'
 activate=echo 'activating...'
 deactivate=echo 'deactivating...'
 """
+from __future__ import unicode_literals
 from sprinter.formulabase import FormulaBase
 import sprinter.lib as lib
 

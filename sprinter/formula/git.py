@@ -7,6 +7,7 @@ url = https://github.com/toumorokoshi/sub.git
 branch = toumorokoshi
 rc = . %(sub:root_dir)s/libexec/sub-init
 """
+from __future__ import unicode_literals
 import logging
 import os
 

@@ -23,6 +23,7 @@ from getpass import getpass
 from subprocess import PIPE, STDOUT
 
 from six import string_types
+from six.moves import input
 
 from sprinter.exceptions import (CommandMissingException,
                                  BadCredentialsException,
@@ -177,7 +178,7 @@ def prompt(prompt_string, default=None, secret=False, boolean=False):
     if secret:
         val = getpass(prompt_string)
     else:
-        val = raw_input(prompt_string)
+        val = input(prompt_string)
     val = (val if val else default)
     if boolean:
         val = val.lower().startswith('y')
