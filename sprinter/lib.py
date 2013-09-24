@@ -22,6 +22,8 @@ from io import StringIO
 from getpass import getpass
 from subprocess import PIPE, STDOUT
 
+from six import string_types
+
 from sprinter.exceptions import (CommandMissingException,
                                  BadCredentialsException,
                                  CertificateException,
@@ -209,7 +211,7 @@ def is_affirmative(phrase):
     Determine if a phrase is in the affirmative
     * start with a t or y, case insensitive
     """
-    if type(phrase) == str:
+    if isinstance(phrase, string_types):
         return phrase.lower()[0] in ['t', 'y']
     else:
         return phrase

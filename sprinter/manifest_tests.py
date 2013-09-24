@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from io import StringIO
+from six import StringIO
 
 import os
 import httpretty

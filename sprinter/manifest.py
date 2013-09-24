@@ -16,6 +16,7 @@ import sys
 from io import StringIO
 
 from six.moves import configparser
+from six import string_types
 import requests
 import sprinter.lib as lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
@@ -142,7 +143,7 @@ class Manifest(object):
     def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
         manifest = configparser.RawConfigParser()
         manifest.add_section('config')
-        if type(raw_manifest) in (str, unicode):
+        if isinstance(raw_manifest, string_types):
             if raw_manifest.startswith("http"):
                 # raw_manifest is a url
                 if username and password:
