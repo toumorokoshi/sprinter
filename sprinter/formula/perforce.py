@@ -19,7 +19,7 @@ overwrite_client = false
 import os
 import re
 import shutil
-import urllib
+import requests
 import sprinter.lib as lib
 from sprinter.core import PHASE
 from sprinter.formulabase import FormulaBase
@@ -104,9 +104,9 @@ class PerforceFormula(FormulaBase):
 
     def install(self):
         config = self.target
-        self.p4environ = dict(os.environ.items() + [('P4USER', config.get('username')),
-                                                    ('P4PASSWD', config.get('password')),
-                                                    ('P4CLIENT', config.get('client'))])
+        self.p4environ = dict(list(os.environ.items()) + [('P4USER', config.get('username')),
+                                                          ('P4PASSWD', config.get('password')),
+                                                          ('P4CLIENT', config.get('client'))])
         installed = self.__install_perforce(config)
         if not os.path.exists(os.path.expanduser(config.get('root_path'))):
             os.makedirs(os.path.expanduser(config['root_path']))
@@ -150,8 +150,8 @@ class PerforceFormula(FormulaBase):
         if not os.path.exists(d):
             os.makedirs(d)
         self.logger.info("Downloading p4 executable...")
-        urllib.urlretrieve(url_prefix + perforce_packages['p4'],
-                           os.path.join(d, "p4"))
+        with open(os.path.join(d, "p4"), 'wb+') as fh:
+            fh.write(requests.get(url_prefix + perforce_packages['p4']).content)
         self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
         self.p4_command = os.path.join(d, "p4")
         self.logger.info("Installing p4v...")
@@ -164,8 +164,7 @@ class PerforceFormula(FormulaBase):
         """ Install perforce applications and binaries for mac """
         package_exists = False
         root_dir = os.path.expanduser(os.path.join("~", "Applications"))
-        package_exists = len(filter(lambda x: os.path.exists(os.path.join(root_dir, x)),
-                                    P4V_APPLICATIONS))
+        package_exists = len([x for x in P4V_APPLICATIONS if os.path.exists(os.path.join(root_dir, x))])
         if not package_exists or overwrite:
             lib.extract_dmg(url, root_dir)
         else:

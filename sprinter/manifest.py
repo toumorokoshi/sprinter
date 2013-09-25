@@ -150,7 +150,7 @@ class Manifest(object):
                     manifest_file_handler = StringIO(lib.authenticated_get(username,
                                                                            password,
                                                                            raw_manifest,
-                                                                           verify=verify_certificate))
+                                                                           verify=verify_certificate).decode("utf-8"))
                 else:
                     manifest_file_handler = StringIO(requests.get(raw_manifest).text)
                 manifest.readfp(manifest_file_handler)
