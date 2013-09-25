@@ -6,7 +6,7 @@ except:
     from distutils.core import setup
 
 setup(name='sprinter',
-      version='1.0.0',
+      version='1.1.0',
       description='a utility library to help environment bootstrapping scripts',
       long_description=open('README.rst').read(),
       author='Yusuke Tsutsumi',
@@ -28,6 +28,7 @@ setup(name='sprinter',
           'Programming Language :: Python',
           'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.3'
       ],
       entry_points={
           'console_scripts': [

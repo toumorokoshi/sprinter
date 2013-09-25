@@ -318,7 +318,6 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
                     else:
                         return
                 if os.path.isdir(source_path):
-                    import pdb; pdb.set_trace()
                     shutil.copytree(source_path, target_path)
                 else:
                     shutil.copy(source_path, target_path)
