@@ -305,7 +305,7 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
-        with open(temp_file, 'bw+') as fh:
+        with open(temp_file, 'wb+') as fh:
             fh.write(requests.get(url).content)
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
         for f in os.listdir("/Volumes/a/"):
