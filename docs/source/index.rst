@@ -37,10 +37,12 @@ Sprinter was designed with modularity, adaption, and cross-compability in mind. 
 * Dynamically installing new functionality via formulas
 * Sandboxing environments as necessary, such as brew or node.js
 
-Install Instructions
---------------------
+Install Instructions and Tutorial
+---------------------------------
 
 Please refer to the `readme <https://github.com/toumorokoshi/sprinter/blob/develop/README.rst>`_ for instructions on installing sprinter.
+
+It's a good first step to follow the :doc:`tutorial`
 
 
 Compatible Systems

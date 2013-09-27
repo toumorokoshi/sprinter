@@ -235,7 +235,7 @@ some environment variables set. You can do so like this::
     url = https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz
     type = tar.gz
     env = export GOROOT=%(golang-debian:root_dir)s
-    rc = function gov() {
+    rc = function go() {
              go version
          }
 

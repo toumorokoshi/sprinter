@@ -1,8 +1,8 @@
 FAQ
 ===
 
-Sprinter keeps injecting itself after my configuration! How do I override it?
------------------------------------------------------------------------------
+Sprinter keeps overriding my custom *rc! How can I stop it?
+-----------------------------------------------------------
 
 Sprinter will always inject itself after everything in a profile or rc
 file, with the exception of text in a block surrounded by
@@ -12,10 +12,13 @@ configuration.
 How do I make a sprinter formula?
 ---------------------------------
 
-A sprinter formula is just a python module or egg that a python class extends the 'formulabase' class, located in `sprinter.formulas.formulabase <https://github.com/toumorokoshi/sprinter/blob/develop/sprinter/formulabase.py>`.
+A sprinter formula is just a python module or egg that a python class
+extends the 'formulabase' class, located in
+`sprinter.formulas.formulabase
+<https://github.com/toumorokoshi/sprinter/blob/develop/sprinter/formulabase.py>`_.
 
 If you're not familiar with python, it's easier to just follow an
-example, like this one:`https://github.com/toumorokoshi/yt.formula.node`.
+example, like this one: https://github.com/toumorokoshi/yt.formula.node.
 
 I need help! Who do I talk to?
 ------------------------------
