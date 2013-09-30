@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Sprinter: environment bootstrapping made easy
+Sprinter: Environment Management Made Easier
 ============================================
 
-Sprinter is a tool to help create environment bootstrapping scripts for developer environments.
+Sprinter is a tool to help create environment bootstrapping scripts and manage developer environments.
 
 Here are some problems that sprinter was designed to solve:
 
