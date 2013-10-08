@@ -74,7 +74,8 @@ def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False
         process = subprocess.Popen(args, stdin=PIPE, stdout=stdout, stderr=STDOUT,
                                    env=env, cwd=cwd, **kw)
         output = process.communicate(input=stdin)[0]
-        logger.log(output_log_level, str(output).encode('utf-8'))
+        if output is not None:
+            logger.log(output_log_level, str(output).encode('utf-8'))
         return (process.returncode, output)
     except OSError:
         e = sys.exc_info()[1]

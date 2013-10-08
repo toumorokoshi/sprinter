@@ -104,10 +104,12 @@ class Environment(object):
     # specifies where to get the global sprinter root
     global_config = None  # configuration file, which defaults to loading from SPRINTER_ROOT/.global/config.cfg
     write_files = True  # write files to the filesystem.
+    ignore_errors = False  # ignore errors in features
 
     def __init__(self, logger=None, logging_level=logging.INFO,
                  root=None, sprinter_namespace='sprinter',
-                 global_config=None, write_files=True):
+                 global_config=None, write_files=True,
+                 ignore_errors=False):
         self.system = System()
         if not logger:
             logger = self._build_logger(level=logging_level)
@@ -122,6 +124,7 @@ class Environment(object):
         self.shell_util_path = os.path.join(self.global_path, "utils.sh")
         self.load_global_config(global_config)
         self.write_files = write_files
+        self.ignore_errors = ignore_errors
         
     @warmup
     def install(self):
@@ -144,11 +147,12 @@ class Environment(object):
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             self.logger.info("An error occured during installation!")
-            self.clear_all()
-            self.logger.info("Removing installation %s..." % self.namespace)
-            self.directory.remove()
-            et, ei, tb = sys.exc_info()
-            reraise(et, ei, tb)
+            if not self.ignore_errors:
+                self.clear_all()
+                self.logger.info("Removing installation %s..." % self.namespace)
+                self.directory.remove()
+                et, ei, tb = sys.exc_info()
+                reraise(et, ei, tb)
         
     @warmup
     @install_required

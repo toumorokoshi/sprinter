@@ -1,9 +1,9 @@
 """Sprinter, an environment installation and management tool.
 Usage:
-  sprinter install <environment_source> [-av -n <namespace> -u <username> -p <password> --allow-bad-certificate]
-  sprinter update <environment_name> [-rav -u <username> -p <password> --allow-bad-certificate]
+  sprinter install <environment_source> [-avi -n <namespace> -u <username> -p <password> --allow-bad-certificate]
+  sprinter update <environment_name> [-ravi -u <username> -p <password> --allow-bad-certificate]
   sprinter (remove | deactivate | activate) <environment_name> [-v]
-  sprinter validate <environment_source> [-av -u <username> -p <password> --allow-bad-certificate]
+  sprinter validate <environment_source> [-avi -u <username> -p <password> --allow-bad-certificate]
   sprinter environments
   sprinter (-h | --help)
 
@@ -16,6 +16,7 @@ Options:
   -u <username>, --username <username>      When using basic authentication, this is the username used
   -p <password>, --password <password>      When using basic authentication, this is the password used
   --allow-bad-certificate                   Do not verify ssl certificates when pulling environment configurations
+  -i, --ignore-errors                       Ignore errors in a formula
 """
 
 import logging
@@ -60,7 +61,7 @@ def parse_args(argv, Environment=Environment):
     options = docopt(__doc__, argv=argv, version="Sprinter 1.0")
     logging_level = logging.DEBUG if options['--verbose'] else logging.INFO
     # start processing commands
-    env = Environment(logging_level=logging_level)
+    env = Environment(logging_level=logging_level, ignore_errors=options['--ignore-errors'])
     try:
         if options['install']:
             target = options['<environment_source>']
