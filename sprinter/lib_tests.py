@@ -50,6 +50,14 @@ class TestLib(object):
             """ An ampersand and other variables in quotes should not split """
             tools.eq_(lib.whitespace_smart_split('"ae09ge&eai"'), ['\"ae09ge&eai\"'])
 
+        def test_call_no_output(self):
+            """ A process that returns nothing back should not raise an exception """
+            lib.call("echo")
+
+        def test_call_unicode_output(self):
+            """ A process that returns unicode output should not raise an exception """
+            lib.call("echo -e \"\\xE2\\x98\\xA0\"")
+
         def test_lib_sprinterpip(self):
             """ Pip install command should work """
             tools.eq_(

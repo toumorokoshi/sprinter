@@ -75,10 +75,7 @@ def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False
                                    env=env, cwd=cwd, **kw)
         output = process.communicate(input=stdin)[0]
         if output is not None:
-            try:
-                logger.log(output_log_level, str(output).encode('utf-8'))
-            except UnicodeDecodeError: 
-                pass
+            logger.log(output_log_level, output.decode('utf-8'))
         return (process.returncode, output)
     except OSError:
         e = sys.exc_info()[1]
