@@ -54,6 +54,25 @@ class TestInjections(object):
         assert l.find(self.test_injection) == -1, "Injection was not cleared properly!"
         assert l.find(self.permanent_string) != -1, "Permanent string was removed on clear!"
 
+    def test_similar_injectionname(self):
+        # and add in the originally named injection
+        i = Injections("testinjection")
+        i.inject(self.temp_file_path, self.test_injection)
+        i.commit()
+        # start with a similar injection
+        SIMILAR_INJECTION = "This is a similar injection"
+        i_similiar = Injections("testinjectionsagain")
+        i_similiar.inject(self.temp_file_path, SIMILAR_INJECTION)
+        i_similiar.commit()
+        l = open(self.temp_file_path, 'r').read()
+        assert l.count(SIMILAR_INJECTION) > 0, "Similar injection was removed!"
+        assert l.count(SIMILAR_INJECTION) == 1, "Multiple injections were found!"
+        i.clear(self.temp_file_path)
+        i.commit()
+        l = open(self.temp_file_path, 'r').read()
+        assert l.find(self.test_injection) == -1, "Injection was not cleared properly!"
+        assert l.find(SIMILAR_INJECTION) > 0, "Similar Injection was incorrectly cleared!"
+
     def test_override(self):
         """ Test the override functionality """
         i = Injections("testinjection", override="OVERRIDE")
