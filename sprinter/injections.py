@@ -26,11 +26,11 @@ class Injections(object):
 
     def __init__(self, wrapper, override=None, logger='sprinter'):
         if override:
-            self.override_match = re.compile("(\n?#%s.*#%s\n?)" % (override, override), re.DOTALL)
+            self.override_match = re.compile("(\n?#%s\n.*#%s\n?)" % (override, override), re.DOTALL)
         else:
             self.override_match = None
         self.wrapper = "#%s" % wrapper
-        self.wrapper_match = re.compile("\n?#%s.*#%s\n?" % (wrapper, wrapper), re.DOTALL)
+        self.wrapper_match = re.compile("\n?#%s\n.*#%s\n?" % (wrapper, wrapper), re.DOTALL)
         self.logger = logging.getLogger(logger)
         self.inject_dict = {}
         self.clear_set = set()
