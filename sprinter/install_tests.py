@@ -52,7 +52,7 @@ class TestInstall(unittest.TestCase):
     def test_install_environment(self, environment):
         """ Test if install calls the proper methods """
         args = ['install', 'http://www.google.com']
-        calls = [call(logging_level=logging.INFO),
+        calls = [call(logging_level=logging.INFO, ignore_errors=False),
                  call().install()]
         parse_args(args, Environment=environment)
         environment.assert_has_calls(calls)
@@ -63,7 +63,7 @@ class TestInstall(unittest.TestCase):
         config = {'validate_manifest.return_value': ['this is funky']}
         environment.configure_mock(**config)
         args = ['validate', self.temp_file_path]
-        calls = [call(logging_level=logging.INFO),
+        calls = [call(logging_level=logging.INFO, ignore_errors=False),
                  call().validate()]
         parse_args(args, Environment=environment)
         environment.assert_has_calls(calls)
