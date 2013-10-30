@@ -35,6 +35,16 @@ update = echo 'update up...'
 formula = sprinter.formula.command
 install = echo 'installing...'
 shell = True
+
+[failure]
+formula = sprinter.formula.command
+install = exit 1
+fail_on_error = true
+
+[failure_no_error]
+formula = sprinter.formula.command
+install = exit 1
+fail_on_error = false
 """
 
 
@@ -73,6 +83,20 @@ class TestCommandFormula(FormulaTest):
     def test_activate(self, call):
         self.environment.run_feature("activate", 'activate')
         call.assert_called_once_with("echo 'activating...'", shell=False)
+        
+    @patch.object(lib, 'call')
+    def test_failure(self, call):
+        """ If a failure occurs and fail_on_error is true, raise an error """
+        call.return_value = (1, "dummy")
+        self.environment.run_feature('failure', 'sync')
+        assert self.environment.error_occured
+
+    @patch.object(lib, 'call')
+    def test_failure_no_fail_on_error(self, call):
+        """ If a failure occurs and fail_on_error is false, don't raise an error """
+        call.return_value = (1, "dummy")
+        self.environment.run_feature('failure_no_error', 'sync')
+        assert not self.environment.error_occured
 
     @patch.object(lib, 'is_affirmative')
     @patch.object(lib, 'call')

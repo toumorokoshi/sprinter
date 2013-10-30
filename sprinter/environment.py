@@ -538,6 +538,7 @@ class Environment(object):
                     self._error_dict[feature] += result
             if len(self._error_dict[feature]) > 0:
                 self.error_occured = True
+        # catch a generic exception within a feature
         except Exception:
             e = sys.exc_info()[1]
             self.logger.info("An exception occurred with action %s in feature %s!" %
