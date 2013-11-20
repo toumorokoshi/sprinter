@@ -20,7 +20,7 @@ class CommandFormulaException(Exception):
 
 class CommandFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['install', 'update', 'remove', 'activate', 'deactivate', 'fail_on_error']
+    valid_options = FormulaBase.valid_options + ['install', 'update', 'remove', 'activate', 'deactivate', 'fail_on_error', 'shell']
 
     def install(self):
         self.__run_command('install', 'target')
