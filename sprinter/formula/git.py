@@ -61,6 +61,7 @@ class GitFormula(FormulaBase):
             error, output = lib.call("git pull origin %s" % target_branch,
                                      output_log_level=logging.DEBUG)
             if error:
+                self.logger.info(output)
                 raise GitException("An error occurred when pulling!")
         FormulaBase.update(self)
 
@@ -73,6 +74,7 @@ class GitFormula(FormulaBase):
             error, output = lib.call("git checkout %s" % branch,
                                      output_log_level=logging.DEBUG)
         if error:
+            self.logger.info(output)
             raise GitException("An error occurred when checking out a branch!")
 
     def __clone_repo(self, repo_url, target_directory, branch):
@@ -80,6 +82,7 @@ class GitFormula(FormulaBase):
         error, output = lib.call("git clone %s %s" % (repo_url, target_directory),
                                  output_log_level=logging.DEBUG)
         if error:
+            self.logger.info(output)
             raise GitException("An error occurred when cloning!")
         if branch != "master":
             self.__checkout_branch(target_directory, branch)
