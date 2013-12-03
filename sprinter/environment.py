@@ -447,10 +447,10 @@ class Environment(object):
             # prepend brew for global installs
             manifest = self.target or self.source
             if self.system.isOSX() and manifest.is_affirmative('config', 'use_global_packagemanagers'):
-                self.directory.add_to_env('sprinter_prepend_path "%s" PATH' % '/usr/local/bin')
-            self.directory.add_to_env('sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
-            self.directory.add_to_env('sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
-            self.directory.add_to_env('sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
+                self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % '/usr/local/bin')
+            self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
+            self.directory.add_to_env('__sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
+            self.directory.add_to_env('__sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
         if self.write_files:
             self.injections.commit()
             self.global_injections.commit()

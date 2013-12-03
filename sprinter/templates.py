@@ -5,9 +5,9 @@ A storage area for templates as strings
 # utils.sh is the same for every namespace, only sourced once
 shell_utils_template = """
 # don't add paths repeatedly to env vars
-# sprinter_prepend_path "/foo"         => "/foo:$PATH"
-# sprinter_prepend_path "/foo" MANPATH => "/foo:$MANPATH"
-sprinter_prepend_path() {
+# __sprinter_prepend_path "/foo"         => "/foo:$PATH"
+# __sprinter_prepend_path "/foo" MANPATH => "/foo:$MANPATH"
+__sprinter_prepend_path() {
     local sp_dir="$1"
     local sp_var="${2:-PATH}"
     local sp_list=$(eval echo '$'$sp_var)
