@@ -123,13 +123,6 @@ class Directory(object):
         """
         return os.path.join(self.root_dir, "features", feature_name)
 
-    def install_utils(self):
-        """
-        Install utils.sh
-        """
-        with open(self.utils_path, "w+") as fh:
-            fh.write(utils_template)
-
     def add_to_env(self, content):
         """
         add content to the env script.
