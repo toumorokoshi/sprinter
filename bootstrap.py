@@ -18,10 +18,18 @@ The script accepts buildout command-line options, so you can
 use the -c option to specify an alternate configuration file.
 """
 
+######################################################################
+# Download URLs/Constants
+VIRTUALENV_OPTION = "--virtualenv"
+
+VIRTUALENV_URL = "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-1.10.tar.gz"
+EZSETUP_URL = "https://bitbucket.org/pypa/setuptools/downloads/ez_setup.py"
+
 import os
 import shutil
 import sys
 import tempfile
+import subprocess
 
 from optparse import OptionParser
 
@@ -59,9 +67,15 @@ parser.add_option("-f", "--find-links",
 parser.add_option("--allow-site-packages",
                   action="store_true", default=False,
                   help=("Let bootstrap.py use existing site packages"))
+parser.add_option(VIRTUALENV_OPTION, action="store_true", default=False,
+                  help=("Use virtualenv to sandbox buildout"))
 
 
 options, args = parser.parse_args()
+
+
+    
+    
 
 ######################################################################
 # load/install setuptools
@@ -74,9 +88,37 @@ try:
 except ImportError:
     from urllib2 import urlopen
 
+
+def _setup_virtualenv():
+    """ Setup and install virtualenv """
+    print "Downloading virtualenv..."
+    import gzip, tarfile, io, tempfile, shutil
+    tf = tarfile.open(fileobj=io.BytesIO(urlopen(VIRTUALENV_URL).read()))
+    temp_folder = tempfile.mkdtemp()
+    tf.extractall(temp_folder)
+    print "Calling virtualenv..."
+    subprocess.call([sys.executable, os.path.join(temp_folder, 'virtualenv-1.10', 'virtualenv.py'), 
+                     '--no-setuptools', '--no-pip', '--no-site-packages', os.path.join(os.curdir, 'venv')])
+    shutil.rmtree(temp_folder)
+
+
+def _run_with_different_python(executable):
+    """ Run bootstrap.py with a different python executable """
+    args = [arg for arg in sys.argv if arg != VIRTUALENV_OPTION]
+    args.insert(0, executable)
+    print "Running bootstrap.py with {0}".format(executable)
+    exit(subprocess.call(args))
+
+
+# if we want to use virtualenv, restart with a virtualenv'd bootstrap.py
+if options.virtualenv:
+    python_executable = os.path.join(os.curdir, 'venv', 'bin', 'python')
+    if not os.path.exists(python_executable):
+        _setup_virtualenv()
+    _run_with_different_python(python_executable)
+
 ez = {}
-exec(urlopen('https://bitbucket.org/pypa/setuptools/downloads/ez_setup.py'
-            ).read(), ez)
+exec(urlopen(EZSETUP_URL).read(), ez)
 if not options.allow_site_packages:
     # ez_setup imports site, which adds site packages
     # this will remove them from the path to ensure that incompatible versions 
@@ -155,7 +197,6 @@ if version:
     requirement = '=='.join((requirement, version))
 cmd.append(requirement)
 
-import subprocess
 if subprocess.call(cmd, env=dict(os.environ, PYTHONPATH=setuptools_path)) != 0:
     raise Exception(
         "Failed to execute command:\n%s",

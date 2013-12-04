@@ -4,6 +4,9 @@ MANIFEST
 # C extensions
 *.so
 
+# Virtualenv
+local
+
 # Packages
 *.egg
 *.egg-info
