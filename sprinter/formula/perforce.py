@@ -19,7 +19,6 @@ overwrite_client = false
 import os
 import re
 import shutil
-import requests
 import sprinter.lib as lib
 from sprinter.core import PHASE
 from sprinter.formulabase import FormulaBase
@@ -151,7 +150,7 @@ class PerforceFormula(FormulaBase):
             os.makedirs(d)
         self.logger.info("Downloading p4 executable...")
         with open(os.path.join(d, "p4"), 'wb+') as fh:
-            fh.write(requests.get(url_prefix + perforce_packages['p4']).content)
+            fh.write(lib.cleaned_request('get', url_prefix + perforce_packages['p4']).content)
         self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
         self.p4_command = os.path.join(d, "p4")
         self.logger.info("Installing p4v...")

@@ -170,6 +170,13 @@ def authenticated_get(username, password, url, verify=True):
         raise CertificateException("Unable to verify certificate at %s!" % url)
     return response.content
 
+def cleaned_request(request_type, *args, **kwargs):
+    """ Perform a cleaned requests request """
+    s = requests.Session()
+    # this removes netrc checking
+    s.trust_env = False
+    return s.request(request_type, *args, **kwargs)
+
 
 def prompt(prompt_string, default=None, secret=False, boolean=False):
     """
@@ -310,7 +317,7 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
             os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
         with open(temp_file, 'wb+') as fh:
-            fh.write(requests.get(url).content)
+            fh.write(cleaned_request('get', url).content)
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
         for f in os.listdir("/Volumes/a/"):
             if not f.startswith(".") and f != ' ':

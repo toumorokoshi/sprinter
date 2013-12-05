@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 import logging
 import os
 import shutil
-import requests
 import sprinter.lib as lib
 
 BOOTSTRAP_URL = "https://raw.github.com/toumorokoshi/sprinter/master/scripts/bootstrap.py"
@@ -59,7 +58,7 @@ class BuildoutPuppet(object):
         """ Install buildout to the path provided """
         bootstrap_path = os.path.join(self.root_path, "bootstrap.py")
         with open(bootstrap_path, 'w+') as fh:
-            fh.write(requests.get(BOOTSTRAP_URL, verify=False).content)
+            fh.write(lib.cleaned_request('get', BOOTSTRAP_URL, verify=False).content)
 
     def write_buildout(self):
         """ Write buildout.cfg to the path provided """

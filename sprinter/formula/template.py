@@ -11,9 +11,9 @@ password = %(config:mywebsitepassword)s
 on_update = false
 """
 import os
-import requests
 
 from sprinter.formulabase import FormulaBase
+import sprinter.lib as lib
 from sprinter.core import PHASE
 
 
@@ -58,7 +58,7 @@ class TemplateFormula(FormulaBase):
                                                             config.get('password'),
                                                             source).decode("utf-8")
             else:
-                source_content = requests.get(source).text
+                source_content = lib.cleaned_request('get', source).text
         else:
             source_content = open(os.path.expanduser(source)).read()
         target_file = os.path.expanduser(config.get('target'))

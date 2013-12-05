@@ -154,7 +154,7 @@ class Manifest(object):
                                                                                    raw_manifest,
                                                                                    verify=verify_certificate).decode("utf-8"))
                         else:
-                            manifest_file_handler = StringIO(requests.get(raw_manifest).text)
+                            manifest_file_handler = StringIO(lib.cleaned_request('get', raw_manifest).text)
                         manifest.readfp(manifest_file_handler)
                     except requests.exceptions.RequestException:
                         self.logger.debug("", exc_info=True)
