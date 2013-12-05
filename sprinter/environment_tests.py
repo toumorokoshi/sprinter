@@ -331,9 +331,11 @@ env_source_rc = False
         "On an environment with a incorrectly formatted manifest, message_failure should return None"""
         temp_dir = tempfile.mkdtemp()
         try:
-            env = Environment(root=None)
-            env.target = "gibberish"
-            assert env.message_failure() is None
+            with patch('sprinter.lib.prompt') as prompt:
+                prompt.return_value = "1,2"
+                env = Environment(root=None)
+                env.target = "gibberish"
+                assert env.message_failure() is None
         finally:
             shutil.rmtree(temp_dir)
 
