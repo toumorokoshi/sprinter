@@ -1,5 +1,6 @@
 *.py[cod]
 MANIFEST
+venv
 
 # C extensions
 *.so
