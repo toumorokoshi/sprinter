@@ -143,28 +143,38 @@ class Manifest(object):
     def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
         manifest = configparser.RawConfigParser()
         manifest.add_section('config')
-        if isinstance(raw_manifest, string_types):
-            if raw_manifest.startswith("http"):
-                # raw_manifest is a url
-                if username and password:
-                    manifest_file_handler = StringIO(lib.authenticated_get(username,
-                                                                           password,
-                                                                           raw_manifest,
-                                                                           verify=verify_certificate).decode("utf-8"))
+        try:
+            if isinstance(raw_manifest, string_types):
+                if raw_manifest.startswith("http"):
+                    # raw_manifest is a url
+                    try:
+                        if username and password:
+                            manifest_file_handler = StringIO(lib.authenticated_get(username,
+                                                                                   password,
+                                                                                   raw_manifest,
+                                                                                   verify=verify_certificate).decode("utf-8"))
+                        else:
+                            manifest_file_handler = StringIO(requests.get(raw_manifest).text)
+                        manifest.readfp(manifest_file_handler)
+                    except requests.exceptions.RequestException:
+                        self.logger.debug("", exc_info=True)
+                        error_message = sys.exc_info()[1]
+                        raise ManifestException("There was an error retrieving {0}!\n {1}".format(raw_manifest, str(error_message)))
                 else:
-                    manifest_file_handler = StringIO(requests.get(raw_manifest).text)
-                manifest.readfp(manifest_file_handler)
+                    # raw_manifest is a filepath
+                    if not os.path.exists(os.path.expanduser(raw_manifest)):
+                        raise ManifestException("Manifest does not exist at %s!" % raw_manifest)
+                    manifest.read(raw_manifest)
+                if not manifest.has_option('config', 'source'):
+                    manifest.set('config', 'source', str(raw_manifest))
+            elif raw_manifest.__class__ == configparser.RawConfigParser:
+                return raw_manifest
             else:
-                # raw_manifest is a filepath
-                if not os.path.exists(os.path.expanduser(raw_manifest)):
-                    raise ManifestException("Manifest does not exist at %s!" % raw_manifest)
-                manifest.read(raw_manifest)
-            if not manifest.has_option('config', 'source'):
-                manifest.set('config', 'source', str(raw_manifest))
-        elif raw_manifest.__class__ == configparser.RawConfigParser:
-            return raw_manifest
-        else:
-            manifest.readfp(raw_manifest)
+                manifest.readfp(raw_manifest)
+        except configparser.Error:
+            self.logger.debug("", exc_info=True)
+            error_message = sys.exc_info()[1]
+            raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
         return manifest
 
     def __parse_namespace(self):

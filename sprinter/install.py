@@ -144,8 +144,10 @@ def parse_args(argv, Environment=Environment):
         raise e
     except ManifestException:
         e = sys.exc_info()[1]
-        print(str(e))
-        print("Could not find Manifest!")
+        env.log_error(str(e))
+        env.logger.info("Error occured when attempting to load manifest!")
+        env.logger.info("Writing debug output to /tmp/sprinter.log")
+        env.write_debug_log("/tmp/sprinter.log")
     except Exception:
         e = sys.exc_info()[1]
         env.log_error(str(e))

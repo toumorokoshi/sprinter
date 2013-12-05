@@ -326,7 +326,16 @@ env_source_rc = False
                 assert os.path.exists(os.path.join(global_path, 'utils.sh'))
         finally:
             shutil.rmtree(temp_dir)
-        
+
+    def test_message_failure_bad_manifest(self):
+        "On an environment with a incorrectly formatted manifest, message_failure should return None"""
+        temp_dir = tempfile.mkdtemp()
+        try:
+            env = Environment(root=None)
+            env.target = "gibberish"
+            assert env.message_failure() is None
+        finally:
+            shutil.rmtree(temp_dir)
 
 missing_formula_config = """
 [missingformula]
