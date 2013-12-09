@@ -30,7 +30,7 @@ class Injections(object):
         else:
             self.override_match = None
         self.wrapper = "#%s" % wrapper
-        self.wrapper_match = re.compile("\n?#%s\n.*#%s\n" % (wrapper, wrapper), re.DOTALL)
+        self.wrapper_match = re.compile("^#%s\n.*?#%s$" % (wrapper, wrapper), re.DOTALL + re.MULTILINE)
         self.logger = logging.getLogger(logger)
         self.inject_dict = {}
         self.clear_set = set()
@@ -123,7 +123,10 @@ class Injections(object):
         satisfied or is None. Remove old instances of injects if they
         exist.
         """
-        content = self.wrapper_match.sub("", content)
+        wrapper_match_count = sum(1 for mo in self.wrapper_match.finditer(content))
+        if wrapper_match_count > 1:
+            content = self.wrapper_match.sub("", content, wrapper_match_count - 1)
+        sprinter_overrides = None;
         if self.override_match:
             sprinter_overrides = self.override_match.search(content)
             if sprinter_overrides:
@@ -131,13 +134,13 @@ class Injections(object):
                 sprinter_overrides = sprinter_overrides.groups()[0]
             else:
                 sprinter_overrides = ""
-        content += """
-%s
-%s
-%s
-""" % (self.wrapper, inject_string.rstrip(), self.wrapper)
-        if self.override_match:
-            content += sprinter_overrides.rstrip() + "\n"
+        injection_content = "%s\n%s\n%s" % (self.wrapper, inject_string.rstrip(), self.wrapper)
+        if wrapper_match_count > 0:
+            content = self.wrapper_match.sub(injection_content, content, 1)
+        else:
+            content += "\n" + injection_content
+        if sprinter_overrides:
+            content += "\n" + sprinter_overrides
         return content
 
     def clear_content(self, content):
