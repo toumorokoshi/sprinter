@@ -99,6 +99,25 @@ class TestInjections(object):
         assert i.in_noninjected_file(self.temp_file_path, self.permanent_string)
         assert not i.in_noninjected_file(self.temp_file_path, self.test_injection)
 
+    def test_injected_injects_after_overrides(self):
+        """
+        re-injecting into a file will come after all other content
+        """
+        ORIGINAL_STRING = """
+#testinjection
+injectme
+#testinjection
+
+#OVERRIDE
+overidden content
+#OVERRIDE
+
+non-override content
+        """.strip()
+        i = Injections("testinjection", override="OVERRIDE")
+        c = i.inject_content(ORIGINAL_STRING, "injectme")
+        assert c.find("injectme") > c.find("non-override content")
+
     def test_created(self):
         """ Test the injection creates a file if it does not exist """
         i = Injections("testinjection")
