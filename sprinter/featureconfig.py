@@ -33,12 +33,13 @@ class FeatureConfig(object):
         context_dict = copy.deepcopy(self.manifest.get_context_dict())
         for k, v in self.raw_dict.items():
             context_dict["%s:%s" % (self.feature_name, k)] = v
-        try:
-            return str(self.raw_dict[param]) % context_dict
-        except KeyError:
-            e = sys.exc_info()[1]
-            self.logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
-            return self.raw_dict[param]
+        while True:
+            try:
+                return str(self.raw_dict[param]) % context_dict
+            except KeyError:
+                e = sys.exc_info()[1]
+                self.logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
+                return self.raw_dict[param]
 
     def has(self, param):
         """ return true if the param exists """
@@ -72,7 +73,7 @@ class FeatureConfig(object):
     def set_if_empty(self, param, default):
         """ Set the parameter to the default if it doesn't exist """
         if not self.has(param):
-            self.set(param, defaulct)
+            self.set(param, default)
             
     def to_dict(self):
         """ Returns the context, fully specialized, as a dictionary """

@@ -163,7 +163,9 @@ class Environment(object):
             self.logger.info("Updating environment %s..." % self.namespace)
             self.install_sandboxes()
             self.instantiate_features()
-            self.grab_inputs(reconfigure=reconfigure)
+            # We don't grab inputs, only on install
+            # updates inputs are grabbed on demand
+            # self.grab_inputs(reconfigure=reconfigure)
             self._specialize(reconfigure=reconfigure)
             for feature in self._feature_dict_order:
                 self._run_action(feature, 'sync')
@@ -574,7 +576,7 @@ class Environment(object):
                     if not self.target.has_option('config', k):
                         self.target.set('config', k, v)
         if self.target:
-            self.target.grab_inputs(force_prompt=reconfigure)
+            self.target.get_inputs(force_prompt=reconfigure)
 
     def load_global_config(self, global_config_string):
         if self.global_config:

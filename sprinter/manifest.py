@@ -22,6 +22,7 @@ import sprinter.lib as lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
 from sprinter.system import System
 from sprinter.featureconfig import FeatureConfig
+from sprinter.inputs import Inputs
 from sprinter.core import LOGGER
 
 CONFIG_RESERVED = ['source', 'inputs']
@@ -47,7 +48,6 @@ class Manifest(object):
     """
     dtree = None  # dependency tree object to ascertain order
     additional_context_variables = {}  # a list of the additional context variables available
-    temporary_config_variables = []  # a list of the temporary keys, such as password
 
     def __init__(self, raw_manifest, namespace=None,
                  logger=LOGGER, username=None, password=None,
@@ -57,6 +57,7 @@ class Manifest(object):
                                              username=username,
                                              password=password,
                                              verify_certificate=verify_certificate)
+        self.inputs = self.__setup_inputs()
         self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
         self.system = System(logger=self.logger)
@@ -69,15 +70,6 @@ class Manifest(object):
             return self.dtree.order
         else:
             return [s for s in self.manifest.sections() if s != "config"]
-
-    def grab_inputs(self, force_prompt=False):
-        for s in self.manifest.sections():
-            if self.has_option(s, 'inputs'):
-                for param, attributes in \
-                        self.__parse_input_string(self.get(s, 'inputs')):
-                    default = attributes.get('default', None)
-                    secret = attributes.get('secret', False)
-                    self.get_config(param, default=default, secret=secret, force_prompt=force_prompt)
 
     def source(self):
         """
@@ -100,27 +92,13 @@ class Manifest(object):
     
     def write(self, file_handle):
         """ write the current state to a file manifest """
-        temp_variables = {}
-        for k, v in self.items('config'):
-            if k in self.temporary_config_variables:
-                temp_variables[k] = v
-                self.remove_option('config', k)
+        for k, v in self.inputs.write_values().items():
+            self.set('config', k, v)
         self.set('config', 'namespace', self.namespace)
         self.manifest.write(file_handle)
-        for k, v in temp_variables.items():
-            self.set('config', k, v)
 
-    def get_config(self, param_name, default=None, secret=False, force_prompt=False):
-        """
-        grabs a config from the user space; if it doesn't exist, it will prompt for it.
-        """
-        if not self.has_option('config', param_name) or force_prompt:
-            self.set('config', param_name, lib.prompt("please enter your %s" % param_name,
-                                                      default=default,
-                                                      secret=secret))
-        if secret:
-            self.temporary_config_variables.append(param_name)
-        return self.get('config', param_name)
+    def grab_inputs(self, force=False):
+        self.inputs.prompt_unset_inputs()
 
     def get_feature_config(self, feature_name):
         """ Return a FeatureConfig for the feature name provided """
@@ -132,6 +110,8 @@ class Manifest(object):
         for s in self.sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
+        for k, v in self.inputs.values():
+            context_dict["config:{0}".format(k)] = v
         context_dict.update(self.additional_context_variables.items())
         context_dict.update(dict([("%s|escaped" % k, re.escape(str(v) or "")) for k, v in context_dict.items()]))
         return context_dict
@@ -223,6 +203,19 @@ class Manifest(object):
         else:
             return value
 
+    def __setup_inputs(self):
+        """ Setup the inputs object """
+        input_object = Inputs()
+        # populate input schemas
+        for s in self.manifest.sections():
+            if self.has_option(s, 'inputs'):
+                input_object.add_inputs_from_inputstring(self.get(s, 'inputs'))
+        # add in values
+        for k, v in self.items('config'):
+            if input_object.is_input(s):
+                input_object.set_input(k, v)
+        return input_object
+        
     # custom equality method
     def __eq__(self, other):
         if not isinstance(other, Manifest):
@@ -239,31 +232,3 @@ class Manifest(object):
     # act like a configparser if asking for a non-existent method.
     def __getattr__(self, name):
         return getattr(self.manifest, name)
-
-    def __parse_input_string(self, input_string):
-        """
-        parse an attribute in a given input string format:
-
-        e.g.:
-
-        inputs = gitroot==~/workspace
-                 username
-                 password?
-                 main_branch==comp_main
-        """
-        raw_params = input_string.split('\n')
-        return [self.__parse_param_line(rp) for rp in raw_params if len(rp.strip(' \t')) > 0]
-
-    def __parse_param_line(self, line):
-        """ Parse a single param line. """
-        value = line.strip('\n \t')
-        if len(value) > 0:
-            attribute_dict = {}
-            if value.find('==') != -1:
-                value, default = line.split('==')
-                attribute_dict['default'] = default
-            if value.endswith('?'):
-                value = value[:-1]
-                attribute_dict['secret'] = True
-            return (value, attribute_dict)
-        return None
