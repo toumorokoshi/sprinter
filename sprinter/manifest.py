@@ -20,7 +20,7 @@ from six import string_types
 import requests
 import sprinter.lib as lib
 from sprinter.dependencytree import DependencyTree, DependencyTreeException
-from sprinter.system import System
+from sprinter import system
 from sprinter.featureconfig import FeatureConfig
 from sprinter.inputs import Inputs
 from sprinter.core import LOGGER
@@ -60,7 +60,6 @@ class Manifest(object):
         self.inputs = self.__setup_inputs()
         self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
-        self.system = System(logger=self.logger)
 
     def formula_sections(self):
         """

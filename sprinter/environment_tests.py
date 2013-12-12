@@ -5,6 +5,7 @@ import tempfile
 from io import StringIO
 from mock import Mock, call, patch
 from nose import tools
+from six.moves import configparser
 from sprinter.testtools import (create_mock_environment,
                                 create_mock_formulabase)
 from sprinter.exceptions import SprinterException
@@ -166,6 +167,8 @@ gui = true
 [global]
 env_source_rc = False
         """
+        global_config = configparser.RawConfigParser()
+        global_config.add_section(
         environment = create_mock_environment(
             target_config=test_target,
             global_config=global_shell_configuration_bash,

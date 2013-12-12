@@ -49,9 +49,9 @@ def create_mock_environment(source_config=None,
     # mocking system (we will always test as if the system is debian, unless explicitly specified)
     if mock_system:
         environment.system = Mock(spec=environment.system)
-        environment.system.isDebianBased.return_value = True
-        environment.system.isOSX.return_value = False
-        environment.system.isFedoraBased.return_value = False
+        environment.system.is_debian.return_value = True
+        environment.system.is_osx.return_value = False
+        environment.system.is_fedora.return_value = False
     environment.write_manifest = Mock()
     return environment
 

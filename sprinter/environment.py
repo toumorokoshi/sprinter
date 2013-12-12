@@ -10,12 +10,13 @@ from functools import wraps
 from sprinter.core import PHASE
 import sprinter.brew as brew
 import sprinter.lib as lib
+from sprinter import system
+from sprinter.globals import load_global_config
 from sprinter.formulabase import FormulaBase
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
 from sprinter.manifest import Manifest
-from sprinter.system import System
 from sprinter.pippuppet import Pip, PipException
 from sprinter.templates import shell_utils_template, source_template, warning_template
 
@@ -82,7 +83,6 @@ class Environment(object):
     directory = None  # handles interactions with the environment directory
     injections = None  # handles injections
     global_injections = None  # handles injections for the global sprinter configuration
-    system = None  # stores utility methods to determine system specifics
     # variables typically populated programatically
     warmed_up = False  # returns true if the environment is ready for environments
     shell_util_path = None  # the path to the shell utils file
@@ -107,24 +107,35 @@ class Environment(object):
     ignore_errors = False  # ignore errors in features
 
     def __init__(self, logger=None, logging_level=logging.INFO,
-                 root=None, sprinter_namespace='sprinter',
+                 root=None, sprinter_namespace=None, 
                  global_config=None, write_files=True,
                  ignore_errors=False):
-        self.system = System()
-        if not logger:
-            logger = self._build_logger(level=logging_level)
-        self.logger = logger
-        self.sprinter_namespace = sprinter_namespace
-        self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
-        self.global_path = os.path.join(self.root, ".global")
-        self._pip = Pip(self.global_path)
+
+        # base logging object to log instances
+        self.logger = logger or self._build_logger(level=logging_level)
         if logging_level == logging.DEBUG:
             self.logger.info("Starting in debug mode...")
-        self.formula_dict = {}
-        self.shell_util_path = os.path.join(self.global_path, "utils.sh")
-        self.load_global_config(global_config)
+
+        # the sprinter namespace
+        self.sprinter_namespace = sprinter_namespace or 'sprinter'
+
+        # the root directory which sprinter installs sandboxable files too
+        self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
+
         self.write_files = write_files
         self.ignore_errors = ignore_errors
+        # the following are not parameterizable
+        # dictionary wich contains the formula instances
+        self.formula_dict = {}
+
+        # path to the directory to install global files
+        self.global_path = os.path.join(self.root, ".global")
+        self.global_config_path = os.path.join(self.global_path, "config.cfg")
+        self.global_config = global_config or self.load_global_config(self.global_config_path)
+        
+        self.shell_util_path = os.path.join(self.global_path, "utils.sh")
+        # instrumented instance of pip, for package installation
+        self._pip = Pip(self.global_path)
         
     @warmup
     def install(self):
@@ -255,7 +266,7 @@ class Environment(object):
     def inject_environment_config(self):
         for shell in SHELL_CONFIG:
             if shell == 'gui':
-                if self.system.isDebianBased():
+                if self.system.is_debian():
                     self._inject_config_source(".env", SHELL_CONFIG['gui']['debian'])
             else:
                 if (self.global_config.has_option('shell', shell)
@@ -278,7 +289,7 @@ class Environment(object):
                             source_template % (full_rc_path, full_rc_path))
                     else:
                         self.global_injections.inject(full_env_path, '')
-                    if self.system.isOSX() and not self.injections.in_noninjected_file(env_path, rc_file):
+                    if self.system.is_osx() and not self.injections.in_noninjected_file(env_path, rc_file):
                         if self.phase is PHASE.INSTALL:
                             self.logger.info("On OSX, login shell are the default, which only source config files")
 
@@ -291,7 +302,7 @@ class Environment(object):
 
     def install_sandboxes(self):
         if self.target:
-            if self.system.isOSX():
+            if self.system.is_osx():
                 if not self.target.is_affirmative('config', 'use_global_packagemanagers'):
                     self._install_sandbox('brew', brew.install_brew)
                 elif lib.which('brew') is None:
@@ -450,7 +461,7 @@ class Environment(object):
             self.directory.add_to_rc('')
             # prepend brew for global installs
             manifest = self.target or self.source
-            if self.system.isOSX() and manifest.is_affirmative('config', 'use_global_packagemanagers'):
+            if self.system.is_osx() and manifest.is_affirmative('config', 'use_global_packagemanagers'):
                 self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % '/usr/local/bin')
             self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
             self.directory.add_to_env('__sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
@@ -462,7 +473,7 @@ class Environment(object):
                 self.logger.debug("Global directoy doesn't exist! creating...")
                 os.makedirs(os.path.join(self.root, ".global"))
             self.logger.debug("Writing global config...")
-            self.global_config.write(open(os.path.join(self.root, ".global", "config.cfg"), 'w+'))
+            self.global_config.write(open(self.global_config_path, 'w+'))
             self.logger.debug("Writing shell util file...")
             with open(self.shell_util_path, 'w+') as fh:
                 fh.write(shell_utils_template)
@@ -577,61 +588,3 @@ class Environment(object):
                         self.target.set('config', k, v)
         if self.target:
             self.target.get_inputs(force_prompt=reconfigure)
-
-    def load_global_config(self, global_config_string):
-        if self.global_config:
-            return self.global_config
-        self.global_config = configparser.RawConfigParser()
-        if global_config_string:
-            self.global_config.readfp(StringIO(global_config_string))
-        else:
-            global_config_path = os.path.join(self.root, ".global", "config.cfg")
-            if os.path.exists(global_config_path):
-                self.global_config.read(global_config_path)
-                self.logger.info("Checking and setting global parameters...")
-            else:
-                self.initial_run()  # it's probably the first run, so stick initial run logic in here
-                self.logger.info("Unable to find a global sprinter configuration!")
-                self.logger.info("Creating one now. Please answer some questions" +
-                                 " about what you would like sprinter to do.")
-                self.logger.info("")
-            if not self.global_config.has_section('shell'):
-                # shell configuration
-                self.global_config.add_section('shell')
-                self.logger.info("What shells or environments would you like sprinter to work with?\n" +
-                                 "(Sprinter will not try to inject into environments not specified here.)\n" +
-                                 "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n" +
-                                 "i.e. environment variables sprinter set will affect programs as well, not just shells")
-                environments = list(enumerate(sorted(SHELL_CONFIG), start=1))
-                self.logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
-                desired_environments = lib.prompt("type the environment, comma-separated", default="0")
-                for index, val in environments:
-                    if str(index) in desired_environments or "0" in desired_environments:
-                        self.global_config.set('shell', val, 'true')
-                    else:
-                        self.global_config.set('shell', val, 'false')
-            if not self.global_config.has_section('global'):
-                self.global_config.add_section('global')
-            if not self.global_config.has_option('global', 'env_source_rc'):
-                self.global_config.set('global', 'env_source_rc', False)
-                if self.system.isOSX():
-                    self.logger.info("On OSX, login shells are default, which only source sprinter's 'env' configuration.")
-                    self.logger.info("I.E. environment variables would be sourced, but not shell functions "
-                                     + "or terminal status lines.")
-                    self.logger.info("The typical solution to get around this is to source your rc file (.bashrc, .zshrc) "
-                                     + "from your login shell.")
-                    env_source_rc = lib.prompt("would you like sprinter to source the rc file too?", default="yes",
-                                               boolean=True)
-                    self.global_config.set('global', 'env_source_rc', env_source_rc)
-
-    def initial_run(self):
-        """ A method that only runs during the initial run of sprinter """
-        if not self.system.is_officially_supported():
-            self.logger.warn(warning_template
-                             + "===========================================================\n"
-                             + "Sprinter is not officially supported on {0}! Please use at your own risk.\n\n".format(self.system.operating_system())
-                             + "You can find the supported platforms here:\n"
-                             + "(http://sprinter.readthedocs.org/en/latest/index.html#compatible-systems)\n\n"
-                             + "Conversely, please help us support your system by reporting on issues\n"
-                             + "(http://sprinter.readthedocs.org/en/latest/faq.html#i-need-help-who-do-i-talk-to)\n"
-                             + "===========================================================")
