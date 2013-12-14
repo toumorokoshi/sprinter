@@ -6,9 +6,10 @@ import getpass
 from six import reraise
 from io import StringIO
 from functools import wraps
-from sprinter.core import PHASE
-import sprinter.brew as brew
+
 import sprinter.lib as lib
+import sprinter.externals.brew as brew
+from sprinter.core import PHASE
 from sprinter import system
 from sprinter.globals import load_global_config
 from sprinter.formulabase import FormulaBase
@@ -16,7 +17,7 @@ from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
 from sprinter.manifest import Manifest
-from sprinter.pippuppet import Pip, PipException
+from sprinter.externals.pippuppet import Pip, PipException
 from sprinter.templates import shell_utils_template, source_template
 
 
