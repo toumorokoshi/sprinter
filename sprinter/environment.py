@@ -4,7 +4,6 @@ import os
 import sys
 import getpass
 from six import reraise
-from six.moves import configparser
 from io import StringIO
 from functools import wraps
 from sprinter.core import PHASE
@@ -18,7 +17,7 @@ from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections
 from sprinter.manifest import Manifest
 from sprinter.pippuppet import Pip, PipException
-from sprinter.templates import shell_utils_template, source_template, warning_template
+from sprinter.templates import shell_utils_template, source_template
 
 
 def warmup(f):
@@ -106,9 +105,13 @@ class Environment(object):
     write_files = True  # write files to the filesystem.
     ignore_errors = False  # ignore errors in features
 
-    def __init__(self, logger=None, logging_level=logging.INFO,
-                 root=None, sprinter_namespace=None, 
-                 global_config=None, write_files=True,
+    def __init__(self,
+                 logger=None,
+                 logging_level=logging.INFO,
+                 root=None,
+                 sprinter_namespace=None,
+                 global_config=None,
+                 write_files=True,
                  ignore_errors=False):
 
         # base logging object to log instances
@@ -131,7 +134,7 @@ class Environment(object):
         # path to the directory to install global files
         self.global_path = os.path.join(self.root, ".global")
         self.global_config_path = os.path.join(self.global_path, "config.cfg")
-        self.global_config = global_config or self.load_global_config(self.global_config_path)
+        self.global_config = global_config or load_global_config(self.global_config_path)
         
         self.shell_util_path = os.path.join(self.global_path, "utils.sh")
         # instrumented instance of pip, for package installation
@@ -257,7 +260,7 @@ class Environment(object):
             for s in self.target.formula_sections():
                 context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
                 context_dict['config:root_dir'] = self.directory.root_dir
-                context_dict['config:node'] = self.system.node
+                context_dict['config:node'] = system.node
                 self.target.add_additional_context(context_dict)
         for feature in self._feature_dict_order:
             self._run_action(feature, 'validate', run_if_error=True)
@@ -266,7 +269,7 @@ class Environment(object):
     def inject_environment_config(self):
         for shell in SHELL_CONFIG:
             if shell == 'gui':
-                if self.system.is_debian():
+                if system.is_debian():
                     self._inject_config_source(".env", SHELL_CONFIG['gui']['debian'])
             else:
                 if (self.global_config.has_option('shell', shell)
@@ -289,7 +292,7 @@ class Environment(object):
                             source_template % (full_rc_path, full_rc_path))
                     else:
                         self.global_injections.inject(full_env_path, '')
-                    if self.system.is_osx() and not self.injections.in_noninjected_file(env_path, rc_file):
+                    if system.is_osx() and not self.injections.in_noninjected_file(env_path, rc_file):
                         if self.phase is PHASE.INSTALL:
                             self.logger.info("On OSX, login shell are the default, which only source config files")
 
@@ -302,7 +305,7 @@ class Environment(object):
 
     def install_sandboxes(self):
         if self.target:
-            if self.system.is_osx():
+            if system.is_osx():
                 if not self.target.is_affirmative('config', 'use_global_packagemanagers'):
                     self._install_sandbox('brew', brew.install_brew)
                 elif lib.which('brew') is None:
@@ -461,7 +464,7 @@ class Environment(object):
             self.directory.add_to_rc('')
             # prepend brew for global installs
             manifest = self.target or self.source
-            if self.system.is_osx() and manifest.is_affirmative('config', 'use_global_packagemanagers'):
+            if system.is_osx() and manifest.is_affirmative('config', 'use_global_packagemanagers'):
                 self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % '/usr/local/bin')
             self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
             self.directory.add_to_env('__sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
@@ -570,7 +573,7 @@ class Environment(object):
                 for s in manifest.formula_sections():
                     context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
                     context_dict['config:root_dir'] = self.directory.root_dir
-                    context_dict['config:node'] = self.system.node
+                    context_dict['config:node'] = system.node
                 manifest.add_additional_context(context_dict)
         self.grab_inputs()
         for feature in self._feature_dict_order:

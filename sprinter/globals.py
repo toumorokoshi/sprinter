@@ -29,7 +29,7 @@ SHELL_CONFIG = {
 }
 
 
-def load_global_config(self, config_path):
+def load_global_config(config_path):
     """ Load a global configuration object, and query for any required variables along the way """
     config = configparser.RawConfigParser()
     if os.path.exists(config_path):
@@ -54,7 +54,7 @@ def load_global_config(self, config_path):
     return config
 
 
-def create_default_config(self):
+def create_default_config():
     """ Create a default configuration object, with all parameters filled """
     config = configparser.RawConfigParser()
     config.add_section('global')
