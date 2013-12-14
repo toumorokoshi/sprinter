@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 
 source_config = """
@@ -9,24 +9,24 @@ source_config = """
 
 target_config = """
 [install_with_rc]
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 rc = teststring
 
 [install_with_command]
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 command = echo 'helloworld'
 
 [osx]
 systems = osx
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 
 [osx2]
 systems = OsX
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 
 [debian]
 systems = debian
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 """
 
 

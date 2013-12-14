@@ -10,7 +10,7 @@ from sprinter.testtools import (create_mock_environment,
                                 create_mock_formulabase)
 from sprinter.exceptions import SprinterException
 from sprinter.environment import Environment
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 from sprinter.templates import source_template
 
 source_config = """
@@ -320,12 +320,12 @@ missing_formula_config = """
 [missingformula]
 
 [otherformula]
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 """
 
 test_source = """
 [testfeature]
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 """
 
 test_target = """
@@ -333,5 +333,5 @@ test_target = """
 namespace = testsprinter
 
 [testfeature]
-formula = sprinter.formulabase
+formula = sprinter.formula.base
 """

@@ -21,7 +21,7 @@ import re
 import shutil
 import sprinter.lib as lib
 from sprinter.core import PHASE
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 
 P4V_APPLICATIONS = ['p4v.app', 'p4admin.app', 'p4merge.app']
 url_prefix = "http://filehost.perforce.com/perforce/"

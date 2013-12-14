@@ -6,7 +6,7 @@ formula = sprinter.formula.package
 apt-get = git
 brew = git
 """
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 import logging
 

@@ -8,7 +8,7 @@ user = %(config:user)
 MAVEN_HOME = %(maven:root_dir)
 M2_PATH = ~/.m2/
 """
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 
 
 class EnvFormula(FormulaBase):

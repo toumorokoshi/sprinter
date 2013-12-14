@@ -11,7 +11,7 @@ import httpretty
 from nose import tools
 from mock import patch
 
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 from sprinter.formula.env import EnvFormula
 import sprinter.lib as lib
 from sprinter.lib import (BadCredentialsException,
@@ -30,7 +30,7 @@ class TestLib(object):
 
         def test_get_formulabase(self):
             """ Test if formulabase can be grabbed"""
-            class_object = lib.get_subclass_from_module("sprinter.formulabase",
+            class_object = lib.get_subclass_from_module("sprinter.formula.base",
                                                         FormulaBase)
             assert issubclass(class_object, FormulaBase)
 

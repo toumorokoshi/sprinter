@@ -12,7 +12,7 @@ activate=echo 'activating...'
 deactivate=echo 'deactivating...'
 """
 from __future__ import unicode_literals
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 
 class CommandFormulaException(Exception):

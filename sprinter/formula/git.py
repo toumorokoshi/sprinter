@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 import logging
 import os
 
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 
 

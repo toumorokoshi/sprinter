@@ -12,7 +12,7 @@ import sprinter.externals.brew as brew
 from sprinter.core import PHASE
 from sprinter import system
 from sprinter.globals import load_global_config
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 from sprinter.directory import Directory
 from sprinter.exceptions import SprinterException
 from sprinter.injections import Injections

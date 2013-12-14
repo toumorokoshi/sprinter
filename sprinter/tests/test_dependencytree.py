@@ -1,4 +1,4 @@
-from sprinter.dependencytree import DependencyTree, DependencyTreeException
+from sprinter.lib.dependencytree import DependencyTree, DependencyTreeException
 
 LEGAL_TREE = {
     'a': ['b', 'c', 'd'],

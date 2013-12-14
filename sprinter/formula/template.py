@@ -12,7 +12,7 @@ on_update = false
 """
 import os
 
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 from sprinter.core import PHASE
 

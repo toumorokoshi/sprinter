@@ -8,7 +8,7 @@ from mock import Mock
 
 
 from sprinter.environment import Environment
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 from sprinter.injections import Injections
 from sprinter.manifest import Manifest
 from sprinter.core import PHASE

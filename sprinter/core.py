@@ -2,7 +2,7 @@
 Contains core dependencies
 """
 import logging
-from sprinter.structures import Enum, EnumInstance
+from sprinter.lib.structures import Enum, EnumInstance
 
 LOGGER = logging.getLogger('sprinter')
 

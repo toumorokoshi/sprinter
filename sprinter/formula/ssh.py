@@ -14,7 +14,7 @@ install_command = echo 'hello'
 import os
 import logging
 
-from sprinter.formulabase import FormulaBase
+from sprinter.formula.base import FormulaBase
 from sprinter.core import PHASE
 import sprinter.lib as lib
 
