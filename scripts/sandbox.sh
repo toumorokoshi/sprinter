@@ -5,9 +5,9 @@ mkdir -p /tmp/sprinter-sandbox
 cd /tmp/sprinter-sandbox
 # install virtualenv
 if [[ `uname` == 'Linux' ]]; then
-    wget https://raw.github.com/toumorokoshi/sprinter/master/sprinter/virtualenv.py
+    wget https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
 elif [[ `uname` == 'Darwin' ]]; then
-    curl -o virtualenv.py https://raw.github.com/toumorokoshi/sprinter/master/sprinter/virtualenv.py
+    curl -o virtualenv.py https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
 fi
 python virtualenv.py sprinter-dir
 cd sprinter-dir
