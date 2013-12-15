@@ -1,5 +1,5 @@
 from mock import patch
-from sprinter.globals import create_default_config, _configure_shell
+from sprinter.core.globals import create_default_config, _configure_shell
 
 
 class TestGlobalConfig(object):

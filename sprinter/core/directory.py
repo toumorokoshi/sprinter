@@ -9,7 +9,7 @@ import os
 import shutil
 import stat
 
-from sprinter.templates import source_template
+from .templates import source_template
 
 
 class DirectoryException(Exception):

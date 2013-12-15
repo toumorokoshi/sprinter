@@ -6,8 +6,9 @@ import os
 
 from six.moves import configparser
 
-from sprinter import system, lib
-from sprinter.templates import warning_template
+from sprinter.lib import system
+from sprinter import lib
+from sprinter.core.templates import warning_template
 
 logger = logging.getLogger(__name__)
 

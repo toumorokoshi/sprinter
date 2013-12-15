@@ -30,7 +30,7 @@ from sprinter.exceptions import (CommandMissingException,
                                  CertificateException,
                                  ExtractException,
                                  SprinterException)
-from sprinter.core import LOGGER
+logger = logging.getLogger(__name__)
 
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
@@ -61,7 +61,7 @@ def get_subclass_from_module(module, parent_class):
 
 
 def call(command, stdin=None, stdout=PIPE, env=os.environ, cwd=None, shell=False,
-         output_log_level=logging.INFO, logger=LOGGER, sensitive_info=False):
+         output_log_level=logging.INFO, logger=logger, sensitive_info=False):
     """ Better, smarter call logic """
     logger.debug("calling command: %s" % command)
     try:

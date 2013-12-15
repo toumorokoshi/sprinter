@@ -8,7 +8,7 @@ import tempfile
 
 from nose import tools
 from mock import Mock, patch
-from sprinter.directory import Directory, DirectoryException
+from sprinter.core.directory import Directory, DirectoryException
 
 
 class TestDirectory(object):
