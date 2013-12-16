@@ -13,8 +13,8 @@ target = /tmp/
 import os
 
 from sprinter.formula.base import FormulaBase
-from sprinter.exceptions import ExtractException
-from sprinter.directory import DirectoryException
+from sprinter.lib import ExtractException
+from sprinter.core.directory import DirectoryException
 import sprinter.lib as lib
 
 

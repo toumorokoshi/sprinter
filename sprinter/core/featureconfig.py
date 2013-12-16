@@ -1,8 +1,10 @@
+import logging
 import copy
 import sys
 
-from sprinter.core import LOGGER
 import sprinter.lib as lib
+
+logger = logging.getLogger(__name__)
 
 
 class ParamNotFoundException(Exception):
@@ -13,11 +15,10 @@ class FeatureConfig(object):
 
     manifest = None  # the manifest the featureconfig is derived from
 
-    def __init__(self, manifest, feature_name, logger=LOGGER):
+    def __init__(self, manifest, feature_name):
         self.feature_name = feature_name
         self.manifest = manifest
         self.raw_dict = dict(manifest.items(feature_name))
-        self.logger = logger
 
     def get(self, param, default=None):
         """
@@ -38,7 +39,7 @@ class FeatureConfig(object):
                 return str(self.raw_dict[param]) % context_dict
             except KeyError:
                 e = sys.exc_info()[1]
-                self.logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
+                logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
                 return self.raw_dict[param]
 
     def has(self, param):

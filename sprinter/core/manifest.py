@@ -10,6 +10,7 @@ The manifest can take a source and/or a target manifest
 """
 from __future__ import unicode_literals
 
+import logging
 import os
 import re
 import sys
@@ -19,19 +20,19 @@ from six.moves import configparser
 from six import string_types
 import requests
 import sprinter.lib as lib
-from sprinter.dependencytree import DependencyTree, DependencyTreeException
-from sprinter import system
-from sprinter.featureconfig import FeatureConfig
-from sprinter.inputs import Inputs
-from sprinter.core import LOGGER
+from sprinter.lib.dependencytree import DependencyTree, DependencyTreeException
+from .featureconfig import FeatureConfig
+from .inputs import Inputs
 
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
 
+logger = logging.getLogger(__name__)
+
 
 class ManifestException(Exception):
-    pass
+    """ Returned if an exception occurred with the manifest """
 
 
 class Manifest(object):
@@ -49,10 +50,8 @@ class Manifest(object):
     dtree = None  # dependency tree object to ascertain order
     additional_context_variables = {}  # a list of the additional context variables available
 
-    def __init__(self, raw_manifest, namespace=None,
-                 logger=LOGGER, username=None, password=None,
+    def __init__(self, raw_manifest, namespace=None, username=None, password=None,
                  verify_certificate=True):
-        self.logger = logger
         self.manifest = self.__load_manifest(raw_manifest,
                                              username=username,
                                              password=password,
@@ -136,7 +135,7 @@ class Manifest(object):
                             manifest_file_handler = StringIO(lib.cleaned_request('get', raw_manifest).text)
                         manifest.readfp(manifest_file_handler)
                     except requests.exceptions.RequestException:
-                        self.logger.debug("", exc_info=True)
+                        logger.debug("", exc_info=True)
                         error_message = sys.exc_info()[1]
                         raise ManifestException("There was an error retrieving {0}!\n {1}".format(raw_manifest, str(error_message)))
                 else:
@@ -151,7 +150,7 @@ class Manifest(object):
             else:
                 manifest.readfp(raw_manifest)
         except configparser.Error:
-            self.logger.debug("", exc_info=True)
+            logger.debug("", exc_info=True)
             error_message = sys.exc_info()[1]
             raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
         return manifest
@@ -165,7 +164,7 @@ class Manifest(object):
         elif self.manifest.has_option('config', 'source'):
             return NAMESPACE_REGEX.search(self.manifest.get('config', 'source')).groups()[0]
         else:
-            self.logger.warn('Could not parse namespace implicitely')
+            logger.warn('Could not parse namespace implicitely')
             return None
 
     def __generate_dependency_tree(self):
@@ -197,7 +196,7 @@ class Manifest(object):
                 return value % context_dict
             except KeyError:
                 e = sys.exc_info()[1]
-                self.logger.warn("Could not specialize %s! Error: %s" % (value, e))
+                logger.warn("Could not specialize %s! Error: %s" % (value, e))
                 return value
         else:
             return value

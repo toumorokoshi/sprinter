@@ -3,11 +3,14 @@
 Formula base is an abstract base class outlining the method required
 and some documentation on what they should provide.
 """
+import logging
 import os
 
-from sprinter.core import LOGGER, PHASE
-from sprinter.exceptions import FormulaException
+from sprinter.core import PHASE
+from sprinter.lib import FormulaException
 import sprinter.lib as lib
+
+logger = logging.getLogger(__name__)
 
 
 class FormulaBase(object):
@@ -15,7 +18,7 @@ class FormulaBase(object):
     valid_options = ['rc', 'env', 'command', 'systems', 'depends', 'inputs']
     required_options = ['formula']
 
-    def __init__(self, environment, feature_name, source=None, target=None, logger=LOGGER):
+    def __init__(self, environment, feature_name, source=None, target=None):
         """
         In most cases, it is not a good idea to override the formulabase
         init method. Sprinter calls it in a very specific fashion, and
@@ -30,7 +33,6 @@ class FormulaBase(object):
         self.injections = environment.injections
         if not (source or target):
             raise FormulaException("A formula requires a source and/or a target!")
-        self.logger = LOGGER
 
     def prompt(self):
         """
@@ -125,7 +127,7 @@ class FormulaBase(object):
         if self.target:
             for k in self.target.keys():
                 if k not in self.valid_options and k not in self.required_options:
-                    self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
+                    logger.warn("Unused option %s in %s!" % (k, self.feature_name))
             for k in self.required_options:
                 if not self.target.has(k):
                     self._log_error("Required option %s not present in feature %s!" % (k, self.feature_name))
@@ -155,7 +157,7 @@ class FormulaBase(object):
     def sync(self):
         """ Updates the state of the feature to what it should be """
         phase = self.sync_phase()
-        self.logger.info("%s %s..." % (phase.verb, self.feature_name))
+        logger.info("%s %s..." % (phase.verb, self.feature_name))
         return getattr(self, phase.name)()
 
     def resolve(self):

@@ -1,10 +1,7 @@
 """
 Contains core dependencies
 """
-import logging
 from sprinter.lib.structures import Enum, EnumInstance
-
-LOGGER = logging.getLogger('sprinter')
 
 PHASE = Enum(
     INSTALL=EnumInstance(name='install', verb='installing'),
