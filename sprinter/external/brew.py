@@ -1,11 +1,13 @@
 """
 Utility methods for brew
 """
+import logging
 import os
 from sprinter.lib import extract_targz
-from sprinter.core import LOGGER
 
 HOMEBREW_URL = "http://github.com/mxcl/homebrew/tarball/master"
+
+logger = logging.getLogger(__name__)
 
 
 def install_brew(target_path):
@@ -14,7 +16,7 @@ def install_brew(target_path):
         try:
             os.makedirs(target_path)
         except OSError:
-            LOGGER.warn("Unable to create directory %s for brew." % target_path)
-            LOGGER.warn("Skipping...")
+            logger.warn("Unable to create directory %s for brew." % target_path)
+            logger.warn("Skipping...")
             return
     extract_targz(HOMEBREW_URL, target_path, remove_common_prefix=True)

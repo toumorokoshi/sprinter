@@ -7,7 +7,7 @@ import logging
 import os
 
 from sprinter.core import PHASE
-from sprinter.lib import FormulaException
+from sprinter.lib import FormulaException, system
 import sprinter.lib as lib
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,6 @@ class FormulaBase(object):
         self.target = target
         self.environment = environment
         self.directory = environment.directory
-        self.system = environment.system
         self.injections = environment.injections
         if not (source or target):
             raise FormulaException("A formula requires a source and/or a target!")
@@ -142,7 +141,7 @@ class FormulaBase(object):
             valid_systems = [s.lower() for s in config.get('systems').split(",")]
             for system_type, param in [('isOSX', 'osx'),
                                        ('isDebianBased', 'debian')]:
-                if param in valid_systems and getattr(self.system, system_type)():
+                if param in valid_systems and getattr(system, system_type)():
                     should_run = True
         return should_run
             

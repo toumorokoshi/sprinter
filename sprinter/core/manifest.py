@@ -27,8 +27,61 @@ from .inputs import Inputs
 CONFIG_RESERVED = ['source', 'inputs']
 FEATURE_RESERVED = ['rc', 'command', 'phase']
 NAMESPACE_REGEX = re.compile('([a-zA-Z0-9_]+)(\.[a-zA-Z0-9_]+)?$')
+MANIFEST_NULL_KEY = object()
 
 logger = logging.getLogger(__name__)
+
+
+def load_manifest(raw_manifest, username=None, password=None, verify_certificate=True):
+    """ wrapper method which generates the manifest from various sources """
+    if isinstance(raw_manifest, configparser.RawConfigParser):
+        return Manifest(raw_manifest)
+    manifest = configparser.RawConfigParser()
+    manifest.add_section('config')
+    
+    try:
+        if isinstance(raw_manifest, string_types):
+            if raw_manifest.startswith("http"):
+                # if manifest is a url
+                _load_manifest_from_url(manifest, raw_manifest,
+                                        verify_certificate=verify_certificate,
+                                        username=username, password=password)
+            else:
+                _load_manifest_from_file(manifest, raw_manifest)
+            if not manifest.has_option('config', 'source'):
+                manifest.set('config', 'source', str(raw_manifest))
+        else:
+            # assume raw_manifest is a file pointer
+            manifest.readfp(raw_manifest)
+
+    except configparser.Error:
+        logger.debug("", exc_info=True)
+        error_message = sys.exc_info()[1]
+        raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
+
+    return Manifest(manifest)
+
+
+def _load_manifest_from_url(manifest, url, verify_certificate=True, username=None, password=None):
+    """ load a url body into a manifest """
+    try:
+        if username and password:
+            manifest_file_handler = StringIO(lib.authenticated_get(username, password, url,
+                                                                   verify=verify_certificate).decode("utf-8"))
+        else:
+            manifest_file_handler = StringIO(lib.cleaned_request('get', url).text)
+        manifest.readfp(manifest_file_handler)
+    except requests.exceptions.RequestException:
+        logger.debug("", exc_info=True)
+        error_message = sys.exc_info()[1]
+        raise ManifestException("There was an error retrieving {0}!\n {1}".format(url, str(error_message)))
+
+
+def _load_manifest_from_file(manifest, path):
+    """ load manifest from file """
+    if not os.path.exists(os.path.expanduser(path)):
+        raise ManifestException("Manifest does not exist at {0}!".format(path))
+    manifest.read(path)
 
 
 class ManifestException(Exception):
@@ -50,12 +103,10 @@ class Manifest(object):
     dtree = None  # dependency tree object to ascertain order
     additional_context_variables = {}  # a list of the additional context variables available
 
-    def __init__(self, raw_manifest, namespace=None, username=None, password=None,
-                 verify_certificate=True):
-        self.manifest = self.__load_manifest(raw_manifest,
-                                             username=username,
-                                             password=password,
-                                             verify_certificate=verify_certificate)
+    def __init__(self, raw_manifest, namespace=None):
+        self.manifest = raw_manifest
+        if not self.manifest.has_section('config'):
+            self.manifest.add_section('config')
         self.inputs = self.__setup_inputs()
         self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
@@ -118,42 +169,11 @@ class Manifest(object):
         """ Add additional context variable """
         self.additional_context_variables.update(additional_context)
 
-    def __load_manifest(self, raw_manifest, username=None, password=None, verify_certificate=True):
-        manifest = configparser.RawConfigParser()
-        manifest.add_section('config')
-        try:
-            if isinstance(raw_manifest, string_types):
-                if raw_manifest.startswith("http"):
-                    # raw_manifest is a url
-                    try:
-                        if username and password:
-                            manifest_file_handler = StringIO(lib.authenticated_get(username,
-                                                                                   password,
-                                                                                   raw_manifest,
-                                                                                   verify=verify_certificate).decode("utf-8"))
-                        else:
-                            manifest_file_handler = StringIO(lib.cleaned_request('get', raw_manifest).text)
-                        manifest.readfp(manifest_file_handler)
-                    except requests.exceptions.RequestException:
-                        logger.debug("", exc_info=True)
-                        error_message = sys.exc_info()[1]
-                        raise ManifestException("There was an error retrieving {0}!\n {1}".format(raw_manifest, str(error_message)))
-                else:
-                    # raw_manifest is a filepath
-                    if not os.path.exists(os.path.expanduser(raw_manifest)):
-                        raise ManifestException("Manifest does not exist at %s!" % raw_manifest)
-                    manifest.read(raw_manifest)
-                if not manifest.has_option('config', 'source'):
-                    manifest.set('config', 'source', str(raw_manifest))
-            elif raw_manifest.__class__ == configparser.RawConfigParser:
-                return raw_manifest
-            else:
-                manifest.readfp(raw_manifest)
-        except configparser.Error:
-            logger.debug("", exc_info=True)
-            error_message = sys.exc_info()[1]
-            raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
-        return manifest
+    def get(self, section, key, default=MANIFEST_NULL_KEY):
+        """ Returns the value if it exist, or default if default is set """
+        if not self.manifest.has_option(section, key) and default is not MANIFEST_NULL_KEY:
+            return default
+        return self.manifest.get(section, key)
 
     def __parse_namespace(self):
         """

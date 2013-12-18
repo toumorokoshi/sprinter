@@ -7,7 +7,7 @@ import tempfile
 from nose import tools
 from mock import Mock, call, patch
 
-from sprinter.core.manifest import Manifest, ManifestException
+from sprinter.core.manifest import Manifest, ManifestException, load_manifest
 import sprinter.lib as lib
 
 manifest_correct_dependency = """
@@ -51,8 +51,8 @@ class TestManifest(object):
     """
 
     def setup(self):
-        self.old_manifest = Manifest(StringIO(old_manifest))
-        self.new_manifest = Manifest(StringIO(new_manifest))
+        self.old_manifest = load_manifest(StringIO(old_manifest))
+        self.new_manifest = load_manifest(StringIO(new_manifest))
 
     def test_dependency_order(self):
         """ Test whether a proper dependency tree generated the correct output. """
@@ -63,11 +63,11 @@ class TestManifest(object):
     @tools.raises(ManifestException)
     def test_incorrect_dependency(self):
         """ Test whether an incorrect dependency tree returns an error. """
-        Manifest(StringIO(manifest_incorrect_dependency))
+        load_manifest(StringIO(manifest_incorrect_dependency))
 
     def test_equality(self):
         """ Manifest object should be equal to itself """
-        tools.eq_(self.old_manifest, Manifest(StringIO(old_manifest)))
+        tools.eq_(self.old_manifest, load_manifest(StringIO(old_manifest)))
 
     def test_get_feature_config(self):
         """ get_feature_config should return a dictionary with the attributes """
@@ -108,7 +108,7 @@ class TestManifest(object):
 
     def test_get_context_dict_escaped_character(self):
         """ Test getting a config dict with escaping filter will properly escape a character"""
-        manifest = Manifest(StringIO(manifest_escaped_parameters))
+        manifest = load_manifest(StringIO(manifest_escaped_parameters))
         context_dict = manifest.get_context_dict()
         assert "section:escapeme|escaped" in context_dict
         tools.eq_(context_dict["section:escapeme|escaped"], "\!\@\#\$\%\^\&\*\(\)\\\"\\'\~\`\/\?\<\>")
@@ -127,7 +127,7 @@ class TestManifest(object):
         TEST_URI = "http://testme.com/test.cfg"
         httpretty.register_uri(httpretty.GET, TEST_URI,
                                body=http_manifest)
-        m = Manifest(TEST_URI)
+        m = load_manifest(TEST_URI)
         assert m.source() == TEST_URI
 
     def test_write(self):
@@ -136,14 +136,14 @@ class TestManifest(object):
         try:
             with open(temp_file, 'w+') as fh:
                 self.new_manifest.write(fh)
-            tools.eq_(self.new_manifest, Manifest(temp_file))
+            tools.eq_(self.new_manifest, load_manifest(temp_file))
         finally:
             os.unlink(temp_file)
         
     @tools.raises(ManifestException)
     def test_invalid_manifest_filepath(self):
         """ The manifest should throw an exception on an invalid manifest path """
-        Manifest("./ehiiehaiehnatheita")
+        load_manifest("./ehiiehaiehnatheita")
 
 old_manifest = """
 [config]

@@ -9,9 +9,7 @@ from mock import Mock
 
 from sprinter.environment import Environment
 from sprinter.formula.base import FormulaBase
-from sprinter.injections import Injections
-from sprinter.manifest import Manifest
-from sprinter.core import PHASE
+from sprinter.core import Injections, Manifest, PHASE
 
 MOCK_GLOBAL_CONFIGURATION = """
 """
@@ -28,7 +26,6 @@ def create_mock_environment(source_config=None,
                             mock_directory=True):
     """ Create and return a mock environment instance """
     environment = Environment(global_config=global_config,
-                              write_files=False,
                               root=root)
     environment.source = (None if not source_config else
                           Manifest(StringIO(source_config), namespace="test"))
@@ -46,12 +43,6 @@ def create_mock_environment(source_config=None,
     # mocking global injections
     if mock_global_injections:
         environment.global_injections = Mock(spec=Injections)
-    # mocking system (we will always test as if the system is debian, unless explicitly specified)
-    if mock_system:
-        environment.system = Mock(spec=environment.system)
-        environment.system.is_debian.return_value = True
-        environment.system.is_osx.return_value = False
-        environment.system.is_fedora.return_value = False
     environment.write_manifest = Mock()
     return environment
 

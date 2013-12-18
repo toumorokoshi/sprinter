@@ -8,10 +8,10 @@ from nose import tools
 from six.moves import configparser
 from sprinter.testtools import (create_mock_environment,
                                 create_mock_formulabase)
-from sprinter.exceptions import SprinterException
+from sprinter.lib import SprinterException
 from sprinter.environment import Environment
 from sprinter.formula.base import FormulaBase
-from sprinter.templates import source_template
+from sprinter.core.templates import source_template
 
 source_config = """
 [config]
@@ -168,7 +168,6 @@ gui = true
 env_source_rc = False
         """
         global_config = configparser.RawConfigParser()
-        global_config.add_section(
         environment = create_mock_environment(
             target_config=test_target,
             global_config=global_shell_configuration_bash,
