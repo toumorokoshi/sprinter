@@ -130,45 +130,6 @@ class TestManifest(object):
         m = Manifest(TEST_URI)
         assert m.source() == TEST_URI
 
-    @patch.object(lib, 'prompt')
-    def test_get_config(self, prompt):
-        """ Test the get config """
-        prompt.return_value = "no"
-        self.new_manifest.get_config('hobopopo', default="Yes", secret=False)
-        prompt.assert_called_once_with("please enter your hobopopo",
-                                       default="Yes", secret=False)
-
-    @patch.object(lib, 'prompt')
-    def test_get_config_force_prompt(self, prompt):
-        """ Test the get config with force_prompt """
-        prompt.return_value = "no"
-        self.new_manifest.set('config', 'hobopopo', 'test')
-        self.new_manifest.get_config('hobopopo', default="Yes", secret=False, force_prompt=True)
-        prompt.assert_called_once_with("please enter your hobopopo",
-                                       default="Yes", secret=False)
-
-    def test_grab_inputs(self):
-        """ Test grabbing inputs """
-        self.new_manifest.get_config = Mock()
-        self.new_manifest.grab_inputs()
-        self.new_manifest.get_config.assert_has_calls([
-            call("gitroot", default="~/workspace", secret=False, force_prompt=False),
-            call("username", default=None, secret=False, force_prompt=False),
-            call("password", default=None, secret=True, force_prompt=False),
-            call("main_branch", default="comp_main", secret=True, force_prompt=False)
-        ])
-
-    def test_force_prompt_grab_inputs(self):
-        """ Test the force_prompt grabbing of inputs """
-        target = Manifest(StringIO(manifest_force_inputs))
-        target.get_config = Mock()
-        target.grab_inputs(force_prompt=True)
-        target.get_config.assert_has_calls([
-            call("gitroot", default="~/workspace", secret=False, force_prompt=True),
-            call("username", default=None, secret=False, force_prompt=True),
-            call("main_branch", default="comp_main", secret=True, force_prompt=True)
-        ])
-
     def test_write(self):
         """ Test the write command """
         temp_file = tempfile.mkstemp()[1]
@@ -178,16 +139,6 @@ class TestManifest(object):
             tools.eq_(self.new_manifest, Manifest(temp_file))
         finally:
             os.unlink(temp_file)
-        
-    @patch.object(lib, 'prompt')
-    def test_write_with_temporary_config(self, prompt):
-        """ The Write command with a temporary config value should not be written """
-        prompt.return_value = "no"
-        self.new_manifest.get_config('hobopopo', default="Yes", secret=False)
-        new_manifest = StringIO()
-        self.new_manifest.write(new_manifest)
-        assert not Manifest(new_manifest).has_option('config', 'hobopopo'), \
-            "A secret value was written to the config!"
         
     @tools.raises(ManifestException)
     def test_invalid_manifest_filepath(self):

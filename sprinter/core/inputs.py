@@ -47,7 +47,7 @@ class Inputs(object):
             raise InputException("Key {0} is not a valid input!".format(key))
         if key not in self._values or force:
             self._values[key] = lib.prompt("please enter your %s" % key,
-                                           default=self._defaults.get(key, None),
+                                           default=(self._values.get(key, None) or self._defaults.get(key, None)),
                                            secret=(key in self._secret_values))
         return self._values[key]
 
@@ -57,8 +57,12 @@ class Inputs(object):
 
     def prompt_unset_inputs(self, force=False):
         """ Prompt for unset input values """
-        for s in self.get_unset_inputs():
-            self.get_input(s, force=force)
+        if force:
+            for s in self._inputs:
+                self.get_input(s, force=True)
+        else:
+            for s in self.get_unset_inputs():
+                self.get_input(s, force=force)
 
     def keys(self):
         """ Return a set of valid keys """
