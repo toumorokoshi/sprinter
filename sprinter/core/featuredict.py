@@ -31,14 +31,20 @@ class FeatureDict(dict):
             if feature_key:
                 self._run_order.append(feature_key)
 
+    @property
+    def run_order(self):
+        return self._run_order
+
     def _instantiate_feature(self, feature, manifest, kind):
+        if feature == "config":
+            return None
         feature_config = manifest.get_feature_config(feature)
         if feature_config.has('formula'):
             key = (feature, feature_config.get('formula'))
             if key not in self:
                 try:
                     formula_class = self._get_formula_class(feature_config.get('formula'))
-                    self[key] = formula_class(self.environment, feature, **{kind: feature_config})
+                    self[key] = formula_class(self._environment, feature, **{kind: feature_config})
                     self._environment._error_dict[key] = []
                     if self[key].should_run():
                         return key
@@ -76,6 +82,3 @@ class FeatureDict(dict):
                     self.logger.error("ERROR: Unable to download %s!" % formula_class)
         return self._formula_dict[formula_class]
 
-    @property
-    def run_order(self):
-        return self._run_order

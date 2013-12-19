@@ -32,7 +32,7 @@ MANIFEST_NULL_KEY = object()
 logger = logging.getLogger(__name__)
 
 
-def load_manifest(raw_manifest, username=None, password=None, verify_certificate=True):
+def load_manifest(raw_manifest, namespace=None, username=None, password=None, verify_certificate=True):
     """ wrapper method which generates the manifest from various sources """
     if isinstance(raw_manifest, configparser.RawConfigParser):
         return Manifest(raw_manifest)
@@ -59,7 +59,7 @@ def load_manifest(raw_manifest, username=None, password=None, verify_certificate
         error_message = sys.exc_info()[1]
         raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
 
-    return Manifest(manifest)
+    return Manifest(manifest, namespace=namespace)
 
 
 def _load_manifest_from_url(manifest, url, verify_certificate=True, username=None, password=None):

@@ -116,7 +116,7 @@ class Environment(object):
         self.global_config = global_config or load_global_config(self.global_config_path)
         
         self.shell_util_path = os.path.join(self.global_path, "utils.sh")
-        # instrumented instance of pip, for package installation
+        self.main_manifest = None
         
     @warmup
     def install(self):
@@ -300,7 +300,7 @@ class Environment(object):
                         brew.install_brew('/usr/local')
 
     def instantiate_features(self):
-        self.features = FeatureDict(self.environment,
+        self.features = FeatureDict(self,
                                     self.source, self.target,
                                     self.global_path)
 
@@ -398,6 +398,7 @@ class Environment(object):
         """ command to run at the end of sprinter's run """
         self.logger.info("Finalizing...")
         self.write_manifest()
+
         if self.directory.rewrite_config:
             # always ensure .rc is written (sourcing .env)
             self.directory.add_to_rc('')
@@ -407,21 +408,27 @@ class Environment(object):
             self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
             self.directory.add_to_env('__sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
             self.directory.add_to_env('__sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
-        if self.write_files:
-            self.injections.commit()
-            self.global_injections.commit()
-            if not os.path.exists(os.path.join(self.root, ".global")):
-                self.logger.debug("Global directoy doesn't exist! creating...")
-                os.makedirs(os.path.join(self.root, ".global"))
-            self.logger.debug("Writing global config...")
-            self.global_config.write(open(self.global_config_path, 'w+'))
-            self.logger.debug("Writing shell util file...")
-            with open(self.shell_util_path, 'w+') as fh:
-                fh.write(shell_utils_template)
+
+        self.injections.commit()
+        self.global_injections.commit()
+
+        if not os.path.exists(os.path.join(self.root, ".global")):
+            self.logger.debug("Global directory doesn't exist! creating...")
+            os.makedirs(os.path.join(self.root, ".global"))
+
+        self.logger.debug("Writing global config...")
+        self.global_config.write(open(self.global_config_path, 'w+'))
+
+        self.logger.debug("Writing shell util file...")
+        with open(self.shell_util_path, 'w+') as fh:
+            fh.write(shell_utils_template)
+
         if self.error_occured:
             raise SprinterException("Error occured!")
+
         if self.message_success():
             self.logger.info(self.message_success())
+
         self.logger.info("NOTE: Please remember to open new shells/terminals to use the modified environment")
 
     def _install_sandbox(self, name, call, kwargs={}):
