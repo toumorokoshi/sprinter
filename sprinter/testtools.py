@@ -98,4 +98,3 @@ class FormulaTest(object):
         )
         self.directory = self.environment.directory
         self.environment.instantiate_features()
-        self.system = self.environment.system
