@@ -300,6 +300,8 @@ class Environment(object):
                         brew.install_brew('/usr/local')
 
     def instantiate_features(self):
+        if hasattr(self, 'features') and self.features:
+            return
         self.features = FeatureDict(self,
                                     self.source, self.target,
                                     self.global_path)

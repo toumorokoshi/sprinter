@@ -56,8 +56,8 @@ class TestEnvironment(object):
 
     def test_feature_run_order_install(self):
         """ A feature install should have it's methods run in the proper order """
-        with MockEnvironment(target_config=test_target) as environment:
-            with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.install()
                 eq_(formulabase().method_calls, [call.should_run(),
                                                  call.validate(),
@@ -67,8 +67,8 @@ class TestEnvironment(object):
 
     def test_feature_run_order_update(self):
         """ A feature update should have it's methods run in the proper order """
-        with MockEnvironment(test_source, test_target) as environment:
-            with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
                 environment.update()
@@ -80,8 +80,8 @@ class TestEnvironment(object):
 
     def test_feature_run_order_remove(self):
         """ A feature remove should have it's methods run in the proper order """
-        with MockEnvironment(test_source, test_target) as environment:
-            with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
                 environment.remove()
@@ -93,8 +93,8 @@ class TestEnvironment(object):
 
     def test_feature_run_order_deactivate(self):
         """ A feature deactivate should have it's methods run in the proper order """
-        with MockEnvironment(test_source, test_target) as environment:
-            with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
                 environment.deactivate()
@@ -106,8 +106,8 @@ class TestEnvironment(object):
 
     def test_feature_run_order_activate(self):
         """ A feature should have it's methods run in the proper order """
-        with MockEnvironment(test_source, test_target) as environment:
-            with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
                 environment.activate()
@@ -139,9 +139,7 @@ class TestEnvironment(object):
         """ If env_source_rc is set to true, the env environments should source the rc """
         # test bash, gui, no zshell
         global_config = create_default_config()
-        global_config.set('shell', 'bash', 'true')
-        global_config.set('shell', 'zsh', 'true')
-        global_config.set('shell', 'gui', 'false')
+        global_config.set('global', 'env_source_rc', True)
         with MockEnvironment(test_source, test_target, global_config=global_config) as environment:
             environment.install()
 

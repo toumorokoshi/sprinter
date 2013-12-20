@@ -11,7 +11,7 @@ import tempfile
 
 from sprinter.environment import Environment
 from sprinter.formula.base import FormulaBase
-from sprinter.core import Injections, PHASE, load_manifest
+from sprinter.core import Injections, PHASE, load_manifest, FeatureDict
 from sprinter.core.globals import create_default_config
 
 MOCK_GLOBAL_CONFIGURATION = """
@@ -20,7 +20,7 @@ MOCK_GLOBAL_CONFIGURATION = """
 
 class MockEnvironment(object):
 
-    def __init__(self, source_config=None, target_config=None, global_config=None):
+    def __init__(self, source_config=None, target_config=None, global_config=None, mock_formulabase=None):
         self.temp_directory = tempfile.mkdtemp()
         self.environment = Environment(root=self.temp_directory,
                                        sprinter_namespace='test',
@@ -36,6 +36,12 @@ class MockEnvironment(object):
         self.environment.injections.commit = Mock()
         self.environment.global_injections.commit = Mock()
         self.environment.write_manifest = Mock()
+        if mock_formulabase:
+            formula_dict = {'sprinter.formula.base': mock_formulabase}
+            self.environment.features = FeatureDict(self.environment,
+                                                    self.environment.source, self.environment.target,
+                                                    self.environment.global_path,
+                                                    formula_dict=formula_dict)
 
     def __enter__(self):
         return self.environment
@@ -80,6 +86,7 @@ def create_mock_formulabase():
     """ Generate a formulabase object that does nothing, and returns no errors """
     mock_formulabase = Mock(spec=FormulaBase)
     mock_formulabase.side_effect = lambda *args, **kw: mock_formulabase
+    mock_formulabase.should_run.return_value = True
     mock_formulabase.resolve.return_value = None
     mock_formulabase.prompt.return_value = None
     mock_formulabase.sync.return_value = None

@@ -26,11 +26,9 @@ import sys
 from docopt import docopt
 
 import sprinter.lib as lib
-from sprinter.core import PHASE
+from sprinter.core import PHASE, Manifest, ManifestException, load_manifest, Directory
 from sprinter.environment import Environment
-from sprinter.manifest import Manifest, ManifestException
-from sprinter.directory import Directory
-from sprinter.exceptions import SprinterException, BadCredentialsException
+from sprinter.lib import SprinterException, BadCredentialsException
 
 
 def signal_handler(signal, frame):
@@ -75,10 +73,10 @@ def parse_args(argv, Environment=Environment):
             signal.signal(signal.SIGINT, handle_install_shutdown)
             if options['--username'] or options['--auth']:
                 options = get_credentials(options, parse_domain(target))
-                target = Manifest(target,
-                                  username=options['<username>'],
-                                  password=options['<password>'],
-                                  verify_certificate=(not options['--allow-bad-certificate']))
+                target = load_manifest(target,
+                                       username=options['<username>'],
+                                       password=options['<password>'],
+                                       verify_certificate=(not options['--allow-bad-certificate']))
             env.target = target
             if options['--namespace']:
                 env.namespace = options['<namespace>']
@@ -89,35 +87,35 @@ def parse_args(argv, Environment=Environment):
             env.directory = Directory(target,
                                       sprinter_root=env.root,
                                       shell_util_path=env.shell_util_path)
-            env.source = Manifest(env.directory.manifest_path)
+            env.source = load_manifest(env.directory.manifest_path)
             use_auth = options['--username'] or options['--auth']
             if use_auth:
                 options = get_credentials(options, target)
-            env.target = Manifest(env.source.source(),
-                                  username=options['<username>'] if use_auth else None,
-                                  password=options['<password>'] if use_auth else None,
-                                  verify_certificate=(not options['--allow-bad-certificate']))
+            env.target = load_manifest(env.source.source(),
+                                       username=options['<username>'] if use_auth else None,
+                                       password=options['<password>'] if use_auth else None,
+                                       verify_certificate=(not options['--allow-bad-certificate']))
             env.update(reconfigure=options['--reconfigure'])
 
         elif options["remove"]:
             env.directory = Directory(options['<environment_name>'],
                                       sprinter_root=env.root,
                                       shell_util_path=env.shell_util_path)
-            env.source = Manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
             env.remove()
 
         elif options['deactivate']:
             env.directory = Directory(options['<environment_name>'],
                                       sprinter_root=env.root,
                                       shell_util_path=env.shell_util_path)
-            env.source = Manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
             env.deactivate()
 
         elif options['activate']:
             env.directory = Directory(options['<environment_name>'],
                                       sprinter_root=env.root,
                                       shell_util_path=env.shell_util_path)
-            env.source = Manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
             env.activate()
 
         elif options['environments']:
@@ -129,10 +127,10 @@ def parse_args(argv, Environment=Environment):
         elif options['validate']:
             if options['--username'] or options['--auth']:
                 options = get_credentials(options, parse_domain(target))
-                target = Manifest(options['<environment_source>'],
-                                  username=options['<username>'],
-                                  password=options['<password>'],
-                                  verify_certificate=(not options['--allow-bad-certificate']))
+                target = load_manifest(options['<environment_source>'],
+                                       username=options['<username>'],
+                                       password=options['<password>'],
+                                       verify_certificate=(not options['--allow-bad-certificate']))
             env.target = options['<environment_source>']
             env.validate()
             if not env.error_occured:

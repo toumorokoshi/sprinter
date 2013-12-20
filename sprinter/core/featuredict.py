@@ -12,11 +12,11 @@ class FeatureDict(dict):
     Dictionary which contains instances of features, formulas with a specific configuration
     """
 
-    def __init__(self, environment, source_manifest, target_manifest, pip_install_path):
+    def __init__(self, environment, source_manifest, target_manifest, pip_install_path, formula_dict=None):
         """ generate a feature dict from Manifests <source_manifest> and <target_manifest> """
         self._environment = environment
         self._run_order = []  # the order with which these features should run
-        self._formula_dict = {}  # a dictionary to hold instanitated instances of formulas
+        self._formula_dict = formula_dict or {}  # a dictionary to hold formula classes
         self._pip = Pip(pip_install_path)
 
         if target_manifest:
