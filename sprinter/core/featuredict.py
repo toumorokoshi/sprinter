@@ -1,6 +1,5 @@
 from sprinter import lib
 from sprinter.lib import SprinterException
-from sprinter.formula.base import FormulaBase
 from sprinter.external.pippuppet import Pip, PipException
 import logging
 
@@ -22,14 +21,14 @@ class FeatureDict(dict):
         if target_manifest:
             for feature in target_manifest.sections():
                 feature_key = self._instantiate_feature(feature, target_manifest, 'target')
-            if feature_key:
-                self._run_order.append(feature_key)
+                if feature_key:
+                    self._run_order.append(feature_key)
 
         if source_manifest:
             for feature in source_manifest.sections():
                 feature_key = self._instantiate_feature(feature, source_manifest, 'source')
-            if feature_key:
-                self._run_order.append(feature_key)
+                if feature_key:
+                    self._run_order.append(feature_key)
 
     @property
     def run_order(self):
@@ -45,7 +44,6 @@ class FeatureDict(dict):
                 try:
                     formula_class = self._get_formula_class(feature_config.get('formula'))
                     self[key] = formula_class(self._environment, feature, **{kind: feature_config})
-                    self._environment._error_dict[key] = []
                     if self[key].should_run():
                         return key
                     else:
@@ -64,6 +62,8 @@ class FeatureDict(dict):
         get a formula class object if it exists, else
         create one, add it to the dict, and pass return it.
         """
+        # recursive import otherwise
+        from sprinter.formula.base import FormulaBase
         formula_class, formula_url = formula, None
         if ':' in formula:
             formula_class, formula_url = formula.split(":", 1)
@@ -81,4 +81,3 @@ class FeatureDict(dict):
                 except PipException:
                     self.logger.error("ERROR: Unable to download %s!" % formula_class)
         return self._formula_dict[formula_class]
-

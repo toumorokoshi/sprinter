@@ -10,8 +10,6 @@ from sprinter.core import PHASE
 from sprinter.lib import FormulaException, system
 import sprinter.lib as lib
 
-logger = logging.getLogger(__name__)
-
 
 class FormulaBase(object):
 
@@ -24,6 +22,7 @@ class FormulaBase(object):
         init method. Sprinter calls it in a very specific fashion, and
         to set it up otherwise risks incompatibility
         """
+        self.logger = logging.getLogger("sprinter.formula." + type(self).__name__)
         self.feature_name = feature_name
         self.source = source
         self.target = target
@@ -126,7 +125,7 @@ class FormulaBase(object):
         if self.target:
             for k in self.target.keys():
                 if k not in self.valid_options and k not in self.required_options:
-                    logger.warn("Unused option %s in %s!" % (k, self.feature_name))
+                    self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
             for k in self.required_options:
                 if not self.target.has(k):
                     self._log_error("Required option %s not present in feature %s!" % (k, self.feature_name))
@@ -156,7 +155,7 @@ class FormulaBase(object):
     def sync(self):
         """ Updates the state of the feature to what it should be """
         phase = self.sync_phase()
-        logger.info("%s %s..." % (phase.verb, self.feature_name))
+        self.logger.info("%s %s..." % (phase.verb, self.feature_name))
         return getattr(self, phase.name)()
 
     def resolve(self):

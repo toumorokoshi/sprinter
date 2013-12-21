@@ -11,7 +11,7 @@ import tempfile
 
 from sprinter.environment import Environment
 from sprinter.formula.base import FormulaBase
-from sprinter.core import Injections, PHASE, load_manifest, FeatureDict
+from sprinter.core import PHASE, load_manifest, FeatureDict
 from sprinter.core.globals import create_default_config
 
 MOCK_GLOBAL_CONFIGURATION = """
@@ -20,8 +20,8 @@ MOCK_GLOBAL_CONFIGURATION = """
 
 class MockEnvironment(object):
 
-    def __init__(self, **kw):
-        self.environment, self.temp_directory = create_mock_environment(**kw)
+    def __init__(self, *args, **kw):
+        self.environment, self.temp_directory = create_mock_environment(*args, **kw)
 
     def __enter__(self):
         return self.environment
@@ -75,5 +75,5 @@ class FormulaTest(object):
     def setup(self, **kw):
         self.environment, self.temp_directory = create_mock_environment(**kw)
         # adding some extra mocking
-        self.directory = Mock(spec=self.environment.directory)
+        self.directory = self.environment.directory
         self.environment.instantiate_features()

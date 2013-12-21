@@ -3,7 +3,6 @@ import sprinter.lib as lib
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
 from sprinter.formula.base import FormulaBase
-from sprinter.lib import system
 
 source_config = """
 """
@@ -38,19 +37,17 @@ class TestFormulaBase(FormulaTest):
         super(TestFormulaBase, self).setup(source_config=source_config,
                                            target_config=target_config)
 
-    @patch.object(lib, 'call')
-    def test_install_with_rc(self, call):
+    def test_install_with_rc(self):
         """ Test install with rc """
+        self.directory.add_to_rc = Mock()
         self.environment.run_feature("install_with_rc", 'sync')
         self.directory.add_to_rc.assert_called_once_with('teststring')
-        call.called, "lib call was called when it was not specified"
 
     @patch.object(lib, 'call')
     def test_install_with_command(self, call):
         """ Test install with command """
         self.environment.run_feature("install_with_command", 'sync')
-        call.assert_called_once_with("echo 'helloworld'", cwd="/tmp/", shell=True)
-        assert not self.directory.add_to_rc.called, "add to rc called when rc not enabled!"
+        call.assert_called_once_with("echo 'helloworld'", cwd=None, shell=True)
 
     def test_osx_only(self):
         """ Test a feature that should only occur on osx """
@@ -58,7 +55,7 @@ class TestFormulaBase(FormulaTest):
                          target=self.environment.target.get_feature_config('osx'))
         fb2 = FormulaBase(self.environment, 'osx2',
                           target=self.environment.target.get_feature_config('osx2'))
-        with patch(system, 'is_osx') as is_osx:
+        with patch('sprinter.lib.system.is_osx') as is_osx:
             is_osx.return_value = True
             assert fb.should_run()
             assert fb2.should_run()
@@ -70,7 +67,7 @@ class TestFormulaBase(FormulaTest):
         """ Test a feature that should only occur on debian-based distributions """
         fb = FormulaBase(self.environment, 'debian',
                          target=self.environment.target.get_feature_config('debian'))
-        with patch(system, 'is_debian') as is_debian:
+        with patch('sprinter.lib.system.is_debian') as is_debian:
             is_debian.return_value = True
             assert fb.should_run()
             is_debian.return_value = False

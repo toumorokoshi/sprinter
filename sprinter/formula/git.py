@@ -41,16 +41,25 @@ class GitFormula(FormulaBase):
         target_directory = self.directory.install_directory(self.feature_name)
         source_branch = self.source.get('branch', 'master')
         target_branch = self.target.get('branch', 'master')
-        if self.target.get('url') != self.source.get('url') or \
-           not os.path.exists(target_directory):
-            if os.path.exists(target_directory):
-                self.logger.debug("Old git repository Found. Deleting...")
-                self.directory.remove_feature(self.feature_name)
+
+        if not os.path.exists(target_directory):
+            # directory doesn't exist, so we just clone again
+            self.logger.debug("No repository cloned. Re-cloning...")
+            self.__clone_repo(self.target.get('url'),
+                              target_directory,
+                              branch=target_branch)
+
+        if self.target.get('url') != self.source.get('url'):
+
+            self.logger.debug("Old git repository Found. Deleting...")
+            self.directory.remove_feature(self.feature_name)
             self.__clone_repo(self.target.get('url'),
                               target_directory,
                               branch=self.target.get('branch', 'master'))
+
         elif source_branch != target_branch:
             self.__checkout_branch(target_directory, target_branch)
+
         else:
             if not os.path.exists(target_directory):
                 self.logger.debug("No repository cloned. Re-cloning...")

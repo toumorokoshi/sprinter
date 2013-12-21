@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import logging
+import os
 import os.path
 from mock import patch
 from sprinter.testtools import FormulaTest
@@ -48,9 +49,19 @@ class TestGitFormula(FormulaTest):
                                 output_log_level=logging.DEBUG)
 
     @patch.object(lib, 'call')
-    def test_update(self, call_mock):
-        """ The git formula should call a clone to a git repo """
+    def test_update_different_branches(self, call_mock):
+        """ The git formula should call a clone to a git repo if the branches are different """
+        
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call("git fetch origin develop", output_log_level=logging.DEBUG)
         call_mock.assert_any_call("git checkout develop", output_log_level=logging.DEBUG)
+
+    @patch.object(lib, 'call')
+    def test_update_no_directory(self, call_mock):
+        """ The git formula should re-clone a repo if the repo directory doesn't exist """
+        call_mock.return_value = (0, '')
+        self.environment.run_feature('update', 'sync')
+        call_mock.assert_called_with("git clone %s %s" % (vals['repoA'],
+                                                          self.directory.install_directory('update')),
+                                     output_log_level=logging.DEBUG)

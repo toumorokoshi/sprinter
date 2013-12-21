@@ -6,6 +6,7 @@ import getpass
 from six import reraise
 from io import StringIO
 from functools import wraps
+from collections import defaultdict
 
 import sprinter.lib as lib
 from sprinter.core import PHASE, load_global_config, Directory, Injections, Manifest, load_manifest, FeatureDict
@@ -80,9 +81,6 @@ class Environment(object):
     warmed_up = False  # returns true if the environment is ready for environments
     shell_util_path = None  # the path to the shell utils file
     error_occured = False
-    # a dictionary of the errors associated with features.
-    # The key is a tuple of feature name and formula, while the value is an instance.
-    _error_dict = {}
     _errors = []  # list to keep all the errors
     sandboxes = []  # a list of package managers to sandbox (brew)
     # specifies where to get the global sprinter root
@@ -117,6 +115,10 @@ class Environment(object):
         
         self.shell_util_path = os.path.join(self.global_path, "utils.sh")
         self.main_manifest = None
+
+        # a dictionary of the errors associated with features.
+        # The key is a tuple of feature name and formula, while the value is an instance.
+        self._error_dict = defaultdict(list)
         
     @warmup
     def install(self):
@@ -459,6 +461,11 @@ class Environment(object):
         self.error_occured = True
         self._errors += [error_message]
         self.logger.error(error_message)
+
+    def get_error_value(self, feature):
+        """ get the error value for a feature """
+        if feature not in self._error_dict:
+            self._error_dict1
 
     def log_feature_error(self, feature, error_message):
         self.error_occured = True
