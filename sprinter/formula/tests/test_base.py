@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
+import sprinter.lib as lib
 from mock import Mock, patch
 from sprinter.testtools import FormulaTest
 from sprinter.formula.base import FormulaBase
-import sprinter.lib as lib
+from sprinter.lib import system
 
 source_config = """
 """
@@ -57,18 +58,20 @@ class TestFormulaBase(FormulaTest):
                          target=self.environment.target.get_feature_config('osx'))
         fb2 = FormulaBase(self.environment, 'osx2',
                           target=self.environment.target.get_feature_config('osx2'))
-        self.system.isOSX = Mock(return_value=True)
-        assert fb.should_run()
-        assert fb2.should_run()
-        self.system.isOSX = Mock(return_value=False)
-        assert not fb.should_run()
-        assert not fb2.should_run()
+        with patch(system, 'is_osx') as is_osx:
+            is_osx.return_value = True
+            assert fb.should_run()
+            assert fb2.should_run()
+            is_osx.return_value = False
+            assert not fb.should_run()
+            assert not fb2.should_run()
 
     def test_debianbased_only(self):
         """ Test a feature that should only occur on debian-based distributions """
         fb = FormulaBase(self.environment, 'debian',
                          target=self.environment.target.get_feature_config('debian'))
-        self.system.isDebianBased = Mock(return_value=True)
-        assert fb.should_run()
-        self.system.isDebianBased = Mock(return_value=False)
-        assert not fb.should_run()
+        with patch(system, 'is_debian') as is_debian:
+            is_debian.return_value = True
+            assert fb.should_run()
+            is_debian.return_value = False
+            assert not fb.should_run()

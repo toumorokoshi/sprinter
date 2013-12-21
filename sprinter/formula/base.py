@@ -139,8 +139,8 @@ class FormulaBase(object):
         if config.has('systems'):
             should_run = False
             valid_systems = [s.lower() for s in config.get('systems').split(",")]
-            for system_type, param in [('isOSX', 'osx'),
-                                       ('isDebianBased', 'debian')]:
+            for system_type, param in [('is_osx', 'osx'),
+                                       ('is_debian', 'debian')]:
                 if param in valid_systems and getattr(system, system_type)():
                     should_run = True
         return should_run

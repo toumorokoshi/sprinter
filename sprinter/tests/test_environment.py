@@ -2,17 +2,13 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
-from io import StringIO
 from mock import Mock, call, patch
 from nose import tools
 from nose.tools import eq_
-from six.moves import configparser
 from sprinter.testtools import (MockEnvironment,
-                                create_mock_environment,
                                 create_mock_formulabase)
 from sprinter.lib import SprinterException
 from sprinter.environment import Environment
-from sprinter.formula.base import FormulaBase
 from sprinter.core.templates import source_template
 from sprinter.core.globals import create_default_config
 

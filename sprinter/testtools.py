@@ -20,28 +20,8 @@ MOCK_GLOBAL_CONFIGURATION = """
 
 class MockEnvironment(object):
 
-    def __init__(self, source_config=None, target_config=None, global_config=None, mock_formulabase=None):
-        self.temp_directory = tempfile.mkdtemp()
-        self.environment = Environment(root=self.temp_directory,
-                                       sprinter_namespace='test',
-                                       global_config=(global_config or create_default_config()))
-        if source_config:
-            self.environment.source = load_manifest(StringIO(source_config), namespace="test")
-
-        if target_config:
-            self.environment.target = load_manifest(StringIO(target_config), namespace="test")
-        
-        self.environment.warmup()
-        # TODO: implement sandboxing so no need to mock these
-        self.environment.injections.commit = Mock()
-        self.environment.global_injections.commit = Mock()
-        self.environment.write_manifest = Mock()
-        if mock_formulabase:
-            formula_dict = {'sprinter.formula.base': mock_formulabase}
-            self.environment.features = FeatureDict(self.environment,
-                                                    self.environment.source, self.environment.target,
-                                                    self.environment.global_path,
-                                                    formula_dict=formula_dict)
+    def __init__(self, **kw):
+        self.environment, self.temp_directory = create_mock_environment(**kw)
 
     def __enter__(self):
         return self.environment
@@ -50,37 +30,31 @@ class MockEnvironment(object):
         shutil.rmtree(self.temp_directory)
 
 
-def create_mock_environment(source_config=None,
-                            target_config=None,
-                            installed=False,
-                            global_config=MOCK_GLOBAL_CONFIGURATION,
-                            root=None,
-                            mock_injections=True,
-                            mock_global_injections=True,
-                            mock_system=True,
-                            mock_directory=True):
-    """ Create and return a mock environment instance """
-    environment = Environment(global_config=global_config,
-                              root=root)
-    environment.source = (None if not source_config else
-                          load_manifest(StringIO(source_config), namespace="test"))
-    environment.target = (None if not target_config else
-                          load_manifest(StringIO(target_config), namespace="test"))
-    # mocking directory
-    if mock_directory:
-        environment.directory = Mock(spec=environment.directory)
-        environment.directory.bin_path.return_value = "dummy"
-        environment.directory.install_directory.return_value = "/tmp/"
-        environment.directory.new = not installed
-    # mocking injections
-    if mock_injections:
-        environment.injections = Mock(spec=Injections)
-    # mocking global injections
-    if mock_global_injections:
-        environment.global_injections = Mock(spec=Injections)
-    environment.write_manifest = Mock()
-    return environment
+def create_mock_environment(source_config=None, target_config=None,
+                            global_config=None, mock_formulabase=None):
+        temp_directory = tempfile.mkdtemp()
+        environment = Environment(root=temp_directory,
+                                  sprinter_namespace='test',
+                                  global_config=(global_config or create_default_config()))
+        if source_config:
+            environment.source = load_manifest(StringIO(source_config), namespace="test")
 
+        if target_config:
+            environment.target = load_manifest(StringIO(target_config), namespace="test")
+        
+        environment.warmup()
+        # TODO: implement sandboxing so no need to mock these
+        environment.injections.commit = Mock()
+        environment.global_injections.commit = Mock()
+        environment.write_manifest = Mock()
+        if mock_formulabase:
+            formula_dict = {'sprinter.formula.base': mock_formulabase}
+            environment.features = FeatureDict(environment,
+                                               environment.source, environment.target,
+                                               environment.global_path,
+                                               formula_dict=formula_dict)
+        return environment, temp_directory
+    
 
 def create_mock_formulabase():
     """ Generate a formulabase object that does nothing, and returns no errors """
@@ -98,10 +72,8 @@ def create_mock_formulabase():
 
 class FormulaTest(object):
 
-    def setup(self, source_config=None, target_config=None):
-        self.environment = create_mock_environment(
-            source_config=source_config,
-            target_config=target_config
-        )
-        self.directory = self.environment.directory
+    def setup(self, **kw):
+        self.environment, self.temp_directory = create_mock_environment(**kw)
+        # adding some extra mocking
+        self.directory = Mock(spec=self.environment.directory)
         self.environment.instantiate_features()
