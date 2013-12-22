@@ -58,7 +58,7 @@ class Inputs(object):
     def prompt_unset_inputs(self, force=False):
         """ Prompt for unset input values """
         if force:
-            for s in self._inputs:
+            for s in sorted(self._inputs):
                 self.get_input(s, force=True)
         else:
             for s in self.get_unset_inputs():
