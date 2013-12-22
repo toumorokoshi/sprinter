@@ -14,7 +14,7 @@ import re
 
 import sprinter.lib as lib
 from sprinter.formula.base import FormulaBase
-from sprinter.externals.virtualenv import create_environment as create_virtualenv
+from sprinter.external.virtualenv import create_environment as create_virtualenv
 
 # a list of regex's that should no be symlinked to the bin path
 BLACKLISTED_EXECUTABLES = [

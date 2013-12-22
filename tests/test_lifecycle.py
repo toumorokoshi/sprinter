@@ -1,16 +1,10 @@
 import tempfile
 import shutil
 from sprinter import environment
+from sprinter.core.globals import create_default_config
 import httpretty
 from nose.plugins.attrib import attr
 from mock import patch
-
-GLOBAL_CONFIG = u"""
-[shell]
-bash = false
-zsh = false
-gui = false
-"""
 
 
 @attr('full')
@@ -18,6 +12,12 @@ class TestLifecycle(object):
     """
     Test the sprinter lifecycle
     """
+
+    def setUp(self):
+        self.global_config = create_default_config()
+        self.global_config.set('shell', 'bash', 'false')
+        self.global_config.set('shell', 'zsh', 'false')
+        self.global_config.set('shell', 'gui', 'false')
 
     @httpretty.activate
     @patch('sprinter.lib.prompt')
@@ -30,11 +30,11 @@ class TestLifecycle(object):
             httpretty.register_uri(httpretty.GET, TEST_URI,
                                    body=open("./test_data/test_setup.cfg").read())
             env = environment.Environment(root=temp_directory, sprinter_namespace='test',
-                                          global_config=GLOBAL_CONFIG)
+                                          global_config=self.global_config)
             env.target = TEST_URI
             env.install()
             env = environment.Environment(root=temp_directory, sprinter_namespace='test',
-                                          global_config=GLOBAL_CONFIG)
+                                          global_config=self.global_config)
             env.source = TEST_URI
             env.remove()
         finally:
@@ -52,18 +52,18 @@ class TestLifecycle(object):
                                    body=open("./examples/sprinter.cfg").read())
             # install
             env = environment.Environment(root=temp_directory, sprinter_namespace='test',
-                                          global_config=GLOBAL_CONFIG)
+                                          global_config=self.global_config)
             env.target = TEST_URI
             env.install()
             # update
             env = environment.Environment(root=temp_directory, sprinter_namespace='test',
-                                          global_config=GLOBAL_CONFIG)
+                                          global_config=self.global_config)
             env.target = TEST_URI
             env.source = TEST_URI
             env.update()
             # remove
             env = environment.Environment(root=temp_directory, sprinter_namespace='test',
-                                          global_config=GLOBAL_CONFIG)
+                                          global_config=self.global_config)
             env.source = TEST_URI
             env.remove()
         finally:

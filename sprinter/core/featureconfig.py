@@ -107,3 +107,6 @@ class FeatureConfig(object):
 
     def __iter__(self):
         return self.raw_dict.__iter__()
+
+    def __str__(self):
+        return "<featureconfig object for '{0}'>".format(self.feature_name)

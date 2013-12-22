@@ -79,13 +79,13 @@ class FormulaTest(object):
         self.directory = self.environment.directory
         self.environment.instantiate_features()
 
+
 @contextmanager
 def set_os_types(osx=False, debian=False, fedora=False):
     with patch('sprinter.lib.system.is_osx') as is_osx:
-        is_osx = osx
+        is_osx.return_value = osx
         with patch('sprinter.lib.system.is_debian') as is_debian:
-            is_debian = debian
+            is_debian.return_value = debian
             with patch('sprinter.lib.system.is_fedora') as is_fedora:
-                is_fedora = fedora
-                import pdb; pdb.set_trace()
+                is_fedora.return_value = fedora
                 yield

@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from mock import Mock, patch
-from sprinter.testtools import FormulaTest
+from sprinter.testtools import FormulaTest, set_os_types
 import sprinter.lib as lib
 
 TEST_TARGZ = "http://github.com/toumorokoshi/sprinter/tarball/master"
@@ -47,9 +47,9 @@ class TestUnpackFormula(FormulaTest):
     @patch.object(lib, 'extract_dmg')
     def test_dmg_with_target(self, extract_dmg):
         """ Test the dmg extracting to a specific target """
-        self.environment.system.isOSX = Mock(return_value=True)
-        self.environment.run_feature("dmg_with_target", 'sync')
-        extract_dmg.assert_called_with(TEST_DMG, '/testpath', remove_common_prefix=False)
+        with set_os_types(osx=True):
+            self.environment.run_feature("dmg_with_target", 'sync')
+            extract_dmg.assert_called_with(TEST_DMG, '/testpath', remove_common_prefix=False)
 
     @patch.object(lib, 'extract_targz')
     def test_targz_with_target(self, extract_targz):

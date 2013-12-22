@@ -13,7 +13,7 @@ target = /tmp/
 import os
 
 from sprinter.formula.base import FormulaBase
-from sprinter.lib import ExtractException
+from sprinter.lib import ExtractException, system
 from sprinter.core.directory import DirectoryException
 import sprinter.lib as lib
 
@@ -86,7 +86,7 @@ class UnpackFormula(FormulaBase):
                                 remove_common_prefix=remove_common_prefix)
 
             elif config.get('type', config.get('url')).endswith("dmg"):
-                if not self.system.isOSX():
+                if not system.is_osx():
                     self.logger.warn("Non OSX based distributions can not install a dmg!")
                 else:
                     lib.extract_dmg(config.get('url'), destination,

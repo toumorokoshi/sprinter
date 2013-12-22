@@ -71,7 +71,7 @@ class FeatureDict(dict):
             try:
                 self._formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
             except (SprinterException, ImportError):
-                self.logger.info("Downloading %s..." % formula_class)
+                logger.info("Downloading %s..." % formula_class)
                 try:
                     self._pip.install_egg(formula_url or formula_class)
                     try:
@@ -79,5 +79,5 @@ class FeatureDict(dict):
                     except ImportError:
                         raise SprinterException("Error: Unable to retrieve formula %s!" % formula_class)
                 except PipException:
-                    self.logger.error("ERROR: Unable to download %s!" % formula_class)
+                    logger.error("ERROR: Unable to download %s!" % formula_class)
         return self._formula_dict[formula_class]

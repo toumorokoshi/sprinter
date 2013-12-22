@@ -32,7 +32,6 @@ apt-get = gitB
 """
 
 
-
 class TestPackageFormula(FormulaTest):
 
     def setup(self):
