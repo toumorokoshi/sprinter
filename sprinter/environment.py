@@ -104,7 +104,7 @@ class Environment(object):
         self.sprinter_namespace = sprinter_namespace or 'sprinter'
 
         # the root directory which sprinter installs sandboxable files too
-        self.root = root or os.path.expanduser(os.path.join("~", ".%s" % sprinter_namespace))
+        self.root = root or os.path.expanduser(os.path.join("~", ".%s" % self.sprinter_namespace))
 
         self.ignore_errors = ignore_errors
 
