@@ -29,8 +29,8 @@ class TestInputs(object):
             prompt.return_value = "yusuke"
             self.inputs.prompt_unset_inputs(force=True)
             prompt.assert_has_calls([
-                call("please enter your key_with_value", default='value', secret=False),
                 call("please enter your key", default=None, secret=False),
+                call("please enter your key_with_value", default='value', secret=False),
             ])
 
     def test_write_values(self):
