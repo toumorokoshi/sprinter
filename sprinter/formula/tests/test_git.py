@@ -51,7 +51,7 @@ class TestGitFormula(FormulaTest):
     @patch.object(lib, 'call')
     def test_update_different_branches(self, call_mock):
         """ The git formula should call a clone to a git repo if the branches are different """
-        
+        os.makedirs(self.directory.install_directory('update'))
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call("git fetch origin develop", output_log_level=logging.DEBUG)

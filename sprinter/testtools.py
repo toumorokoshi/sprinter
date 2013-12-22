@@ -4,7 +4,8 @@ Testing tools to help facilitate sprinter formula testing
 from __future__ import unicode_literals
 from io import StringIO
 
-from mock import Mock
+from mock import Mock, patch
+from contextlib import contextmanager
 import shutil
 import tempfile
 
@@ -77,3 +78,14 @@ class FormulaTest(object):
         # adding some extra mocking
         self.directory = self.environment.directory
         self.environment.instantiate_features()
+
+@contextmanager
+def set_os_types(osx=False, debian=False, fedora=False):
+    with patch('sprinter.lib.system.is_osx') as is_osx:
+        is_osx = osx
+        with patch('sprinter.lib.system.is_debian') as is_debian:
+            is_debian = debian
+            with patch('sprinter.lib.system.is_fedora') as is_fedora:
+                is_fedora = fedora
+                import pdb; pdb.set_trace()
+                yield

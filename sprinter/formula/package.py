@@ -6,9 +6,10 @@ formula = sprinter.formula.package
 apt-get = git
 brew = git
 """
-from sprinter.formula.base import FormulaBase
-import sprinter.lib as lib
 import logging
+from sprinter import lib
+from sprinter.lib import system
+from sprinter.formula.base import FormulaBase
 
 
 class PackageFormulaException(Exception):
@@ -55,13 +56,13 @@ class PackageFormula(FormulaBase):
         package_manager = ""
         args = ""
         sudo_required = True
-        if self.system.isOSX():
+        if system.is_osx():
             package_manager = "brew"
             sudo_required = False
-        elif self.system.isDebianBased():
+        elif system.is_debian():
             package_manager = "apt-get"
             args = " -y"
-        elif self.system.isFedoraBased():
+        elif system.is_fedora():
             package_manager = "yum"
         if lib.which(package_manager) is None:
             self.logger.warn("Package manager %s not installed! Packages will not be installed."
