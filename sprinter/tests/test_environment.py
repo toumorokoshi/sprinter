@@ -218,6 +218,7 @@ env_source_rc = False
     def test_no_namespace(self):
         """ an warmup should fail if the namespace is not set and cant' be determined implicitely """
         with MockEnvironment(target_config="") as environment:
+            del(environment.namespace)
             environment.warmup()
 
 missing_formula_config = """
