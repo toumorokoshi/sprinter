@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from mock import Mock, call, patch
 from nose import tools
-from nose.tools import eq_
+from nose.tools import eq_, raises
 from sprinter.testtools import (MockEnvironment,
                                 create_mock_formulabase)
 from sprinter.lib import SprinterException
@@ -213,6 +213,12 @@ env_source_rc = False
         with MockEnvironment(target_config=test_target) as environment:
             environment.target = "gibberish"
             assert environment.message_failure() is None
+
+    @raises(SprinterException)
+    def test_no_namespace(self):
+        """ an warmup should fail if the namespace is not set and cant' be determined implicitely """
+        with MockEnvironment(target_config="") as environment:
+            environment.warmup()
 
 missing_formula_config = """
 [missingformula]

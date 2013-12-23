@@ -37,6 +37,7 @@ def create_mock_environment(source_config=None, target_config=None,
         environment = Environment(root=temp_directory,
                                   sprinter_namespace='test',
                                   global_config=(global_config or create_default_config()))
+        environment.namespace = "test"
         if source_config:
             environment.source = load_manifest(StringIO(source_config), namespace="test")
 

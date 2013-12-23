@@ -344,6 +344,7 @@ class Environment(object):
     def warmup(self):
         """ initialize variables necessary to perform a sprinter action """
         self.logger.debug("Warming up...")
+
         try:
             if not isinstance(self.source, Manifest) and self.source:
                 self.source = load_manifest(self.source)
@@ -354,10 +355,15 @@ class Environment(object):
             e = sys.exc_info()[1]
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
-        if self.target:
-            self.namespace = self.target.namespace
-        if not self.namespace and self.source:
-            self.namespace = self.source.namespace
+
+        if not getattr(self, 'namespace', None):
+            if self.target:
+                self.namespace = self.target.namespace
+            elif not self.namespace and self.source:
+                self.namespace = self.source.namespace
+            else:
+                raise SprinterException("No environment name has been specified!")
+
         if not self.directory:
             self.directory = Directory(self.namespace,
                                        sprinter_root=self.root,
