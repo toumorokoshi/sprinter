@@ -159,7 +159,7 @@ class Manifest(object):
         for s in self.sections():
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
-        for k, v in self.inputs.values():
+        for k, v in self.inputs.values().items():
             context_dict["config:{0}".format(k)] = v
         context_dict.update(self.additional_context_variables.items())
         context_dict.update(dict([("%s|escaped" % k, re.escape(str(v) or "")) for k, v in context_dict.items()]))

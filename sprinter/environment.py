@@ -160,6 +160,10 @@ class Environment(object):
             # We don't grab inputs, only on install
             # updates inputs are grabbed on demand
             # self.grab_inputs(reconfigure=reconfigure)
+            if reconfigure:
+                self.grab_inputs(reconfigure=True)
+            else:
+                self._copy_source_to_target()
             self._specialize(reconfigure=reconfigure)
             for feature in self.features.run_order:
                 self.run_action(feature, 'sync')
@@ -512,19 +516,22 @@ class Environment(object):
                     context_dict['config:root_dir'] = self.directory.root_dir
                     context_dict['config:node'] = system.NODE
                 manifest.add_additional_context(context_dict)
-        self.grab_inputs()
         for feature in self.features.run_order:
             self.run_action(feature, 'validate', run_if_error=True)
             if not reconfigure:
                 self.run_action(feature, 'resolve')
             self.run_action(feature, 'prompt')
 
+    def _copy_source_to_target(self):
+        """ copy source user configuration to target """
+        if self.source and self.target:
+            for k, v in self.source.items('config'):
+                if not self.target.has_option('config', k):
+                    self.target.set('config', k, v)
+
     def grab_inputs(self, reconfigure=False):
         """ Resolve the source and target config section """
-        if self.source:
-            if self.target:
-                for k, v in self.source.items('config'):
-                    if not self.target.has_option('config', k):
-                        self.target.set('config', k, v)
+        self._copy_source_to_target()
+
         if self.target:
             self.target.grab_inputs(force=reconfigure)

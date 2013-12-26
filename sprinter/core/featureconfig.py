@@ -39,8 +39,15 @@ class FeatureConfig(object):
                 return str(self.raw_dict[param]) % context_dict
             except KeyError:
                 e = sys.exc_info()[1]
-                logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
-                return self.raw_dict[param]
+                key = e.args[0]
+                if key.startswith('config:'):
+                    missing_key = key.split(':')[1]
+                    if self.manifest.inputs.is_input(missing_key):
+                        val = self.manifest.inputs.get_input(missing_key)
+                        context_dict[key] = val
+                else:
+                    logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
+                    return self.raw_dict[param]
 
     def has(self, param):
         """ return true if the param exists """

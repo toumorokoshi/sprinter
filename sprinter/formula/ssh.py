@@ -73,12 +73,12 @@ class SSHFormula(FormulaBase):
         """
         Generate the ssh key, and return the ssh config location
         """
-        command = "ssh-keygen -t %(type)s -f %(keyname)s -N  " % config.to_dict()
         cwd = config.get('ssh_path', self.directory.install_directory(self.feature_name))
         if not config.has('create') or config.is_affirmative('create'):
             if not os.path.exists(cwd):
                 os.makedirs(cwd)
             if not os.path.exists(os.path.join(cwd, config.get('keyname'))):
+                command = "ssh-keygen -t %(type)s -f %(keyname)s -N  " % config.to_dict()
                 lib.call(command, cwd=cwd, output_log_level=logging.DEBUG)
         if not config.has('ssh_path'):
             config.set('ssh_path', cwd)
@@ -89,7 +89,12 @@ class SSHFormula(FormulaBase):
         Install the ssh configuration
         """
         if not self.__global_ssh_key_exists() or not config.is_affirmative('use_global_ssh', default="no"):
-            ssh_config_injection = ssh_config_template % config.to_dict()
+            ssh_config_injection = ssh_config_template % {
+                'host': config.get('host'),
+                'hostname': config.get('hostname'),
+                'ssh_key_path': config.get('ssh_key_path'),
+                'user': config.get('user')
+            }
             if os.path.exists(ssh_config_path):
                 if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config.get('host')):
                     if config.is_affirmative('override'):

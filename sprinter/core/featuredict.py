@@ -5,6 +5,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# legacy mappings for renames
+LEGACY_MAPPINGS = {
+    'sprinter.formulabase': 'sprinter.formula.base'
+}
 
 class FeatureDict(dict):
     """
@@ -64,6 +68,8 @@ class FeatureDict(dict):
         """
         # recursive import otherwise
         from sprinter.formula.base import FormulaBase
+        if formula in LEGACY_MAPPINGS:
+            formula = LEGACY_MAPPINGS[formula]
         formula_class, formula_url = formula, None
         if ':' in formula:
             formula_class, formula_url = formula.split(":", 1)

@@ -80,6 +80,9 @@ class FormulaTest(object):
         self.directory = self.environment.directory
         self.environment.instantiate_features()
 
+    def tearDown(self):
+        shutil.rmtree(self.temp_directory)
+
 
 @contextmanager
 def set_os_types(osx=False, debian=False, fedora=False):
