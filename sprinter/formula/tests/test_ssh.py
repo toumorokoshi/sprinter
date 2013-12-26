@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 from mock import Mock, patch
+from nose.tools import ok_
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib
 
@@ -10,10 +11,16 @@ source_config = """
 """
 
 target_config = """
-[simple_example]
-formula = sprinter.formula.template
-source = %(temp_dir)s/in.txt
-target = %(temp_dir)s/out.txt
+[github]
+formula = sprinter.formula.ssh
+host = github.com
+keyname = github
+nopassphrase = true
+type = rsa
+hostname = github.com
+user = toumorokoshi
+create = false
+use_global_ssh = yes
 """
 
 
@@ -21,19 +28,13 @@ class TestSSHFormula(FormulaTest):
     """ Tests for the unpack formula """
 
     def setup(self):
-        self.temp_dir = tempfile.mkdtemp()
-        config_dict = {'temp_dir': self.temp_dir}
-        super(TestSSHFormula, self).setup(source_config=(source_config % config_dict),
-                                          target_config=(target_config % config_dict))
+        super(TestSSHFormula, self).setup(source_config=source_config,
+                                          target_config=target_config)
 
-    def teardown(self):
-        shutil.rmtree(self.temp_dir)
-
-    def skip_simple_example(self):
-        """ The template formula should grab a template and save it """
-        with open(os.path.join(self.temp_dir, 'in.txt'), 'w+') as fh:
-            fh.write(SIMPLE_TEMPLATE)
-        self.environment.run_feature("simple_example", 'sync')
-        out_file = os.path.join(self.temp_dir, 'out.txt')
-        assert os.path.exists(out_file)
-        assert open(out_file).read() == SIMPLE_TEMPLATE
+    def test_use_global_ssh(self):
+        """ If use_global_ssh is false, then no config should be injected into ssh config"""
+        self.environment.injections.inject = Mock()
+        self.environment.run_feature("github", "sync")
+        print(self.environment.injections.inject.call_count)
+        print(self.environment.injections.inject.call_args)
+        ok_(not self.environment.injections.inject.called)

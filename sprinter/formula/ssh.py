@@ -38,9 +38,9 @@ class SSHFormula(FormulaBase):
     def prompt(self):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
-                if not self.target.has('use_global_ssh') and self.__global_ssh_key_exists():
-                    self.target.prompt("use_global_ssh",
-                                       "A standard global ssh key was detected! Would you like to use the global ssh key?",
+                if not self.target.has('use_global_ssh'):
+                    self.target.prompt("use_global_ssh", 
+                                       "Would you like to use existing ssh configuration?",
                                        default="no")
                 if (self.injections.in_noninjected_file(
                         ssh_config_path, "Host %s" % self.target.get('host')) and
@@ -88,19 +88,21 @@ class SSHFormula(FormulaBase):
         """
         Install the ssh configuration
         """
-        if not self.__global_ssh_key_exists() or not config.is_affirmative('use_global_ssh', default="no"):
+        if not config.is_affirmative('use_global_ssh', default="no"):
             ssh_config_injection = ssh_config_template % {
                 'host': config.get('host'),
                 'hostname': config.get('hostname'),
                 'ssh_key_path': config.get('ssh_key_path'),
                 'user': config.get('user')
             }
-            if os.path.exists(ssh_config_path):
+            if not os.path.exists(ssh_config_path):
+
                 if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config.get('host')):
                     if config.is_affirmative('override'):
                         self.injections.inject(ssh_config_path, ssh_config_injection)
                 else:
                     self.injections.inject(ssh_config_path, ssh_config_injection)
+
             else:
                 self.injections.inject(ssh_config_path, ssh_config_injection)
             self.injections.commit()
@@ -110,9 +112,3 @@ class SSHFormula(FormulaBase):
         ssh_contents = open(ssh_path, 'r').read().rstrip('\n')
         command = command.replace('{{ssh}}', ssh_contents)
         lib.call(command, shell=True, output_log_level=logging.DEBUG)
-
-    def __global_ssh_key_exists(self):
-        """ Check if the global ssh keys exists """
-        return (os.path.exists(os.path.join(user_ssh_path, "id_dsa")) or 
-                os.path.exists(os.path.join(user_ssh_path, "id_ecdsa")) or 
-                os.path.exists(os.path.join(user_ssh_path, "id_rsa")))
