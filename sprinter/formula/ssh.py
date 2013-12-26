@@ -89,12 +89,8 @@ class SSHFormula(FormulaBase):
         Install the ssh configuration
         """
         if not config.is_affirmative('use_global_ssh', default="no"):
-            ssh_config_injection = ssh_config_template % {
-                'host': config.get('host'),
-                'hostname': config.get('hostname'),
-                'ssh_key_path': config.get('ssh_key_path'),
-                'user': config.get('user')
-            }
+            ssh_config_injection = self._build_ssh_config(config)
+
             if not os.path.exists(ssh_config_path):
 
                 if self.injections.in_noninjected_file(ssh_config_path, "Host %s" % config.get('host')):
@@ -105,6 +101,7 @@ class SSHFormula(FormulaBase):
 
             else:
                 self.injections.inject(ssh_config_path, ssh_config_injection)
+
             self.injections.commit()
 
     def __call_command(self, command, ssh_path):
@@ -112,3 +109,15 @@ class SSHFormula(FormulaBase):
         ssh_contents = open(ssh_path, 'r').read().rstrip('\n')
         command = command.replace('{{ssh}}', ssh_contents)
         lib.call(command, shell=True, output_log_level=logging.DEBUG)
+
+    def _build_ssh_config(self, config):
+        """ build the ssh injection configuration """
+        ssh_config_injection = ssh_config_template % {
+            'host': config.get('host'),
+            'hostname': config.get('hostname'),
+            'ssh_key_path': config.get('ssh_key_path'),
+            'user': config.get('user')
+        }
+        if config.has('port'):
+            ssh_config_injection += "  port={0}\n".format(config.get('port'))
+        return ssh_config_injection
