@@ -51,8 +51,8 @@ class TestFeatureDict():
 
     def test_run_order(self):
         """ run_order should return the order in which features should run """
-        eq_(set(self.feature_dict.run_order), set([(u'install_with_rc', 'sprinter.formula.base'),
-                                                   (u'install_with_command', 'sprinter.formula.base'),
-                                                   (u'osx', 'sprinter.formula.base'),
-                                                   (u'osx2', 'sprinter.formula.base'),
-                                                   (u'debian', 'sprinter.formula.base')]))
+        eq_(set(self.feature_dict.run_order), set([('install_with_rc', 'sprinter.formula.base'),
+                                                   ('install_with_command', 'sprinter.formula.base'),
+                                                   ('osx', 'sprinter.formula.base'),
+                                                   ('osx2', 'sprinter.formula.base'),
+                                                   ('debian', 'sprinter.formula.base')]))
