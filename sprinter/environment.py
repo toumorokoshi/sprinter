@@ -133,6 +133,7 @@ class Environment(object):
             self.directory.initialize()
             self.install_sandboxes()
             self.instantiate_features()
+            self.grab_inputs()
             self._specialize()
             for feature in self.features.run_order:
                 self.run_action(feature, 'sync')
