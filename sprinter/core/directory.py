@@ -11,10 +11,11 @@ import stat
 
 from .templates import source_template
 
+logger = logging.getLogger(__name__)
+
 
 class DirectoryException(Exception):
     """ An exception to specify it's a directory """
-
 
 class Directory(object):
 
@@ -26,15 +27,13 @@ class Directory(object):
     rc_file = None  # file handler for rc file
     env_file = None  # file handler for env file
     shell_util_path = None  # the path to the shell utils file
+    logger = logger
 
-    def __init__(self, namespace,
+    def __init__(self, root_dir,
                  rewrite_config=True,
-                 sprinter_root=os.path.join("~", ".sprinter"),
-                 logger=logging.getLogger('sprinter'),
                  shell_util_path=None):
         """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
-        self.root_dir = os.path.expanduser(os.path.join(sprinter_root, namespace))
-        self.logger = logger
+        self.root_dir = root_dir
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
         self.rewrite_config = rewrite_config
@@ -108,7 +107,7 @@ class Directory(object):
 
     def clear_feature_symlinks(self, feature_name):
         """ Clear the symlinks for a feature in the symlinked path """
-        self.logger.debug("Clearing feature symlinks for %s" % feature_name)
+        logger.debug("Clearing feature symlinks for %s" % feature_name)
         feature_path = self.install_directory(feature_name)
         for d in ('bin', 'lib'):
             if os.path.exists(os.path.join(self.root_dir, d)):
@@ -146,7 +145,7 @@ class Directory(object):
     def __remove_path(self, path):
         """ Remove an object """
         if not os.path.exists(path):
-            self.logger.warn("Attempted to remove a non-existent path %s" % path)
+            logger.warn("Attempted to remove a non-existent path %s" % path)
             return
         try:
             if os.path.isdir(path):
@@ -154,7 +153,7 @@ class Directory(object):
             else:
                 os.unlink(path)
         except OSError:
-            self.logger.error("Unable to remove object at path %s" % path)
+            logger.error("Unable to remove object at path %s" % path)
             raise DirectoryException("Unable to remove object at path %s" % path)
 
     def __get_env_handle(self, root_dir):
@@ -182,11 +181,11 @@ class Directory(object):
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         target_path = os.path.join(self.root_dir, dir_name, name)
-        self.logger.debug("Attempting to symlink %s to %s..." % (path, target_path))
+        logger.debug("Attempting to symlink %s to %s..." % (path, target_path))
         if os.path.exists(target_path):
             if os.path.islink(target_path):
                 os.remove(target_path)
             else:
-                self.logger.warn("%s is not a symlink! please remove it manually." % target_path)
+                logger.warn("%s is not a symlink! please remove it manually." % target_path)
                 return
         os.symlink(path, target_path)

@@ -70,6 +70,8 @@ class Environment(object):
     source = None  # the path to the source handle, the handle itself, or a manifest instance
     target = None  # the path to the target handle, the handle itself, or a manifest instance
     namespace = None  # the namespace of the environment
+    custom_directory_root = None  # the root to install directories too
+    do_inject_environment_config = True  # inject configuration into shells
     sprinter_namespace = None  # the namespace to make installs with. this affects:
     phase = None  # the phase currently running
     # the prefix added to injections
@@ -125,7 +127,7 @@ class Environment(object):
         """ Install the environment """
         self.phase = PHASE.INSTALL
         if not self.directory.new:
-            self.logger.info("Namespace %s already exists!" % self.namespace)
+            self.logger.info("Namespace %s directory already exists!" % self.namespace)
             self.source = load_manifest(self.directory.manifest_path)
             return self.update()
         try:
@@ -252,6 +254,9 @@ class Environment(object):
 
     @warmup
     def inject_environment_config(self):
+        if not self.do_inject_environment_config:
+            return
+
         for shell in SHELL_CONFIG:
             if shell == 'gui':
                 if system.is_debian():
@@ -369,10 +374,15 @@ class Environment(object):
             else:
                 raise SprinterException("No environment name has been specified!")
 
+        self.directory_root = self.custom_directory_root
+
         if not self.directory:
-            self.directory = Directory(self.namespace,
-                                       sprinter_root=self.root,
+            if not self.directory_root:
+                self.directory_root = os.path.join(self.root, self.namespace)
+
+            self.directory = Directory(self.directory_root,
                                        shell_util_path=self.shell_util_path)
+
         if not self.injections:
             self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
                                                             self.namespace),

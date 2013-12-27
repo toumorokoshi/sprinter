@@ -18,8 +18,8 @@ class TestDirectory(object):
 
     def setup(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.directory = Directory('test', rewrite_config=True,
-                                   sprinter_root=self.temp_dir)
+        self.directory = Directory(os.path.join(self.temp_dir, 'test'), 
+                                   rewrite_config=True)
         self.directory.initialize()
 
     def teardown(self):
@@ -40,7 +40,7 @@ class TestDirectory(object):
     def test_initialize_new(self):
         """ The initialize method should return new for a non-existent directory """
         new_temp_dir = self.temp_dir + "e09dia0d"
-        directory = Directory('test', rewrite_config=False, sprinter_root=new_temp_dir)
+        directory = Directory(os.path.join(new_temp_dir, 'test'), rewrite_config=False)
         assert directory.new
         try:
             directory.initialize()
@@ -174,8 +174,7 @@ class TestDirectory(object):
         With the rc_rewrite flag false, an exception should be thrown if
         one attempts to write to it
         """
-        directory = Directory('test', rewrite_config=False,
-                              sprinter_root=self.temp_dir)
+        directory = Directory(os.path.join(self.temp_dir, 'test'), rewrite_config=False)
         directory.add_to_rc("test")
 
     def test_remove(self):

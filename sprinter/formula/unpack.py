@@ -76,8 +76,9 @@ class UnpackFormula(FormulaBase):
         remove_common_prefix = (config.has('remove_common_prefix') and
                                 config.is_affirmative('remove_common_prefix'))
         destination = config.get('target', self.directory.install_directory(self.feature_name))
+        url_type = config.get('type', config.get('url'))
         try:
-            if config.get('type', config.get('url')).endswith("tar.gz"):
+            if url_type.endswith("tar.gz") or url_type.endswith("tar.bz2") or url_type.endswith("tar"):
                 lib.extract_targz(config.get('url'), destination,
                                   remove_common_prefix=remove_common_prefix)
 

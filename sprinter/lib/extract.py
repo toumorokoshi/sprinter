@@ -1,7 +1,6 @@
 """
 Utilities that extract files from packages
 """
-import gzip
 import io
 import os
 import shutil
@@ -13,6 +12,7 @@ import zipfile
 import requests
 
 from .command import call
+from .request import cleaned_request
 
 
 class ExtractException(Exception):
@@ -20,12 +20,15 @@ class ExtractException(Exception):
 
 
 def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
+    extract_tar(url, target_dir, additional_compression="gz",
+                remove_common_prefix=remove_common_prefix, overwrite=overwrite)
+
+def extract_tar(url, target_dir, additional_compression="", remove_common_prefix=False, overwrite=False):
     """ extract a targz and install to the target directory """
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        gz = gzip.GzipFile(fileobj=io.BytesIO(requests.get(url).content))
-        tf = tarfile.TarFile(fileobj=gz)
+        tf = tarfile.TarFile.open(fileobj=io.BytesIO(requests.get(url).content))
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         common_prefix = os.path.commonprefix(tf.getnames())
@@ -35,7 +38,7 @@ def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
             if remove_common_prefix:
                 tfile.name = tfile.name.replace(common_prefix, "", 1)
             if tfile.name != "":
-                target_path = os.path.join(tfile, target_dir)
+                target_path = os.path.join(target_dir, tfile.name)
                 if target_path != target_dir and os.path.exists(target_path):
                     if overwrite:
                         remove_path(target_path)
@@ -77,7 +80,7 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
 
 def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
     if remove_common_prefix:
-        raise Exception("Remove common prefix for zip not implemented yet!")
+        raise Exception("Remove common prefix for dmg not implemented yet!")
     tmpdir = tempfile.mkdtemp()
     try:
         if not os.path.exists(target_dir):
