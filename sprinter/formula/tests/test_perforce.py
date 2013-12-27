@@ -1,6 +1,9 @@
+from __future__ import unicode_literals
 import tempfile
 import shutil
 from mock import Mock, patch
+from nose.tools import ok_
+from nose.plugins.attrib import attr
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib
 
@@ -16,7 +19,7 @@ username = username
 password = password
 port = perforce.local:1666
 client = test_client
-write_p4settings
+write_p4settings = true
 write_password_p4settings = true
 overwrite_p4settings = false
 overwrite_client = false
@@ -35,9 +38,11 @@ class TestPerforceFormula(FormulaTest):
     def teardown(self):
         del(self.environment)
         shutil.rmtree(self.temp_dir)
-        
-    """
-    @patch.object(lib, 'call')
-    def test_install(self, call):
-        self.environment.run_feature("install", 'sync')
-    """
+       
+    @attr('full')
+    def test_install(self):
+        with patch('sprinter.lib.extract_targz') as extract_targz:
+            with patch('sprinter.lib.call') as call:
+                self.environment.run_feature("install", 'sync')
+                ok_(extract_targz.called)
+                ok_(call.caled)

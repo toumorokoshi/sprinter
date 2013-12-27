@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import sprinter.lib as lib
+from sprinter.lib import system
 from sprinter.core import PHASE
 from sprinter.formula.base import FormulaBase
 
@@ -139,11 +140,11 @@ class PerforceFormula(FormulaBase):
         
     def __install_perforce(self, config):
         """ install perforce binary """
-        if not self.system.is64bit():
+        if not system.is_64_bit():
             self.logger.warn("Perforce formula is only designed for 64 bit systems! Not install executables...")
             return False
         version = config.get('version', 'r13.2')
-        key = 'osx' if self.system.isOSX() else 'linux'
+        key = 'osx' if system.is_osx() else 'linux'
         perforce_packages = package_dict[version][key]
         d = self.directory.install_directory(self.feature_name)
         if not os.path.exists(d):
@@ -154,7 +155,7 @@ class PerforceFormula(FormulaBase):
         self.directory.symlink_to_bin("p4", os.path.join(d, "p4"))
         self.p4_command = os.path.join(d, "p4")
         self.logger.info("Installing p4v...")
-        if self.system.isOSX():
+        if system.is_osx():
             return self.__install_p4v_osx(url_prefix + perforce_packages['p4v'])
         else:
             return self.__install_p4v_linux(url_prefix + perforce_packages['p4v'])
@@ -207,7 +208,7 @@ class PerforceFormula(FormulaBase):
         client_dict = config.to_dict()
         client_dict['root_path'] = os.path.expanduser(config.get('root_path'))
         os.chdir(client_dict['root_path'])
-        client_dict['hostname'] = self.system.node
+        client_dict['hostname'] = system.node
         client_dict['p4view'] = config['p4view'] % self.environment.target.get_context_dict()
         client = re.sub('//depot', '    //depot', p4client_template % client_dict)
         self.logger.info(lib.call("%s client -i" % self.p4_command,
