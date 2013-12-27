@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from mock import Mock, call, patch
 from nose import tools
-from nose.tools import eq_, raises
+from nose.tools import eq_, raises, ok_
 from sprinter.testtools import (MockEnvironment,
                                 create_mock_formulabase)
 from sprinter.lib import SprinterException
@@ -220,6 +220,13 @@ env_source_rc = False
         with MockEnvironment(target_config="") as environment:
             del(environment.namespace)
             environment.warmup()
+
+    def test_grab_inputs_in_install(self):
+        """ an install should grab all required inputs at the beginning """
+        with MockEnvironment(test_source, test_target) as environment:
+            environment.grab_inputs = Mock()
+            environment.install()
+            ok_(environment.grab_inputs.called)
 
 missing_formula_config = """
 [missingformula]
