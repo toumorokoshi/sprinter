@@ -88,8 +88,7 @@ def parse_args(argv, Environment=Environment):
 
         elif options['update']:
             target = options['<environment_name>']
-            env.directory = Directory(target,
-                                      sprinter_root=env.root,
+            env.directory = Directory(os.path.join(env.root, target),
                                       shell_util_path=env.shell_util_path)
             env.source = load_manifest(env.directory.manifest_path)
             use_auth = options['--username'] or options['--auth']
@@ -102,22 +101,19 @@ def parse_args(argv, Environment=Environment):
             env.update(reconfigure=options['--reconfigure'])
 
         elif options["remove"]:
-            env.directory = Directory(options['<environment_name>'],
-                                      sprinter_root=env.root,
+            env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
                                       shell_util_path=env.shell_util_path)
             env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
             env.remove()
 
         elif options['deactivate']:
-            env.directory = Directory(options['<environment_name>'],
-                                      sprinter_root=env.root,
+            env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
                                       shell_util_path=env.shell_util_path)
             env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
             env.deactivate()
 
         elif options['activate']:
-            env.directory = Directory(options['<environment_name>'],
-                                      sprinter_root=env.root,
+            env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
                                       shell_util_path=env.shell_util_path)
             env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
             env.activate()
