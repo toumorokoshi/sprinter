@@ -208,7 +208,7 @@ class PerforceFormula(FormulaBase):
         client_dict = config.to_dict()
         client_dict['root_path'] = os.path.expanduser(config.get('root_path'))
         os.chdir(client_dict['root_path'])
-        client_dict['hostname'] = system.node
+        client_dict['hostname'] = system.NODE
         client_dict['p4view'] = config['p4view'] % self.environment.target.get_context_dict()
         client = re.sub('//depot', '    //depot', p4client_template % client_dict)
         self.logger.info(lib.call("%s client -i" % self.p4_command,

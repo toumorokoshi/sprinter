@@ -6,7 +6,6 @@ Roadmap
 TODO:
 * unpack has a bug with not symlinking to the proper directory
 * Directory behavior changed to warn if a directory is not a symlink, not throw an error.
-* test authenticated get catches unauthorized error
 * test the 'bash' clause in command
 
 This page highlights Sprinter's roadmap to reach 1.0
