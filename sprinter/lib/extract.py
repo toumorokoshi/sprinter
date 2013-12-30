@@ -43,7 +43,7 @@ def extract_tar(url, target_dir, additional_compression="", remove_common_prefix
                     if overwrite:
                         remove_path(target_path)
                     else:
-                        return
+                        continue
                 tf.extract(tfile, target_dir)
     except OSError:
         e = sys.exc_info()[1]
