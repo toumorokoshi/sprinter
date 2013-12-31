@@ -119,5 +119,5 @@ class SSHFormula(FormulaBase):
             'user': config.get('user')
         }
         if config.has('port'):
-            ssh_config_injection += "  port={0}\n".format(config.get('port'))
+            ssh_config_injection += "  Port {0}\n".format(config.get('port'))
         return ssh_config_injection
