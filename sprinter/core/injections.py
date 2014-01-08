@@ -6,7 +6,7 @@ These operations are batched and applied together with the commit
 command, or applied separately with the destructive_inject and
 destructive_clear..
 """
-
+from __future__ import unicode_literals
 import logging
 import os
 import re

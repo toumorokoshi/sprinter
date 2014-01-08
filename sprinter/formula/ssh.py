@@ -11,6 +11,7 @@ user = toumorokoshi
 create = false
 install_command = echo 'hello'
 """
+from __future__ import unicode_literals
 import os
 import logging
 

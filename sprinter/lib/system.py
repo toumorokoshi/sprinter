@@ -5,7 +5,7 @@ as:
 * operating system
 * debian, fedora, or os x based
 """
-
+from __future__ import unicode_literals
 import platform
 import re
 

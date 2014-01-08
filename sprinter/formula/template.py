@@ -10,6 +10,7 @@ username = %(config:username)s
 password = %(config:mywebsitepassword)s
 on_update = false
 """
+from __future__ import unicode_literals
 import os
 
 from sprinter.formula.base import FormulaBase

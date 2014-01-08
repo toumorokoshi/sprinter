@@ -8,6 +8,7 @@ user = %(config:user)
 MAVEN_HOME = %(maven:root_dir)
 M2_PATH = ~/.m2/
 """
+from __future__ import unicode_literals
 from sprinter.formula.base import FormulaBase
 
 

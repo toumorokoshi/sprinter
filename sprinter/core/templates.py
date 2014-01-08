@@ -1,6 +1,7 @@
 """
 A storage area for templates as strings
 """
+from __future__ import unicode_literals
 
 # utils.sh is the same for every namespace, only sourced once
 shell_utils_template = """

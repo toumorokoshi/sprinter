@@ -1,6 +1,7 @@
 """
 Utility methods for brew
 """
+from __future__ import unicode_literals
 import logging
 import os
 from sprinter.lib import extract_targz

@@ -10,6 +10,7 @@ url = https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz
 target = /tmp/
 """
 
+from __future__ import unicode_literals
 import os
 
 from sprinter.formula.base import FormulaBase

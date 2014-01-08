@@ -1,6 +1,7 @@
 """
 Methods to manipulate the global configuration
 """
+from __future__ import unicode_literals
 import logging
 import os
 

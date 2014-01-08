@@ -16,6 +16,7 @@ write_password_p4settings = true
 overwrite_p4settings = false
 overwrite_client = false
 """
+from __future__ import unicode_literals
 import os
 import re
 import shutil

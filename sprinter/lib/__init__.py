@@ -3,6 +3,7 @@ Library module for sprinter. To handle a lot of the typical
 features of the library.
 
 """
+from __future__ import unicode_literals
 import logging
 import re
 
