@@ -15,6 +15,16 @@ fedora_match = re.compile(".*(RHEL).*", re.IGNORECASE)
 SYSTEM, NODE, RELEASE, VERSION, ARCHITECTURE, PROCESSOR = platform.uname()
 LINUX_DISTRO, LINUX_VERSION, LINUX_VERSION_NAME = platform.dist()
 
+def get_system_info():
+    """ return the system info as a string """
+    return (
+        "operating system = " + operating_system() + "\n" +
+        "is officially supported = " + str(is_officially_supported()) + "\n" +
+        "node = "   + NODE + "\n" +
+        "release = " + RELEASE + "\n" +
+        "version = " + VERSION + "\n" +
+        "architecture = " + ARCHITECTURE + "\n"
+    )
 
 def is_debian():
         """ returns true if the system is debian based """
