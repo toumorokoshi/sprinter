@@ -1,8 +1,6 @@
 """
 A location for various structs/class bases
 """
-from __future__ import unicode_literals
-
 
 class Singleton(type):
     """
