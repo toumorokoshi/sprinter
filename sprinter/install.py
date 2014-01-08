@@ -19,7 +19,7 @@ Options:
   -i, --ignore-errors                       Ignore errors in a formula
   --allow-bad-certificate                   Do not verify ssl certificates when pulling environment configurations
 """
-
+from __future__ import unicode_literals
 import logging
 import os
 import signal

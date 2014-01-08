@@ -1,6 +1,8 @@
 """
 Utilities that extract files from packages
 """
+from __future__ import unicode_literals
+import gzip
 import io
 import os
 import shutil

@@ -3,6 +3,7 @@
 Formula base is an abstract base class outlining the method required
 and some documentation on what they should provide.
 """
+from __future__ import unicode_literals
 import logging
 import os
 

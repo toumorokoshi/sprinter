@@ -6,6 +6,7 @@ formula = sprinter.formula.package
 apt-get = git
 brew = git
 """
+from __future__ import unicode_literals
 import logging
 from sprinter import lib
 from sprinter.lib import system

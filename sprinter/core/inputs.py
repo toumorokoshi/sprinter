@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from sprinter import lib
 
 INPUT_EMPTY_VALUE = object()
