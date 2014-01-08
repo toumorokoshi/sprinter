@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from sprinter import lib
 from sprinter.lib import SprinterException
 from sprinter.external.pippuppet import Pip, PipException
+import sys
 import logging
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,7 @@ class FeatureDict(dict):
                     else:
                         del(self[key])
                 except SprinterException:
+                    logger.debug("Exception details", exc_info=sys.exc_info())
                     self._environment.log_error("ERROR: Invalid formula {0} for {1} feature {2}!".format(
                         feature_config.get('formula'), kind, feature))
             else:
@@ -84,6 +86,7 @@ class FeatureDict(dict):
                     try:
                         self._formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
                     except ImportError:
+                        logger.debug("FeatureDict import Error", exc_info=sys.exc_info())
                         raise SprinterException("Error: Unable to retrieve formula %s!" % formula_class)
                 except PipException:
                     logger.error("ERROR: Unable to download %s!" % formula_class)
