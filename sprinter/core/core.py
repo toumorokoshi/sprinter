@@ -1,7 +1,6 @@
 """
 Contains core dependencies
 """
-from __future__ import unicode_literals
 from sprinter.lib.structures import Enum, EnumInstance
 
 PHASE = Enum(
