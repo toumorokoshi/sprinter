@@ -54,4 +54,4 @@ class TestSSHFormula(FormulaTest):
         """ If port is included, port should be injected in the ssh config """
         self.environment.injections.inject = Mock()
         self.environment.run_feature("port", "sync")
-        ok_("port=4444" in self.environment.injections.inject.call_args[0][1])
+        ok_("Port 4444" in self.environment.injections.inject.call_args[0][1])
