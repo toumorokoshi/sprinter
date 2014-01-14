@@ -15,7 +15,7 @@ echo "Creating python sandbox..."
 if [[ `uname` == 'Linux' ]]; then
     wget https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
 elif [[ `uname` == 'Darwin' ]]; then
-    curl -o -l sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master
+    curl -o -L sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master
 fi
 echo "Installing sprinter to sandbox..."
 python bootstrap.py || error "Failure with bootstrap.py!"
