@@ -34,7 +34,7 @@ class SSHFormula(FormulaBase):
 
     required_options = FormulaBase.required_options + ['keyname', 'hostname', 'user', 'host']
     valid_options = FormulaBase.valid_options + ['override', 'install_command', 'create',
-                                                 'nopassphrase', 'type', 'ssh_path', 'use_global_ssh']
+                                                 'nopassphrase', 'type', 'ssh_path', 'use_global_ssh', 'port']
 
     def prompt(self):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
