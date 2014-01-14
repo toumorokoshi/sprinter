@@ -327,7 +327,9 @@ class Environment(object):
         """ Write the debug log to a file """
         with open(file_path, "w+") as fh:
             fh.write(system.get_system_info())
-            fh.write(self._debug_stream.getvalue())
+            # writing to debug stream
+            self._debug_stream.seek(0)
+            fh.write(self._debug_stream.read())
             fh.write("The following errors occured:\n")
             for error in self._errors:
                 fh.write(error + "\n")
