@@ -14,7 +14,7 @@ import re
 
 import sprinter.lib as lib
 from sprinter.formula.base import FormulaBase
-from sprinter.external.virtualenv import create_environment as create_virtualenv
+from sprinter.external.virtualenv import file_search_dirs, create_environment as create_virtualenv
 
 # a list of regex's that should no be symlinked to the bin path
 BLACKLISTED_EXECUTABLES = [
@@ -29,7 +29,8 @@ class EggscriptFormula(FormulaBase):
     valid_options = FormulaBase.valid_options + ['egg', 'eggs', 'redownload']
 
     def install(self):
-        create_virtualenv(self.directory.install_directory(self.feature_name))
+        create_virtualenv(self.directory.install_directory(self.feature_name),
+                          search_dirs=file_search_dirs())
         self.__install_eggs(self.target)
         self.__add_paths(self.target)
         return FormulaBase.install(self)
