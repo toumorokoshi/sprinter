@@ -15,25 +15,22 @@ echo "Creating python sandbox..."
 if [[ `uname` == 'Linux' ]]; then
     wget https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
 elif [[ `uname` == 'Darwin' ]]; then
-    curl -o virtualenv.py https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
+    curl -o -l sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master
 fi
-python virtualenv.py sprinter-dir
-cd sprinter-dir
 echo "Installing sprinter to sandbox..."
-bin/easy_install http://github.com/toumorokoshi/sprinter/tarball/master
+python bootstrap.py || error "Failure with bootstrap.py!"
+bin/buildout -c buildout-install.cfg || error "Failure with buildout!"
  
-# Put your Commands here. e.g.:
 echo "Removing sprinter environment if it already exists..."
-bin/sprinter remove sprinter
+bin/sprinter remove sprinter || error "Failure removing sprinter!"
 if [[ -d ~/.sprinter/sprinter/ ]]; then
     echo "Sprinter environment was not removed cleanly. Forcefully removing..."
-    rm -rf ~/.sprinter/sprinter/
+    rm -rf ~/.sprinter/sprinter/ || error "Failure forcefully removing sprinter!"
 fi
 echo "Installing global sprinter..."
-bin/sprinter install https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter.cfg
- 
+bin/sprinter install https://raw.github.com/toumorokoshi/sprinter/master/examples/sprinter.cfg || error "Issue installing global sprinter!"
  
 # finally, delete the temporary directory
 echo "Cleaning up..."
-rm -r /tmp/sprinter-sandbox
+rm -r /tmp/sprinter-sandbox || error "Issue cleaning up!"
 echo "Done!"
