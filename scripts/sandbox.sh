@@ -14,7 +14,7 @@ cd /tmp/sprinter-sandbox
 echo "Downlading sprinter..."
 # install virtualenv
 if [[ `uname` == 'Linux' ]]; then
-    wget https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
+    wget -O sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master
 elif [[ `uname` == 'Darwin' ]]; then
     curl -o sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master -L
 fi
