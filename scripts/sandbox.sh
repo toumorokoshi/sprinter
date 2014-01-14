@@ -15,11 +15,12 @@ echo "Creating python sandbox..."
 if [[ `uname` == 'Linux' ]]; then
     wget https://raw.github.com/toumorokoshi/sprinter/master/sprinter/external/virtualenv.py
 elif [[ `uname` == 'Darwin' ]]; then
-    curl -o -L sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master
+    curl -o sprinter.tar.gz http://github.com/toumorokoshi/sprinter/tarball/master -L
 fi
-echo "Installing sprinter to sandbox..."
+tar -xzvf sprinter.tar.gz --strip-components=1 &> /dev/null || error "Failure extracting sprinter targz!"
 python bootstrap.py || error "Failure with bootstrap.py!"
-bin/buildout -c buildout-install.cfg || error "Failure with buildout!"
+echo "Installing sprinter to sandbox..."
+bin/buildout -c buildout-install.cfg &> /dev/null || error "Failure with buildout!"
  
 echo "Removing sprinter environment if it already exists..."
 bin/sprinter remove sprinter || error "Failure removing sprinter!"
