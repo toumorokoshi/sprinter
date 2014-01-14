@@ -2,8 +2,6 @@
 Utilities that extract files from packages
 """
 from __future__ import unicode_literals
-import gzip
-import io
 import os
 import shutil
 import sys
@@ -11,15 +9,12 @@ import tarfile
 import tempfile
 import zipfile
 
-import requests
-
 from .command import call
-from .request import cleaned_request
+from .request import download_to_bytesio 
 
 
 class ExtractException(Exception):
     """ Returned if there was an issue with extracting a package """
-
 
 def extract_targz(url, target_dir, remove_common_prefix=False, overwrite=False):
     extract_tar(url, target_dir, additional_compression="gz",
@@ -30,7 +25,7 @@ def extract_tar(url, target_dir, additional_compression="", remove_common_prefix
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        tf = tarfile.TarFile.open(fileobj=io.BytesIO(requests.get(url).content))
+        tf = tarfile.TarFile.open(fileobj=download_to_bytesio(url))
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         common_prefix = os.path.commonprefix(tf.getnames())
@@ -59,7 +54,7 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        memory_file = io.BytesIO(requests.get(url).content)
+        memory_file = download_to_bytesio(url)
         zip_file = zipfile.ZipFile(memory_file)
         common_prefix = os.path.commonprefix(zip_file.namelist())
         for zip_file_info in zip_file.infolist():
@@ -89,7 +84,7 @@ def extract_dmg(url, target_dir, remove_common_prefix=False, overwrite=False):
             os.makedirs(target_dir)
         temp_file = os.path.join(tmpdir, "temp.dmg")
         with open(temp_file, 'wb+') as fh:
-            fh.write(cleaned_request('get', url).content)
+            fh.write(download_to_bytesio(url).read())
         call("hdiutil attach %s -mountpoint /Volumes/a/" % temp_file)
         for f in os.listdir("/Volumes/a/"):
             if not f.startswith(".") and f != ' ':

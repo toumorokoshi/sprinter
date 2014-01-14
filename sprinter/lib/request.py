@@ -1,6 +1,11 @@
 from __future__ import unicode_literals
-import requests
 
+import logging
+import requests
+import io
+from clint.textui import progress
+
+logger = logging.getLogger()
 
 class BadCredentialsException(Exception):
     """ Returned if the credentials are incorrect """
@@ -31,3 +36,15 @@ def cleaned_request(request_type, *args, **kwargs):
     # this removes netrc checking
     s.trust_env = False
     return s.request(request_type, *args, **kwargs)
+
+def download_to_bytesio(url):
+    """ Return a bytesio object with a download bar """
+    logger.info("Downloading url: {0}".format(url))
+    r = cleaned_request('get', url, stream=True)
+    stream = io.BytesIO()
+    total_length = int(r.headers.get('content-length'))
+    for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1): 
+        if chunk:
+            stream.write(chunk)
+    stream.seek(0)
+    return stream

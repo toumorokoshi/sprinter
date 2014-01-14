@@ -17,7 +17,8 @@ setup(name='sprinter',
           'requests>=1.2.3',
           'pip>=1.4',
           'docopt>=0.6.1',
-          'six>=1.4.1'
+          'six>=1.4.1',
+          'clint>=0.3.3'
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',
