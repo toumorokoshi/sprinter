@@ -15,7 +15,7 @@ setup(name='sprinter',
       packages=find_packages(),
       install_requires=[
           'requests>=1.2.3',
-          'pip>=1.3.1',
+          'pip>=1.5',
           'docopt>=0.6.1',
           'six>=1.4.1'
       ],
