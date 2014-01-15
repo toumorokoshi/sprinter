@@ -54,14 +54,14 @@ parent = me
 
 child_manifest = """
 [config]
-parent = {0}
+extends = {0}
 
 [parent_section]
 parent = not me
 
 [child_section]
 child = me
-"""
+""".strip()
 
 
 class TestManifest(object):
@@ -85,15 +85,13 @@ class TestManifest(object):
             fh.write(parent_manifest)
 
         with open(child_file_path, 'w') as fh:
-            fh.write(child_manifest.format(parent_manifest))
+            fh.write(child_manifest.format(parent_file_path))
 
         manifest = load_manifest(child_file_path)
 
-        assert (manifest.get('config', 'namespace') == 'inheritance', 
-                "Value not present in child should be pulled from parent!")
+        assert manifest.get('config', 'namespace') == 'inheritance', "Value not present in child should be pulled from parent!"
 
-        assert (manifest.get('parent_section', 'parent') == 'not me', 
-                "child value should override parent value!")
+        assert manifest.get('parent_section', 'parent') == 'not me', "child value should override parent value!"
 
     def test_load_manifest_no_inheritance(self):
         """ load_manifest should not load ancestors with inherit=False """
@@ -104,12 +102,11 @@ class TestManifest(object):
             fh.write(parent_manifest)
 
         with open(child_file_path, 'w') as fh:
-            fh.write(child_manifest.format(parent_manifest))
+            fh.write(child_manifest.format(parent_file_path))
 
         manifest = load_manifest(child_file_path, do_inherit=False)
 
-        assert (manifest.get('parent_section', 'parent') == 'me', 
-                "child value should override parent value!")
+        assert not manifest.has_option('config', 'namespace')
         
     def test_dependency_order(self):
         """ Test whether a proper dependency tree generated the correct output. """

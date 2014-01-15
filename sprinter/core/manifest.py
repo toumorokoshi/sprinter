@@ -68,7 +68,7 @@ def _load_manifest_interpret_source(manifest, source, username=None, password=No
         if manifest.has_option('config', 'extends') and do_inherit:
             parent_manifest = configparser.RawConfigParser()
             _load_manifest_interpret_source(parent_manifest, 
-                                            manifest.get('config', 'source'),
+                                            manifest.get('config', 'extends'),
                                             username=username,
                                             password=password,
                                             verify_certificate=verify_certificate)
