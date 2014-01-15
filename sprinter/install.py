@@ -90,7 +90,7 @@ def parse_args(argv, Environment=Environment):
             target = options['<environment_name>']
             env.directory = Directory(os.path.join(env.root, target),
                                       shell_util_path=env.shell_util_path)
-            env.source = load_manifest(env.directory.manifest_path)
+            env.source = load_manifest(env.directory.manifest_path, do_inherit=False)
             use_auth = options['--username'] or options['--auth']
             if use_auth:
                 options = get_credentials(options, target)
@@ -103,19 +103,25 @@ def parse_args(argv, Environment=Environment):
         elif options["remove"]:
             env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
                                       shell_util_path=env.shell_util_path)
-            env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.source = load_manifest(env.directory.manifest_path, 
+                                       namespace=options['<environment_name>'], 
+                                       do_inherit=False)
             env.remove()
 
         elif options['deactivate']:
             env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
                                       shell_util_path=env.shell_util_path)
-            env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.source = load_manifest(env.directory.manifest_path, 
+                                       namespace=options['<environment_name>'],
+                                       do_inherit=False)
             env.deactivate()
 
         elif options['activate']:
             env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
                                       shell_util_path=env.shell_util_path)
-            env.source = load_manifest(env.directory.manifest_path, namespace=options['<environment_name>'])
+            env.source = load_manifest(env.directory.manifest_path, 
+                                       namespace=options['<environment_name>'],
+                                       do_inherit=False)
             env.activate()
 
         elif options['environments']:

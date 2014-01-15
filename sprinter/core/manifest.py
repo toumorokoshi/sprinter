@@ -32,34 +32,52 @@ MANIFEST_NULL_KEY = object()
 logger = logging.getLogger(__name__)
 
 
-def load_manifest(raw_manifest, namespace=None, username=None, password=None, verify_certificate=True):
+def load_manifest(raw_manifest, namespace=None, **kwargs):
     """ wrapper method which generates the manifest from various sources """
     if isinstance(raw_manifest, configparser.RawConfigParser):
         return Manifest(raw_manifest)
     manifest = configparser.RawConfigParser()
     manifest.add_section('config')
-    
+
+    _load_manifest_interpret_source(manifest, 
+                                    raw_manifest, 
+                                    **kwargs)
+
+    return Manifest(manifest, namespace=namespace)
+
+def _load_manifest_interpret_source(manifest, source, username=None, password=None, verify_certificate=True, do_inherit=True):
+    """ Interpret the <source>, and load the results into <manifest> """
     try:
-        if isinstance(raw_manifest, string_types):
-            if raw_manifest.startswith("http"):
+        if isinstance(source, string_types):
+            if source.startswith("http"):
                 # if manifest is a url
-                _load_manifest_from_url(manifest, raw_manifest,
+                _load_manifest_from_url(manifest, source,
                                         verify_certificate=verify_certificate,
                                         username=username, password=password)
             else:
-                _load_manifest_from_file(manifest, raw_manifest)
+                _load_manifest_from_file(manifest, source)
             if not manifest.has_option('config', 'source'):
-                manifest.set('config', 'source', str(raw_manifest))
+                manifest.set('config', 'source', str(source))
         else:
-            # assume raw_manifest is a file pointer
-            manifest.readfp(raw_manifest)
+            # assume source is a file pointer
+            manifest.readfp(source)
+        if manifest.has_option('config', 'extends') and do_inherit:
+            parent_manifest = configparser.RawConfigParser()
+            _load_manifest_interpret_source(parent_manifest, 
+                                            manifest.get('config', 'source'),
+                                            username=username,
+                                            password=password,
+                                            verify_certificate=verify_certificate)
+            for s in parent_manifest.sections():
+                for k, v in parent_manifest.items(s):
+                    if not manifest.has_option(s, k):
+                        manifest.set(s, k, v)
 
     except configparser.Error:
         logger.debug("", exc_info=True)
         error_message = sys.exc_info()[1]
         raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
-
-    return Manifest(manifest, namespace=namespace)
+    
 
 
 def _load_manifest_from_url(manifest, url, verify_certificate=True, username=None, password=None):

@@ -44,6 +44,25 @@ http_manifest = """
 formula = sprinter.formulas.git
 """
 
+parent_manifest = """
+[config]
+namespace = inheritance
+
+[parent_section]
+parent = me
+"""
+
+child_manifest = """
+[config]
+parent = {0}
+
+[parent_section]
+parent = not me
+
+[child_section]
+child = me
+"""
+
 
 class TestManifest(object):
     """
@@ -54,6 +73,44 @@ class TestManifest(object):
         self.old_manifest = load_manifest(StringIO(old_manifest))
         self.new_manifest = load_manifest(StringIO(new_manifest))
 
+    def test_load_manifest_inheritance(self):
+        """ 
+        With a parent, a child manifest should load it's parent manifest,
+        with child values overriding parent values
+        """
+        temp_directory = tempfile.mkdtemp()
+        parent_file_path = os.path.join(temp_directory, 'parent.cfg')
+        child_file_path = os.path.join(temp_directory, 'child.cfg')
+        with open(parent_file_path, 'w') as fh:
+            fh.write(parent_manifest)
+
+        with open(child_file_path, 'w') as fh:
+            fh.write(child_manifest.format(parent_manifest))
+
+        manifest = load_manifest(child_file_path)
+
+        assert (manifest.get('config', 'namespace') == 'inheritance', 
+                "Value not present in child should be pulled from parent!")
+
+        assert (manifest.get('parent_section', 'parent') == 'not me', 
+                "child value should override parent value!")
+
+    def test_load_manifest_no_inheritance(self):
+        """ load_manifest should not load ancestors with inherit=False """
+        temp_directory = tempfile.mkdtemp()
+        parent_file_path = os.path.join(temp_directory, 'parent.cfg')
+        child_file_path = os.path.join(temp_directory, 'child.cfg')
+        with open(parent_file_path, 'w') as fh:
+            fh.write(parent_manifest)
+
+        with open(child_file_path, 'w') as fh:
+            fh.write(child_manifest.format(parent_manifest))
+
+        manifest = load_manifest(child_file_path, do_inherit=False)
+
+        assert (manifest.get('parent_section', 'parent') == 'me', 
+                "child value should override parent value!")
+        
     def test_dependency_order(self):
         """ Test whether a proper dependency tree generated the correct output. """
         sections = self.old_manifest.formula_sections()
