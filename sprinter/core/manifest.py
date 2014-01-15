@@ -20,6 +20,7 @@ from six.moves import configparser
 from six import string_types
 import requests
 import sprinter.lib as lib
+from sprinter.lib.compatability import create_configparser
 from sprinter.lib.dependencytree import DependencyTree, DependencyTreeException
 from .featureconfig import FeatureConfig
 from .inputs import Inputs
@@ -36,8 +37,11 @@ def load_manifest(raw_manifest, namespace=None, **kwargs):
     """ wrapper method which generates the manifest from various sources """
     if isinstance(raw_manifest, configparser.RawConfigParser):
         return Manifest(raw_manifest)
-    manifest = configparser.RawConfigParser()
-    manifest.add_section('config')
+
+    manifest = create_configparser()
+
+    if not manifest.has_section('config'):
+        manifest.add_section('config')
 
     _load_manifest_interpret_source(manifest, 
                                     raw_manifest, 
