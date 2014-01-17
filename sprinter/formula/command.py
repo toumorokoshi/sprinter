@@ -14,13 +14,21 @@ deactivate=echo 'deactivating...'
 from __future__ import unicode_literals
 from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
+import subprocess
 
 class CommandFormulaException(Exception):
     pass
 
 class CommandFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['install', 'update', 'remove', 'activate', 'deactivate', 'fail_on_error', 'shell']
+    valid_options = FormulaBase.valid_options + ['install', 
+                                                 'update', 
+                                                 'remove', 
+                                                 'activate', 
+                                                 'deactivate', 
+                                                 'fail_on_error', 
+                                                 'shell',
+                                                 'redirect_stdout_to_log']
 
     def install(self):
         self.__run_command('install', 'target')
@@ -48,6 +56,7 @@ class CommandFormula(FormulaBase):
             command = config.get(command_type)
             self.logger.debug("Running %s..." % command)
             shell = config.has('shell') and config.is_affirmative('shell')
-            return_code, output = lib.call(command, shell=shell)
+            stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
+            return_code, output = lib.call(command, shell=shell, stdout=stdout)
             if config.is_affirmative('fail_on_error', True) and return_code != 0:
                 raise CommandFormulaException("Command returned a return code of {0}!".format(return_code))

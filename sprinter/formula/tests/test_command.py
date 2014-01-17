@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from mock import patch
 from sprinter.testtools import FormulaTest
+import subprocess
 import sprinter.lib as lib
 
 source_config = """
@@ -45,6 +46,11 @@ fail_on_error = true
 formula = sprinter.formula.command
 install = exit 1
 fail_on_error = false
+
+[dont-log]
+formula = sprinter.formula.command
+install = ls
+redirect_stdout_to_log = false
 """
 
 
@@ -62,27 +68,27 @@ class TestCommandFormula(FormulaTest):
     @patch.object(lib, 'call')
     def test_install(self, call):
         self.environment.run_feature("install", 'sync')
-        call.assert_called_once_with("echo 'setting up...'", shell=False)
+        call.assert_called_once_with("echo 'setting up...'", shell=False, stdout=subprocess.PIPE)
 
     @patch.object(lib, 'call')
     def test_update(self, call):
         self.environment.run_feature("update", 'sync')
-        call.assert_called_once_with("echo 'update up...'", shell=False)
+        call.assert_called_once_with("echo 'update up...'", shell=False, stdout=subprocess.PIPE)
 
     @patch.object(lib, 'call')
     def test_remove(self, call):
         self.environment.run_feature("remove", 'sync')
-        call.assert_called_once_with("echo 'destroy up...'", shell=False)
+        call.assert_called_once_with("echo 'destroy up...'", shell=False, stdout=subprocess.PIPE)
 
     @patch.object(lib, 'call')
     def test_deactivate(self, call):
         self.environment.run_feature("deactivate", 'deactivate')
-        call.assert_called_once_with("echo 'deactivating...'", shell=False)
+        call.assert_called_once_with("echo 'deactivating...'", shell=False, stdout=subprocess.PIPE)
 
     @patch.object(lib, 'call')
     def test_activate(self, call):
         self.environment.run_feature("activate", 'activate')
-        call.assert_called_once_with("echo 'activating...'", shell=False)
+        call.assert_called_once_with("echo 'activating...'", shell=False, stdout=subprocess.PIPE)
         
     @patch.object(lib, 'call')
     def test_failure(self, call):
@@ -104,4 +110,10 @@ class TestCommandFormula(FormulaTest):
         """The shell clause should make the command run with shell """
         is_affirmative.return_value = True
         self.environment.run_feature("with-shell", 'sync')
-        call.assert_called_once_with("echo 'installing...'", shell=True)
+        call.assert_called_once_with("echo 'installing...'", shell=True, stdout=subprocess.PIPE)
+
+    def test_shell_redirect_to_stdout(self):
+        """ Shell with redirect_stdout_to_log as False should print to stdout """
+        with patch('sprinter.lib.call') as call:
+            self.environment.run_feature('dont-log', 'sync')
+            call.assert_called_once_with("ls", shell=False, stdout=None)
