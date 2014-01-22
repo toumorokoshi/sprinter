@@ -540,8 +540,8 @@ class Environment(object):
         """ copy source user configuration to target """
         if self.source and self.target:
             for k, v in self.source.items('config'):
-                if not self.target.has_option('config', k):
-                    self.target.set('config', k, v)
+                # always have source override target.
+                self.target.set('config', k, v)
 
     def grab_inputs(self, reconfigure=False):
         """ Resolve the source and target config section """

@@ -228,6 +228,15 @@ env_source_rc = False
             environment.install()
             ok_(environment.grab_inputs.called)
 
+    def test_source_to_target_config(self):
+        """ On an update, values in the config section should be preserved """
+        with MockEnvironment(test_input_source, test_input_target) as environment:
+            environment.directory = Mock(spec=environment.directory)
+            environment.directory.new = False
+            environment.update()
+            eq_(environment.target.get('config', 'my_custom_value'), 'foo')
+            eq_(environment.target.get('config', 'non_custom_value'), 'baz')
+
 missing_formula_config = """
 [missingformula]
 
@@ -246,4 +255,17 @@ namespace = testsprinter
 
 [testfeature]
 formula = sprinter.formula.base
+"""
+
+test_input_source = """
+[config]
+namespace = testsprinter
+my_custom_value = foo
+"""
+
+test_input_target = """
+[config]
+namespace = testsprinter
+my_custom_value = bar
+non_custom_value = baz
 """
