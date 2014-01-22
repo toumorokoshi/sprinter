@@ -164,7 +164,8 @@ class Manifest(object):
     def write(self, file_handle):
         """ write the current state to a file manifest """
         for k, v in self.inputs.write_values().items():
-            self.set('config', k, v)
+            if not self.has_option('config', k):
+                self.set('config', k, v)
         self.set('config', 'namespace', self.namespace)
         self.manifest.write(file_handle)
 
