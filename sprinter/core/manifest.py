@@ -160,6 +160,11 @@ class Manifest(object):
         """
         return self.has_option(section, option) and \
             lib.is_affirmative(self.get(section, option))
+
+    def set_input(self, key, value):
+        if self.inputs.is_input(key):
+            self.inputs.set_input(key, value)
+        self.set('config', key, value)
     
     def write(self, file_handle):
         """ write the current state to a file manifest """
@@ -169,7 +174,7 @@ class Manifest(object):
         self.manifest.write(file_handle)
 
     def grab_inputs(self, force=False):
-        self.inputs.prompt_unset_inputs()
+        self.inputs.prompt_unset_inputs(force=force)
 
     def get_feature_config(self, feature_name):
         """ Return a FeatureConfig for the feature name provided """

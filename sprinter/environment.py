@@ -541,11 +541,10 @@ class Environment(object):
         if self.source and self.target:
             for k, v in self.source.items('config'):
                 # always have source override target.
-                self.target.set('config', k, v)
+                self.target.set_input(k, v)
 
     def grab_inputs(self, reconfigure=False):
         """ Resolve the source and target config section """
         self._copy_source_to_target()
-
         if self.target:
             self.target.grab_inputs(force=reconfigure)
