@@ -4,7 +4,7 @@ import shutil
 from mock import Mock, patch
 from nose.tools import ok_
 from nose.plugins.attrib import attr
-from sprinter.testtools import FormulaTest
+from sprinter.testtools import FormulaTest, set_os_types
 import sprinter.lib as lib
 
 source_config = """
@@ -42,7 +42,8 @@ class TestPerforceFormula(FormulaTest):
     @attr('full')
     def test_install(self):
         with patch('sprinter.lib.extract_targz') as extract_targz:
-            with patch('sprinter.lib.call') as call:
-                self.environment.run_feature("install", 'sync')
-                ok_(extract_targz.called)
-                ok_(call.caled)
+            with set_os_types(debian=True):
+                with patch('sprinter.lib.call') as call:
+                    self.environment.run_feature("install", 'sync')
+                    ok_(extract_targz.called)
+                    ok_(call.caled)
