@@ -169,3 +169,25 @@ class FormulaBase(object):
         """ Log an error for the feature """
         key = (self.feature_name, self.target.get('formula'))
         self.environment.log_feature_error(key, "ERROR: " + message)
+
+    def _prompt_value(self, key, prompt_string, default=None, only_if_empty=True):
+        """prompts the user for a value, and saves it to either the target or
+        source manifest (whichever is appropriate for the phase)
+        
+        this method takes will default to the original value passed by
+        the user in the case one exists. e.g. if a user already
+        answered 'yes' to a question, it will use 'yes' as the default
+        vs the one passed into this method.
+        """
+        main_manifest = self.target or self.source
+
+        if only_if_empty and main_manifest.has(key):
+            return main_manifest.get(key)
+
+        prompt_default = default
+        if self.source and self.source.has(key):
+            prompt_default = self.source.get(key)
+
+        main_manifest.set(key,
+                          lib.prompt(prompt_string,
+                                     default=prompt_default))

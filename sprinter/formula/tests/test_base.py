@@ -5,6 +5,9 @@ from sprinter.testtools import FormulaTest
 from sprinter.formula.base import FormulaBase
 
 source_config = """
+[prompt_value_source]
+formula = sprinter.formula.base
+source_value = old
 """
 
 target_config = """
@@ -26,6 +29,13 @@ formula = sprinter.formula.base
 
 [debian]
 systems = debian
+formula = sprinter.formula.base
+
+[prompt_value]
+formula = sprinter.formula.base
+existing_value = here
+
+[prompt_value_source]
 formula = sprinter.formula.base
 """
 
@@ -72,3 +82,24 @@ class TestFormulaBase(FormulaTest):
             assert fb.should_run()
             is_debian.return_value = False
             assert not fb.should_run()
+
+    def test_prompt_value(self):
+        """ _prompt_value should prompt a value if it does not exist in the target """
+        fb = FormulaBase(self.environment, 'prompt_value',
+                         target=self.environment.target.get_feature_config('prompt_value'))
+        with patch('sprinter.lib.prompt') as prompt:
+            prompt.return_value = "foo"
+            fb._prompt_value('existing_value', 'this value exists')
+            assert fb.target.get('existing_value') == "here"
+            fb._prompt_value('non_existing_value', "this value doesn't exists")
+            assert fb.target.get('non_existing_value') == "foo"
+
+    def test_prompt_value_default(self):
+        """ _prompt_value default should be overwritten by the source if it exists """
+        fb = FormulaBase(self.environment, 'prompt_value',
+                         source=self.environment.source.get_feature_config('prompt_value_source'),
+                         target=self.environment.target.get_feature_config('prompt_value_source'))
+        with patch('sprinter.lib.prompt') as prompt:
+            prompt.return_value = "foo"
+            fb._prompt_value('source_value', 'this value exists')
+            prompt.assert_called_once_with('this value exists', default="old")

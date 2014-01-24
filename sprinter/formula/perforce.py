@@ -45,6 +45,11 @@ package_dict = {
             "p4v": "r13.2/bin.linux26x86_64/p4v.tgz"}
     }
 }
+
+WRITE_P4PASSWD_MESSAGE = """
+Insert the perforce password to your p4settings?
+(password will be stored in plaintext in a file in your perforce root)
+""".strip()
                 
     
 class PerforceFormulaException(Exception):
@@ -60,48 +65,41 @@ class PerforceFormula(FormulaBase):
                                                  'client_default',
                                                  'client']
 
-    required_options = FormulaBase.required_options + ['version', 'root_path', 'username',
-                                                       'password', 'port', 'p4view']
+    required_options = FormulaBase.required_options + ['version', 'root_path',
+                                                       'username', 'password',
+                                                       'port', 'p4view']
 
     def prompt(self):
-        if self.target:
-            if not self.target.has('write_p4settings'):
-                self.target.prompt('write_p4settings', 'Write a p4settings file?', default='yes')
-                self.target.set_if_empty('write_p4settings', True)
+        if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
+            self._prompt_value('write_p4settings', "Write a p4settings file?", default="yes")
 
-            if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
-                if self.target.is_affirmative('write_p4settings'):
-                    p4settings_path = os.path.join(os.path.expanduser(self.target.get('root_path')),
-                                                   '.p4settings')
+            if self.target.is_affirmative('write_p4settings'):
+                p4settings_path = os.path.join(os.path.expanduser(self.target.get('root_path')),
+                                               '.p4settings')
+                write_p4settings = True
 
-                    if os.path.exists(p4settings_path):
-                        self.target.prompt(
-                            "overwrite_p4settings",
-                            "p4settings already exists at %s. Overwrite?" % self.target.get('root_path'),
-                            default="no", only_if_empty=True)
+                if os.path.exists(p4settings_path):
+                    self._prompt_value("overwrite_p4settings",
+                                       "p4settings already exists at {0}. Overwrite?".format(self.target.get('root_path')),
+                                       default="no")
+                    write_p4settings = self.target.is_affirmative('overwrite_p4settings')
 
-                    if (self.target.is_affirmative('write_p4settings') and
-                        (not os.path.exists(p4settings_path)
-                         or self.target.is_affirmative('overwrite_p4settings', default=False))):
-                        self.target.prompt(
-                            "write_password_p4settings",
-                            "Insert the perforce password to your p4settings?\n" +
-                            "(password will be stored in plaintext in a file in your perforce root)\n",
-                            default="no", only_if_empty=True)
-                self.target.prompt(
-                    "client",
-                    "Please choose your perforce client",
-                    default=self.target.get('client_default', ''), only_if_empty=True)
-            self.target.prompt(
-                "overwrite_client",
-                "Would you like to overwrite the client workspace in perforce?",
-                default="yes", only_if_empty=True)
+                if write_p4settings:
+                    self._prompt_value("write_password_p4settings",
+                                       WRITE_P4PASSWD_MESSAGE,
+                                       default="no")
+
+            self._prompt_value("client", "Please choose your perforce client",
+                               default=self.target.get('client_default', ''))
+
+            self._prompt_value("overwrite_client",
+                               "Would you like to overwrite the client workspace in perforce?",
+                               default="yes")
 
         elif self.environment.phase == PHASE.REMOVE:
-                self.source.prompt(
-                    "remove_p4root",
-                    "Would you like to completely remove the p4 directory?",
-                    default="no", only_if_empty=True)
+                self._prompt_value("remove_p4root",
+                                   "Would you like to completely remove the p4 directory?",
+                                   default="no")
 
     def install(self):
         config = self.target

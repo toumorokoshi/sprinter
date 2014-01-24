@@ -62,7 +62,7 @@ class Inputs(object):
             for s in sorted(self._inputs):
                 self.get_input(s, force=True)
         else:
-            for s in self.get_unset_inputs():
+            for s in sorted(self.get_unset_inputs()):
                 self.get_input(s, force=force)
 
     def keys(self):

@@ -32,24 +32,19 @@ ssh_config_path = os.path.join(user_ssh_path, "config")
 
 class SSHFormula(FormulaBase):
 
-    required_options = FormulaBase.required_options + ['keyname', 'hostname', 'user', 'host']
-    valid_options = FormulaBase.valid_options + ['override', 'install_command', 'create',
-                                                 'nopassphrase', 'type', 'ssh_path', 'use_global_ssh', 'port']
+    required_options = FormulaBase.required_options + ['keyname', 'hostname',
+                                                       'user', 'host']
+    valid_options = FormulaBase.valid_options + ['override', 'install_command',
+                                                 'create', 'nopassphrase',
+                                                 'type', 'ssh_path',
+                                                 'use_global_ssh', 'port']
 
     def prompt(self):
         if self.environment.phase in (PHASE.INSTALL, PHASE.UPDATE):
             if os.path.exists(ssh_config_path):
-                if not self.target.has('use_global_ssh'):
-                    self.target.prompt("use_global_ssh", 
-                                       "Would you like to use existing ssh configuration?",
-                                       default="no")
-                if (self.injections.in_noninjected_file(
-                        ssh_config_path, "Host %s" % self.target.get('host')) and
-                   not self.target.has('override')):
-                    self.logger.info("SSH config for host %s already exists! Override?" %
-                                     self.target.get('host'))
-                    self.logger.info("Your existing config will not be overwritten, simply inactive.")
-                    self.target.set('override', lib.prompt("Override?", boolean=True, default="no"))
+                self._prompt_value('use_global_ssh',
+                                   "Would you like to manage your own ssh configuration?",
+                                   default="no")
 
     def install(self):
         self.__generate_key(self.target)

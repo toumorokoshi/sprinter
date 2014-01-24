@@ -49,6 +49,7 @@ def load_manifest(raw_manifest, namespace=None, **kwargs):
 
     return Manifest(manifest, namespace=namespace)
 
+
 def _load_manifest_interpret_source(manifest, source, username=None, password=None, verify_certificate=True, do_inherit=True):
     """ Interpret the <source>, and load the results into <manifest> """
     try:
@@ -82,7 +83,6 @@ def _load_manifest_interpret_source(manifest, source, username=None, password=No
         error_message = sys.exc_info()[1]
         raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
     
-
 
 def _load_manifest_from_url(manifest, url, verify_certificate=True, username=None, password=None):
     """ load a url body into a manifest """
