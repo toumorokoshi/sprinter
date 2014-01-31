@@ -405,7 +405,7 @@ class Environment(object):
         """
         # src_path = os.path.join(self.directory.root_dir, source_filename)
         # src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
-        src_exec = "[ -r {0} ] && . {0}".format(os.path.join(self.directory.root_dir, source_filename))
+        src_exec = "[ -r {0} ] && . {0}".format(os.path.join(str(self.directory.root_dir), str(source_filename)))
         # The ridiculous construction above is necessary to avoid failing tests(!)
 
         for config_file in files_to_inject:
