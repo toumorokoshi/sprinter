@@ -260,7 +260,7 @@ class Environment(object):
         for shell in SHELL_CONFIG:
             if shell == 'gui':
                 if system.is_debian():
-                    self._inject_config_source(".env", SHELL_CONFIG['gui']['debian'])
+                    self._inject_config_source(".gui", SHELL_CONFIG['gui']['debian'])
             else:
                 if (self.global_config.has_option('shell', shell)
                    and lib.is_affirmative(self.global_config.get('shell', shell))):
@@ -405,8 +405,7 @@ class Environment(object):
         """
         # src_path = os.path.join(self.directory.root_dir, source_filename)
         # src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
-        src_exec = "[ -r %s/%s ] && . %s/%s" % (self.directory.root_dir, source_filename,
-                                                self.directory.root_dir, source_filename)
+        src_exec = "[ -r {0} ] && . {0}".format(os.path.join(self.directory.root_dir, source_filename))
         # The ridiculous construction above is necessary to avoid failing tests(!)
 
         for config_file in files_to_inject:
@@ -443,9 +442,6 @@ class Environment(object):
         if not os.path.exists(os.path.join(self.root, ".global")):
             self.logger.debug("Global directory doesn't exist! creating...")
             os.makedirs(os.path.join(self.root, ".global"))
-
-        self.logger.debug("Writing global config...")
-        self.global_config.write(open(self.global_config_path, 'w+'))
 
         self.logger.debug("Writing shell util file...")
         with open(self.shell_util_path, 'w+') as fh:

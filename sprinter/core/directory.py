@@ -142,6 +142,16 @@ class Directory(object):
             self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
         self.rc_file.write(content + '\n')
 
+    def add_to_gui(self, content):
+        """
+        add content to the gui script.
+        """
+        if not self.rewrite_config:
+            raise DirectoryException("Error! Directory was not intialized w/ rewrite_config.")
+        if not self.gui_file:
+            self.gui_path, self.gui_file = self.__get_gui_handle(self.root_dir)
+        self.gui_file.write(content + '\n')
+
     def __remove_path(self, path):
         """ Remove an object """
         if not os.path.exists(path):
@@ -159,9 +169,12 @@ class Directory(object):
     def __get_env_handle(self, root_dir):
         """ get the filepath and filehandle to the .env file for the environment """
         env_path = os.path.join(root_dir, '.env')
+        gui_path = os.path.join(root_dir, '.gui')
         fh = open(env_path, "w+")
         # .env will source utils.sh if it hasn't already
-        fh.write(source_template % (self.shell_util_path, self.shell_util_path))
+        fh.write(source_template % (gui_path, gui_path))
+        fh.write(source_template % (self.shell_util_path,
+                                    self.shell_util_path))
         return (env_path, fh)
 
     def __get_rc_handle(self, root_dir):
@@ -172,6 +185,12 @@ class Directory(object):
         # .rc will always source .env
         fh.write(source_template % (env_path, env_path))
         return (rc_path, fh)
+
+    def __get_gui_handle(self, root_dir):
+        """ get the filepath and filehandle to the .env file for the environment """
+        gui_path = os.path.join(root_dir, '.gui')
+        fh = open(gui_path, "w+")
+        return (gui_path, fh)
 
     def __symlink_dir(self, dir_name, name, path):
         """

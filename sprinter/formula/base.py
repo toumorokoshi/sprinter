@@ -14,7 +14,8 @@ import sprinter.lib as lib
 
 class FormulaBase(object):
 
-    valid_options = ['rc', 'env', 'command', 'systems', 'depends', 'inputs']
+    valid_options = ['rc', 'env', 'gui',
+                     'command', 'systems', 'depends', 'inputs']
     required_options = ['formula']
 
     def __init__(self, environment, feature_name, source=None, target=None):
@@ -61,6 +62,8 @@ class FormulaBase(object):
             self.directory.add_to_env(self.target.get('env'))
         if self.target.has('rc'):
             self.directory.add_to_rc(self.target.get('rc'))
+        if self.target.has('gui'):
+            self.directory.add_to_gui(self.target.get('gui'))
         if self.target.has('command'):
             lib.call(self.target.get('command'), shell=True, cwd=cwd)
 

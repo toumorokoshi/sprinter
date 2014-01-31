@@ -5,6 +5,7 @@ Usage:
   sprinter (remove | deactivate | activate) <environment_name> [-v]
   sprinter validate <environment_source> [-avi -u <username> -p <password> --allow-bad-certificate]
   sprinter environments
+  sprinter globals [-r]
   sprinter (-h | --help)
 
 Options:
@@ -30,6 +31,7 @@ import sprinter.lib as lib
 from sprinter.core import PHASE, Manifest, ManifestException, load_manifest, Directory
 from sprinter.environment import Environment
 from sprinter.lib import SprinterException, BadCredentialsException
+from sprinter.core.globals import print_global_config, configure_config, write_config
 
 
 def signal_handler(signal, frame):
@@ -143,6 +145,12 @@ def parse_args(argv, Environment=Environment):
                 print("No errors! Manifest is valid!")
             else:
                 "Manifest is invalid! Please see errors above."
+        elif options['globals']:
+            if options['--reconfigure']:
+                configure_config(env.global_config, reconfigure=True)
+                write_config(env.global_config, env.global_config_path)
+            else:
+                print_global_config(env.global_config)
     except BadCredentialsException:
         e = sys.exc_info()[1]
         raise e

@@ -47,13 +47,36 @@ def load_global_config(config_path):
     if not config.has_section('global'):
         config.add_section('global')
 
-    if not config.has_section('shell'):
-        _configure_shell(config)
-
-    if not config.has_option('global', 'env_source_rc'):
-        _configure_env_source_rc(config)
+    configure_config(config)
+    write_config(config, config_path)
 
     return config
+
+
+def configure_config(config, reconfigure=False):
+    if not config.has_section('shell') or reconfigure:
+        _configure_shell(config)
+
+    if not config.has_option('global', 'env_source_rc') or reconfigure:
+        _configure_env_source_rc(config)
+
+
+def write_config(config, config_path):
+    logger.debug("Writing global config...")
+    with open(config_path, 'w+') as fh:
+        config.write(fh)
+
+
+def print_global_config(global_config):
+    """ print the global configuration """
+    if global_config.has_section('shell'):
+        print("\nShell configurations:")
+        for shell_type, set_value in global_config.items('shell'):
+            print("{0}: {1}".format(shell_type, set_value))
+
+    if global_config.has_option('global', 'env_source_rc'):
+        print("\nHave sprinter env source rc: {0}".format(
+            global_config.get('global', 'env_source_rc')))
 
 
 def create_default_config():
@@ -83,7 +106,7 @@ def _initial_run():
 
 def _configure_shell(config):
     """ Checks and queries values for the shell """
-    config.add_section('shell')
+    config.has_section('shell') or config.add_section('shell')
     logger.info("What shells or environments would you like sprinter to work with?\n" +
                 "(Sprinter will not try to inject into environments not specified here.)\n" +
                 "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n" +
