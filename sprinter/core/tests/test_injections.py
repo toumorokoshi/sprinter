@@ -125,3 +125,11 @@ non-override content
         i.inject(new_file, self.test_injection)
         i.commit()
         assert os.path.exists(new_file), "File was not generated on injection!"
+
+    def test_clear_nonexistent_file(self):
+        """ clear should not create a file """
+        i = Injections("testinjection")
+        new_file = os.path.join(self.temp_dir, "dontcreateme")
+        i.clear(new_file)
+        i.commit()
+        assert not os.path.exists(new_file)

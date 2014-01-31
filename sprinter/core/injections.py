@@ -88,6 +88,8 @@ class Injections(object):
             f.write(new_content)
 
     def destructive_clear(self, filename):
+        if not os.path.exists(os.path.expanduser(filename)):
+            return
         full_path = self.__generate_file(filename)
         with open(full_path, 'r') as f:
             new_content = self.clear_content(f.read())
