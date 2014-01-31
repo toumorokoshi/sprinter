@@ -66,6 +66,7 @@ class TestEnvironment(object):
         with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
             with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
+                environment.directory.root_dir = "/tmp/"
                 environment.directory.new = False
                 environment.update()
                 eq_(formulabase().method_calls, [call.should_run(),
@@ -105,6 +106,7 @@ class TestEnvironment(object):
         with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
             with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
+                environment.directory.root_dir = "/tmp/"
                 environment.directory.new = False
                 environment.activate()
                 eq_(formulabase().method_calls, [call.should_run(),
@@ -232,6 +234,7 @@ env_source_rc = False
         """ On an update, values in the config section should be preserved """
         with MockEnvironment(test_input_source, test_input_target) as environment:
             environment.directory = Mock(spec=environment.directory)
+            environment.directory.root_dir = "/tmp/"
             environment.directory.new = False
             environment.update()
             eq_(environment.target.get('config', 'my_custom_value'), 'foo')
