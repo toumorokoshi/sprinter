@@ -63,6 +63,9 @@ def configure_config(config, reconfigure=False):
 
 def write_config(config, config_path):
     logger.debug("Writing global config...")
+    parent_directory = os.path.dirname(config_path)
+    if not os.path.exists(parent_directory):
+        os.makedirs(parent_directory)
     with open(config_path, 'w+') as fh:
         config.write(fh)
 

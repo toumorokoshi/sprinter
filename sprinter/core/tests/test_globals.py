@@ -26,3 +26,6 @@ class TestGlobalConfig(object):
             assert self.config.get('shell', 'bash') == "false"
             assert self.config.get('shell', 'zsh') == "true"
             assert self.config.get('shell', 'gui') == "true"
+
+    def test_write_globals_no_root(self):
+        """ globals should create the root directory before writing the config, if one doesn't exist """
