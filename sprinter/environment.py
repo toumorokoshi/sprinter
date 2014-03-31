@@ -114,14 +114,14 @@ class Environment(object):
         self.global_path = os.path.join(self.root, ".global")
         self.global_config_path = os.path.join(self.global_path, "config.cfg")
         self.global_config = global_config or load_global_config(self.global_config_path)
-        
+
         self.shell_util_path = os.path.join(self.global_path, "utils.sh")
         self.main_manifest = None
 
         # a dictionary of the errors associated with features.
         # The key is a tuple of feature name and formula, while the value is an instance.
         self._error_dict = defaultdict(list)
-        
+
     @warmup
     def install(self):
         """ Install the environment """
@@ -150,7 +150,7 @@ class Environment(object):
                 self.directory.remove()
                 et, ei, tb = sys.exc_info()
                 reraise(et, ei, tb)
-        
+
     @warmup
     @install_required
     def update(self, reconfigure=False):
@@ -326,18 +326,18 @@ class Environment(object):
     def write_debug_log(self, file_path):
         """ Write the debug log to a file """
         with open(file_path, "w+") as fh:
-            fh.write(system.get_system_info())
+            fh.write(system.get_system_info().encode('utf-8'))
             # writing to debug stream
             self._debug_stream.seek(0)
-            fh.write(self._debug_stream.read())
-            fh.write("The following errors occured:\n")
+            fh.write(self._debug_stream.read().encode('utf-8'))
+            fh.write("The following errors occured:\n".encode('utf-8'))
             for error in self._errors:
-                fh.write(error + "\n")
+                fh.write((error + "\n").encode('utf-8'))
             for k, v in self._error_dict.items():
                 if len(v) > 0:
-                    fh.write("Error(s) in %s with formula %s:\n" % k)
+                    fh.write(("Error(s) in %s with formula %s:\n" % k).encode('utf-8'))
                     for error in v:
-                        fh.write(error + "\n")
+                        fh.write((error + "\n").encode('utf-8'))
 
     def write_manifest(self):
         """ Write the manifest to the file """
@@ -491,7 +491,7 @@ class Environment(object):
         self.error_occured = True
         self._error_dict[feature] += [error_message]
         self.logger.error(error_message)
-            
+
     def run_action(self, feature, action, run_if_error=False):
         """ Run an action, and log it's output in case of errors """
         if len(self._error_dict[feature]) > 0 and not run_if_error:
