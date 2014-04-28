@@ -18,11 +18,11 @@ It's recommended to use Sprinter's standalone installer:
 
 OSX::
 
-    curl -s https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
+    curl -s https://raw.githubusercontent.com/toumorokoshi/sprinter/master/scripts/sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
 
 Debian-Based (e.g. Ubuntu)::
     
-    cd /tmp/; rm sandbox.sh; wget https://raw.github.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
+    cd /tmp/; rm sandbox.sh; wget https://raw.githubusercontent.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
    
 
 You can also install sprinter using easy_install or pip (not recommended, it's easier to update with the standalone)::
