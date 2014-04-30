@@ -6,9 +6,10 @@ import logging
 import tempfile
 import shutil
 import os
-from mock import call, patch
+from mock import call, patch, Mock
 
 from sprinter.install import parse_args, parse_domain
+from sprinter.core.manifest import Manifest
 
 TEST_MANIFEST = \
     """
@@ -51,11 +52,27 @@ class TestInstall(unittest.TestCase):
     @patch('sprinter.environment.Environment')
     def test_install_environment(self, environment):
         """ Test if install calls the proper methods """
-        args = ['install', 'http://www.google.com']
-        calls = [call(logging_level=logging.INFO, ignore_errors=False),
-                 call().install()]
-        parse_args(args, Environment=environment)
-        environment.assert_has_calls(calls)
+        with patch('sprinter.core.manifest.load_manifest') as load_manifest:
+            load_manifest.return_value = Mock(spec=Manifest)
+            args = ['install', 'http://www.google.com']
+            calls = [call(logging_level=logging.INFO, ignore_errors=False),
+                     call().install()]
+            parse_args(args, Environment=environment)
+            environment.assert_has_calls(calls)
+
+    @patch('sprinter.environment.Environment')
+    def test_install_environment_bad_certificate(self, environment):
+        """ Test if install calls the proper methods """
+        with patch('sprinter.core.manifest.load_manifest') as load_manifest:
+            load_manifest.return_value = Mock(spec=Manifest)
+            args = ['install', 'http://www.google.com', '--allow-bad-certificate']
+            calls = [call(logging_level=logging.INFO, ignore_errors=False),
+                     call().install()]
+            parse_args(args, Environment=environment)
+            load_manifest.assert_called_with(
+                'http://www.google.com',
+                verify_certificate=False)
+            environment.assert_has_calls(calls)
 
     @patch('sprinter.environment.Environment')
     def test_errors(self, environment):

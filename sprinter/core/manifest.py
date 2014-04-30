@@ -46,7 +46,6 @@ def load_manifest(raw_manifest, namespace=None, **kwargs):
     _load_manifest_interpret_source(manifest,
                                     raw_manifest,
                                     **kwargs)
-
     return Manifest(manifest, namespace=namespace)
 
 

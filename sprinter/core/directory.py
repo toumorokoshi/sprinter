@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 class DirectoryException(Exception):
     """ An exception to specify it's a directory """
 
+
 class Directory(object):
 
     root_dir = None  # path to the root directory
@@ -115,7 +116,7 @@ class Directory(object):
                     path = os.path.join(self.root_dir, d, link)
                     if feature_path in os.path.realpath(path):
                         getattr(self, 'remove_from_%s' % d)(link)
-        
+
     def install_directory(self, feature_name):
         """
         return a path to the install directory that the feature should install to.
