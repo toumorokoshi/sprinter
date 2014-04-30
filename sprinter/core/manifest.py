@@ -43,8 +43,8 @@ def load_manifest(raw_manifest, namespace=None, **kwargs):
     if not manifest.has_section('config'):
         manifest.add_section('config')
 
-    _load_manifest_interpret_source(manifest, 
-                                    raw_manifest, 
+    _load_manifest_interpret_source(manifest,
+                                    raw_manifest,
                                     **kwargs)
 
     return Manifest(manifest, namespace=namespace)
@@ -68,7 +68,7 @@ def _load_manifest_interpret_source(manifest, source, username=None, password=No
             manifest.readfp(source)
         if manifest.has_option('config', 'extends') and do_inherit:
             parent_manifest = configparser.RawConfigParser()
-            _load_manifest_interpret_source(parent_manifest, 
+            _load_manifest_interpret_source(parent_manifest,
                                             manifest.get('config', 'extends'),
                                             username=username,
                                             password=password,
@@ -82,7 +82,7 @@ def _load_manifest_interpret_source(manifest, source, username=None, password=No
         logger.debug("", exc_info=True)
         error_message = sys.exc_info()[1]
         raise ManifestException("Unable to parse manifest!: {0}".format(error_message))
-    
+
 
 def _load_manifest_from_url(manifest, url, verify_certificate=True, username=None, password=None):
     """ load a url body into a manifest """
@@ -91,7 +91,9 @@ def _load_manifest_from_url(manifest, url, verify_certificate=True, username=Non
             manifest_file_handler = StringIO(lib.authenticated_get(username, password, url,
                                                                    verify=verify_certificate).decode("utf-8"))
         else:
-            manifest_file_handler = StringIO(lib.cleaned_request('get', url).text)
+            manifest_file_handler = StringIO(lib.cleaned_request(
+                'get', url, verify=verify_certificate
+            ).text)
         manifest.readfp(manifest_file_handler)
     except requests.exceptions.RequestException:
         logger.debug("", exc_info=True)
@@ -165,7 +167,7 @@ class Manifest(object):
         if self.inputs.is_input(key):
             self.inputs.set_input(key, value)
         self.set('config', key, value)
-    
+
     def write(self, file_handle):
         """ write the current state to a file manifest """
         for k, v in self.inputs.write_values().items():
@@ -260,7 +262,7 @@ class Manifest(object):
             if input_object.is_input(s):
                 input_object.set_input(k, v)
         return input_object
-        
+
     # custom equality method
     def __eq__(self, other):
         if not isinstance(other, Manifest):
@@ -273,7 +275,7 @@ class Manifest(object):
                    self.manifest.get(s, option) != other.manifest.get(s, option)):
                     return False
         return True
-                
+
     # act like a configparser if asking for a non-existent method.
     def __getattr__(self, name):
         return getattr(self.manifest, name)

@@ -6,6 +6,7 @@ import httpretty
 import tempfile
 from nose import tools
 from mock import Mock, call, patch
+from requests.models import Response
 
 from sprinter.core.manifest import Manifest, ManifestException, load_manifest
 import sprinter.lib as lib
@@ -74,7 +75,7 @@ class TestManifest(object):
         self.new_manifest = load_manifest(StringIO(new_manifest))
 
     def test_load_manifest_inheritance(self):
-        """ 
+        """
         With a parent, a child manifest should load it's parent manifest,
         with child values overriding parent values
         """
@@ -107,7 +108,7 @@ class TestManifest(object):
         manifest = load_manifest(child_file_path, do_inherit=False)
 
         assert not manifest.has_option('config', 'namespace')
-        
+
     def test_dependency_order(self):
         """ Test whether a proper dependency tree generated the correct output. """
         sections = self.old_manifest.formula_sections()
@@ -184,6 +185,18 @@ class TestManifest(object):
         m = load_manifest(TEST_URI)
         assert m.source() == TEST_URI
 
+    @httpretty.activate
+    def test_source_from_url_certificate(self):
+        """ When the manifest is sourced from a url, the source should be the url. """
+        with patch('sprinter.lib.cleaned_request') as cleaned_request:
+            mock = Mock(spec=Response)
+            mock.text = old_manifest
+            cleaned_request.return_value = mock
+            TEST_URI = "https://testme.com/test.cfg"
+            load_manifest(TEST_URI, verify_certificate=False)
+            cleaned_request.assert_called_with('get', TEST_URI,
+                                               verify=False)
+
     def test_write(self):
         """ Test the write command """
         temp_file = tempfile.mkstemp()[1]
@@ -193,7 +206,7 @@ class TestManifest(object):
             tools.eq_(self.new_manifest, load_manifest(temp_file))
         finally:
             os.unlink(temp_file)
-        
+
     @tools.raises(ManifestException)
     def test_invalid_manifest_filepath(self):
         """ The manifest should throw an exception on an invalid manifest path """
