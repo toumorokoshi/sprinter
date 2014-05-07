@@ -76,6 +76,10 @@ class FeatureDict(dict):
         formula_class, formula_url = formula, None
         if ':' in formula:
             formula_class, formula_url = formula.split(":", 1)
+        # forcing install of formula url
+        # while trying to figure out how to diff a package
+        if formula_url:
+            self._pip.install_egg(formula_url)
         if formula_class not in self._formula_dict:
             try:
                 self._formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
