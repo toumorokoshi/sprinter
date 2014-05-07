@@ -23,6 +23,8 @@ class FeatureDict(dict):
         self._run_order = []  # the order with which these features should run
         self._formula_dict = formula_dict or {}  # a dictionary to hold formula classes
         self._pip = Pip(pip_install_path)
+        # TODO: have a better way of detecting exists eggs are installed
+        self._pip.delete_all_eggs()
 
         if target_manifest:
             for feature in target_manifest.sections():
@@ -76,11 +78,6 @@ class FeatureDict(dict):
         formula_class, formula_url = formula, None
         if ':' in formula:
             formula_class, formula_url = formula.split(":", 1)
-        # forcing install of formula url
-        # while trying to figure out how to diff a package
-        if formula_url:
-            logger.info("Downloading %s..." % formula_class)
-            self._pip.install_egg(formula_url)
         if formula_class not in self._formula_dict:
             try:
                 self._formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)

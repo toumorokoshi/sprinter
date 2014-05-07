@@ -31,15 +31,15 @@ class Pip(object):
             build_dir=build_prefix,
             src_dir=src_prefix,
             download_dir=None,
-            upgrade=True)
+            upgrade=True
+        )
+
+    def delete_all_eggs(self):
+        """ delete all the eggs in the directory specified """
+        shutil.rmtree(self.egg_directory)
 
     def install_egg(self, egg_name):
         """ Install an egg into the egg directory """
-        # delete the directory first, to ensure pip can build the egg
-        # pip refuses to build eggs in existing directories
-        shutil.rmtree(build_prefix)
-        os.makedirs(build_prefix)
-
         if not os.path.exists(self.egg_directory):
             os.makedirs(self.egg_directory)
         self.requirement_set.add_requirement(
