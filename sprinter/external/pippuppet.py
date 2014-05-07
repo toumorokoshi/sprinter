@@ -36,7 +36,9 @@ class Pip(object):
 
     def delete_all_eggs(self):
         """ delete all the eggs in the directory specified """
-        shutil.rmtree(os.path.join(self.egg_directory, "lib", "python"))
+        path_to_delete = os.path.join(self.egg_directory, "lib", "python")
+        if os.path.exists(path_to_delete):
+            shutil.rmtree(path_to_delete)
 
     def install_egg(self, egg_name):
         """ Install an egg into the egg directory """
