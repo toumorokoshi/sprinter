@@ -79,6 +79,7 @@ class FeatureDict(dict):
         # forcing install of formula url
         # while trying to figure out how to diff a package
         if formula_url:
+            logger.info("Downloading %s..." % formula_class)
             self._pip.install_egg(formula_url)
         if formula_class not in self._formula_dict:
             try:

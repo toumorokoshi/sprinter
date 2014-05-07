@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 import os
+import shutil
 import sys
- 
+
 from pip.index import PackageFinder
 from pip.req import InstallRequirement, RequirementSet
 from pip.locations import build_prefix, src_prefix
@@ -31,9 +32,13 @@ class Pip(object):
             src_dir=src_prefix,
             download_dir=None,
             upgrade=True)
-    
+
     def install_egg(self, egg_name):
         """ Install an egg into the egg directory """
+        # delete the directory first, to ensure pip can build the egg
+        # pip refuses to build eggs in existing directories
+        shutil.rmtree(build_prefix)
+
         if not os.path.exists(self.egg_directory):
             os.makedirs(self.egg_directory)
         self.requirement_set.add_requirement(
