@@ -9,7 +9,7 @@ from six.moves import configparser
 
 from sprinter.lib import system
 from sprinter import lib
-from sprinter.core.templates import warning_template
+from sprinter.core.templates import warning_template, sprinter_template
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +105,13 @@ def _initial_run():
                     + "Conversely, please help us support your system by reporting on issues\n"
                     + "(http://sprinter.readthedocs.org/en/latest/faq.html#i-need-help-who-do-i-talk-to)\n"
                     + "===========================================================")
+    else:
+        logger.info(
+            "\nThanks for using \n" +
+            "=" * 60 +
+            sprinter_template +
+            "=" * 60
+        )
 
 
 def _configure_shell(config):
