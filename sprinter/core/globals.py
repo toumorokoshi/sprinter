@@ -96,7 +96,7 @@ def create_default_config():
 
 def _initial_run():
     """ Check things during the initial setting of sprinter's global config """
-    if system.is_officially_supported():
+    if not system.is_officially_supported():
         logger.warn(warning_template
                     + "===========================================================\n"
                     + "Sprinter is not officially supported on {0}! Please use at your own risk.\n\n".format(system.operating_system())
