@@ -101,7 +101,7 @@ class GitFormula(FormulaBase):
         if not error:
             self.logger.info(output)
             self.logger.debug("Merging branch %s..." % target_branch)
-            error, output = lib.call("git merge --ff-only origin %s", target_branch,
+            error, output = lib.call("git merge --ff-only origin %s" % target_branch,
                                      output_log_level=logging.DEBUG)
         if error:
             self.logger.info(output)
