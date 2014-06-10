@@ -98,12 +98,16 @@ class GitFormula(FormulaBase):
 
         error, output = lib.call("git fetch origin %s" % target_branch,
                                  output_log_level=logging.DEBUG)
-        if not error:
-            self.logger.info(output)
-            self.logger.debug("Merging branch %s..." % target_branch)
-            error, output = lib.call("git merge --ff-only origin %s" % target_branch,
-                                     output_log_level=logging.DEBUG)
         if error:
             self.logger.info(output)
-            raise GitException("An error occurred when merging!")
-
+            raise GitException("An error occurred while fetching!")
+        
+        self.logger.info(output)
+        self.logger.debug("Merging branch %s..." % target_branch)
+        error, output = lib.call("git merge --ff-only origin %s" % target_branch,
+                                     output_log_level=logging.DEBUG)
+        if error:
+            #do not want to raise exception on merge failures/conflicts
+            self.logger.warning(output)
+        else:
+            self.logger.info(output)
