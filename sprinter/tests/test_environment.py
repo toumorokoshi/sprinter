@@ -240,6 +240,19 @@ env_source_rc = False
             eq_(environment.target.get('config', 'my_custom_value'), 'foo')
             eq_(environment.target.get('config', 'non_custom_value'), 'baz')
 
+    @raises(SprinterException)
+    def test_errors_fail_out_immediately(self):
+        """ Failures in the update should fail out right then and there, 
+            not afterward. 
+            See https://github.com/toumorokoshi/sprinter/issues/56 
+        """
+
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:   
+            formulabase.install.side_effect = Exception    
+            with MockEnvironment(None, test_target, mock_formulabase=formulabase) as environment:
+                environment.run_feature('testfeature', 'install')
+
+
 missing_formula_config = """
 [missingformula]
 

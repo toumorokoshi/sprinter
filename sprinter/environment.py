@@ -482,15 +482,18 @@ class Environment(object):
         self._errors += [error_message]
         self.logger.error(error_message)
 
+    def log_feature_error(self, feature, error_message):
+        if type(error_message) != list:
+            error_message = "Error occured! %s" % str(error_message)
+            self._error_dict[feature] += [error_message]
+        else:
+            self._error_dict[feature] += error_message
+        self.log_error(error_message)
+
     def get_error_value(self, feature):
         """ get the error value for a feature """
         if feature not in self._error_dict:
-            self._error_dict1
-
-    def log_feature_error(self, feature, error_message):
-        self.error_occured = True
-        self._error_dict[feature] += [error_message]
-        self.logger.error(error_message)
+            self._error_dict1               #
 
     def run_action(self, feature, action, run_if_error=False):
         """ Run an action, and log it's output in case of errors """
@@ -500,13 +503,7 @@ class Environment(object):
         try:
             result = getattr(instance, action)()
             if result:
-                if type(result) != list:
-                    self.log_feature_error(feature,
-                                           "Error occurred! %s" % str(result))
-                else:
-                    self._error_dict[feature] += result
-            if len(self._error_dict[feature]) > 0:
-                self.error_occured = True
+                self.log_feature_error(feature, result)
         # catch a generic exception within a feature
         except Exception:
             e = sys.exc_info()[1]
@@ -514,6 +511,9 @@ class Environment(object):
                              (action, feature))
             self.logger.debug("Exception", exc_info=sys.exc_info())
             self.log_feature_error(feature, str(e))
+        # any error in a feature should fail immediately
+        if self.error_occured:
+            raise SprinterException("%s action failed for feature %s!" % (action, feature))
 
     def _specialize(self, reconfigure=False):
         """ Add variables and specialize contexts """
