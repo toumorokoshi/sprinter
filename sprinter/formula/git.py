@@ -72,15 +72,16 @@ class GitFormula(FormulaBase):
 
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)
-        os.chdir(target_directory)
-        error, output = lib.call("git fetch origin %s" % branch,
-                                 output_log_level=logging.DEBUG)
-        if not error:
-            error, output = lib.call("git checkout %s" % branch,
-                                     output_log_level=logging.DEBUG)
-        if error:
-            self.logger.info(output)
-            raise GitException("An error occurred when checking out a branch!")
+        for command in ("git fetch origin {0}".format(branch),
+                        "git checkout {0}".format(branch)):
+            error, output = lib.call(
+                command,
+                output_log_level=logging.DEBUG,
+                cwd=target_directory
+            )
+            if error:
+                self.logger.info(output)
+                raise GitException("An error occurred when checking out a branch!")
 
     def __clone_repo(self, repo_url, target_directory, branch):
         self.logger.debug("Cloning repository %s into %s..." % (repo_url, target_directory))
@@ -101,7 +102,7 @@ class GitFormula(FormulaBase):
         if error:
             self.logger.info(output)
             raise GitException("An error occurred while fetching!")
-        
+
         self.logger.info(output)
         self.logger.debug("Merging branch %s..." % target_branch)
         error, output = lib.call("git merge --ff-only origin %s" % target_branch,

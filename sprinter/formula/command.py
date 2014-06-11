@@ -16,17 +16,19 @@ from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 import subprocess
 
+
 class CommandFormulaException(Exception):
     pass
 
+
 class CommandFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['install', 
-                                                 'update', 
-                                                 'remove', 
-                                                 'activate', 
-                                                 'deactivate', 
-                                                 'fail_on_error', 
+    valid_options = FormulaBase.valid_options + ['install',
+                                                 'update',
+                                                 'remove',
+                                                 'activate',
+                                                 'deactivate',
+                                                 'fail_on_error',
                                                  'shell',
                                                  'redirect_stdout_to_log']
 

@@ -54,14 +54,22 @@ class TestGitFormula(FormulaTest):
         os.makedirs(self.directory.install_directory('update'))
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
-        call_mock.assert_any_call("git fetch origin develop", output_log_level=logging.DEBUG)
-        call_mock.assert_any_call("git checkout develop", output_log_level=logging.DEBUG)
+        call_mock.assert_any_call(
+            "git fetch origin develop",
+            output_log_level=logging.DEBUG,
+            cwd=self.directory.install_directory('update')
+        )
+        call_mock.assert_any_call(
+            "git checkout develop",
+            output_log_level=logging.DEBUG,
+            cwd=self.directory.install_directory('update')
+        )
 
     @patch.object(lib, 'call')
     def test_update_no_directory(self, call_mock):
         """ The git formula should re-clone a repo if the repo directory doesn't exist """
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
-        call_mock.assert_called_with("git clone %s %s" % (vals['repoA'],
-                                                          self.directory.install_directory('update')),
-                                     output_log_level=logging.DEBUG)
+        call_mock.assert_any_call("git clone %s %s" % (vals['repoA'],
+                                                       self.directory.install_directory('update')),
+                                  output_log_level=logging.DEBUG)
