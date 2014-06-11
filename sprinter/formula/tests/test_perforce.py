@@ -38,7 +38,7 @@ class TestPerforceFormula(FormulaTest):
     def teardown(self):
         del(self.environment)
         shutil.rmtree(self.temp_dir)
-       
+
     @attr('full')
     def test_install(self):
         with patch('sprinter.lib.extract_targz') as extract_targz:

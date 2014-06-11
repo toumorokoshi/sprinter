@@ -50,8 +50,8 @@ WRITE_P4PASSWD_MESSAGE = """
 Insert the perforce password to your p4settings?
 (password will be stored in plaintext in a file in your perforce root)
 """.strip()
-                
-    
+
+
 class PerforceFormulaException(Exception):
     """Exceptions for perforce formula"""
 
@@ -136,7 +136,7 @@ class PerforceFormula(FormulaBase):
         if version not in package_dict:
             raise PerforceFormulaException("Version %s in not supported by perforce formula!\n" % version +
                                            "Supported versions are: %s" % ", ".join(package_dict.keys()))
-        
+
     def __install_perforce(self, config):
         """ install perforce binary """
         if not system.is_64_bit():
@@ -155,11 +155,11 @@ class PerforceFormula(FormulaBase):
         self.p4_command = os.path.join(d, "p4")
         self.logger.info("Installing p4v...")
         if system.is_osx():
-            return self.__install_p4v_osx(url_prefix + perforce_packages['p4v'])
+            return self._install_p4v_osx(url_prefix + perforce_packages['p4v'])
         else:
-            return self.__install_p4v_linux(url_prefix + perforce_packages['p4v'])
+            return self._install_p4v_linux(url_prefix + perforce_packages['p4v'])
 
-    def __install_p4v_osx(self, url, overwrite=False):
+    def _install_p4v_osx(self, url, overwrite=False):
         """ Install perforce applications and binaries for mac """
         package_exists = False
         root_dir = os.path.expanduser(os.path.join("~", "Applications"))
@@ -170,14 +170,15 @@ class PerforceFormula(FormulaBase):
             self.logger.warn("P4V exists already in %s! Not overwriting..." % root_dir)
         return True
 
-    def __install_p4v_linux(self, url):
+    def _install_p4v_linux(self, url):
         """ Install perforce applications and binaries for linux """
         lib.extract_targz(url,
                           self.directory.install_directory(self.feature_name),
                           remove_common_prefix=True)
         bin_path = os.path.join(self.directory.install_directory(self.feature_name), 'bin')
-        for f in os.listdir(bin_path):
-            self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
+        if os.path.exists(bin_path):
+            for f in os.listdir(bin_path):
+                self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
         return True
 
     def __write_p4settings(self, config):
