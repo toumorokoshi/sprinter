@@ -27,6 +27,7 @@ import logging
 import os
 import signal
 import sys
+import pkg_resources
 from docopt import docopt
 
 import sprinter.lib as lib
@@ -34,12 +35,6 @@ from sprinter.core import PHASE, Manifest, ManifestException, Directory, manifes
 from sprinter.environment import Environment
 from sprinter.lib import SprinterException, BadCredentialsException
 from sprinter.core.globals import print_global_config, configure_config, write_config
-
-try:
-    import bin
-    VERSION = bin.__version__
-except ImportError:
-    VERSION = "Sprinter 1.0"
 
 def signal_handler(signal, frame):
     print("\nShutting down sprinter...")
@@ -66,7 +61,7 @@ def error(message):
 
 
 def parse_args(argv, Environment=Environment):
-    options = docopt(__doc__, argv=argv, version=VERSION)
+    options = docopt(__doc__, argv=argv, version= pkg_resources.get_distribution('sprinter').version)
     logging_level = logging.DEBUG if options['--verbose'] else logging.INFO
     # start processing commands
     env = Environment(logging_level=logging_level, ignore_errors=options['--ignore-errors'])
