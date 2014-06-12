@@ -39,7 +39,7 @@ try:
     import bin
     VERSION = bin.__version__
 except ImportError:
-    VERSION = "NOT_FOUND"
+    VERSION = "Sprinter 1.0"
 
 def signal_handler(signal, frame):
     print("\nShutting down sprinter...")
