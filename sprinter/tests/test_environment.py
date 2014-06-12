@@ -252,6 +252,17 @@ env_source_rc = False
             with MockEnvironment(None, test_target, mock_formulabase=formulabase) as environment:
                 environment.run_feature('testfeature', 'install')
 
+    def test_feature_run_remove_failure(self):
+        """ A feature remove should not throw SprinterException on failure - it should
+            raise a FeatureException that is handle in remove() """
+
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            formulabase.sync.side_effect = Exception 
+            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
+                environment.directory = Mock(spec=environment.directory)
+                environment.directory.new = False
+                environment.remove()
+
 
 missing_formula_config = """
 [missingformula]
