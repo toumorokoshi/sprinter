@@ -7,6 +7,7 @@ Usage:
   sprinter environments
   sprinter globals [-r]
   sprinter (-h | --help)
+  sprinter --version
 
 Options:
   -h, --help                                Show this usage guide.
@@ -19,6 +20,7 @@ Options:
   -l, --local <local_path>                  Intall the environment as a local. This installs objects relative to the local directory, and doesn't inject.
   -i, --ignore-errors                       Ignore errors in a formula
   --allow-bad-certificate                   Do not verify ssl certificates when pulling environment configurations
+  --version                                 Show version.
 """
 from __future__ import unicode_literals
 import logging
