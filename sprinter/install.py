@@ -7,7 +7,7 @@ Usage:
   sprinter environments
   sprinter globals [-r]
   sprinter (-h | --help)
-  sprinter --version
+  sprinter (-V | --version)
 
 Options:
   -h, --help                                Show this usage guide.
@@ -20,7 +20,7 @@ Options:
   -l, --local <local_path>                  Intall the environment as a local. This installs objects relative to the local directory, and doesn't inject.
   -i, --ignore-errors                       Ignore errors in a formula
   --allow-bad-certificate                   Do not verify ssl certificates when pulling environment configurations
-  --version                                 Show version.
+  -V, --version                             Show version.
 """
 from __future__ import unicode_literals
 import logging
@@ -35,6 +35,11 @@ from sprinter.environment import Environment
 from sprinter.lib import SprinterException, BadCredentialsException
 from sprinter.core.globals import print_global_config, configure_config, write_config
 
+try:
+    import bin
+    VERSION = bin.__version__
+except ImportError:
+    VERSION = "NOT_FOUND"
 
 def signal_handler(signal, frame):
     print("\nShutting down sprinter...")
@@ -61,7 +66,7 @@ def error(message):
 
 
 def parse_args(argv, Environment=Environment):
-    options = docopt(__doc__, argv=argv, version="Sprinter 1.0")
+    options = docopt(__doc__, argv=argv, version=VERSION)
     logging_level = logging.DEBUG if options['--verbose'] else logging.INFO
     # start processing commands
     env = Environment(logging_level=logging_level, ignore_errors=options['--ignore-errors'])
