@@ -7,7 +7,7 @@ from nose import tools
 from nose.tools import eq_, raises, ok_
 from sprinter.testtools import (MockEnvironment,
                                 create_mock_formulabase)
-from sprinter.lib import SprinterException
+from sprinter.exceptions import SprinterException
 from sprinter.environment import Environment
 from sprinter.core.templates import source_template
 from sprinter.core.globals import create_default_config
@@ -242,13 +242,13 @@ env_source_rc = False
 
     @raises(SprinterException)
     def test_errors_fail_out_immediately(self):
-        """ Failures in the update should fail out right then and there, 
-            not afterward. 
-            See https://github.com/toumorokoshi/sprinter/issues/56 
+        """ Failures in the update should fail out right then and there,
+            not afterward.
+            See https://github.com/toumorokoshi/sprinter/issues/56
         """
 
-        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:   
-            formulabase.install.side_effect = Exception    
+        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
+            formulabase.install.side_effect = Exception
             with MockEnvironment(None, test_target, mock_formulabase=formulabase) as environment:
                 environment.run_feature('testfeature', 'install')
 

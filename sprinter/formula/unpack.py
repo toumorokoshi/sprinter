@@ -15,11 +15,12 @@ import os
 
 from sprinter.formula.base import FormulaBase
 from sprinter.lib import ExtractException, system
+from sprinter.exceptions import FormulaException
 from sprinter.core.directory import DirectoryException
 import sprinter.lib as lib
 
 
-class UnpackFormulaException(Exception):
+class UnpackFormulaException(FormulaException):
     """ Covers execptions with the unpack formula """
 
 

@@ -11,9 +11,10 @@ import logging
 from sprinter import lib
 from sprinter.lib import system
 from sprinter.formula.base import FormulaBase
+from sprinter.exceptions import FormulaException
 
 
-class PackageFormulaException(Exception):
+class PackageFormulaException(FormulaException):
     """ Errors with the package formula """
 
 

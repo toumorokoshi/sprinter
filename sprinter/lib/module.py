@@ -3,7 +3,7 @@ import inspect
 import imp
 import sys
 
-from .exception import SprinterException
+from sprinter.exceptions import SprinterException
 
 
 def get_subclass_from_module(module, parent_class):

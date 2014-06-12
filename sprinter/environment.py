@@ -11,7 +11,8 @@ from collections import defaultdict
 import sprinter.lib as lib
 from sprinter.core import PHASE, load_global_config, Directory, Injections, Manifest, load_manifest, FeatureDict
 from sprinter.core.templates import shell_utils_template, source_template
-from sprinter.lib import SprinterException, system
+from sprinter.lib import system
+from sprinter.exceptions import SprinterException
 from sprinter.external import brew
 
 

@@ -23,6 +23,7 @@ import shutil
 import sprinter.lib as lib
 from sprinter.lib import system
 from sprinter.core import PHASE
+from sprinter.exceptions import FormulaException
 from sprinter.formula.base import FormulaBase
 
 P4V_APPLICATIONS = ['p4v.app', 'p4admin.app', 'p4merge.app']
@@ -52,7 +53,7 @@ Insert the perforce password to your p4settings?
 """.strip()
 
 
-class PerforceFormulaException(Exception):
+class PerforceFormulaException(FormulaException):
     """Exceptions for perforce formula"""
 
 

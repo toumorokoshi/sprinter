@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from sprinter import lib
-from sprinter.lib import SprinterException
+from sprinter.exceptions import SprinterException
 from sprinter.external.pippuppet import Pip, PipException
 import sys
 import logging

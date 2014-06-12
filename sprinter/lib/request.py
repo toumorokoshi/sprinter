@@ -7,6 +7,7 @@ from clint.textui import progress
 
 logger = logging.getLogger()
 
+
 class BadCredentialsException(Exception):
     """ Returned if the credentials are incorrect """
 

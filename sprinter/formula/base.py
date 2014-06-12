@@ -1,4 +1,3 @@
-
 """
 Formula base is an abstract base class outlining the method required
 and some documentation on what they should provide.
@@ -8,7 +7,8 @@ import logging
 import os
 
 from sprinter.core import PHASE
-from sprinter.lib import FormulaException, system
+from sprinter.exceptions import FormulaException
+from sprinter.lib import system
 import sprinter.lib as lib
 
 
@@ -51,7 +51,7 @@ class FormulaBase(object):
 
         In the case of a feature changing formulas, the old feature/formula is
         removed, then the new feature/formula is installed.
-        
+
         Installs are only guaranteed to have the 'target' config set.
 
         errors should either be reported via self._log_error(), or raise an exception
@@ -106,19 +106,19 @@ class FormulaBase(object):
     def activate(self):
         """
         Activate is called when a user activates the environment.
-        
+
         activate should inject configuration into the environment. Activate enables the .rc file for a sprinter install,
         so any extra functionality should be added here:
 
         * configuration in a global location, such as an ssh configuration
-        
+
         errors should either be reported via self._log_error(), or raise an exception
         """
 
     def validate(self):
         """
         validates the feature configuration, and returns a list of errors (empty list if no error)
-        
+
         validate should:
 
         * required variables
@@ -147,7 +147,7 @@ class FormulaBase(object):
                 if param in valid_systems and getattr(system, system_type)():
                     should_run = True
         return should_run
-            
+
     def sync_phase(self):
         """ Says whether a sync is an install, update, or delete """
         if not self.source:
@@ -176,7 +176,7 @@ class FormulaBase(object):
     def _prompt_value(self, key, prompt_string, default=None, only_if_empty=True):
         """prompts the user for a value, and saves it to either the target or
         source manifest (whichever is appropriate for the phase)
-        
+
         this method takes will default to the original value passed by
         the user in the case one exists. e.g. if a user already
         answered 'yes' to a question, it will use 'yes' as the default

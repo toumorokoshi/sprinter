@@ -13,11 +13,12 @@ deactivate=echo 'deactivating...'
 """
 from __future__ import unicode_literals
 from sprinter.formula.base import FormulaBase
+from sprinter.exceptions import FormulaException
 import sprinter.lib as lib
 import subprocess
 
 
-class CommandFormulaException(Exception):
+class CommandFormulaException(FormulaException):
     pass
 
 

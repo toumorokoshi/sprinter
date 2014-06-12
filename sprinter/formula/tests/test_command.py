@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from mock import patch, Mock
 from nose.tools import raises
-from sprinter.lib import SprinterException
+from sprinter.exceptions import SprinterException
 from sprinter.testtools import FormulaTest
 import subprocess
 import sprinter.lib as lib

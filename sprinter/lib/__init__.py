@@ -22,7 +22,6 @@ from .extract import extract_dmg, extract_targz, extract_zip, remove_path, Extra
 from .command import call, whitespace_smart_split, which, is_executable, CommandMissingException
 from .module import get_subclass_from_module
 from .request import CertificateException, BadCredentialsException, authenticated_get, cleaned_request
-from .exception import SprinterException, FormulaException
 
 
 def prompt(prompt_string, default=None, secret=False, boolean=False):

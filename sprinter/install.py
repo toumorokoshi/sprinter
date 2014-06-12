@@ -33,7 +33,8 @@ from docopt import docopt
 import sprinter.lib as lib
 from sprinter.core import PHASE, Manifest, ManifestException, Directory, manifest
 from sprinter.environment import Environment
-from sprinter.lib import SprinterException, BadCredentialsException
+from sprinter.exceptions import SprinterException
+from sprinter.lib.request import BadCredentialsException
 from sprinter.core.globals import print_global_config, configure_config, write_config
 
 def signal_handler(signal, frame):
