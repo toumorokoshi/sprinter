@@ -12,7 +12,7 @@ import sprinter.lib as lib
 from sprinter.core import PHASE, load_global_config, Directory, Injections, Manifest, load_manifest, FeatureDict
 from sprinter.core.templates import shell_utils_template, source_template
 from sprinter.lib import system
-from sprinter.exceptions import SprinterException
+from sprinter.exceptions import SprinterException, FormulaException
 from sprinter.external import brew
 
 
@@ -188,7 +188,11 @@ class Environment(object):
             self.instantiate_features()
             self._specialize()
             for feature in self.features.run_order:
-                self.run_action(feature, 'sync')
+                try:
+                    self.run_action(feature, 'sync')
+                except FormulaException:
+                    # continue trying to removal any remaining features.
+                    pass
             self.clear_all()
             self.directory.remove()
             self.injections.commit()
@@ -512,9 +516,15 @@ class Environment(object):
                              (action, feature))
             self.logger.debug("Exception", exc_info=sys.exc_info())
             self.log_feature_error(feature, str(e))
-        # any error in a feature should fail immediately
+        # any error in a feature should fail immediately - unless it occurred
+        # from the remove() method in which case continue the rest of the
+        # feature removal from there
         if self.error_occured:
-            raise SprinterException("%s action failed for feature %s!" % (action, feature))
+            exception_msg = "%s action failed for feature %s!" % (action, feature)
+            if self.phase == PHASE.REMOVE:
+                raise FormulaException(exception_msg)
+            else:
+                raise SprinterException(exception_msg)
 
     def _specialize(self, reconfigure=False):
         """ Add variables and specialize contexts """
