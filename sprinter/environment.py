@@ -197,7 +197,7 @@ class Environment(object):
             self.clear_all()
             self.directory.remove()
             self.injections.commit()
-            if self.error_occurred:
+            if self.error_occured:
                 self.logger.error(warning_template)
                 self.logger.error(REMOVE_WARNING)
         except Exception:
