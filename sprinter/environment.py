@@ -10,7 +10,8 @@ from collections import defaultdict
 
 import sprinter.lib as lib
 from sprinter.core import PHASE, load_global_config, Directory, Injections, Manifest, load_manifest, FeatureDict
-from sprinter.core.templates import shell_utils_template, source_template
+from sprinter.core.templates import shell_utils_template, source_template, warning_template
+from sprinter.core.messages import REMOVE_WARNING
 from sprinter.lib import system
 from sprinter.exceptions import SprinterException, FormulaException
 from sprinter.external import brew
@@ -196,6 +197,9 @@ class Environment(object):
             self.clear_all()
             self.directory.remove()
             self.injections.commit()
+            if self.error_occurred:
+                self.logger.error(warning_template)
+                self.logger.error(REMOVE_WARNING)
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
             et, ei, tb = sys.exc_info()
