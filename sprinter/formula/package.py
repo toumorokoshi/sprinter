@@ -43,7 +43,7 @@ class PackageFormula(FormulaBase):
         if self.package_manager and config.has(self.package_manager):
             package = config.get(self.package_manager)
             self.logger.info("Installing %s..." % package)
-            call_command = "%s%s install %s" % (self.package_manager, self.args, package)
+            call_command = "%s%s %s" % (self.package_manager, self.args, package)
             if self.sudo_required:
                 call_command = "sudo " + call_command
             self.logger.debug("Calling command: %s" % call_command)
@@ -61,11 +61,13 @@ class PackageFormula(FormulaBase):
         if system.is_osx():
             package_manager = "brew"
             sudo_required = False
+            args = " install"
         elif system.is_debian():
             package_manager = "apt-get"
-            args = " -y"
+            args = " -y install"
         elif system.is_fedora():
             package_manager = "yum"
+            args = " install"
         elif system.is_arch():
             package_manager = "pacman"
             args = " --noconfirm -S"
