@@ -68,7 +68,7 @@ class PackageFormula(FormulaBase):
             package_manager = "yum"
         elif system.is_arch():
             package_manager = "arch"
-            args = " -S"
+            args = " --noconfirm -S"
         if lib.which(package_manager) is None:
             self.logger.warn("Package manager %s not installed! Packages will not be installed."
                              % package_manager)
