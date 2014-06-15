@@ -67,7 +67,7 @@ class PackageFormula(FormulaBase):
         elif system.is_fedora():
             package_manager = "yum"
         elif system.is_arch():
-            package_manager = "arch"
+            package_manager = "pacman"
             args = " --noconfirm -S"
         if lib.which(package_manager) is None:
             self.logger.warn("Package manager %s not installed! Packages will not be installed."

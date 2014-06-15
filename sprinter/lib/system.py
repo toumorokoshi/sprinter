@@ -28,7 +28,7 @@ def get_system_info():
 
 
 def is_arch():
-    return LINUX_DISTRO.lower() in ['arch']
+    return 'arch' in RELEASE.lower()
 
 
 def is_debian():
