@@ -185,7 +185,11 @@ def parse_args(argv, Environment=Environment):
     except Exception:
         e = sys.exc_info()[1]
         env.log_error(str(e))
-        env.logger.info("failed! Writing debug output to /tmp/sprinter.log")
+        env.logger.info("""
+=====================================================================
+the sprinter action failed! Writing debug output to /tmp/sprinter.log
+=====================================================================
+        """)
         env.write_debug_log("/tmp/sprinter.log")
         if env.message_failure():
             env.logger.info(env.message_failure())

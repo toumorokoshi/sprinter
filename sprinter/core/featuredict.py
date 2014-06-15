@@ -67,7 +67,7 @@ class FeatureDict(dict):
             raise FormulaException(
                 """
 -----------------------------------------------------------------------
-feature {0} has no formula! Each feature requires an option
+feature "{0}" has no formula! Each feature requires an option
 "formula" in it's configuration to dictate how to install this feature:
 
 [myfeature]
