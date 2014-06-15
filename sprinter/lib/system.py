@@ -26,9 +26,14 @@ def get_system_info():
         "architecture = " + ARCHITECTURE + "\n"
     )
 
+
+def is_arch():
+    return LINUX_DISTRO.lower() in ['arch']
+
+
 def is_debian():
-        """ returns true if the system is debian based """
-        return LINUX_DISTRO.lower() in ['ubuntu', 'debian']
+    """ returns true if the system is debian based """
+    return LINUX_DISTRO.lower() in ['ubuntu', 'debian']
 
 
 def is_fedora():

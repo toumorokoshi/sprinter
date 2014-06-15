@@ -20,7 +20,7 @@ class PackageFormulaException(FormulaException):
 
 class PackageFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['apt-get', 'brew', 'yum']
+    valid_options = FormulaBase.valid_options + ['apt-get', 'brew', 'yum', 'pacman']
 
     def install(self):
         self.__get_package_manager()
@@ -66,6 +66,9 @@ class PackageFormula(FormulaBase):
             args = " -y"
         elif system.is_fedora():
             package_manager = "yum"
+        elif system.is_arch():
+            package_manager = "arch"
+            args = " -S"
         if lib.which(package_manager) is None:
             self.logger.warn("Package manager %s not installed! Packages will not be installed."
                              % package_manager)
