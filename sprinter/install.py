@@ -188,11 +188,13 @@ def parse_args(argv, Environment=Environment):
         env.logger.info("""
 =====================================================================
 the sprinter action failed! Writing debug output to /tmp/sprinter.log
-=====================================================================
         """)
         env.write_debug_log("/tmp/sprinter.log")
         if env.message_failure():
             env.logger.info(env.message_failure())
+        env.logger.info("""
+=====================================================================
+        """.strip())
 
 
 def parse_domain(url):
