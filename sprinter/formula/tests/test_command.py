@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from mock import patch, Mock
-from nose.tools import raises
+from nose.tools import raises, ok_
 from sprinter.exceptions import SprinterException
 from sprinter.testtools import FormulaTest
 import subprocess

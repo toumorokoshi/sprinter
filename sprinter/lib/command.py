@@ -13,7 +13,8 @@ class CommandMissingException(Exception):
     """ Return if command doesn't exist """
 
     def __init__(self, command):
-        self.message = "Command %s does not exist in the current path!" % command
+        message = "command {0} does not exist! Is a dependency missing?".format(command)
+        super(CommandMissingException, self).__init__(message)
 
 
 def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ, cwd=None, shell=False,
