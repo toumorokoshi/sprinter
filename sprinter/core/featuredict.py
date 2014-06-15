@@ -65,7 +65,15 @@ class FeatureDict(dict):
                 setattr(self[key], kind, feature_config)
         else:
             raise FormulaException(
-                'feature {0} has no formula!'.format(feature)
+                """
+-----------------------------------------------------------------------
+feature {0} has no formula! Each feature requires an option
+"formula" in it's configuration to dictate how to install this feature:
+
+[myfeature]
+formula = sprinter.formula.env
+-----------------------------------------------------------------------
+                """.format(feature)
             )
         return None
 
