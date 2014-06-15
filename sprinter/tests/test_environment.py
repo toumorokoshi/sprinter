@@ -257,7 +257,7 @@ env_source_rc = False
             raise a FeatureException that is handle in remove() """
 
         with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            formulabase.sync.side_effect = Exception 
+            formulabase.sync.side_effect = Exception
             with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False

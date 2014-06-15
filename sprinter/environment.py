@@ -11,7 +11,7 @@ from collections import defaultdict
 import sprinter.lib as lib
 from sprinter.core import PHASE, load_global_config, Directory, Injections, Manifest, load_manifest, FeatureDict
 from sprinter.core.templates import shell_utils_template, source_template, warning_template
-from sprinter.core.messages import REMOVE_WARNING
+from sprinter.core.messages import REMOVE_WARNING, INVALID_MANIFEST
 from sprinter.lib import system
 from sprinter.exceptions import SprinterException, FormulaException
 from sprinter.external import brew
@@ -504,14 +504,19 @@ class Environment(object):
         if feature not in self._error_dict:
             self._error_dict1               #
 
-    def run_action(self, feature, action, run_if_error=False):
+    def run_action(self, feature, action,
+                   run_if_error=False,
+                   raise_exception=True):
         """ Run an action, and log it's output in case of errors """
         if len(self._error_dict[feature]) > 0 and not run_if_error:
             return
+
+        error = None
         instance = self.features[feature]
         try:
             result = getattr(instance, action)()
             if result:
+                error = result
                 self.log_feature_error(feature, result)
         # catch a generic exception within a feature
         except Exception:
@@ -519,16 +524,32 @@ class Environment(object):
             self.logger.info("An exception occurred with action %s in feature %s!" %
                              (action, feature))
             self.logger.debug("Exception", exc_info=sys.exc_info())
+            error = str(e)
             self.log_feature_error(feature, str(e))
         # any error in a feature should fail immediately - unless it occurred
         # from the remove() method in which case continue the rest of the
         # feature removal from there
-        if self.error_occured:
-            exception_msg = "%s action failed for feature %s!" % (action, feature)
+        if error is not None and raise_exception:
+            exception_msg = "%s action failed for feature %s: %s" % (action, feature, error)
             if self.phase == PHASE.REMOVE:
                 raise FormulaException(exception_msg)
             else:
                 raise SprinterException(exception_msg)
+        return error
+
+    def _validate_manifest(self):
+        errors = {}
+        for feature in self.features.run_order:
+            error = self.run_action(feature, 'validate', run_if_error=True,
+                                    raise_exception=False)
+            if error:
+                errors[feature] = error
+        if errors:
+            message = INVALID_MANIFEST + "\n\n"
+            for feature, error in errors.items():
+                message += "* {0}: {1}\n".format(error)
+            self.log.error(message)
+            raise SprinterException("invalid manifest!")
 
     def _specialize(self, reconfigure=False):
         """ Add variables and specialize contexts """
@@ -541,8 +562,8 @@ class Environment(object):
                     context_dict['config:root_dir'] = self.directory.root_dir
                     context_dict['config:node'] = system.NODE
                 manifest.add_additional_context(context_dict)
+        self._validate_manifest()
         for feature in self.features.run_order:
-            self.run_action(feature, 'validate', run_if_error=True)
             if not reconfigure:
                 self.run_action(feature, 'resolve')
             self.run_action(feature, 'prompt')
