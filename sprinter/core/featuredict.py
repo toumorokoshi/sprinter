@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from sprinter import lib
-from sprinter.exceptions import SprinterException
+from sprinter.exceptions import SprinterException, FormulaException
 from sprinter.external.pippuppet import Pip, PipException
 import sys
 import logging
@@ -58,12 +58,15 @@ class FeatureDict(dict):
                         del(self[key])
                 except SprinterException:
                     logger.debug("Exception details", exc_info=sys.exc_info())
-                    self._environment.log_error("ERROR: Invalid formula {0} for {1} feature {2}!".format(
-                        feature_config.get('formula'), kind, feature))
+                    raise FormulaException(
+                        "ERROR: Invalid formula {0} for {1} feature {2}!".format(
+                            feature_config.get('formula'), kind, feature))
             else:
                 setattr(self[key], kind, feature_config)
         else:
-            self._environment.log_error('feature {0} has no formula!'.format(feature))
+            raise FormulaException(
+                'feature {0} has no formula!'.format(feature)
+            )
         return None
 
     def _get_formula_class(self, formula):

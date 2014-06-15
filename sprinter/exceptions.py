@@ -8,5 +8,5 @@ class SprinterException(Exception):
     """ For generic sprinter exceptions """
 
 
-class FormulaException(Exception):
+class FormulaException(SprinterException):
     """ For a generic exception with a formula """

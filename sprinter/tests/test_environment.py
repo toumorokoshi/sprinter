@@ -7,7 +7,7 @@ from nose import tools
 from nose.tools import eq_, raises, ok_
 from sprinter.testtools import (MockEnvironment,
                                 create_mock_formulabase)
-from sprinter.exceptions import SprinterException
+from sprinter.exceptions import SprinterException, FormulaException
 from sprinter.environment import Environment
 from sprinter.core.templates import source_template
 from sprinter.core.globals import create_default_config
