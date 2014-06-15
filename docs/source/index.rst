@@ -52,6 +52,7 @@ Sprinter is currently actively developed against the following operating systems
 
 * OSX
 * Ubuntu
+* Arch
 
 And the following shells:
 

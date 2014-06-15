@@ -69,4 +69,4 @@ def is_officially_supported():
     sprinter
     """
     # TODO: Get the shell name and check that as well
-    return is_osx() or is_debian()
+    return is_osx() or is_debian() or is_arch()
