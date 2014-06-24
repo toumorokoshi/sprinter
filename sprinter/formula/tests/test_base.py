@@ -8,6 +8,11 @@ source_config = """
 [prompt_value_source]
 formula = sprinter.formula.base
 source_value = old
+
+[resolve]
+formula = sprinter.formula.base
+systems = osx
+depends = prompt_value_source
 """
 
 target_config = """
@@ -36,6 +41,9 @@ formula = sprinter.formula.base
 existing_value = here
 
 [prompt_value_source]
+formula = sprinter.formula.base
+
+[resolve]
 formula = sprinter.formula.base
 """
 
@@ -103,3 +111,14 @@ class TestFormulaBase(FormulaTest):
             prompt.return_value = "foo"
             fb._prompt_value('source_value', 'this value exists')
             prompt.assert_called_once_with('this value exists', default="old")
+
+    def test_resolve_dont_carry_over_options(self):
+        """ resolve should resolve non-carry over options """
+        fb = FormulaBase(
+            self.environment, 'prompt_value',
+            source=self.environment.source.get_feature_config('resolve'),
+            target=self.environment.target.get_feature_config('resolve')
+        )
+        fb.resolve()
+        assert not fb.target.has('systems')
+        assert not fb.target.has('depends')

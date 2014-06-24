@@ -18,6 +18,9 @@ class FormulaBase(object):
                      'command', 'systems', 'depends', 'inputs']
     required_options = ['formula']
 
+    # these values will not carry over from source to target
+    dont_carry_over_options = valid_options + required_options
+
     def __init__(self, environment, feature_name, source=None, target=None):
         """
         In most cases, it is not a good idea to override the formulabase
@@ -165,8 +168,10 @@ class FormulaBase(object):
     def resolve(self):
         """ Resolve differences between the target and the source configuration """
         if self.source and self.target:
-            for k in (k for k in self.source.keys() if not self.target.has(k)):
-                self.target.set(k, self.source.get(k))
+            for key in self.source.keys():
+                if (key not in self.dont_carry_over_options
+                        and not self.target.has(key)):
+                    self.target.set(key, self.source.get(key))
 
     def _log_error(self, message):
         """ Log an error for the feature """

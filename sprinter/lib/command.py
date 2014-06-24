@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 class CommandMissingException(Exception):
     """ Return if command doesn't exist """
 
+    def __init__(self, command):
+        message = "command {0} does not exist! Is a dependency missing?".format(command)
+        super(CommandMissingException, self).__init__(message)
+
 
 def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ,
          cwd=None, shell=False, output_log_level=logging.INFO,
@@ -22,8 +26,7 @@ def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ,
         args = command if shell else whitespace_smart_split(command)
         kw = {}
         if not shell and not which(args[0], cwd=cwd):
-            message = "command {0} does not exist! Is a dependency missing?".format(args[0])
-            raise CommandMissingException(message)
+            raise CommandMissingException(args[0])
         if shell:
             kw['shell'] = True
         process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=stdout, stderr=subprocess.STDOUT,
