@@ -104,7 +104,10 @@ class SSHFormula(FormulaBase):
         ssh_path += ".pub"  # make this the public key
         ssh_contents = open(ssh_path, 'r').read().rstrip('\n')
         command = command.replace('{{ssh}}', ssh_contents)
-        lib.call(command, shell=True, output_log_level=logging.DEBUG)
+        lib.call(command,
+                 shell=True,
+                 output_log_level=logging.DEBUG,
+                 sensitive_info=True)
 
     def _build_ssh_config(self, config):
         """ build the ssh injection configuration """

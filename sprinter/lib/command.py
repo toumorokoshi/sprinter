@@ -13,13 +13,18 @@ class CommandMissingException(Exception):
     """ Return if command doesn't exist """
 
     def __init__(self, command):
-        self.message = "Command %s does not exist in the current path!" % command
+        self.message = "Command {} does not exist in the current path!".format(
+            command
+        )
 
 
-def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ, cwd=None, shell=False,
-         output_log_level=logging.INFO, sensitive_info=False):
+def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ, cwd=None,
+         shell=False, output_log_level=logging.INFO, sensitive_info=False):
     """ Better, smarter call logic """
-    logger.debug("calling command: %s" % command)
+    if not sensitive_info:
+        logger.debug("calling command: %s" % command)
+    else:
+        logger.debug("calling command with sensitive information")
     try:
         args = command if shell else whitespace_smart_split(command)
         kw = {}
@@ -27,8 +32,9 @@ def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ, cwd=None, 
             raise CommandMissingException(args[0])
         if shell:
             kw['shell'] = True
-        process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=stdout, stderr=subprocess.STDOUT,
-                                   env=env, cwd=cwd, **kw)
+        process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=stdout,
+                                   stderr=subprocess.STDOUT, env=env, cwd=cwd,
+                                   **kw)
         output = process.communicate(input=stdin)[0]
         if output is not None:
             try:
@@ -48,10 +54,12 @@ def call(command, stdin=None, stdout=subprocess.PIPE, env=os.environ, cwd=None, 
 
 def whitespace_smart_split(command):
     """
-    Split a command by whitespace, taking care to not split on whitespace within quotes.
+    Split a command by whitespace, taking care to not split on
+    whitespace within quotes.
 
     >>> whitespace_smart_split("test this \\\"in here\\\" again")
     ['test', 'this', '"in here"', 'again']
+
     """
     return_array = []
     s = ""
