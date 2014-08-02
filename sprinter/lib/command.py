@@ -13,7 +13,7 @@ class CommandMissingException(Exception):
     """ Return if command doesn't exist """
 
     def __init__(self, command):
-        self.message = "Command {} does not exist in the current path!".format(
+        self.message = "Could not find command {0}!".format(
             command
         )
 
