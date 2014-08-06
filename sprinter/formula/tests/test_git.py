@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import logging
 import os
 import os.path
-from mock import patch
+from mock import patch, call
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib
 
@@ -40,13 +40,16 @@ class TestGitFormula(FormulaTest):
         os.chdir(self.curdir)
 
     @patch.object(lib, 'call')
-    def test_simple_example(self, call):
+    def test_simple_example(self, call_mock):
         """ The git formula should call a clone to a git repo """
-        call.return_value = (0, '')
+        call_mock.return_value = (0, '')
         self.environment.run_feature('simple_example', 'sync')
-        call.assert_called_with("git clone %s %s" % (vals['repoA'],
-                                                     self.directory.install_directory('simple_example')),
-                                output_log_level=logging.DEBUG)
+        call_mock.assert_has_calls([
+            call("git clone {0} {1}".format(
+                vals['repoA'],
+                self.directory.install_directory('simple_example')
+            ), output_log_level=logging.DEBUG)
+        ])
 
     @patch.object(lib, 'call')
     def test_update_different_branches(self, call_mock):
