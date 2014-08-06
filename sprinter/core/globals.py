@@ -35,7 +35,7 @@ def load_global_config(config_path):
     """ Load a global configuration object, and query for any required variables along the way """
     config = configparser.RawConfigParser()
     if os.path.exists(config_path):
-        logger.info("Checking and setting global parameters...")
+        logger.debug("Checking and setting global parameters...")
         config.read(config_path)
     else:
         _initial_run()

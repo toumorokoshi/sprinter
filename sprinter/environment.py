@@ -462,6 +462,7 @@ class Environment(object):
         if self.message_success():
             self.logger.info(self.message_success())
 
+        self.logger.info("Done!")
         self.logger.info("NOTE: Please remember to open new shells/terminals to use the modified environment")
 
     def _install_sandbox(self, name, call, kwargs={}):
