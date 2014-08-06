@@ -199,3 +199,11 @@ class FormulaBase(object):
         main_manifest.set(key,
                           lib.prompt(prompt_string,
                                      default=prompt_default))
+
+    # utility methods
+    def _install_directory(self):
+        """
+        return the path to the directory available for the feature to put
+        files in
+        """
+        return self.directory.install_directory(self.feature_name)

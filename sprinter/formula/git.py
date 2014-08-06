@@ -90,8 +90,7 @@ class GitFormula(FormulaBase):
         if error:
             self.logger.info(output)
             raise GitException("An error occurred when cloning!")
-        if branch != "master":
-            self.__checkout_branch(target_directory, branch)
+        self.__checkout_branch(target_directory, branch)
 
     def __fetch_merge_repo(self, target_directory, target_branch):
         self.logger.debug("Fetching branch %s..." % target_branch)
@@ -105,8 +104,8 @@ class GitFormula(FormulaBase):
 
         self.logger.info(output)
         self.logger.debug("Merging branch %s..." % target_branch)
-        error, output = lib.call("git merge --ff-only origin %s" % target_branch,
-                                     output_log_level=logging.DEBUG)
+        error, output = lib.call("git merge --ff-only origin/%s" % target_branch,
+                                 output_log_level=logging.DEBUG)
         if error:
             #do not want to raise exception on merge failures/conflicts
             self.logger.warning(output)

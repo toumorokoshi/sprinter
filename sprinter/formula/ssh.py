@@ -69,8 +69,8 @@ class SSHFormula(FormulaBase):
         """
         Generate the ssh key, and return the ssh config location
         """
-        cwd = config.get('ssh_path', self.directory.install_directory(self.feature_name))
-        if not config.has('create') or config.is_affirmative('create'):
+        cwd = config.get('ssh_path', self._install_directory())
+        if config.is_affirmative('create', default="yes"):
             if not os.path.exists(cwd):
                 os.makedirs(cwd)
             if not os.path.exists(os.path.join(cwd, config.get('keyname'))):
