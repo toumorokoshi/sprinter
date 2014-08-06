@@ -60,10 +60,10 @@ class Injections(object):
         self.logger.debug("Clear list is:")
         self.logger.debug(self.clear_set)
         for filename, content in self.inject_dict.items():
-            self.logger.info("Injecting values into %s..." % filename)
+            self.logger.debug("Injecting values into %s..." % filename)
             self.destructive_inject(filename, content)
         for filename in self.clear_set:
-            self.logger.info("Clearing injection from %s..." % filename)
+            self.logger.debug("Clearing injection from %s..." % filename)
             self.destructive_clear(filename)
 
     def injected(self, filename):
