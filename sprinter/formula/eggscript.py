@@ -9,6 +9,7 @@ links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
 redownload = true
 """
 from __future__ import unicode_literals
+import logging
 import os
 import re
 
@@ -48,7 +49,7 @@ class EggscriptFormula(FormulaBase):
             if not (self.target.has('egg') or self.target.has('eggs')):
                 self.logger.warn("No eggs will be installed! 'egg' or 'eggs' parameter not set!")
         return FormulaBase.validate(self)
-                
+
     def __install_eggs(self, config):
         """ Install eggs for a particular configuration """
         eggs = []
@@ -61,7 +62,8 @@ class EggscriptFormula(FormulaBase):
                   'w+') as fh:
             fh.write('\n'.join(eggs))
         lib.call("bin/pip install -r requirements.txt --upgrade",
-                 cwd=self.directory.install_directory(self.feature_name))
+                 cwd=self.directory.install_directory(self.feature_name),
+                 output_log_level=logging.DEBUG)
 
     def __add_paths(self, config):
         """ add the proper resources into the environment """
