@@ -515,10 +515,7 @@ class Environment(object):
         error = None
         instance = self.features[feature]
         try:
-            result = getattr(instance, action)()
-            if result:
-                error = result
-                self.log_feature_error(feature, result)
+            getattr(instance, action)()
         # catch a generic exception within a feature
         except Exception:
             e = sys.exc_info()[1]
