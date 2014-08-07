@@ -162,8 +162,13 @@ class FormulaBase(object):
     def sync(self):
         """ Updates the state of the feature to what it should be """
         phase = self.sync_phase()
-        self.logger.info("%s %s..." % (phase.verb, self.feature_name))
-        return getattr(self, phase.name)()
+        message = "finished %s %s." % (phase.verb, self.feature_name)
+        result = getattr(self, phase.name)()
+        if result:
+            self.logger.info(message)
+        else:
+            self.logger.debug(message)
+        return result
 
     def resolve(self):
         """ Resolve differences between the target and the source configuration """
