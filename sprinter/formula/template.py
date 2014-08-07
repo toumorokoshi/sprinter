@@ -33,9 +33,12 @@ class TemplateFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
+        acted = False
         if self.target.has('on_update') and self.target.is_affirmative('on_update'):
             self.__install_file(self.target)
+            acted = True
         FormulaBase.update(self)
+        return acted
 
     def remove(self):
         if self.source.is_affirmative('remove_file_on_delete', False):

@@ -69,6 +69,7 @@ class GitFormula(FormulaBase):
             self.__fetch_merge_repo(target_directory, target_branch)
 
         FormulaBase.update(self)
+        return True
 
     def __checkout_branch(self, target_directory, branch):
         self.logger.debug("Checking out branch %s..." % branch)

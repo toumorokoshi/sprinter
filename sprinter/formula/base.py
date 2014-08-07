@@ -92,6 +92,7 @@ class FormulaBase(object):
         errors should either be reported via self._log_error(), or raise an exception
         """
         self.directory.remove_feature(self.feature_name)
+        return True
 
     def deactivate(self):
         """
@@ -164,7 +165,7 @@ class FormulaBase(object):
         phase = self.sync_phase()
         message = "finished %s %s." % (phase.verb, self.feature_name)
         result = getattr(self, phase.name)()
-        if result:
+        if result or phase in (PHASE.INSTALL, PHASE.REMOVE):
             self.logger.info(message)
         else:
             self.logger.debug(message)

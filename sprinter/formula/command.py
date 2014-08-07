@@ -38,8 +38,8 @@ class CommandFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
-        self.__run_command('update', 'target')
-        FormulaBase.update(self)
+        value = self.__run_command('update', 'target')
+        return value or FormulaBase.update(self)
 
     def remove(self):
         self.__run_command('remove', 'source')
@@ -63,3 +63,4 @@ class CommandFormula(FormulaBase):
             return_code, output = lib.call(command, shell=shell, stdout=stdout)
             if config.is_affirmative('fail_on_error', True) and return_code != 0:
                 raise CommandFormulaException("Command returned a return code of {0}!".format(return_code))
+            return True

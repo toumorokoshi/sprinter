@@ -41,7 +41,9 @@ class UnpackFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
+        acted = False
         if self.source.get('url') != self.target.get('url'):
+            acted = True
             if os.path.exists(self.directory.install_directory(self.feature_name)):
                 try:
                     self.directory.remove_feature(self.feature_name)
@@ -51,6 +53,7 @@ class UnpackFormula(FormulaBase):
         if self.source.has('executable'):
             symlink = self.source.get('symlink', self.source.get('executable'))
             if os.path.exists(symlink) and os.path.islink(symlink):
+                acted = True
                 try:
                     self.directory.remove_from_bin(
                         self.source('symlink', self.source.get('executable')))
@@ -59,9 +62,11 @@ class UnpackFormula(FormulaBase):
         if self.target.has('executable'):
             symlink = self.target.get('symlink', self.target.get('executable'))
             if not os.path.exists(symlink):
+                acted = True
                 self.__symlink_executable(self.target.get('executable'),
                                           symlink)
         FormulaBase.update(self)
+        return acted
 
     def remove(self):
         if self.source.has('executable'):

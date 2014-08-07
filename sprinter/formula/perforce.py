@@ -118,11 +118,14 @@ class PerforceFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
+        acted = False
         if self.source.get('version', 'r13.2') != self.target.get('version', 'r13.2'):
             os.unlink(os.path.join(self.directory.install_directory(self.feature_name), 'p4'))
             self.__install_perforce(self.target)
+            acted = True
         self.__add_p4_env(self.target)
         FormulaBase.update(self)
+        return acted
 
     def remove(self):
         if self.source.is_affirmative('remove_p4root'):

@@ -37,12 +37,15 @@ class EggscriptFormula(FormulaBase):
         return FormulaBase.install(self)
 
     def update(self):
+        acted = False
         if (self.source.get('egg', '') != self.target.get('egg', '') or
             self.source.get('eggs', '') != self.target.get('eggs', '') or
             (self.target.has('redownload') and self.target.is_affirmative('redownload'))):
                 self.__install_eggs(self.target)
+                acted = True
         self.__add_paths(self.target)
-        return FormulaBase.update(self)
+        FormulaBase.update(self)
+        return acted
 
     def validate(self):
         if self.target:

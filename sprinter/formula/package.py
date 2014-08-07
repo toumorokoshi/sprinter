@@ -26,6 +26,7 @@ class PackageFormula(FormulaBase):
         self.__get_package_manager()
         self.__install_package(self.target)
         FormulaBase.install(self)
+        return True
 
     def update(self):
         self.__get_package_manager()
@@ -38,6 +39,7 @@ class PackageFormula(FormulaBase):
         if install_package:
             self.__install_package(self.target)
         FormulaBase.update(self)
+        return install_package
 
     def __install_package(self, config):
         if self.package_manager and config.has(self.package_manager):
