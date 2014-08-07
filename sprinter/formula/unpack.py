@@ -53,10 +53,10 @@ class UnpackFormula(FormulaBase):
         if self.source.has('executable'):
             symlink = self.source.get('symlink', self.source.get('executable'))
             if os.path.exists(symlink) and os.path.islink(symlink):
-                acted = True
                 try:
                     self.directory.remove_from_bin(
                         self.source('symlink', self.source.get('executable')))
+                    acted = True
                 except DirectoryException:
                     pass
         if self.target.has('executable'):
