@@ -18,7 +18,8 @@ setup(name='sprinter',
           'pip>=1.4',
           'docopt>=0.6.1',
           'six>=1.4.1',
-          'clint>=0.3.3'
+          'clint>=0.3.3',
+          'virtualenv>=1.11.6'
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',
