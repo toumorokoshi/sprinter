@@ -59,6 +59,13 @@ class Directory(object):
             open(self.manifest_path, "w+").close()
         self.new = False
 
+    def finalize(self):
+        """ finalize any open file handles """
+        if self.rc_file:
+            self.rc_file.close()
+        if self.env_file:
+            self.env_file.close()
+
     def remove(self):
         """ Removes the sprinter directory, if it exists """
         if self.rc_file:
