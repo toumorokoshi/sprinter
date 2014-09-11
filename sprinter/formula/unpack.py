@@ -42,6 +42,10 @@ class UnpackFormula(FormulaBase):
 
     def update(self):
         acted = False
+        if not os.path.exists(self._get_destination()):
+            self.install()
+            return True
+
         if self.source.get('url') != self.target.get('url'):
             acted = True
             if os.path.exists(self.directory.install_directory(self.feature_name)):
@@ -82,22 +86,21 @@ class UnpackFormula(FormulaBase):
     def __install(self, config):
         remove_common_prefix = (config.has('remove_common_prefix') and
                                 config.is_affirmative('remove_common_prefix'))
-        destination = config.get('target', self.directory.install_directory(self.feature_name))
         url_type = config.get('type', config.get('url'))
         try:
             if url_type.endswith("tar.gz") or url_type.endswith("tar.bz2") or url_type.endswith("tar"):
-                lib.extract_targz(config.get('url'), destination,
+                lib.extract_targz(config.get('url'), self._get_destination(),
                                   remove_common_prefix=remove_common_prefix)
 
             elif config.get('type', config.get('url')).endswith("zip"):
-                lib.extract_zip(config.get('url'), destination,
+                lib.extract_zip(config.get('url'), self._get_destination(),
                                 remove_common_prefix=remove_common_prefix)
 
             elif config.get('type', config.get('url')).endswith("dmg"):
                 if not system.is_osx():
                     self.logger.warn("Non OSX based distributions can not install a dmg!")
                 else:
-                    lib.extract_dmg(config.get('url'), destination,
+                    lib.extract_dmg(config.get('url'), self._get_destination(),
                                     remove_common_prefix=remove_common_prefix)
         except ExtractException:
             self.logger.warn("Unable to extract file for feature %s" % self.feature_name)
@@ -111,3 +114,8 @@ class UnpackFormula(FormulaBase):
             self.directory.symlink_to_bin(target, source_path)
         except OSError:
             self.logger.warn("Could not find source path, unable to symlink! %s" % source)
+
+    def _get_destination(self):
+        return self.target.get(
+            'target', self.directory.install_directory(self.feature_name)
+        )
