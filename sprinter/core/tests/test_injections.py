@@ -44,6 +44,8 @@ class TestInjections(object):
         i = Injections("testinjection")
         i.inject(self.temp_file_path, self.test_injection)
         i.commit()
+        assert os.path.exists(self.temp_file_path + ".sprinter.bak")
+        os.unlink(self.temp_file_path + ".sprinter.bak")
         l = open(self.temp_file_path, 'r').read()
         assert l.count(self.test_injection) > 0, "Injection was not injected properly!"
         assert l.count(self.test_injection) == 1, "Multiple injections were found!"
@@ -53,6 +55,7 @@ class TestInjections(object):
         l = open(self.temp_file_path, 'r').read()
         assert l.find(self.test_injection) == -1, "Injection was not cleared properly!"
         assert l.find(self.permanent_string) != -1, "Permanent string was removed on clear!"
+        assert os.path.exists(self.temp_file_path + ".sprinter.bak")
 
     def test_similar_injectionname(self):
         # and add in the originally named injection

@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 import logging
 import os
 import re
+import shutil
 
 
 class Injections(object):
@@ -81,6 +82,7 @@ class Injections(object):
         generally be run only during the commit phase, when no future
         injections will be done.
         """
+        backup_file(filename)
         full_path = self.__generate_file(filename)
         with open(full_path, 'r') as f:
             new_content = self.inject_content(f.read(), content)
@@ -88,6 +90,7 @@ class Injections(object):
             f.write(new_content)
 
     def destructive_clear(self, filename):
+        backup_file(filename)
         if not os.path.exists(os.path.expanduser(filename)):
             return
         full_path = self.__generate_file(filename)
@@ -147,3 +150,14 @@ class Injections(object):
         Clear the injected content from the content buffer, and return the results
         """
         return self.wrapper_match.sub("", content)
+
+
+def backup_file(filename):
+    """ create a backup of the file desired """
+    if not os.path.exists(filename):
+        return
+
+    BACKUP_SUFFIX = ".sprinter.bak"
+
+    backup_filename = filename + BACKUP_SUFFIX
+    shutil.copyfile(filename, backup_filename)
