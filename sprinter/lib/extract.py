@@ -68,9 +68,8 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
                         remove_path(target_full_path)
                     else:
                         continue
-                if zip_file_info.file_size > 0:
-                    zip_file.filename = target_path
-                    zip_file.extract(zip_file_info, target_dir)
+                zip_file_info.filename = target_path
+                zip_file.extract(zip_file_info, target_dir)
     except OSError:
         raise ExtractException()
     except IOError:

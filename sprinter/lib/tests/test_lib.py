@@ -125,7 +125,7 @@ class TestLib(object):
                 assert os.path.exists(os.path.join(test_dir, "sprinter", "formulas"))
             finally:
                 shutil.rmtree(test_dir)
-               
+
         @httpretty.activate
         def test_zip(self):
             """ Test if the zip extract works """
@@ -164,7 +164,7 @@ class TestLib(object):
                 test_target_dir = tempfile.mkdtemp(prefix=test_dir)
                 lib.remove_path(test_target_dir)
                 assert not os.path.exists(test_target_dir)
-                
+
                 # test file
                 _, test_target_path = tempfile.mkstemp(prefix=test_dir)
                 lib.remove_path(test_target_path)
