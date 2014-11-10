@@ -10,7 +10,7 @@ import tempfile
 import zipfile
 
 from .command import call
-from .request import download_to_bytesio 
+from .request import download_to_bytesio
 
 
 class ExtractException(Exception):
@@ -62,13 +62,15 @@ def extract_zip(url, target_dir, remove_common_prefix=False, overwrite=False):
             if remove_common_prefix:
                 target_path = target_path.replace(common_prefix, "", 1)
             if target_path != "":
-                target_path = os.path.join(target_dir, target_path)
-                if target_path != target_dir and os.path.exists(target_path):
+                target_full_path = os.path.join(target_dir, target_path)
+                if os.path.exists(target_full_path):
                     if overwrite:
-                        remove_path(target_path)
+                        remove_path(target_full_path)
                     else:
-                        return
-                zip_file.extract(zip_file_info, target_path)
+                        continue
+                if zip_file_info.file_size > 0:
+                    zip_file.filename = target_path
+                    zip_file.extract(zip_file_info, target_dir)
     except OSError:
         raise ExtractException()
     except IOError:
