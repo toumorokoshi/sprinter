@@ -1,6 +1,4 @@
-# a one-liner to install a sandboxed sprinter. Use this if you do not
-# want to or can not install sprinter as sudo.
-# this is also a great example of creating a standalone installer for an environment
+# a one-liner to install a sandboxed sprinter, using uranium (expiremental)
 error () {
     last_error=$?
     echo "!!"
@@ -22,9 +20,7 @@ elif [[ `uname` == 'Darwin' ]]; then
 fi
 tar -xzvf sprinter.tar.gz --strip-components=1 &> /dev/null || error "Failure extracting sprinter targz!"
 echo "Creating python sandbox..."
-python bootstrap.py || error "Failure with bootstrap.py!"
-echo "Installing sprinter to sandbox..."
-bin/buildout -c buildout-install.cfg || error "Failure with buildout!"
+./warmup || error "Failure with prebuild!"
 
 echo "Removing sprinter environment if it already exists..."
 bin/sprinter remove sprinter
