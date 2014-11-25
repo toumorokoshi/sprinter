@@ -47,3 +47,6 @@ docs/build
 # annoying targz files
 distribute-*.tar.gz
 setuptools-*.tar.gz
+.Python
+include/
+lib/

@@ -8,6 +8,15 @@ from pip.req import InstallRequirement, RequirementSet
 from pip.locations import build_prefix, src_prefix
 from pip.exceptions import DistributionNotFound
 
+# we have to get the major, minor version because
+# we're using the "prefix scheme" of python layouts:
+# https://docs.python.org/2/install/#alternate-installation-unix-the-prefix-scheme
+# this is to support the brew (OSX) install of Python.
+# https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Homebrew-and-Python.md
+PYTHON_VERSION = "{0}.{1}".format(
+    sys.version_info.major, sys.version_info.minor
+)
+
 
 class PipException(Exception):
     """ Pip exception """
@@ -20,13 +29,11 @@ class Pip(object):
     requirement_set = None  # the requirement set
     # the package finder
     finder = PackageFinder(find_links=[], index_urls=["http://pypi.python.org/simple/"])
-    install_options = []  # the install options with pip
-    global_options = []  # the global options with pip
 
-    def __init__(self, egg_directory, install_options=[], global_options=[]):
+    def __init__(self, egg_directory):
         self.egg_directory = egg_directory = os.path.abspath(os.path.expanduser(egg_directory))
-        self.install_options += ["--home=%s" % egg_directory]
-        sys.path += [os.path.join(egg_directory, "lib", "python")]
+        sys.path += [os.path.join(egg_directory, "lib",
+                                  "python" + PYTHON_VERSION, "site-packages")]
         self.requirement_set = RequirementSet(
             build_dir=build_prefix,
             src_dir=src_prefix,
@@ -50,8 +57,7 @@ class Pip(object):
             self.requirement_set.prepare_files(self.finder,
                                                force_root_egg_info=False,
                                                bundle=False)
-            self.requirement_set.install(self.install_options,
-                                         self.global_options)
+            self.requirement_set.install(['--prefix=' + self.egg_directory])
         except DistributionNotFound:
             self.requirement_set.requirements._keys.remove(egg_name)
             raise PipException()
