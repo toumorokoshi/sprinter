@@ -1,2 +1,6 @@
 develop-eggs:
   - .
+eggs:
+  httpretty: null
+  mock: null
+  nose: null

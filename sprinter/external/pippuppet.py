@@ -14,7 +14,7 @@ from pip.exceptions import DistributionNotFound
 # this is to support the brew (OSX) install of Python.
 # https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Homebrew-and-Python.md
 PYTHON_VERSION = "{0}.{1}".format(
-    sys.version_info.major, sys.version_info.minor
+    sys.version_info[0], sys.version_info[1]
 )
 
 

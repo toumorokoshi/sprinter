@@ -50,3 +50,4 @@ setuptools-*.tar.gz
 .Python
 include/
 lib/
+man/
