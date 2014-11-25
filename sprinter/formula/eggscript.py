@@ -66,7 +66,7 @@ class EggscriptFormula(FormulaBase):
             fh.write('\n'.join(eggs))
         lib.call("bin/pip install -r requirements.txt --upgrade",
                  cwd=self.directory.install_directory(self.feature_name),
-                 output_log_level=logging.DEBUG)
+                 output_log_level=logging.DEBUG, shell=True)
 
     def __add_paths(self, config):
         """ add the proper resources into the environment """
