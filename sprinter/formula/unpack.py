@@ -52,6 +52,7 @@ class UnpackFormula(FormulaBase):
                 try:
                     self.directory.remove_feature(self.feature_name)
                 except DirectoryException:
+                    self.logger.exception()
                     self.logger.error("Unable to remove old directory!")
             self.__install(self.target)
         if self.source.has('executable'):
