@@ -166,7 +166,9 @@ class Directory(object):
             logger.warn("Attempted to remove a non-existent path %s" % path)
             return
         try:
-            if os.path.isdir(path):
+            if os.path.islink(path):
+                os.unlink(path)
+            elif os.path.isdir(path):
                 shutil.rmtree(path)
             else:
                 os.unlink(path)

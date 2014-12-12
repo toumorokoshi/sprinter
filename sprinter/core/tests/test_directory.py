@@ -18,7 +18,7 @@ class TestDirectory(object):
 
     def setup(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.directory = Directory(os.path.join(self.temp_dir, 'test'), 
+        self.directory = Directory(os.path.join(self.temp_dir, 'test'),
                                    rewrite_config=True)
         self.directory.initialize()
 
@@ -112,7 +112,16 @@ class TestDirectory(object):
             assert not os.path.exists(os.path.join(self.directory.bin_path(), 'newfolder'))
         finally:
             os.unlink(temp_file_path)
-            
+
+    def test_remove_from_bin_directory_as_symlink(self):
+        """ removing from bin should remove a file from bin """
+        temp_dir = tempfile.mkdtemp()
+        try:
+            self.directory.symlink_to_bin('newfile', temp_dir)
+            self.directory.remove_from_bin('newfile')
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_remove_from_bin_no_file_warns(self):
         """ If a file doesn't exist and is attempted to be removed, a warning should fire """
         self.directory.logger.warn = Mock()
@@ -158,7 +167,7 @@ class TestDirectory(object):
         tools.eq_(open(os.path.join(self.directory.include_path(), 'newfile')).read(),
                   open(temp_file).read(),
                   "File contents are different for symlinked files!")
-        
+
     def test_add_to_rc(self):
         """ Test if the add_to_rc method adds to the rc """
         test_content = "THIS IS AN OOOGA BOOGA TEST "
@@ -167,7 +176,7 @@ class TestDirectory(object):
         del(self.directory)
         assert open(rc_file_path).read().find(test_content) != -1,\
             "test content was not found!"
-        
+
     @tools.raises(DirectoryException)
     def test_add_to_rc_norc_rewrite(self):
         """
