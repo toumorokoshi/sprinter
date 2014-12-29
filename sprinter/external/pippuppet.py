@@ -58,7 +58,7 @@ class Pip(object):
         self.requirement_set.add_requirement(
             InstallRequirement.from_line(egg_name, None))
         try:
-            self.requirement_set.prepare_files(self.finder, bundle=False)
+            self.requirement_set.prepare_files(self.finder)
             self.requirement_set.install(['--prefix=' + self.egg_directory])
         except DistributionNotFound:
             self.requirement_set.requirements._keys.remove(egg_name)
