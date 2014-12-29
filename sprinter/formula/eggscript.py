@@ -37,7 +37,6 @@ class EggscriptFormula(FormulaBase):
         return FormulaBase.install(self)
 
     def update(self):
-        import pdb; pdb.set_trace()
         acted = False
         if (self.source.get('egg', '') != self.target.get('egg', '') or
             self.source.get('eggs', '') != self.target.get('eggs', '') or
