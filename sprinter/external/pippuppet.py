@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 
+from pip.download import PipSession
 from pip.index import PackageFinder
 from pip.req import InstallRequirement, RequirementSet
 from pip.locations import build_prefix, src_prefix
@@ -28,7 +29,9 @@ class Pip(object):
     """
     requirement_set = None  # the requirement set
     # the package finder
-    finder = PackageFinder(find_links=[], index_urls=["http://pypi.python.org/simple/"])
+    finder = PackageFinder(find_links=[],
+                           index_urls=["http://pypi.python.org/simple/"],
+                           session=PipSession())
 
     def __init__(self, egg_directory):
         self.egg_directory = egg_directory = os.path.abspath(os.path.expanduser(egg_directory))
@@ -38,7 +41,8 @@ class Pip(object):
             build_dir=build_prefix,
             src_dir=src_prefix,
             download_dir=None,
-            upgrade=True
+            upgrade=True,
+            session=PipSession()
         )
 
     def delete_all_eggs(self):

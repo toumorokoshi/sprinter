@@ -1,6 +1,13 @@
 develop-eggs:
   - .
+phases:
+  after-eggs: ['unit']
 eggs:
   httpretty: null
   mock: null
   nose: null
+parts:
+  unit:
+    recipe: yt.recipe.shell
+    script: "./bin/nosetests -a '!full' --with-coverage --cover-package=sprinter"
+    name: unit
