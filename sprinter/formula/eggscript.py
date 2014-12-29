@@ -31,12 +31,13 @@ class EggscriptFormula(FormulaBase):
 
     def install(self):
         create_virtualenv(self.directory.install_directory(self.feature_name),
-                          search_dirs=file_search_dirs())
+                          search_dirs=file_search_dirs(), symlink=False)
         self.__install_eggs(self.target)
         self.__add_paths(self.target)
         return FormulaBase.install(self)
 
     def update(self):
+        import pdb; pdb.set_trace()
         acted = False
         if (self.source.get('egg', '') != self.target.get('egg', '') or
             self.source.get('eggs', '') != self.target.get('eggs', '') or
