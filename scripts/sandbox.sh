@@ -33,5 +33,5 @@ bin/sprinter install https://raw.github.com/toumorokoshi/sprinter/master/example
 
 # finally, delete the temporary directory
 echo "Cleaning up..."
-rm -r /tmp/sprinter-sandbox || error "Issue cleaning up!"
+rm -rf /tmp/sprinter-sandbox || error "Issue cleaning up!"
 echo "Done!"
