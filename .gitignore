@@ -1,6 +1,9 @@
 *.py[cod]
 MANIFEST
 venv
+include
+lib
+man
 
 # C extensions
 *.so

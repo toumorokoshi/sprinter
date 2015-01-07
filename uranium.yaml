@@ -1,7 +1,7 @@
-develop-eggs:
-  - .
 phases:
   after-eggs: ['unit']
+develop-eggs:
+  - .
 eggs:
   httpretty: null
   mock: null
