@@ -54,3 +54,4 @@ setuptools-*.tar.gz
 include/
 lib/
 man/
+.uranium

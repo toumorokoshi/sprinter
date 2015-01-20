@@ -20,7 +20,7 @@ elif [[ `uname` == 'Darwin' ]]; then
 fi
 tar -xzvf sprinter.tar.gz --strip-components=1 &> /dev/null || error "Failure extracting sprinter targz!"
 echo "Creating python sandbox..."
-./warmup || error "Failure with prebuild!"
+./uranium || error "Failure with prebuild!"
 
 echo "Removing sprinter environment if it already exists..."
 bin/sprinter remove sprinter

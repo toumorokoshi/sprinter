@@ -11,3 +11,5 @@ parts:
     recipe: yt.recipe.shell
     script: "./bin/nosetests -a '!full' --with-coverage --cover-package=sprinter"
     name: unit
+versions:
+  requests: "==2.3.0"
