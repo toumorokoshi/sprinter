@@ -66,7 +66,7 @@ def main(argv):
     if options.with_uranium:
         LOGGER.info("installing uranium...")
         _install_uranium(install_dir, uranium_dir=uranium_dir,
-                         version=options.uranium_version)
+                         version=options.version)
 
         LOGGER.info("running uranium...")
         _run_uranium(install_dir)
@@ -92,13 +92,13 @@ def _install_virtualenv(install_dir):
         shutil.rmtree(temp_dir)
 
 
-def _install_uranium(virtualenv_dir, uranium_dir=None, uranium_version='0.0.30'):
+def _install_uranium(virtualenv_dir, uranium_dir=None, version=None):
     log_file = os.path.join(virtualenv_dir, 'uranium_install_log.txt')
     pip_executable = os.path.join(virtualenv_dir, 'bin', 'pip')
     uranium_name = uranium_dir or 'uranium'
 
-    if uranium_version and not uranium_dir:
-        uranium_name = 'uranium=={0}'.format(uranium_version)
+    if version and not uranium_dir:
+        uranium_name = 'uranium=={0}'.format(version)
 
     with open(log_file, 'w+') as fh:
         status = subprocess.call([pip_executable, 'install', uranium_name,
