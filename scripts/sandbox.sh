@@ -7,6 +7,9 @@ error () {
 }
 
 SANDBOX_DIR=/tmp/sprinter-sandbox
+if [[ -d $SANDBOX_DIR ]]; then
+    rm -r $SANDBOX_DIR
+fi
 
 echo "Creating sandbox directory..."
 mkdir -p $SANDBOX_DIR
