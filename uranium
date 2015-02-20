@@ -5,9 +5,9 @@
 # * run uranium
 
 VENV_URL = "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-{major}.{minor}.{rev}.tar.gz"
-VENV_MAJOR = 1
-VENV_MINOR = 11
-VENV_REV = 6
+VENV_MAJOR = 12
+VENV_MINOR = 0
+VENV_REV = 5
 
 import io
 import logging
@@ -46,35 +46,31 @@ def main(argv):
     options, args = parser.parse_args(argv)
 
     current_dir = os.getcwd()
-    # in the future, uranium should install
-    # into a separate directory. This is tricky due to the
-    # fact that a very strong sandboxing / reset of python
-    # environment is required to isolate version in the current
-    # python context.
-    # install_dir = os.path.join(current_dir, URANIUM_TARGET)
-    install_dir = current_dir
+    install_dir = os.path.join(current_dir, URANIUM_TARGET)
     uranium_dir = options.uranium_dir
 
-    LOGGER.info("installing virtualenv...")
     _install_virtualenv(install_dir)
 
-    LOGGER.info("activating virtualenv...")
+    LOGGER.debug("activating virtualenv...")
     _activate_virtualenv(install_dir)
 
     os.chdir(current_dir)
 
     if options.with_uranium:
-        LOGGER.info("installing uranium...")
+        LOGGER.info("setting up uranium...")
         _install_uranium(install_dir, uranium_dir=uranium_dir,
                          version=options.version)
+        LOGGER.info("done!")
 
-        LOGGER.info("running uranium...")
+        LOGGER.debug("running uranium...")
         _run_uranium(install_dir)
 
 
 def _install_virtualenv(install_dir):
     if _is_virtualenv(install_dir):
         return
+
+    LOGGER.info("installing virtualenv...")
 
     temp_dir = tempfile.mkdtemp()
     try:
@@ -93,6 +89,9 @@ def _install_virtualenv(install_dir):
 
 
 def _install_uranium(virtualenv_dir, uranium_dir=None, version=None):
+    if uranium_dir:
+        uranium_dir = os.path.expanduser(uranium_dir)
+
     log_file = os.path.join(virtualenv_dir, 'uranium_install_log.txt')
     pip_executable = os.path.join(virtualenv_dir, 'bin', 'pip')
     uranium_name = uranium_dir or 'uranium'
@@ -102,7 +101,7 @@ def _install_uranium(virtualenv_dir, uranium_dir=None, version=None):
 
     with open(log_file, 'w+') as fh:
         status = subprocess.call([pip_executable, 'install', uranium_name,
-                                 '-I', '--upgrade'], stdout=fh, stderr=fh)
+                                  '--upgrade'], stdout=fh, stderr=fh)
         if status:
             LOGGER.error("Unable to install uranium. please look at {0} for more info".format(
                 log_file
