@@ -90,7 +90,7 @@ class Injections(object):
         with open(full_path, 'r') as f:
             new_content = self.inject_content(f.read(), content)
         with open(full_path, 'w+') as f:
-            f.write(new_content)
+            f.write(new_content.encode("utf8"))
 
     def destructive_clear(self, filename):
         backup_file(filename)
@@ -100,7 +100,7 @@ class Injections(object):
         with open(full_path, 'r') as f:
             new_content = self.clear_content(f.read())
         with open(full_path, 'w+') as f:
-            f.write(new_content)
+            f.write(new_content.encode("utf8"))
 
     def __generate_file(self, file_path):
         """
