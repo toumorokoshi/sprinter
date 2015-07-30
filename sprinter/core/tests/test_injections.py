@@ -82,6 +82,11 @@ class TestInjections(object):
         c = i.inject_content(TEST_CONTENT, "injectme")
         assert c == TEST_OVERRIDE_CONTENT, "Override result is different from expected."
 
+    def test_unicode(self):
+        """ Test the override functionality """
+        i = Injections("\xf0\x9f\x86\x92", override="OVERRIDE")
+        c = i.inject_content(TEST_CONTENT, "injectme")
+
     def test_injected(self):
         """ Test the injected method to determine if a file has already been injected..."""
         i = Injections("testinjection")

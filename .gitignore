@@ -54,3 +54,5 @@ setuptools-*.tar.gz
 include/
 lib/
 man/
+.uranium
+pip-selfcheck.json

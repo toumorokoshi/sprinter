@@ -7,6 +7,9 @@ error () {
 }
 
 SANDBOX_DIR=/tmp/sprinter-sandbox
+if [[ -d $SANDBOX_DIR ]]; then
+    rm -r $SANDBOX_DIR
+fi
 
 echo "Creating sandbox directory..."
 mkdir -p $SANDBOX_DIR
@@ -20,7 +23,7 @@ elif [[ `uname` == 'Darwin' ]]; then
 fi
 tar -xzvf sprinter.tar.gz --strip-components=1 &> /dev/null || error "Failure extracting sprinter targz!"
 echo "Creating python sandbox..."
-./warmup || error "Failure with prebuild!"
+./uranium --version=0.0.64 || error "Failure with prebuild!"
 
 echo "Removing sprinter environment if it already exists..."
 bin/sprinter remove sprinter

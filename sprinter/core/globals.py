@@ -117,10 +117,14 @@ def _initial_run():
 def _configure_shell(config):
     """ Checks and queries values for the shell """
     config.has_section('shell') or config.add_section('shell')
-    logger.info("What shells or environments would you like sprinter to work with?\n" +
-                "(Sprinter will not try to inject into environments not specified here.)\n" +
-                "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n" +
-                "i.e. environment variables sprinter set will affect programs as well, not just shells")
+    logger.info(
+        "What shells or environments would you like sprinter to work with?\n"
+        "(Sprinter will not try to inject into environments not specified here.)\n"
+        "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n"
+        "i.e. environment variables sprinter set will affect programs as well, not just shells"
+        "WARNING: injecting into the GUI can be very dangerous. it usually requires a restart\n"
+        " to modify any environmental configuration."
+    )
     environments = list(enumerate(sorted(SHELL_CONFIG), start=1))
     logger.info("[0]: All, " + ", ".join(["[%d]: %s" % (index, val) for index, val in environments]))
     desired_environments = lib.prompt("type the environment, comma-separated", default="0")
