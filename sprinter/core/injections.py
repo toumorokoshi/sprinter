@@ -26,11 +26,12 @@ class Injections(object):
     clear_set = set()  # list holding the filenames to clear injection from
 
     def __init__(self, wrapper, override=None, logger='sprinter'):
+        wrapper = _unicode(wrapper)
         if override:
             self.override_match = re.compile("(\n?#%s\n.*#%s\n)" % (override, override), re.DOTALL)
         else:
             self.override_match = None
-        self.wrapper = "#%s" % wrapper
+        self.wrapper = u"#%s" % wrapper
         self.wrapper_match = re.compile("\n?#%s\n.*#%s\n" % (wrapper, wrapper), re.DOTALL)
         self.logger = logging.getLogger(logger)
         self.inject_dict = {}
@@ -39,8 +40,8 @@ class Injections(object):
     def inject(self, filename, content):
         """ add the injection content to the dictionary """
         # ensure content always has one trailing newline
-        content = content.rstrip() + "\n"
-        if not filename in self.inject_dict:
+        content = _unicode(content).rstrip() + "\n"
+        if filename not in self.inject_dict:
             self.inject_dict[filename] = ""
         self.inject_dict[filename] += content
 
@@ -61,6 +62,7 @@ class Injections(object):
         self.logger.debug("Clear list is:")
         self.logger.debug(self.clear_set)
         for filename, content in self.inject_dict.items():
+            content = _unicode(content)
             self.logger.debug("Injecting values into %s..." % filename)
             self.destructive_inject(filename, content)
         for filename in self.clear_set:
@@ -82,6 +84,7 @@ class Injections(object):
         generally be run only during the commit phase, when no future
         injections will be done.
         """
+        content = _unicode(content)
         backup_file(filename)
         full_path = self.__generate_file(filename)
         with open(full_path, 'r') as f:
@@ -115,8 +118,8 @@ class Injections(object):
     def in_noninjected_file(self, file_path, content):
         """ Checks if a string exists in the file, sans the injected """
         if os.path.exists(file_path):
-            file_content = open(file_path).read()
-            file_content = self.wrapper_match.sub("", file_content)
+            file_content = open(file_path).read().decode("unicode-escape")
+            file_content = self.wrapper_match.sub(u"", file_content)
         else:
             file_content = ""
         return file_content.find(content) != -1
@@ -128,7 +131,8 @@ class Injections(object):
         satisfied or is None. Remove old instances of injects if they
         exist.
         """
-        content = self.wrapper_match.sub("", content)
+        inject_string = _unicode(inject_string)
+        content = self.wrapper_match.sub("", _unicode(content))
         if self.override_match:
             sprinter_overrides = self.override_match.search(content)
             if sprinter_overrides:
@@ -149,6 +153,7 @@ class Injections(object):
         """
         Clear the injected content from the content buffer, and return the results
         """
+        content = _unicode(content)
         return self.wrapper_match.sub("", content)
 
 
@@ -161,3 +166,9 @@ def backup_file(filename):
 
     backup_filename = filename + BACKUP_SUFFIX
     shutil.copyfile(filename, backup_filename)
+
+def _unicode(s):
+    """ return the string converted to unicode. """
+    if not isinstance(s, unicode):
+        s = s.decode("unicode-escape")
+    return s

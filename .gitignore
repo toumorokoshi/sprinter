@@ -55,3 +55,4 @@ include/
 lib/
 man/
 .uranium
+pip-selfcheck.json
