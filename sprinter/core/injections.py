@@ -7,6 +7,7 @@ command, or applied separately with the destructive_inject and
 destructive_clear..
 """
 from __future__ import unicode_literals
+import codecs
 import logging
 import os
 import re
@@ -89,8 +90,8 @@ class Injections(object):
         full_path = self.__generate_file(filename)
         with open(full_path, 'r') as f:
             new_content = self.inject_content(f.read(), content)
-        with open(full_path, 'w+') as f:
-            f.write(new_content.encode("utf8"))
+        with codecs.open(full_path, 'w+', encoding="utf8") as f:
+            f.write(new_content)
 
     def destructive_clear(self, filename):
         backup_file(filename)
@@ -99,8 +100,8 @@ class Injections(object):
         full_path = self.__generate_file(filename)
         with open(full_path, 'r') as f:
             new_content = self.clear_content(f.read())
-        with open(full_path, 'w+') as f:
-            f.write(new_content.encode("utf8"))
+        with codecs.open(full_path, 'w+', encoding="utf8") as f:
+            f.write(new_content)
 
     def __generate_file(self, file_path):
         """
