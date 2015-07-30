@@ -84,7 +84,7 @@ class TestInjections(object):
 
     def test_unicode(self):
         """ Test the override functionality """
-        i = Injections("\x9f", override="OVERRIDE")
+        i = Injections("\xf0\x9f\x86\x92", override="OVERRIDE")
         c = i.inject_content(TEST_CONTENT, "injectme")
 
     def test_injected(self):

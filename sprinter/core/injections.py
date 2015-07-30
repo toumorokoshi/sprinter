@@ -75,7 +75,7 @@ class Injections(object):
         full_path = os.path.expanduser(filename)
         if not os.path.exists(full_path):
             return False
-        with open(full_path, 'r+') as fh:
+        with codecs.open(full_path, 'r+', encoding="utf-8") as fh:
             contents = fh.read()
         return self.wrapper_match.search(contents) is not None
 
@@ -88,9 +88,9 @@ class Injections(object):
         content = _unicode(content)
         backup_file(filename)
         full_path = self.__generate_file(filename)
-        with open(full_path, 'r') as f:
+        with codecs.open(full_path, 'r', encoding="utf-8") as f:
             new_content = self.inject_content(f.read(), content)
-        with codecs.open(full_path, 'w+', encoding="utf8") as f:
+        with codecs.open(full_path, 'w+', encoding="utf-8") as f:
             f.write(new_content)
 
     def destructive_clear(self, filename):
@@ -98,9 +98,9 @@ class Injections(object):
         if not os.path.exists(os.path.expanduser(filename)):
             return
         full_path = self.__generate_file(filename)
-        with open(full_path, 'r') as f:
+        with codecs.open(full_path, 'r', encoding="utf-8") as f:
             new_content = self.clear_content(f.read())
-        with codecs.open(full_path, 'w+', encoding="utf8") as f:
+        with codecs.open(full_path, 'w+', encoding="utf-8") as f:
             f.write(new_content)
 
     def __generate_file(self, file_path):
@@ -119,7 +119,7 @@ class Injections(object):
     def in_noninjected_file(self, file_path, content):
         """ Checks if a string exists in the file, sans the injected """
         if os.path.exists(file_path):
-            file_content = open(file_path).read().decode("unicode-escape")
+            file_content = codecs.open(file_path, encoding="utf-8").read()
             file_content = self.wrapper_match.sub(u"", file_content)
         else:
             file_content = ""
@@ -171,5 +171,5 @@ def backup_file(filename):
 def _unicode(s):
     """ return the string converted to unicode. """
     if not isinstance(s, unicode):
-        s = s.decode("unicode-escape")
+        s = s.decode("utf8")
     return s
