@@ -56,3 +56,4 @@ lib/
 man/
 .uranium
 pip-selfcheck.json
+.pydistutils.cfg
