@@ -12,6 +12,7 @@ import logging
 import os
 import re
 import shutil
+from ..lib.compatability import _unicode
 
 
 class Injections(object):
@@ -167,9 +168,3 @@ def backup_file(filename):
 
     backup_filename = filename + BACKUP_SUFFIX
     shutil.copyfile(filename, backup_filename)
-
-def _unicode(s):
-    """ return the string converted to unicode. """
-    if not isinstance(s, unicode):
-        s = s.decode("utf8")
-    return s
