@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 import stat
+import tempfile
 
 from .templates import source_template
 
@@ -162,6 +163,7 @@ class Directory(object):
 
     def __remove_path(self, path):
         """ Remove an object """
+        curpath = os.path.abspath(os.curdir)
         if not os.path.exists(path):
             logger.warn("Attempted to remove a non-existent path %s" % path)
             return
@@ -172,6 +174,12 @@ class Directory(object):
                 shutil.rmtree(path)
             else:
                 os.unlink(path)
+
+            # in the case we just deleted ourselves out of a valid directory,
+            # we move to a valid directory.
+            if curpath == path:
+                os.chdir(tempfile.gettempdir())
+
         except OSError:
             logger.error("Unable to remove object at path %s" % path)
             raise DirectoryException("Unable to remove object at path %s" % path)
