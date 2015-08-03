@@ -5,9 +5,9 @@
 # * run uranium
 
 VENV_URL = "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-{major}.{minor}.{rev}.tar.gz"
-VENV_MAJOR = 12
-VENV_MINOR = 0
-VENV_REV = 6
+VENV_MAJOR = 13
+VENV_MINOR = 1
+VENV_REV = 0
 
 import io
 import logging
@@ -18,6 +18,7 @@ import sys
 import tarfile
 import tempfile
 from optparse import OptionParser
+from pkg_resources import load_entry_point, DistributionNotFound
 
 try:
     from urllib2 import urlopen as urlopen
@@ -36,7 +37,7 @@ parser.add_option("--no-uranium", help="don't install uranium.",
                   default=True, action="store_false", dest="with_uranium")
 parser.add_option("--uranium-dir",
                   help="specify a directory containing uranium source.")
-parser.add_option("--version",
+parser.add_option("--version", default="0.2.15",
                   help="specify the version of uranium to install.")
 
 URANIUM_TARGET = ".uranium"
@@ -46,9 +47,20 @@ def main(argv):
     options, args = parser.parse_args(argv)
 
     current_dir = os.getcwd()
-    install_dir = os.path.join(current_dir, URANIUM_TARGET)
     uranium_dir = options.uranium_dir
 
+    # first we try to see if Uranium is already installed
+    # on the system.
+    uranium = retrieve_system_uranium()
+
+    if uranium and not options.uranium_dir:
+        LOGGER.info("using system uranium...")
+        return uranium(args)
+
+    # if not, we install it in a sandbox and execute it from
+    # there.
+
+    install_dir = os.path.join(current_dir, URANIUM_TARGET)
     _install_virtualenv(install_dir)
 
     LOGGER.debug("activating virtualenv...")
@@ -56,14 +68,21 @@ def main(argv):
 
     os.chdir(current_dir)
 
-    if options.with_uranium:
-        LOGGER.info("setting up uranium...")
-        _install_uranium(install_dir, uranium_dir=uranium_dir,
-                         version=options.version)
-        LOGGER.info("done!")
+    LOGGER.info("setting up uranium...")
+    _install_uranium(install_dir, uranium_dir=uranium_dir,
+                     version=options.version)
+    LOGGER.info("done!")
 
-        LOGGER.debug("running uranium...")
-        _run_uranium(install_dir)
+    LOGGER.debug("running uranium...")
+    return _run_uranium(install_dir, args)
+
+
+def retrieve_system_uranium():
+    """ if uranium already exists on the system path, use that instead. """
+    try:
+        return load_entry_point("uranium", "console_scripts", "uranium")
+    except (ImportError, DistributionNotFound):
+        return None
 
 
 def _install_virtualenv(install_dir):
@@ -135,9 +154,12 @@ def _install_uranium(virtualenv_dir, uranium_dir=None, version=None):
             exit(1)
 
 
-def _run_uranium(virtualenv_dir):
+def _run_uranium(virtualenv_dir, args):
     uranium_executable = os.path.join(virtualenv_dir, 'bin', 'uranium')
-    subprocess.call([uranium_executable])
+    return subprocess.call([uranium_executable] + args,
+                           stdin=sys.stdin,
+                           stdout=sys.stdout,
+                           stderr=sys.stderr)
 
 
 def _download_virtualenv(target_dir=None):
@@ -202,4 +224,4 @@ def _create_stdout_logger():
 
 if __name__ == "__main__":
     _create_stdout_logger()
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
