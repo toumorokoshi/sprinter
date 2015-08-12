@@ -37,7 +37,7 @@ parser.add_option("--no-uranium", help="don't install uranium.",
                   default=True, action="store_false", dest="with_uranium")
 parser.add_option("--uranium-dir",
                   help="specify a directory containing uranium source.")
-parser.add_option("--version", default="0.2.15",
+parser.add_option("--version", default="0.2.18",
                   help="specify the version of uranium to install.")
 
 URANIUM_TARGET = ".uranium"
