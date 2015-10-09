@@ -25,6 +25,7 @@ def extract_tar(url, target_dir, additional_compression="", remove_common_prefix
     try:
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
+        import pdb; pdb.set_trace()
         tf = tarfile.TarFile.open(fileobj=download_to_bytesio(url))
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)

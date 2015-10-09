@@ -42,7 +42,9 @@ def cleaned_request(request_type, *args, **kwargs):
 def download_to_bytesio(url):
     """ Return a bytesio object with a download bar """
     logger.info("Downloading url: {0}".format(url))
-    r = cleaned_request('get', url, stream=True)
+    #r = cleaned_request('get', url, stream=True)
+    r = cleaned_request('get', url, stream=False)
+    return r.raw
     stream = io.BytesIO()
     total_length = int(r.headers.get('content-length'))
     for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
