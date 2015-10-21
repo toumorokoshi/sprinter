@@ -102,12 +102,15 @@ def _install_virtualenv(install_dir):
         ))
         virtualenv_executable = os.path.join(virtualenv_dir, 'virtualenv.py')
         os.chdir(virtualenv_dir)  # virtualenv only works in the cwd it is installed in
-        # note: the always-copy option was removed due to issuen with
-        # certain distros of linux:
+        args = [sys.executable, virtualenv_executable,
+                '--no-site-packages',
+                install_dir]
+        # note: the always-copy option is optional due to issues with
+        # centos
         # https://github.com/pypa/virtualenv/pull/757
-        subprocess.call([sys.executable, virtualenv_executable,
-                         '--no-site-packages',
-                         install_dir])
+        if not os.path.exists(os.path.join("/etc", "centos-release")):
+            args += ["--always-copy"]
+        subprocess.call(args)
         site_py_file = _get_site_file_path(install_dir)
         _inject_to_site_py(site_py_file)
     finally:
