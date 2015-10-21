@@ -566,7 +566,7 @@ class Environment(object):
             if not reconfigure:
                 self.run_action(feature, 'resolve')
             # if a target doesn't exist, no need to prompt.
-            instance = self.feature[feature]
+            instance = self.features[feature]
             if instance.target:
                 self.run_action(feature, 'prompt')
 
