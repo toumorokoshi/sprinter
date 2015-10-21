@@ -565,7 +565,9 @@ class Environment(object):
         for feature in self.features.run_order:
             if not reconfigure:
                 self.run_action(feature, 'resolve')
-            self.run_action(feature, 'prompt')
+            # if a target doesn't exist, no need to prompt.
+            if feature.target:
+                self.run_action(feature, 'prompt')
 
     def _copy_source_to_target(self):
         """ copy source user configuration to target """
