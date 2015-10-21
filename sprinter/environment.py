@@ -566,7 +566,8 @@ class Environment(object):
             if not reconfigure:
                 self.run_action(feature, 'resolve')
             # if a target doesn't exist, no need to prompt.
-            if feature.target:
+            instance = self.feature[feature]
+            if instance.target:
                 self.run_action(feature, 'prompt')
 
     def _copy_source_to_target(self):
