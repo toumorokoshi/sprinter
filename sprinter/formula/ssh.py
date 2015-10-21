@@ -49,7 +49,7 @@ class SSHFormula(FormulaBase):
     def install(self):
         self.__generate_key(self.target)
         self.__install_ssh_config(self.target)
-        if self.target.has('install_command') and not self.target.is_affirmative('use_global_ssh', default="no")::
+        if self.target.has('install_command') and not self.target.is_affirmative('use_global_ssh', default="no"):
             self.__call_command(self.target.get('install_command'), self.target.get('ssh_key_path'))
 
     def update(self):
