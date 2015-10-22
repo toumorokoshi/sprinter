@@ -128,7 +128,7 @@ class PerforceFormula(FormulaBase):
         return acted
 
     def remove(self):
-        if self.source.is_affirmative('remove_p4root'):
+        if self.source.is_affirmative('remove_p4root', False):
             self.logger.info("Removing %s..." % self.source.get('root_path'))
             shutil.rmtree(os.path.expanduser(self.source.get('root_path')))
         FormulaBase.remove(self)
