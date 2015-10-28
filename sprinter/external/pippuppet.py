@@ -6,8 +6,9 @@ import sys
 from pip.download import PipSession
 from pip.index import PackageFinder
 from pip.req import InstallRequirement, RequirementSet
-from pip.locations import build_prefix, src_prefix
+from pip.locations import src_prefix
 from pip.exceptions import DistributionNotFound
+from pip.utils.build import BuildDirectory
 
 # we have to get the major, minor version because
 # we're using the "prefix scheme" of python layouts:
@@ -37,13 +38,14 @@ class Pip(object):
         self.egg_directory = egg_directory = os.path.abspath(os.path.expanduser(egg_directory))
         sys.path += [os.path.join(egg_directory, "lib",
                                   "python" + PYTHON_VERSION, "site-packages")]
-        self.requirement_set = RequirementSet(
-            build_dir=build_prefix,
-            src_dir=src_prefix,
-            download_dir=None,
-            upgrade=True,
-            session=PipSession()
-        )
+        with BuildDirectory() as build_prefix:
+            self.requirement_set = RequirementSet(
+                build_dir=build_prefix,
+                src_dir=src_prefix,
+                download_dir=None,
+                upgrade=True,
+                session=PipSession()
+            )
 
     def delete_all_eggs(self):
         """ delete all the eggs in the directory specified """

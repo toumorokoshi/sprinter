@@ -102,9 +102,11 @@ def _load_manifest_from_url(manifest, url, verify_certificate=True, username=Non
 
 def _load_manifest_from_file(manifest, path):
     """ load manifest from file """
-    if not os.path.exists(os.path.expanduser(path)):
+    path = os.path.abspath(os.path.expanduser(path))
+    if not os.path.exists(path):
         raise ManifestException("Manifest does not exist at {0}!".format(path))
     manifest.read(path)
+    manifest.set('config', 'source', str(path))
 
 
 class ManifestException(Exception):
