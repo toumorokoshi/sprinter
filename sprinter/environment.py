@@ -334,7 +334,7 @@ class Environment(object):
 
     def write_debug_log(self, file_path):
         """ Write the debug log to a file """
-        with open(file_path, "w+") as fh:
+        with open(file_path, "wb+") as fh:
             fh.write(system.get_system_info().encode('utf-8'))
             # writing to debug stream
             self._debug_stream.seek(0)

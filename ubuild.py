@@ -1,5 +1,6 @@
 def main(build):
     build.packages.install(".", develop=True)
+    build.packages.install("pex")
 
 
 def test(build):
