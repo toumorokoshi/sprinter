@@ -6,7 +6,7 @@ except:
     from distutils.core import setup
 
 setup(name='sprinter',
-      version='1.3.0',
+      version='1.4.0',
       description='a utility library to help environment bootstrapping scripts',
       long_description=open('README.rst').read(),
       author='Yusuke Tsutsumi',
@@ -14,12 +14,13 @@ setup(name='sprinter',
       url='http://toumorokoshi.github.io/sprinter',
       packages=find_packages(),
       install_requires=[
-          'requests>=2.3.0',
-          'pip==6.1.1',
-          'docopt>=0.6.1',
-          'six>=1.4.1',
           'clint>=0.3.3',
-          'virtualenv>=1.11.6'
+          'docopt>=0.6.1',
+          'pex==1.1.0',
+          'pip==6.1.1',
+          'requests>=2.3.0',
+          'six>=1.4.1',
+          'virtualenv>=1.11.6',
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',
