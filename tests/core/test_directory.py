@@ -3,6 +3,7 @@ Tests for directory class
 """
 from __future__ import unicode_literals
 import os
+import pytest
 import shutil
 import tempfile
 
@@ -10,6 +11,9 @@ from nose import tools
 from mock import Mock, patch
 from sprinter.core.directory import Directory, DirectoryException
 
+
+def test_intialize(directory):
+    assert directory.new, "new variable should be set to false for existing directory!"
 
 class TestDirectory(object):
     """

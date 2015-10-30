@@ -35,11 +35,11 @@ formula = sprinter.formula.base
 class TestFeatureDict():
     """ Tests for the featuredict """
 
-    def setUp(self):
+    def setup(self):
         source_rawconfig = configparser.RawConfigParser()
         source_rawconfig.readfp(StringIO(source_config))
         self.source_manifest = Manifest(source_rawconfig)
-                                   
+
         target_rawconfig = configparser.RawConfigParser()
         target_rawconfig.readfp(StringIO(target_config))
         self.target_manifest = Manifest(target_rawconfig)

@@ -27,7 +27,7 @@ here is an override string. it should appear at the bottom.
 
 class TestInjections(object):
 
-    def setUp(self):
+    def setup(self):
         self.temp_dir = tempfile.mkdtemp()
         self.permanent_string = "this should stay no matter what."
         self.test_injection = "this should stay temporarily"
@@ -36,7 +36,7 @@ class TestInjections(object):
         fh.write(self.permanent_string)
         fh.close()
 
-    def tearDown(self):
+    def teardown(self):
         shutil.rmtree(self.temp_dir)
 
     def test_injection(self):

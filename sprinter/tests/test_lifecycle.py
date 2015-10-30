@@ -13,7 +13,7 @@ class TestLifecycle(object):
     Test the sprinter lifecycle
     """
 
-    def setUp(self):
+    def setup(self):
         self.global_config = create_default_config()
         self.global_config.set('shell', 'bash', 'false')
         self.global_config.set('shell', 'zsh', 'false')

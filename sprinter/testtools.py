@@ -6,6 +6,7 @@ from io import StringIO
 
 from mock import Mock, patch
 from contextlib import contextmanager
+import pytest
 import shutil
 import tempfile
 
@@ -43,7 +44,7 @@ def create_mock_environment(source_config=None, target_config=None,
 
         if target_config:
             environment.target = load_manifest(StringIO(target_config), namespace="test")
-        
+
         environment.warmup()
         # TODO: implement sandboxing so no need to mock these
         environment.injections.commit = Mock()
@@ -56,7 +57,7 @@ def create_mock_environment(source_config=None, target_config=None,
                                                environment.global_path,
                                                formula_dict=formula_dict)
         return environment, temp_directory
-    
+
 
 def create_mock_formulabase():
     """ Generate a formulabase object that does nothing, and returns no errors """

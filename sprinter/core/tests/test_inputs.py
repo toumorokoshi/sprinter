@@ -21,7 +21,7 @@ class TestInputs(object):
     Tests for the input class
     """
 
-    def setUp(self):
+    def setup(self):
         self.inputs = Inputs()
 
     def test_prompt_unset_imputs(self):

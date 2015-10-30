@@ -5,7 +5,7 @@ from sprinter.core.globals import create_default_config, _configure_shell
 class TestGlobalConfig(object):
     """ Tests for the global logic """
 
-    def setUp(self):
+    def setup(self):
         self.config = create_default_config()
 
     def test_global_config_prompt(self):
