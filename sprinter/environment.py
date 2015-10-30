@@ -150,8 +150,7 @@ class Environment(object):
                 self.clear_all()
                 self.logger.info("Removing installation %s..." % self.namespace)
                 self.directory.remove()
-                et, ei, tb = sys.exc_info()
-                reraise(et, ei, tb)
+                raise
 
     @warmup
     @install_required
@@ -176,8 +175,7 @@ class Environment(object):
             self._finalize()
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
-            et, ei, tb = sys.exc_info()
-            reraise(et, ei, tb)
+            raise
 
     @warmup
     @install_required
@@ -202,8 +200,7 @@ class Environment(object):
                 self.logger.error(REMOVE_WARNING)
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
-            et, ei, tb = sys.exc_info()
-            reraise(et, ei, tb)
+            raise
 
     @warmup
     @install_required
@@ -222,8 +219,7 @@ class Environment(object):
             self._finalize()
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
-            et, ei, tb = sys.exc_info()
-            reraise(et, ei, tb)
+            raise
 
     @warmup
     @install_required
@@ -242,8 +238,7 @@ class Environment(object):
             self._finalize()
         except Exception:
             self.logger.debug("", exc_info=sys.exc_info())
-            et, ei, tb = sys.exc_info()
-            reraise(et, ei, tb)
+            raise
 
     @warmup
     def validate(self):
