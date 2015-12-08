@@ -34,33 +34,32 @@ class CommandFormula(FormulaBase):
                                                  'redirect_stdout_to_log']
 
     def install(self):
-        self.__run_command('install', 'target')
+        self._run_command('install')
         FormulaBase.install(self)
 
     def update(self):
-        value = self.__run_command('update', 'target')
+        value = self._run_command('update')
         return value or FormulaBase.update(self)
 
     def remove(self):
-        self.__run_command('remove', 'source')
+        self._run_command('remove')
         FormulaBase.remove(self)
 
     def activate(self):
-        self.__run_command('activate', 'source')
+        self._run_command('activate')
         FormulaBase.activate(self)
 
     def deactivate(self):
-        self.__run_command('deactivate', 'source')
+        self._run_command('deactivate')
         FormulaBase.deactivate(self)
 
-    def __run_command(self, command_type, manifest_type):
-        config = getattr(self, manifest_type)
-        if config.has(command_type):
-            command = config.get(command_type)
+    def _run_command(self, command_type):
+        if self.config.has(command_type):
+            command = self.config.get(command_type)
             self.logger.debug("Running %s..." % command)
-            shell = config.has('shell') and config.is_affirmative('shell')
-            stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
+            shell = self.config.is_affirmative("shell", default="no")
+            stdout = subprocess.PIPE if self.config.is_affirmative('redirect_stdout_to_log', 'true') else None
             return_code, output = lib.call(command, shell=shell, stdout=stdout)
-            if config.is_affirmative('fail_on_error', True) and return_code != 0:
+            if self.config.is_affirmative('fail_on_error', default="yes") and return_code != 0:
                 raise CommandFormulaException("Command returned a return code of {0}!".format(return_code))
             return True
