@@ -3,6 +3,7 @@ Tests for directory class
 """
 from __future__ import unicode_literals
 import os
+import pytest
 import shutil
 import tempfile
 
@@ -11,22 +12,8 @@ from mock import Mock, patch
 from sprinter.core.directory import Directory, DirectoryException
 
 
-def test_initialize(directory):
-    directory.initialize()
-    assert not directory.new, "new variable should be set to false for existing directory!"
-    assert os.path.exists(directory.bin_path()), "bin directory should exist after initialize!"
-    assert os.path.exists(directory.lib_path()), "lib directory should exist after initialize!"
-
-
-def test_uninitialized(directory):
-    assert not directory.new, "new variable should be set to true for existing directory!"
-
-
-def test_remove(directory):
-    directory.initialize()
-    directory.remove()
-    assert not os.path.exists(directory.root_dir), "Path still exists after remove!"
-
+def test_intialize(directory):
+    assert directory.new, "new variable should be set to false for existing directory!"
 
 class TestDirectory(object):
     """
@@ -43,6 +30,28 @@ class TestDirectory(object):
         if hasattr(self, 'directory'):
             del(self.directory)
         shutil.rmtree(self.temp_dir)
+
+    def test_initialize(self):
+        """ The initialize method should generate the proper directories """
+        self.directory.initialize()
+        assert not self.directory.new,\
+            "new variable should be set to false for existing directory!"
+        assert os.path.exists(self.directory.bin_path()),\
+            "bin directory should exist after initialize!"
+        assert os.path.exists(self.directory.lib_path()),\
+            "lib directory should exist after initialize!"
+
+    def test_initialize_new(self):
+        """ The initialize method should return new for a non-existent directory """
+        new_temp_dir = self.temp_dir + "e09dia0d"
+        directory = Directory(os.path.join(new_temp_dir, 'test'), rewrite_config=False)
+        assert directory.new
+        try:
+            directory.initialize()
+            assert not directory.new, "directory should not be new after initialization"
+        finally:
+            if os.path.exists(new_temp_dir):
+                shutil.rmtree(new_temp_dir)
 
     def test_clear_feature_symlinks(self):
         """ clear feature symlinks """
@@ -180,3 +189,8 @@ class TestDirectory(object):
         """
         directory = Directory(os.path.join(self.temp_dir, 'test'), rewrite_config=False)
         directory.add_to_rc("test")
+
+    def test_remove(self):
+        """ Remove should remove the environment directory """
+        self.directory.remove()
+        assert not os.path.exists(self.directory.root_dir), "Path still exists after remove!"

@@ -31,7 +31,7 @@ class FormulaBase(object):
         self.feature_name = feature_name
         self.source = source
         self.target = target
-        self.env = self.environment = environment
+        self.environment = environment
         self.directory = environment.directory
         self.injections = environment.injections
         if not (source or target):
@@ -207,22 +207,9 @@ class FormulaBase(object):
                                      default=prompt_default))
 
     # utility methods
-    @property
-    def feature_path(self):
+    def _install_directory(self):
         """
         return the path to the directory available for the feature to put
         files in
         """
-        return self.env.directory.install_directory(self.feature_name)
-
-    @property
-    def directory(self):
-        return self.env.directory
-
-    @property
-    def injections(self):
-        return self.env.injections
-
-    @property
-    def config(self):
-        return self.target or self.source
+        return self.directory.install_directory(self.feature_name)

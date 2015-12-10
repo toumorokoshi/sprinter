@@ -2,6 +2,7 @@
 The egg formula will install scripts from an egg (including dependencies) into a sandboxed directory.
 [eggs]
 formula = sprinter.formulas.egg
+egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc
 links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
