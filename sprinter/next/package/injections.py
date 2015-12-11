@@ -12,7 +12,7 @@ import logging
 import os
 import re
 import shutil
-from ..lib.compatability import _unicode
+from ..compat import _unicode
 
 
 class Injections(object):

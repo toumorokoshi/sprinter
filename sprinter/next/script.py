@@ -18,6 +18,7 @@ Options:
 from __future__ import unicode_literals
 import docopt
 import logging
+import pprint
 import os
 import signal
 import sys
@@ -27,6 +28,8 @@ LOGGING_NAMES = ["sprinter"]
 VALID_COMMANDS = [
     "install", "update", "validate", "remove", "deactivate", "activate"
 ]
+CONSUMED_BY_SCRIPT = ["--verbose", "--version"]
+PRINTER = pprint.PrettyPrinter(indent=4)
 
 
 def main(argv=sys.argv[1:]):
@@ -45,9 +48,10 @@ def _run(argv):
     _create_stdout_logger(logging_level)
     home_directory = os.path.expanduser("~")
     sprinter = Sprinter(home_directory)
+    kwargs = dict((k,v) for k,v in options.items() if k not in CONSUMED_BY_SCRIPT)
     for command in VALID_COMMANDS:
         if options[command]:
-            getattr(sprinter, command)()
+            PRINTER.pprint(getattr(sprinter, command)(**kwargs))
 
 
 def _signal_handler(signal, frame):

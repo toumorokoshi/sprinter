@@ -25,7 +25,7 @@ class FeatureConfig(object):
         """
         Returns the param value, and returns the default if it doesn't exist.
         If default is none, an exception will be raised instead.
-        
+
         the returned parameter will have been specialized against the global context
         """
         if not self.has(param):
@@ -76,7 +76,7 @@ class FeatureConfig(object):
         """ Set the parameter to the default if it doesn't exist """
         if not self.has(param):
             self.set(param, default)
-            
+
     def to_dict(self):
         """ Returns the context, fully specialized, as a dictionary """
         return dict((k, str(self.get(k))) for k in self.raw_dict)
@@ -88,7 +88,7 @@ class FeatureConfig(object):
         for k, v in self.raw_dict.items():
             self.manifest.set(self.feature_name, k, v)
 
-    # implementing a dictionary-like behaviour for backwards compatability
+    # implementing a dictionary-like behaviour for backwards compatibility
     # it's most likely better to use set and get instead
     def __getitem__(self, key):
         try:
@@ -96,7 +96,7 @@ class FeatureConfig(object):
         except ParamNotFoundException:
             e = sys.exc_info()[1]
             raise KeyError(str(e))
-        
+
     def __setitem__(self, key, value):
         self.set(key, value)
 

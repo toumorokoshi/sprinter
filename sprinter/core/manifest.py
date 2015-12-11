@@ -20,7 +20,7 @@ from six.moves import configparser
 from six import string_types
 import requests
 import sprinter.lib as lib
-from sprinter.lib.compatability import create_configparser
+from sprinter.next.compat import create_configparser
 from sprinter.lib.dependencytree import DependencyTree, DependencyTreeException
 from .featureconfig import FeatureConfig
 from .inputs import Inputs
