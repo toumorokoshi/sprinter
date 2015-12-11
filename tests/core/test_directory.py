@@ -12,9 +12,6 @@ from mock import Mock, patch
 from sprinter.core.directory import Directory, DirectoryException
 
 
-def test_intialize(directory):
-    assert directory.new, "new variable should be set to false for existing directory!"
-
 class TestDirectory(object):
     """
     Test the directory object
