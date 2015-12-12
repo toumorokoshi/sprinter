@@ -67,6 +67,7 @@ def create_mock_formulabase():
     mock_formulabase.resolve.return_value = None
     mock_formulabase.prompt.return_value = None
     mock_formulabase.sync.return_value = None
+    mock_formulabase.target = True
     for phase in PHASE.values:
         setattr(mock_formulabase, phase.name, Mock(return_value=None))
 
