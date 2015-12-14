@@ -2,7 +2,7 @@ import os
 import shutil
 import tempfile
 
-from sprinter.next.package.injections import Injections
+from sprinter.next.environment.injections import Injections
 
 TEST_CONTENT = """
 Testing abc.

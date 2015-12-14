@@ -1,0 +1,2 @@
+class SprinterException(Exception):
+    pass
