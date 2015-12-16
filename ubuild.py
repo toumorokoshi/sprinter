@@ -14,4 +14,4 @@ def test(build):
     build.packages.install("nose")
     sys.exit(build.executables.run(
         ["py.test", "sprinter"] + build.options.args
-    ))
+    )[0])
