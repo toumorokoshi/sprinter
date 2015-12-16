@@ -195,6 +195,7 @@ the sprinter action failed! Writing debug output to /tmp/sprinter.log
         env.logger.info("""
 =====================================================================
         """.strip())
+        raise
 
 
 def parse_domain(url):
