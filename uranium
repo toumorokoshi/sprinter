@@ -3,6 +3,7 @@
 # * download and set up a virtualenv
 # * install uranium
 # * run uranium
+import sys
 URANIUM_STANDALONE_URL = "https://raw.githubusercontent.com/toumorokoshi/uranium/master/uranium/scripts/uranium_standalone"
 
 try:
