@@ -38,6 +38,7 @@ if [ -n "$URANIUM_PATH" ]; then
 else
     ./uranium || error "Failure with prebuild!"
 fi
+. $SANDBOX_DIR/bin/activate
 
 echo "Removing sprinter environment if it already exists..."
 bin/sprinter remove sprinter
