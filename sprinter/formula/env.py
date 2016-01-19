@@ -13,7 +13,7 @@ from sprinter.formula.base import FormulaBase
 
 
 class EnvFormula(FormulaBase):
-    """ A sprinter formula for git"""
+    """ A sprinter formula for setting environment variables"""
 
     # the keys that should be ignored during write loop (anything that has meaning elsewhere)
     ignored_keys = FormulaBase.valid_options + FormulaBase.required_options
