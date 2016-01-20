@@ -1,9 +1,12 @@
 """
-Runs a command
+Creates a symbolic link. If active_only is True, then it is
+removed when the environment is deactivated.
+
 [symlink]
 formula = sprinter.formula.symlink
 src=/path/to/src
 dest=/path/to/dest
+active_only=True
 """
 from __future__ import unicode_literals
 from sprinter.formula.base import FormulaBase
@@ -38,7 +41,9 @@ class SymlinkFormula(FormulaBase):
         FormulaBase.activate(self)
 
     def deactivate(self):
-        self.__remove_symlink('source')
+        config = getattr(self, manifest_type)
+        if config.has('active_only') and config.is_affirmative('active_only'):
+            self.__remove_symlink('source')
         FormulaBase.deactivate(self)
 
     def __create_symlink(self, manifest_type):
