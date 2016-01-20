@@ -12,7 +12,6 @@ from __future__ import unicode_literals
 import logging
 import os
 import re
-import sys
 
 import sprinter.lib as lib
 from sprinter.formula.base import FormulaBase
@@ -60,7 +59,7 @@ class EggscriptFormula(FormulaBase):
         if config.has('egg'):
             eggs += [config.get('egg')]
         if config.has('eggs'):
-            eggs += [egg.strip() for egg in re.split(',|\n', config.get('eggs'))]
+            eggs += [egg.strip() for egg in re.split(',(?!<)|\n', config.get('eggs'))]
         self.logger.debug("Installing eggs %s..." % eggs)
         with open(os.path.join(self.directory.install_directory(self.feature_name), 'requirements.txt'),
                   'w+') as fh:
