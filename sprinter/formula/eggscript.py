@@ -26,38 +26,13 @@ BLACKLISTED_EXECUTABLES = [
     "^pip.*$"]
 
 
-def _write_pydistutils_cfg(install_dir):
-    """
-    write a .pydistutils.cfg file to override the prefix variable
-    """
-    if os.name == 'posix':
-        env_distutils_filename = '.pydistutils.cfg'
-    else:
-        env_distutils_filename = 'pydistutils.cfg'
-
-    if not os.path.exists(install_dir):
-        os.makedirs(install_dir)
-    env_distutils_file = os.path.join(install_dir, env_distutils_filename)
-
-    with open(env_distutils_file, 'w') as fh:
-        fh.write("""
-[install]
-prefix={prefix_path}
-        """.format(prefix_path=install_dir).strip())
-
-
 class EggscriptFormula(FormulaBase):
 
     valid_options = FormulaBase.valid_options + ['egg', 'eggs', 'redownload']
 
     def install(self):
-
-        if sys.prefix:
-            _write_pydistutils_cfg(self.directory.install_directory(self.feature_name))
-
         create_virtualenv(self.directory.install_directory(self.feature_name),
                           search_dirs=file_search_dirs(), symlink=True)
-
         self.__install_eggs(self.target)
         self.__add_paths(self.target)
         return FormulaBase.install(self)
