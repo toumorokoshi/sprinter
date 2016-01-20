@@ -69,3 +69,33 @@ deactivate MY_ENVIRONMENT::
 remove MY_ENVIRONMENT::
 
     sprinter remove MY_ENVIRONMENT
+
+
+Installing with brewed Python (OS X)
+---------------------------
+Brewed python (installed via `brew install python`), by default sets a prefix value in ~/.pydistutils.cfg. If this value is set, due to a bug in Python's setup tools, the Sprinter install will fail. To get around this issue do the following.
+
+Remove all traces of brewed python::
+
+    brew uninstall python
+    brew uninstall pyenv-virtualenv
+
+Manually move all virtualenv* files under /usr/local/bin to another folder::
+
+    sudo mkdir /usr/local/bin/venv-old
+    sudo mv /usr/local/bin/virtualenv* /usr/local/bin/venv-old/
+
+Open a new terminal tab and double-check that you're in a clean state::
+
+    which python # => /usr/bin/python
+    which virtualenv # => virtualenv not found
+
+Install Python and virtualenv(wrapper):
+
+    brew install python --with-brewed-openssl
+    # Open a new terminal tab now (to access /usr/local/bin/python)
+    pip install virtualenv
+    pip install virtualenvwrapper
+
+Original source `via stackoverflow`_.
+.. _via stackoverflow: http://stackoverflow.com/questions/16860971/cant-pip-install-virtualenv-in-os-x-10-8-with-brewed-python-2-7
