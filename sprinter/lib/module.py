@@ -34,7 +34,7 @@ def __recursive_import(module_name):
     Recursively looks for and imports the names, returning the
     module desired
 
-    >>> __recursive_import("sprinter.formulas.unpack") # doctest: +ELLIPSIS
+    >>> __recursive_import("sprinter.formula.unpack") # doctest: +ELLIPSIS
     <module 'unpack' from '...'>
 
     currently module with relative imports don't work.

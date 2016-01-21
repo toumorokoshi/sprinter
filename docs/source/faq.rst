@@ -14,7 +14,7 @@ How do I make a sprinter formula?
 
 A sprinter formula is just a python module or egg that a python class
 extends the 'formulabase' class, located in
-`sprinter.formulas.formulabase
+`sprinter.formula.formulabase
 <https://github.com/toumorokoshi/sprinter/blob/develop/sprinter/formulabase.py>`_.
 
 If you're not familiar with python, it's easier to just follow an
@@ -25,9 +25,9 @@ I need help! Who do I talk to?
 
 If you have a question about a specific formula, it's best to pots a bug or talk to the author or the formula.
 
-If you have questions about sprinter, your best bet is to post a message in the 
+If you have questions about sprinter, your best bet is to post a message in the
 `Google Group
 <https://groups.google.com/forum/#!forum/sprinter-dev>`_.
 
-If there's behaviour that you think is a bug, you can also 
+If there's behaviour that you think is a bug, you can also
 `create a ticket <https://github.com/toumorokoshi/sprinter/issues?state=open>`_.

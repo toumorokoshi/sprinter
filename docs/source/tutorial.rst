@@ -108,7 +108,7 @@ section to myenvironment.cfg now::
     hostname = github.com
 
     [sub]
-    formula = sprinter.formulas.git
+    formula = sprinter.formula.git
     depends = github
     url = git://github.com/mygithub/sub.git
     branch = mybranch
@@ -195,12 +195,12 @@ Note the section 'inputs' has specific syntax::
 
 If you run a sprinter install of this configuration, you would be prompted to enter the variables specified::
 
-    $ sprinter install sshexample.cfg 
+    $ sprinter install sshexample.cfg
     Checking and setting global parameters...
     Installing environment sshexample...
-    please enter your gitroot (default ~/git/): 
-    please enter your username: 
-    please enter your githostpassword: 
+    please enter your gitroot (default ~/git/):
+    please enter your username:
+    please enter your githostpassword:
 
 
 All prompted variables in the sprinter configuration are added to the

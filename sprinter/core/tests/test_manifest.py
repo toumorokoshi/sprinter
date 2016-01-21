@@ -13,14 +13,14 @@ import sprinter.lib as lib
 
 manifest_correct_dependency = """
 [sub]
-formula = sprinter.formulas.git
+formula = sprinter.formula.git
 depends = git
 url = git://github.com/Toumorokoshi/sub.git
 branch = yusuke
 rc = temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp
 
 [git]
-formula = sprinter.formulas.package
+formula = sprinter.formula.package
 apt-get = git-core
 brew = git
 """
@@ -29,7 +29,7 @@ manifest_incorrect_dependency = """
 namespace = sprinter
 
 [sub]
-formula = sprinter.formulas.git
+formula = sprinter.formula.git
 depends = sub
 """
 
@@ -42,7 +42,7 @@ main_branch==comp_main
 
 http_manifest = """
 [sub]
-formula = sprinter.formulas.git
+formula = sprinter.formula.git
 """
 
 parent_manifest = """
@@ -128,7 +128,7 @@ class TestManifest(object):
         """ get_feature_config should return a dictionary with the attributes """
         tools.eq_(self.old_manifest.get_feature_config("sub").to_dict(), {
             'url': 'git://github.com/Toumorokoshi/sub.git',
-            'formula': 'sprinter.formulas.git',
+            'formula': 'sprinter.formula.git',
             'depends': 'git',
             'branch': 'yusuke',
             'rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
@@ -137,13 +137,13 @@ class TestManifest(object):
     def test_get_context_dict(self):
         """ Test getting a config dict """
         context_dict = self.old_manifest.get_context_dict()
-        test_dict = {'maven:formula': 'sprinter.formulas.unpack',
+        test_dict = {'maven:formula': 'sprinter.formula.unpack',
                      'maven:specific_version': '2.10',
-                     'ant:formula': 'sprinter.formulas.unpack',
-                     'mysql:formula': 'sprinter.formulas.package',
+                     'ant:formula': 'sprinter.formula.unpack',
+                     'mysql:formula': 'sprinter.formula.package',
                      'sub:rc': 'temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp',
                      'ant:specific_version': '1.8.4',
-                     'sub:formula': 'sprinter.formulas.git',
+                     'sub:formula': 'sprinter.formula.git',
                      'sub:branch': 'yusuke',
                      'git:apt-get': 'git-core',
                      'sub:url': 'git://github.com/Toumorokoshi/sub.git',
@@ -154,7 +154,7 @@ class TestManifest(object):
                      'mysql:apt-get': 'libmysqlclient\nlibmysqlclient-dev',
                      'mysql:brew': 'mysql',
                      'git:brew': 'git',
-                     'git:formula': 'sprinter.formulas.package',
+                     'git:formula': 'sprinter.formula.package',
                      'config:inputs': 'sourceonly'}
         for k, v in test_dict.items():
             tools.eq_(context_dict[k], v)
@@ -218,16 +218,16 @@ namespace = sprinter
 inputs = sourceonly
 
 [maven]
-formula = sprinter.formulas.unpack
+formula = sprinter.formula.unpack
 specific_version = 2.10
 
 [ant]
-formula = sprinter.formulas.unpack
+formula = sprinter.formula.unpack
 phases = update
 specific_version = 1.8.4
 
 [sub]
-formula = sprinter.formulas.git
+formula = sprinter.formula.git
 depends = git
 url = git://github.com/Toumorokoshi/sub.git
 branch = yusuke
@@ -235,13 +235,13 @@ rc = temp=`pwd`; cd %(sub:root_dir)s/libexec && . sub-init2 && cd $tmp
 bc = temp=`pwd`; cd %(sub:testvar)s/libexec && . sub-init2 && cd $tmp
 
 [mysql]
-formula = sprinter.formulas.package
+formula = sprinter.formula.package
 apt-get = libmysqlclient
           libmysqlclient-dev
 brew = mysql
 
 [git]
-formula = sprinter.formulas.package
+formula = sprinter.formula.package
 apt-get = git-core
 brew = git
 """
@@ -271,15 +271,15 @@ inputs = gitroot==~/workspace
          main_branch?==comp_main
 
 [maven]
-formula = sprinter.formulas.unpack
+formula = sprinter.formula.unpack
 specific_version = 3.0.4
 
 [ant]
-formula = sprinter.formulas.unpack
+formula = sprinter.formula.unpack
 specific_version = 1.8.4
 
 [myrc]
-formula = sprinter.formulas.template
+formula = sprinter.formula.template
 """
 
 manifest_force_inputs = """

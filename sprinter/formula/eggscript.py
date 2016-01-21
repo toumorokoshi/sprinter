@@ -1,7 +1,7 @@
 """
 The egg formula will install scripts from an egg (including dependencies) into a sandboxed directory.
 [eggs]
-formula = sprinter.formulas.egg
+formula = sprinter.formula.egg
 egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc

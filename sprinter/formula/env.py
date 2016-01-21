@@ -2,7 +2,7 @@
 Specifies environment variables.
 
 [env]
-formula = sprinter.formulas.env
+formula = sprinter.formula.env
 stash = %(config:stash)
 user = %(config:user)
 MAVEN_HOME = %(maven:root_dir)
