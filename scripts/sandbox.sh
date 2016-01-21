@@ -24,7 +24,7 @@ if [ -e $INITIAL_DIR/scripts/sandbox.sh ]; then
     cp -R $INITIAL_DIR/* $SANDBOX_DIR
 else
     echo "Downloading sprinter..."
-    if [[    `uname` == 'Linux' ]]; then
+    if [[ `uname` == 'Linux' ]]; then
         wget -O sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_USER/sprinter/tarball/$SPRINTER_BRANCH
     elif [[ `uname` == 'Darwin' ]]; then
         curl -o sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_USER/sprinter/tarball/$SPRINTER_BRANCH -L
