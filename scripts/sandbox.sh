@@ -7,8 +7,8 @@ error () {
 }
 INITIAL_DIR=`pwd`
 
-: ${SPRINTER_GITHUB_USER:=toumorokoshi}
-: ${SPRINTER_BRANCH:=master}
+: ${SPRINTER_GITHUB_ACCOUNT:=toumorokoshi}
+: ${SPRINTER_GITHUB_BRANCH:=master}
 SANDBOX_DIR=/tmp/sprinter-sandbox
 if [[ -d $SANDBOX_DIR ]]; then
     rm -rf $SANDBOX_DIR
@@ -25,9 +25,9 @@ if [ -e $INITIAL_DIR/scripts/sandbox.sh ]; then
 else
     echo "Downloading sprinter..."
     if [[ `uname` == 'Linux' ]]; then
-        wget -O sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_USER/sprinter/tarball/$SPRINTER_BRANCH
+        wget -O sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_ACCOUNT/sprinter/tarball/$SPRINTER_GITHUB_BRANCH
     elif [[ `uname` == 'Darwin' ]]; then
-        curl -o sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_USER/sprinter/tarball/$SPRINTER_BRANCH -L
+        curl -o sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_ACCOUNT/sprinter/tarball/$SPRINTER_GITHUB_BRANCH -L
     fi
     tar -xzvf sprinter.tar.gz --strip-components=1 &> /dev/null || error "Failure extracting sprinter targz!"
 fi
