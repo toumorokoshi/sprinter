@@ -7,9 +7,9 @@ import sys
 import os
 
 URANIUM_PATH = os.getenv('URANIUM_PATH', None)
-URANIUM_REPO = os.getenv('URANIUM_REPO', 'toumorokoshi')
+URANIUM_GITHUB_USER = os.getenv('URANIUM_GITHUB_USER', 'toumorokoshi')
 URANIUM_BRANCH = os.getenv('URANIUM_BRANCH', 'master')
-URANIUM_STANDALONE_URL = "https://raw.githubusercontent.com/{repo}/uranium/{branch}/uranium/scripts/uranium_standalone".format(repo=URANIUM_REPO, branch=URANIUM_BRANCH)
+URANIUM_STANDALONE_URL = "https://raw.githubusercontent.com/{github_user}/uranium/{branch}/uranium/scripts/uranium_standalone".format(github_user=URANIUM_GITHUB_USER, branch=URANIUM_BRANCH)
 
 if URANIUM_PATH is not None:
     execfile(os.path.realpath(URANIUM_PATH))
