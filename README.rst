@@ -97,5 +97,4 @@ Install Python and virtualenv(wrapper)::
     pip install virtualenv
     pip install virtualenvwrapper
 
-Original source `via stackoverflow`_.
-.. _via stackoverflow: http://stackoverflow.com/questions/16860971/cant-pip-install-virtualenv-in-os-x-10-8-with-brewed-python-2-7
+Original source via stackoverflow: http://stackoverflow.com/questions/16860971/cant-pip-install-virtualenv-in-os-x-10-8-with-brewed-python-2-7
