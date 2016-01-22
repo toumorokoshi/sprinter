@@ -90,7 +90,7 @@ Open a new terminal tab and double-check that you're in a clean state::
     which python # => /usr/bin/python
     which virtualenv # => virtualenv not found
 
-Install Python and virtualenv(wrapper):
+Install Python and virtualenv(wrapper)::
 
     brew install python --with-brewed-openssl
     # Open a new terminal tab now (to access /usr/local/bin/python)
