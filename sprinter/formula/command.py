@@ -1,8 +1,9 @@
 """
 Runs a command
+
 [ssh]
 formula = sprinter.formula.command
-hideoutput=true
+redirect_stdout_to_log=false
 fail_on_error=true
 shell = False
 install=echo 'setting up...'

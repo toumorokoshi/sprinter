@@ -163,7 +163,8 @@ class FormulaBase(object):
     def sync(self):
         """ Updates the state of the feature to what it should be """
         phase = self.sync_phase()
-        message = "finished %s %s." % (phase.verb, self.feature_name)
+        self.logger.info("%s %s..." % (phase.verb.capitalize(), self.feature_name))
+        message = "...finished %s %s." % (phase.verb, self.feature_name)
         result = getattr(self, phase.name)()
         if result or phase in (PHASE.INSTALL, PHASE.REMOVE):
             self.logger.info(message)

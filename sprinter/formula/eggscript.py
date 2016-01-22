@@ -1,7 +1,7 @@
 """
 The egg formula will install scripts from an egg (including dependencies) into a sandboxed directory.
 [eggs]
-formula = sprinter.formulas.egg
+formula = sprinter.formula.egg
 egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc
@@ -12,9 +12,11 @@ from __future__ import unicode_literals
 import logging
 import os
 import re
+import subprocess
 
 import sprinter.lib as lib
 from sprinter.formula.base import FormulaBase
+from sprinter.exceptions import FormulaException
 from virtualenv import file_search_dirs, create_environment as create_virtualenv
 
 # a list of regex's that should no be symlinked to the bin path
@@ -25,9 +27,12 @@ BLACKLISTED_EXECUTABLES = [
     "^pip.*$"]
 
 
+class EggscriptFormulaException(FormulaException):
+    pass
+
 class EggscriptFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['egg', 'eggs', 'redownload']
+    valid_options = FormulaBase.valid_options + ['egg', 'eggs', 'redownload', 'fail_on_error']
 
     def install(self):
         create_virtualenv(self.directory.install_directory(self.feature_name),
@@ -59,14 +64,19 @@ class EggscriptFormula(FormulaBase):
         if config.has('egg'):
             eggs += [config.get('egg')]
         if config.has('eggs'):
-            eggs += [egg.strip() for egg in re.split(',|\n', config.get('eggs'))]
+            eggs += [egg.strip() for egg in re.split(',(?!<)|\n', config.get('eggs'))]
         self.logger.debug("Installing eggs %s..." % eggs)
         with open(os.path.join(self.directory.install_directory(self.feature_name), 'requirements.txt'),
                   'w+') as fh:
             fh.write('\n'.join(eggs))
-        lib.call("bin/pip install -r requirements.txt --upgrade",
-                 cwd=self.directory.install_directory(self.feature_name),
-                 output_log_level=logging.DEBUG, shell=True)
+        stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
+        return_code, output = lib.call("bin/pip install -r requirements.txt --upgrade",
+                                       cwd=self.directory.install_directory(self.feature_name),
+                                       output_log_level=logging.DEBUG,
+                                       shell=True,
+                                       stdout=stdout)
+        if config.is_affirmative('fail_on_error', True) and return_code != 0:
+            raise EggscriptFormulaException("Egg script {name} returned a return code of {code}!".format(name=self.feature_name, code=return_code))
 
     def __add_paths(self, config):
         """ add the proper resources into the environment """

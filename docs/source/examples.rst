@@ -43,7 +43,7 @@ workspace directory or running your server). This works well with sprinter becau
 Here's an example sub configuration section::
 
     [sub]
-    formula = sprinter.formulas.git
+    formula = sprinter.formula.git
     depends = github
     url = git://github.com/mygithub/sub.git
     branch = mybranch

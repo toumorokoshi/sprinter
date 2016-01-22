@@ -3,7 +3,7 @@ Generates a file in a target location from a template
 [gitignore]
 inputs = username
          password
-formula = sprinter.formulas.template
+formula = sprinter.formula.template
 source = http://mywebsite.com/.gitignore
 target = ~/.gitignore
 username = %(config:username)s

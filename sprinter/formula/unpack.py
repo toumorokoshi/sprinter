@@ -2,7 +2,7 @@
 Unpacks and deploys to a location
 
 [unpack]
-formula = sprinter.formulas.unpack
+formula = sprinter.formula.unpack
 executable = bin/go
 symlink = go
 remove_common_prefix = true
