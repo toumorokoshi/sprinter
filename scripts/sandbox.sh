@@ -9,6 +9,7 @@ INITIAL_DIR=`pwd`
 
 : ${SPRINTER_GITHUB_ACCOUNT:=toumorokoshi}
 : ${SPRINTER_GITHUB_BRANCH:=master}
+: ${SPRINTER_ENV_ROOT:=$HOME/.sprinter}
 SANDBOX_DIR=/tmp/sprinter-sandbox
 if [[ -d $SANDBOX_DIR ]]; then
     rm -rf $SANDBOX_DIR
@@ -41,9 +42,9 @@ fi
 
 echo "Removing sprinter environment if it already exists..."
 bin/sprinter remove sprinter
-if [[ -d ~/.sprinter/sprinter/ ]]; then
+if [[ -d $SPRINTER_ENV_ROOT/sprinter/ ]]; then
     echo "Sprinter environment was not removed cleanly. Forcefully removing..."
-    rm -rf ~/.sprinter/sprinter/
+    rm -rf $SPRINTER_ENV_ROOT/sprinter/
 fi
 echo "Installing global sprinter..."
 bin/sprinter install $SANDBOX_DIR/examples/sprinter.cfg || error "Issue installing global sprinter!"
