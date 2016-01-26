@@ -41,7 +41,7 @@ class SymlinkFormula(FormulaBase):
         FormulaBase.activate(self)
 
     def deactivate(self):
-        config = getattr(self, manifest_type)
+        config = getattr(self, 'source')
         if config.has('active_only') and config.is_affirmative('active_only'):
             self.__remove_symlink('source')
         FormulaBase.deactivate(self)
