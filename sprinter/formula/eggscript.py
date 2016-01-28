@@ -85,7 +85,7 @@ class EggscriptFormula(FormulaBase):
     def __add_paths(self, config):
         """ add the proper resources into the environment """
         bin_path = os.path.join(self.directory.install_directory(self.feature_name), 'bin')
-        whitelist_executables = self.get_whitelisted_executables(config)
+        whitelist_executables = self._get_whitelisted_executables(config)
         for f in os.listdir(bin_path):
             for pattern in BLACKLISTED_EXECUTABLES:
                 if re.match(pattern, f):
@@ -95,8 +95,8 @@ class EggscriptFormula(FormulaBase):
             self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
 
     @staticmethod
-    def get_whitelisted_executables(config):
-        whitelist = config.get("executables", None)
+    def _get_whitelisted_executables(config):
+        whitelist = config.get("executables", "")
         if not whitelist:
             return None
         return [ex.strip() for ex in re.split(',(?!<)|\n', whitelist)]

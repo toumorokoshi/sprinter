@@ -3,7 +3,6 @@ Tests for directory class
 """
 from __future__ import unicode_literals
 import os
-import pytest
 import shutil
 import tempfile
 
