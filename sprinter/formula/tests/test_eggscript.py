@@ -41,7 +41,7 @@ class TestEggscriptFormula(FormulaTest):
     def skip_simple_example(self):
         """ The egg formula should install a single egg """
         self.environment.install_feature("simple_example")
-            
+
     def skip_simple_multiple_eggs(self, mockPuppet):
         """ The egg formula should install multiple eggs """
         m = Mock(spec=BuildoutPuppet)
