@@ -251,13 +251,15 @@ class Environment(object):
         self.phase = PHASE.VALIDATE
         self.logger.info("Validating %s..." % self.namespace)
         self.instantiate_features()
-        context_dict = {}
+
         if self.target:
+            context_dict = {
+                'config:root_dir': self.directory.root_dir,
+                'config:node': system.NODE
+            }
             for s in self.target.formula_sections():
                 context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
-                context_dict['config:root_dir'] = self.directory.root_dir
-                context_dict['config:node'] = system.NODE
-                self.target.add_additional_context(context_dict)
+            self.target.add_additional_context(context_dict)
         for feature in self.features.run_order:
             self.run_action(feature, 'validate', run_if_error=True)
 
@@ -554,12 +556,14 @@ class Environment(object):
         """ Add variables and specialize contexts """
         # add in the 'root_dir' directories to the context dictionaries
         for manifest in [self.source, self.target]:
-            context_dict = {}
+            context_dict = {
+                'config:root_dir': self.directory.root_dir,
+                'config:node': system.NODE
+            }
             if manifest:
+                manifest.add_additional_context(context_dict)
                 for s in manifest.formula_sections():
                     context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
-                    context_dict['config:root_dir'] = self.directory.root_dir
-                    context_dict['config:node'] = system.NODE
                 manifest.add_additional_context(context_dict)
         self._validate_manifest()
         for feature in self.features.run_order:
