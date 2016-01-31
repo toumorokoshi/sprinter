@@ -5,6 +5,7 @@ formula = sprinter.formula.egg
 egg = sprinter
 eggs = pelican, pelican-gist
        jedi, epc
+executables = sprinter
 links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
 redownload = true
 """
@@ -30,9 +31,12 @@ BLACKLISTED_EXECUTABLES = [
 class EggscriptFormulaException(FormulaException):
     pass
 
+
 class EggscriptFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['egg', 'eggs', 'redownload', 'fail_on_error']
+    valid_options = FormulaBase.valid_options + [
+        'egg', 'eggs', 'redownload', 'fail_on_error', 'executables'
+    ]
 
     def install(self):
         create_virtualenv(self.directory.install_directory(self.feature_name),
@@ -81,10 +85,18 @@ class EggscriptFormula(FormulaBase):
     def __add_paths(self, config):
         """ add the proper resources into the environment """
         bin_path = os.path.join(self.directory.install_directory(self.feature_name), 'bin')
+        whitelist_executables = self._get_whitelisted_executables(config)
         for f in os.listdir(bin_path):
-            symlink = True
             for pattern in BLACKLISTED_EXECUTABLES:
                 if re.match(pattern, f):
-                    symlink = False
-            if symlink:
-                self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
+                    continue
+            if whitelist_executables and f not in whitelist_executables:
+                continue
+            self.directory.symlink_to_bin(f, os.path.join(bin_path, f))
+
+    @staticmethod
+    def _get_whitelisted_executables(config):
+        whitelist = config.get("executables", "")
+        if not whitelist:
+            return None
+        return [ex.strip() for ex in re.split(',(?!<)|\n', whitelist)]

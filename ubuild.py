@@ -1,9 +1,5 @@
-import sys
-
-
 def main(build):
     build.packages.install(".", develop=True)
-    build.packages.install("pex")
 
 
 def test(build):
@@ -12,6 +8,11 @@ def test(build):
     build.packages.install("mock")
     build.packages.install("pytest")
     build.packages.install("nose")
-    sys.exit(build.executables.run(
+    code = build.executables.run(
+        ["py.test", "tests"] + build.options.args
+    )[0]
+    if code != 0:
+        return code
+    return build.executables.run(
         ["py.test", "sprinter"] + build.options.args
-    )[0])
+    )[0]
