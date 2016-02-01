@@ -28,12 +28,12 @@ class SymlinkFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
-        value = self.__remove_symlink('target')
-        value = self.__create_symlink('target')
-        return value or FormulaBase.update(self)
+        self.__remove_symlink('target')
+        self.__create_symlink('target')
+        return FormulaBase.update(self)
 
     def remove(self):
-        value = self.__create_symlink('source')
+        self.__create_symlink('source')
         FormulaBase.remove(self)
 
     def activate(self):
