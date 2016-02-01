@@ -4,8 +4,8 @@ removed when the environment is deactivated.
 
 [symlink]
 formula = sprinter.formula.symlink
-src=/path/to/src
-dest=/path/to/dest
+source=/path/to/source
+target=/path/to/target
 active_only=True
 """
 from __future__ import unicode_literals
@@ -20,16 +20,22 @@ class SymlinkFormulaException(FormulaException):
 
 class SymlinkFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['src',
-                                                 'dest']
+    valid_options = FormulaBase.valid_options + ['source',
+                                                 'target']
 
     def install(self):
         self.__create_symlink('target')
         FormulaBase.install(self)
 
     def update(self):
-        self.__remove_symlink('target')
-        self.__create_symlink('target')
+        source = getattr(self, 'source')
+        target = getattr(self, 'target')
+        # compare old and new link source and link target
+        if (source.get('source') != target.get('source')
+            or source.get('target') != target.get('target')):
+            self.__remove_symlink('target')
+            self.__create_symlink('target')
+
         return FormulaBase.update(self)
 
     def remove(self):
@@ -42,35 +48,35 @@ class SymlinkFormula(FormulaBase):
 
     def deactivate(self):
         config = getattr(self, 'source')
-        if config.has('active_only') and config.is_affirmative('active_only'):
+        if config.is_affirmative('active_only', 'true'):
             self.__remove_symlink('source')
         FormulaBase.deactivate(self)
 
     def __create_symlink(self, manifest_type):
         config = getattr(self, manifest_type)
-        if config.has('src') and config.has('dest'):
-            src = os.path.expanduser(config.get('src'))
-            dest = os.path.expanduser(config.get('dest'))
-            parts = dest.split('/')
-            dest_name = parts.pop()
-            dest_dir = '/'.join(parts)
+        if config.has('source') and config.has('target'):
+            link_source = os.path.expanduser(config.get('source'))
+            link_target = os.path.expanduser(config.get('target'))
+            parts = link_target.split('/')
+            target_name = parts.pop()
+            target_dir = '/'.join(parts)
 
-            if not os.path.isdir(dest_dir):
-                os.mkdir(dest_dir)
-            if os.path.islink(dest):
-                os.unlink(dest)
+            if not os.path.isdir(target_dir):
+                os.mkdir(target_dir)
+            if os.path.islink(link_target):
+                os.unlink(link_target)
 
-            self.logger.debug("Creating symbolic link {0} > {1}".format(dest, src))
-            os.symlink(src, dest)
+            self.logger.debug("Creating symbolic link {0} > {1}".format(link_target, link_source))
+            os.symlink(link_source, link_target)
             return True
 
     def __remove_symlink(self, manifest_type):
         config = getattr(self, manifest_type)
-        if config.has('src') and config.has('dest'):
-            src = os.path.expanduser(config.get('src'))
-            dest = os.path.expanduser(config.get('dest'))
+        if config.has('source') and config.has('target'):
+            link_source = os.path.expanduser(config.get('source'))
+            link_target = os.path.expanduser(config.get('target'))
 
-            if os.path.islink(dest):
-                self.logger.debug("Removing symbolic link {0} > {1}".format(dest, src))
+            if os.path.islink(link_target):
+                self.logger.debug("Removing symbolic link {0} > {1}".format(link_target, link_source))
                 self.directory.remove_feature(self.feature_name)
             return True
