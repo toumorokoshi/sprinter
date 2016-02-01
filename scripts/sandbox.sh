@@ -47,7 +47,7 @@ if [[ -d $SPRINTER_ENV_ROOT/sprinter/ ]]; then
     rm -rf $SPRINTER_ENV_ROOT/sprinter/
 fi
 echo "Installing global sprinter..."
-bin/sprinter install $SANDBOX_DIR/examples/sprinter.cfg || error "Issue installing global sprinter!"
+PYTHONPATH="" bin/sprinter install $SANDBOX_DIR/examples/sprinter.cfg || error "Issue installing global sprinter!"
 
 # finally, delete the temporary directory
 echo "Cleaning up..."

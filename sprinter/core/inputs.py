@@ -56,10 +56,11 @@ class Inputs(object):
     def get_input(self, key, force=False):
         """ Get the value of <key> if it already exists, or prompt for it if not """
         prompt = "please enter your {0}".format(key)
-        if self._inputs[key].prompt:
-            prompt = self._inputs[key].prompt
         if key not in self._inputs:
             raise InputException("Key {0} is not a valid input!".format(key))
+        if hasattr(self._inputs[key], 'prompt'):
+            prompt = self._inputs[key].prompt
+        help_text = self._inputs[key].help if hasattr(self._inputs[key], 'help') else None
 
         if self._inputs[key].value is EMPTY or force:
 
@@ -69,10 +70,15 @@ class Inputs(object):
             if self._inputs[key].value is not EMPTY:
                 default_value = self._inputs[key].value
 
-            self._inputs[key].value = lib.prompt(
-                prompt,
-                default=default_value,
-                secret=self._inputs[key].is_secret)
+            input_value = None
+            while input_value is None or input_value == '?':
+                if input_value == '?' and help_text:
+                    print help_text
+                input_value = lib.prompt(
+                    prompt,
+                    default=default_value,
+                    secret=self._inputs[key].is_secret)
+            self._inputs[key].value = input_value
 
         return self._inputs[key].value
 
@@ -136,6 +142,8 @@ class Inputs(object):
                     raise InputException("Incorrectly formatted input for {0}!".format(value))
                 if 'prompt' in extra_attributes:
                     i.prompt = extra_attributes['prompt']
+                if 'help' in extra_attributes:
+                    i.help = extra_attributes['help']
             if value.find('==') != -1:
                 value, default = value.split('==')
                 i.default = default
