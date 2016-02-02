@@ -63,11 +63,11 @@ class SymlinkFormula(FormulaBase):
 
             if not os.path.isdir(target_dir):
                 os.mkdir(target_dir)
-            if os.path.islink(link_target):
-                os.unlink(link_target)
+            if os.path.islink(link_source):
+                os.unlink(link_source)
 
-            self.logger.debug("Creating symbolic link {0} > {1}".format(link_target, link_source))
-            os.symlink(link_source, link_target)
+            self.logger.debug("Creating symbolic link {0} > {1}".format(link_source, link_target))
+            os.symlink(link_target, link_source)
             return True
 
     def __remove_symlink(self, manifest_type):
@@ -76,7 +76,8 @@ class SymlinkFormula(FormulaBase):
             link_source = os.path.expanduser(config.get('source'))
             link_target = os.path.expanduser(config.get('target'))
 
-            if os.path.islink(link_target):
-                self.logger.debug("Removing symbolic link {0} > {1}".format(link_target, link_source))
-                self.directory.remove_feature(self.feature_name)
+            if os.path.islink(link_source):
+                self.logger.debug("Removing symbolic link {0} > {1}".format(link_source, link_target))
+                if os.path.islink(link_source):
+                    os.unlink(link_source)
             return True
