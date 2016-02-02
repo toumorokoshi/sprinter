@@ -20,64 +20,89 @@ class SymlinkFormulaException(FormulaException):
 
 class SymlinkFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['source',
-                                                 'target']
+    valid_options = FormulaBase.valid_options + ['source', 'target']
+    # validated internally
+    _required_options = ['source', 'target']
+    deprecated_options = ['src', 'dest']
+    deprecated_warnings = {
+        'src': 'Option "src" in {feature} has been deprecated, use "source" instead',
+        'dest': 'Option "dest" in {feature} has been deprecated, use "target" instead'
+    }
+    option_aliases = {
+        'src': 'source',
+        'dest': 'target'
+    }
 
     def install(self):
-        self.__create_symlink('target')
+        targetOpts = self.__get_options(self.target)
+        self.__create_symlink(**targetOpts)
         FormulaBase.install(self)
 
     def update(self):
-        source = getattr(self, 'source')
-        target = getattr(self, 'target')
+        sourceOpts = self.__get_options(self.source)
+        targetOpts = self.__get_options(self.target)
+
         # compare old and new link source and link target
-        if (source.get('source') != target.get('source')
-            or source.get('target') != target.get('target')):
-            self.__remove_symlink('target')
-            self.__create_symlink('target')
+        if (sourceOpts['source'] != targetOpts['source'] or
+            sourceOpts['target'] != targetOpts['target']):
+            self.__remove_symlink(**sourceOpts)
+            self.__create_symlink(**targetOpts)
 
         return FormulaBase.update(self)
 
+    # internally validating required_options to accommodate deprecated options
+    def validate(self):
+        if self.target:
+            targetOpts = self.__get_options(self.target)
+            for k in self._required_options:
+                if k not in targetOpts:
+                    self._log_error("Required option %s not present in feature %s!" % (k, self.feature_name))
+        return FormulaBase.validate(self)
+
     def remove(self):
-        self.__create_symlink('source')
+        sourceOpts = self.__get_options(self.source)
+        self.__remove_symlink(**sourceOpts)
         FormulaBase.remove(self)
 
     def activate(self):
-        self.__create_symlink('source')
+        sourceOpts = self.__get_options(self.source)
+        self.__create_symlink(**sourceOpts)
         FormulaBase.activate(self)
 
     def deactivate(self):
-        config = getattr(self, 'source')
+        sourceOpts = self.__get_options(self.source)
         if config.is_affirmative('active_only', 'true'):
-            self.__remove_symlink('source')
+            self.__remove_symlink(**sourceOpts)
         FormulaBase.deactivate(self)
 
-    def __create_symlink(self, manifest_type):
-        config = getattr(self, manifest_type)
-        if config.has('source') and config.has('target'):
-            link_source = os.path.expanduser(config.get('source'))
-            link_target = os.path.expanduser(config.get('target'))
-            parts = link_target.split('/')
-            target_name = parts.pop()
-            target_dir = '/'.join(parts)
+    def __get_options(self, config):
+        if config.has('source'):
+            return { 'source': config.get('source'), 'target': config.get('target') }
+        else:
+            return { 'source': config.get('src'), 'target': config.get('dest') }
 
-            if not os.path.isdir(target_dir):
-                os.mkdir(target_dir)
+    def __create_symlink(self, source, target):
+        link_source = os.path.expanduser(source)
+        link_target = os.path.expanduser(target)
+        parts = link_target.split('/')
+        target_name = parts.pop()
+        target_dir = '/'.join(parts)
+
+        if not os.path.isdir(target_dir):
+            os.mkdir(target_dir)
+        if os.path.islink(link_source):
+            os.unlink(link_source)
+
+        self.logger.debug("Creating symbolic link {0} > {1}".format(link_source, link_target))
+        os.symlink(link_target, link_source)
+        return True
+
+    def __remove_symlink(self, source, target):
+        link_source = os.path.expanduser(source)
+        link_target = os.path.expanduser(target)
+
+        if os.path.islink(link_source):
+            self.logger.debug("Removing symbolic link {0} > {1}".format(link_source, link_target))
             if os.path.islink(link_source):
                 os.unlink(link_source)
-
-            self.logger.debug("Creating symbolic link {0} > {1}".format(link_source, link_target))
-            os.symlink(link_target, link_source)
-            return True
-
-    def __remove_symlink(self, manifest_type):
-        config = getattr(self, manifest_type)
-        if config.has('source') and config.has('target'):
-            link_source = os.path.expanduser(config.get('source'))
-            link_target = os.path.expanduser(config.get('target'))
-
-            if os.path.islink(link_source):
-                self.logger.debug("Removing symbolic link {0} > {1}".format(link_source, link_target))
-                if os.path.islink(link_source):
-                    os.unlink(link_source)
-            return True
+        return True
