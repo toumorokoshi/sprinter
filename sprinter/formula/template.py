@@ -85,7 +85,6 @@ class TemplateFormula(FormulaBase):
             try:
                 source_content = string.Formatter().vformat(
                     source_content, (), defaultdict(str, **replacements))
-                # source_content = source_content.format(**replacements)
             except Exception as e:
                 error_message = "Failed trying to format template! error: {err}".format(err=e.message)
                 if config.is_affirmative('fail_on_error', False):
