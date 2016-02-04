@@ -73,7 +73,7 @@ class Inputs(object):
             input_value = None
             while input_value is None or input_value == '?':
                 if input_value == '?' and help_text:
-                    print help_text
+                    print(help_text)
                 input_value = lib.prompt(
                     prompt,
                     default=default_value,
