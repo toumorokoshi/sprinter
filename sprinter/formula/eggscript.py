@@ -1,9 +1,13 @@
 """
 The egg formula will install scripts from an egg (including dependencies) into a sandboxed directory.
+[config]
+inputs =
+    project_root==~/code/my_app
+
 [eggs]
 formula = sprinter.formula.egg
-egg = sprinter
-eggs = pelican, pelican-gist
+egg = file:%(config:project_root)s
+eggs = sprinter, pelican, pelican-gist
        jedi, epc
 executables = sprinter
 links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
@@ -62,13 +66,24 @@ class EggscriptFormula(FormulaBase):
                 self.logger.warn("No eggs will be installed! 'egg' or 'eggs' parameter not set!")
         return FormulaBase.validate(self)
 
+    def __prepare_egg(self, raw_egg):
+        egg = raw_egg.strip()
+        if egg.startswith('file:'):
+            return "-e file://{egg}".format(
+                egg=os.path.expanduser(egg.split(':')[-1]))
+        else:
+            return egg
+
     def __install_eggs(self, config):
         """ Install eggs for a particular configuration """
         eggs = []
         if config.has('egg'):
-            eggs += [config.get('egg')]
+            eggs.append(self.__prepare_egg(config.get('egg')))
+
         if config.has('eggs'):
-            eggs += [egg.strip() for egg in re.split(',(?!<)|\n', config.get('eggs'))]
+            for egg in re.split(',(?!<)|\n', config.get('eggs')):
+                eggs.append(self.__prepare_egg(egg))
+
         self.logger.debug("Installing eggs %s..." % eggs)
         with open(os.path.join(self.directory.install_directory(self.feature_name), 'requirements.txt'),
                   'w+') as fh:
