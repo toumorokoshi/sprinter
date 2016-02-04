@@ -74,7 +74,7 @@ class EggscriptFormula(FormulaBase):
                   'w+') as fh:
             fh.write('\n'.join(eggs))
         stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
-        return_code, output = lib.call("bin/pip install -r requirements.txt --upgrade",
+        return_code, output = lib.call("PYTHONPATH="" bin/pip install -r requirements.txt --upgrade",
                                        cwd=self.directory.install_directory(self.feature_name),
                                        output_log_level=logging.DEBUG,
                                        shell=True,
