@@ -58,7 +58,7 @@ class Inputs(object):
         prompt = "please enter your {0}".format(key)
         if key not in self._inputs:
             raise InputException("Key {0} is not a valid input!".format(key))
-        if hasattr(self._inputs[key], 'prompt'):
+        if self._inputs[key].prompt:
             prompt = self._inputs[key].prompt
         help_text = self._inputs[key].help if hasattr(self._inputs[key], 'help') else None
 
