@@ -111,7 +111,7 @@ class EggscriptFormula(FormulaBase):
         self.logger.debug("Installing eggs %s..." % eggs)
         self.__load_carton(egg_carton, eggs)
 
-        self.__prepare_eggs(egg_carton, config)
+        return_code = self.__prepare_eggs(egg_carton, config)
 
         if config.is_affirmative('fail_on_error', True) and return_code != 0:
             raise EggscriptFormulaException(
