@@ -23,7 +23,7 @@ class Input(object):
     def __str__(self, with_defaults=True):
         """ Return the string value, defaulting to default values """
         if self.value is not EMPTY:
-            if self.type == 'file':
+            if self.type == 'file' or self.type == 'path':
                 return os.path.expanduser(self.value)
             else:
                 return self.value
