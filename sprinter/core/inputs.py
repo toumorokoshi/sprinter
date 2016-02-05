@@ -29,6 +29,8 @@ class Input(object):
                 return self.value
         elif with_defaults and self.default is not EMPTY:
             return self.default
+        else:
+            return ''
 
     def __eq__(self, other):
         for val in ('value', 'default', 'is_secret', 'prompt'):
@@ -121,8 +123,7 @@ class Inputs(object):
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        values = { k: v.value for k, v in self._inputs.iteritems() if not self._inputs[k].is_secret }
-        return values
+        return { k: v.value for k, v in self._inputs.iteritems() if not self._inputs[k].is_secret }
 
     def add_inputs_from_inputstring(self, input_string):
         """
