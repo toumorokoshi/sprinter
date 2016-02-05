@@ -17,6 +17,9 @@ on_update = false
 """
 from __future__ import unicode_literals
 import os
+import string
+
+from collections import defaultdict
 
 from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
@@ -26,6 +29,7 @@ from sprinter.core import PHASE
 class TemplateFormula(FormulaBase):
 
     required_options = FormulaBase.required_options + ['source', 'target']
+    valid_options = ['fail_on_error']
 
     def prompt(self):
         if self.environment.phase == PHASE.REMOVE:
@@ -78,7 +82,15 @@ class TemplateFormula(FormulaBase):
                 key = key.strip()
                 if config.has(key):
                     replacements[key] = config.get(key)
-            source_content = source_content.format(**replacements)
+            try:
+                source_content = string.Formatter().vformat(
+                    source_content, (), defaultdict(str, **replacements))
+            except Exception as e:
+                error_message = "Failed trying to format template! error: {err}".format(err=e.message)
+                if config.is_affirmative('fail_on_error', False):
+                    raise e
+                else:
+                    self.logger.error(error_message)
 
         target_file = os.path.expanduser(config.get('target'))
         parent_directory = os.path.dirname(target_file)
