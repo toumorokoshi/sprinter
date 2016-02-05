@@ -1,4 +1,7 @@
 from __future__ import unicode_literals
+
+import os
+
 from sprinter import lib
 
 EMPTY = object()
@@ -15,6 +18,17 @@ class Input(object):
     default = EMPTY
     is_secret = False
     prompt = None
+    type = None
+
+    def __str__(self, with_defaults=True):
+        """ Return the string value, defaulting to default values """
+        if self.value is not EMPTY:
+            if self.type == 'file':
+                return os.path.expanduser(self.value)
+            else:
+                return self.value
+        elif with_defaults and self.default is not EMPTY:
+            return self.default
 
     def __eq__(self, other):
         for val in ('value', 'default', 'is_secret', 'prompt'):
@@ -26,6 +40,8 @@ class Input(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    __repr__ = __str__
 
 
 class Inputs(object):
@@ -80,7 +96,7 @@ class Inputs(object):
                     secret=self._inputs[key].is_secret)
             self._inputs[key].value = input_value
 
-        return self._inputs[key].value
+        return str(self._inputs[key])
 
     def get_unset_inputs(self):
         """ Return a set of unset inputs """
@@ -101,17 +117,12 @@ class Inputs(object):
 
     def values(self, with_defaults=True):
         """ Return the values dictionary, defaulting to default values """
-        return_dict = {}
-        for k, v in self._inputs.items():
-            if v.value is not EMPTY:
-                return_dict[k] = v.value
-            elif with_defaults and v.default is not EMPTY:
-                return_dict[k] = v.default
-        return return_dict
+        return { k: str(v) for k, v in self._inputs.items() }
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        return dict(((k, v) for k, v in self.values().items() if not self._inputs[k].is_secret))
+        values = { k: v.value for k, v in self._inputs.iteritems() }
+        return values
 
     def add_inputs_from_inputstring(self, input_string):
         """
@@ -144,6 +155,8 @@ class Inputs(object):
                     i.prompt = extra_attributes['prompt']
                 if 'help' in extra_attributes:
                     i.help = extra_attributes['help']
+                if 'type' in extra_attributes:
+                    i.type = extra_attributes['type']
             if value.find('==') != -1:
                 value, default = value.split('==')
                 i.default = default
