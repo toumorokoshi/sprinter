@@ -123,7 +123,7 @@ class Inputs(object):
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        return { k: v.value for k, v in self._inputs.iteritems() if not self._inputs[k].is_secret }
+        return { k: v.value for k, v in self._inputs.iteritems() if not self._inputs[k].is_secret and v.value is not EMPTY }
 
     def add_inputs_from_inputstring(self, input_string):
         """
