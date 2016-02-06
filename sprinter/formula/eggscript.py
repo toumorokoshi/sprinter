@@ -100,6 +100,17 @@ class EggscriptFormula(FormulaBase):
                                        output_log_level=logging.DEBUG,
                                        shell=True,
                                        stdout=stdout)
+
+        if return_code != 0:
+            if config.is_affirmative('fail_on_error', True):
+                raise EggscriptFormulaException("""
+Egg script {name} returned a return code of {code}!
+
+pip install output ==================================================
+{output}
+end pip install output ==============================================
+""".format(name=self.feature_name, code=return_code, output=output))
+
         return return_code
 
     def __install_eggs(self, config):
@@ -111,12 +122,7 @@ class EggscriptFormula(FormulaBase):
         self.logger.debug("Installing eggs %s..." % eggs)
         self.__load_carton(egg_carton, eggs)
 
-        return_code = self.__prepare_eggs(egg_carton, config)
-
-        if config.is_affirmative('fail_on_error', True) and return_code != 0:
-            raise EggscriptFormulaException(
-                "Egg script {name} returned a return code of {code}!".format(
-                    name=self.feature_name, code=return_code))
+        self.__prepare_eggs(egg_carton, config)
 
     def __add_paths(self, config):
         """ add the proper resources into the environment """
