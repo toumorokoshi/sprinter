@@ -20,17 +20,19 @@ class Input(object):
     prompt = None
     type = None
 
-    def __str__(self, with_defaults=True):
+    def is_empty(self, with_defaults=True):
+        return self.value is EMPTY and self.default is EMPTY
+
+    def __str__(self):
         """ Return the string value, defaulting to default values """
         if self.value is not EMPTY:
             if self.type == 'file' or self.type == 'path':
                 return os.path.expanduser(self.value)
             else:
                 return self.value
-        elif with_defaults and self.default is not EMPTY:
+        elif self.default is not EMPTY:
             return self.default
-        else:
-            return ''
+        return ''
 
     def __eq__(self, other):
         for val in ('value', 'default', 'is_secret', 'prompt'):
@@ -119,11 +121,12 @@ class Inputs(object):
 
     def values(self, with_defaults=True):
         """ Return the values dictionary, defaulting to default values """
+        return dict(((k, str(v)) for k, v in self.values().items() if not v.is_empty(with_defaults)))
         return { k: str(v) for k, v in self._inputs.items() }
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        return { k: v.value for k, v in self._inputs.items() if not self._inputs[k].is_secret and v.value is not EMPTY }
+        return dict(((k, str(v)) for k, v in self.values().items() if not self._inputs[k].is_secret and not v.is_empty(False)))
 
     def add_inputs_from_inputstring(self, input_string):
         """
