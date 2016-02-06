@@ -1,9 +1,13 @@
 """
 The egg formula will install scripts from an egg (including dependencies) into a sandboxed directory.
+[config]
+inputs =
+    project_root==~/code/my_app
+
 [eggs]
 formula = sprinter.formula.egg
-egg = sprinter
-eggs = pelican, pelican-gist
+egg = file:%(config:project_root)s
+eggs = sprinter, pelican, pelican-gist
        jedi, epc
 executables = sprinter
 links = http://github.com/toumorokoshi/sprinter/tarball/master#egg=sprinter-0.6
@@ -62,25 +66,63 @@ class EggscriptFormula(FormulaBase):
                 self.logger.warn("No eggs will be installed! 'egg' or 'eggs' parameter not set!")
         return FormulaBase.validate(self)
 
-    def __install_eggs(self, config):
-        """ Install eggs for a particular configuration """
+    def __polish_egg(self, raw_egg):
+        egg = raw_egg.strip()
+        if egg.startswith('file:'):
+            return "-e file://{egg}".format(
+                egg=os.path.expanduser(egg.split(':')[-1]))
+        else:
+            return egg
+
+    def __gather_eggs(self, config):
         eggs = []
         if config.has('egg'):
-            eggs += [config.get('egg')]
+            eggs.append(self.__polish_egg(config.get('egg')))
+
         if config.has('eggs'):
-            eggs += [egg.strip() for egg in re.split(',(?!<)|\n', config.get('eggs'))]
-        self.logger.debug("Installing eggs %s..." % eggs)
-        with open(os.path.join(self.directory.install_directory(self.feature_name), 'requirements.txt'),
-                  'w+') as fh:
+            for egg in re.split(',(?!<)|\n', config.get('eggs')):
+                eggs.append(self.__polish_egg(egg))
+        return eggs
+
+    def __load_carton(self, egg_carton, eggs):
+        egg_carton = os.path.join(*egg_carton)
+        with open(egg_carton, 'w+') as fh:
             fh.write('\n'.join(eggs))
-        stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
-        return_code, output = lib.call("PYTHONPATH='' bin/pip install -r requirements.txt --upgrade",
-                                       cwd=self.directory.install_directory(self.feature_name),
+
+    def __prepare_eggs(self, egg_carton, config):
+        stdout = None
+        if config.is_affirmative('redirect_stdout_to_log', 'true'):
+            stdout = subprocess.PIPE
+
+        egg_recipe = "PYTHONPATH='' bin/pip install -r {filename} --upgrade".format(filename=egg_carton[1])
+        return_code, output = lib.call(egg_recipe,
+                                       cwd=egg_carton[0],
                                        output_log_level=logging.DEBUG,
                                        shell=True,
                                        stdout=stdout)
-        if config.is_affirmative('fail_on_error', True) and return_code != 0:
-            raise EggscriptFormulaException("Egg script {name} returned a return code of {code}!".format(name=self.feature_name, code=return_code))
+
+        if return_code != 0:
+            if config.is_affirmative('fail_on_error', True):
+                raise EggscriptFormulaException("""
+Egg script {name} returned a return code of {code}!
+
+pip install output ==================================================
+{output}
+end pip install output ==============================================
+""".format(name=self.feature_name, code=return_code, output=output))
+
+        return return_code
+
+    def __install_eggs(self, config):
+        """ Install eggs for a particular configuration """
+        egg_carton = (self.directory.install_directory(self.feature_name),
+                      'requirements.txt')
+        eggs = self.__gather_eggs(config)
+
+        self.logger.debug("Installing eggs %s..." % eggs)
+        self.__load_carton(egg_carton, eggs)
+
+        self.__prepare_eggs(egg_carton, config)
 
     def __add_paths(self, config):
         """ add the proper resources into the environment """
