@@ -121,12 +121,11 @@ class Inputs(object):
 
     def values(self, with_defaults=True):
         """ Return the values dictionary, defaulting to default values """
-        return dict(((k, str(v)) for k, v in self.values().items() if not v.is_empty(with_defaults)))
-        return { k: str(v) for k, v in self._inputs.items() }
+        return dict(((k, str(v)) for k, v in self._inputs.items() if not v.is_empty(with_defaults)))
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        return dict(((k, str(v)) for k, v in self.values().items() if not self._inputs[k].is_secret and not v.is_empty(False)))
+        return dict(((k, str(v)) for k, v in self._inputs.items() if not v.is_secret and not v.is_empty(False)))
 
     def add_inputs_from_inputstring(self, input_string):
         """
