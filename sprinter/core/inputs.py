@@ -21,18 +21,20 @@ class Input(object):
     type = None
 
     def is_empty(self, with_defaults=True):
-        return self.value is EMPTY and self.default is EMPTY
+        return self.value is EMPTY and (with_defaults or self.default is EMPTY)
 
     def __str__(self):
         """ Return the string value, defaulting to default values """
+        str_value = ''
         if self.value is not EMPTY:
-            if self.type == 'file' or self.type == 'path':
-                return os.path.expanduser(self.value)
-            else:
-                return self.value
+            str_value = self.value
         elif self.default is not EMPTY:
-            return self.default
-        return ''
+            str_value = self.default
+
+        if self.type == 'file' or self.type == 'path':
+            return os.path.expanduser(str_value)
+        else:
+            return str_value
 
     def __eq__(self, other):
         for val in ('value', 'default', 'is_secret', 'prompt'):
@@ -100,20 +102,17 @@ class Inputs(object):
                     secret=self._inputs[key].is_secret)
             self._inputs[key].value = input_value
 
-        return str(self._inputs[key])
+        return self._inputs[key].value
 
     def get_unset_inputs(self):
         """ Return a set of unset inputs """
-        return set([k for k, v in self._inputs.items() if v.value is EMPTY])
+        return set([k for k, v in self._inputs.items() if v.is_empty()])
 
     def prompt_unset_inputs(self, force=False):
         """ Prompt for unset input values """
-        if force:
-            for s in sorted(self._inputs):
-                self.get_input(s, force=True)
-        else:
-            for s in sorted(self.get_unset_inputs()):
-                self.get_input(s, force=force)
+        for k, v in self._inputs.items():
+            if force or v.is_empty():
+                self.get_input(k, force=force)
 
     def keys(self):
         """ Return a set of valid keys """
@@ -125,7 +124,7 @@ class Inputs(object):
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        return dict(((k, str(v)) for k, v in self._inputs.items() if not v.is_secret and not v.is_empty(False)))
+        return dict(((k, v.value) for k, v in self._inputs.items() if not v.is_secret and not v.is_empty(False)))
 
     def add_inputs_from_inputstring(self, input_string):
         """
