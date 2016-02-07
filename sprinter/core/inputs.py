@@ -21,12 +21,12 @@ class Input(object):
     type = None
 
     def is_empty(self, with_defaults=True):
-        return self.value is EMPTY and (with_defaults or self.default is EMPTY)
+        return self.value is EMPTY and (not with_defaults or self.default is EMPTY)
 
     def __str__(self):
         """ Return the string value, defaulting to default values """
         str_value = ''
-        if self.value is not EMPTY:
+        if self.value is not EMPTY and self.value is not None:
             str_value = self.value
         elif self.default is not EMPTY:
             str_value = self.default
@@ -92,8 +92,8 @@ class Inputs(object):
             if self._inputs[key].value is not EMPTY:
                 default_value = self._inputs[key].value
 
-            input_value = None
-            while input_value is None or input_value == '?':
+            input_value = EMPTY
+            while input_value is EMPTY or input_value == '?':
                 if input_value == '?' and help_text:
                     print(help_text)
                 input_value = lib.prompt(
