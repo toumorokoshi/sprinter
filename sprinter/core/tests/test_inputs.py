@@ -47,7 +47,7 @@ class TestInputs(object):
             prompt.assert_has_calls([
                 call("please enter your key", default=None, secret=False),
                 call("please enter your key_with_value", default='value', secret=False),
-            ])
+            ], any_order=True)
 
     def test_write_values(self):
         """ Only write values should be returned by write_values """
