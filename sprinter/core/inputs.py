@@ -106,7 +106,7 @@ class Inputs(object):
 
     def get_unset_inputs(self):
         """ Return a set of unset inputs """
-        return set([k for k, v in self._inputs.items() if v.is_empty()])
+        return set([k for k, v in self._inputs.items() if v.is_empty(False)])
 
     def prompt_unset_inputs(self, force=False):
         """ Prompt for unset input values """
