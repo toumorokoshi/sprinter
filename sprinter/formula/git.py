@@ -14,6 +14,13 @@ import os
 from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 
+CURRENT_BRANCH = "git -C {dir} rev-parse --abbrev-ref HEAD"
+CURRENT_REMOTE = "git -C {dir} remote get-url origin"
+CLONE_REPO = "git clone {repo} {dir}"
+CHECKOUT_BRANCH = "git -C {dir} checkout {branch}"
+FETCH_BRANCH = "git -C {dir} fetch origin {branch}"
+MERGE_BRANCH = "git -C {dir} merge --ff-only origin/{branch}"
+
 
 class GitException(Exception):
     pass
@@ -49,7 +56,8 @@ class GitFormula(FormulaBase):
                               target_directory,
                               branch=target_branch)
 
-        if self.target.get('url') != self.source.get('url'):
+        # if self.target.get('url') != self.source.get('url'):
+        if self.__git(CURRENT_REMOTE, dir=target_directory)[1] != self.source.get('url'):
 
             self.logger.debug("Old git repository Found. Deleting...")
             self.directory.remove_feature(self.feature_name)
@@ -57,7 +65,8 @@ class GitFormula(FormulaBase):
                               target_directory,
                               branch=self.target.get('branch', 'master'))
 
-        elif source_branch != target_branch:
+        # elif source_branch != target_branch:
+        elif self.__git(CURRENT_BRANCH, dir=target_directory)[1] != target_branch:
             self.__checkout_branch(target_directory, target_branch)
 
         else:
@@ -71,13 +80,17 @@ class GitFormula(FormulaBase):
         FormulaBase.update(self)
         return True
 
-    def __git_branch(self, target_directory):
-        # git -C $nemesis_src_root rev-parse --abbrev-ref HEAD
-        error, output = lib.call("git -C {dir} rev-parse --abbrev-ref HEAD".format(
-            dir=target_directory), output_log_level=logging.DEBUG)
+
+    def __git(self, command, **kwargs):
+        cmd = command.format(**kwargs)
+        error, output = lib.call(cmd, output_log_level=logging.DEBUG)
+        self.logger.info(output)
         if error:
+            self.logger.warning(output)
+        else:
             self.logger.info(output)
-            raise GitException("An error occurred while looking up the current git branch!")
+
+        return (error, output)
 
     def __checkout_branch(self, target_directory, branch):
         git_opts = {
@@ -85,30 +98,17 @@ class GitFormula(FormulaBase):
             'dir': target_directory
         }
         self.logger.debug("Checking out branch {branch}...".format(**git_opts))
-        for command in ("git -C {dir} fetch origin {branch}".format(**git_opts),
-                        "git -C {dir} checkout {branch}".format(**git_opts)):
-            error, output = lib.call(
-                command,
-                output_log_level=logging.DEBUG,
-                cwd=target_directory
-            )
-            if error:
-                self.logger.info(output)
-                raise GitException("An error occurred when checking out a branch!")
+        self.__git(FETCH_BRANCH, **git_opts)
+        self.__git(CHECKOUT_BRANCH, **git_opts)
 
     def __clone_repo(self, repo_url, target_directory, branch):
         git_opts = {
-            'url': repo_url,
+            'repo': repo_url,
             'branch': branch,
             'dir': target_directory
         }
-        self.logger.debug("Cloning repository {url} into {dir}...".format(**git_opts))
-        error, output = lib.call("git clone {url} {dir}".format(**git_opts),
-                                 output_log_level=logging.DEBUG)
-        if error:
-            self.logger.info(output)
-            raise GitException("An error occurred when cloning!")
-        self.__checkout_branch(target_directory, branch)
+        self.logger.debug("Cloning repository {repo} into {dir}...".format(**git_opts))
+        self.__git(CLONE_REPO, **git_opts)
 
     def __fetch_merge_repo(self, target_directory, target_branch):
         git_opts = {
@@ -116,20 +116,8 @@ class GitFormula(FormulaBase):
             'dir': target_directory
         }
         self.logger.debug("Fetching branch {branch}...".format(**git_opts))
-        # os.chdir(target_directory)
+        self.__git(FETCH_BRANCH, **git_opts)
 
-        error, output = lib.call("git -C {dir} fetch origin {branch}".format(**git_opts),
-                                 output_log_level=logging.DEBUG)
-        if error:
-            self.logger.info(output)
-            raise GitException("An error occurred while fetching!")
-
-        self.logger.info(output)
         self.logger.debug("Merging branch {branch}...".format(**git_opts))
-        error, output = lib.call("git -C {dir} merge --ff-only origin/{branch}".format(**git_opts),
-                                 output_log_level=logging.DEBUG)
-        if error:
-            #do not want to raise exception on merge failures/conflicts
-            self.logger.warning(output)
-        else:
-            self.logger.info(output)
+        error, output = self.__git(MERGE_BRANCH, **git_opts)
+

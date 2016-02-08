@@ -5,6 +5,7 @@ import os.path
 from mock import patch, call
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib
+from sprinter.formula.git import CLONE_REPO, CHECKOUT_BRANCH, FETCH_BRANCH, MERGE_BRANCH
 
 vals = {
     'repoA': 'git://github.com/toumorokoshi/sprinter.git'
@@ -46,28 +47,26 @@ class TestGitFormula(FormulaTest):
         call_mock.return_value = (0, '')
         self.environment.run_feature('simple_example', 'sync')
         call_mock.assert_has_calls([
-            call("git clone {0} {1}".format(
-                vals['repoA'],
-                install_directory
+            call(CLONE_REPO.format(
+                repo=vals['repoA'],
+                dir=install_directory
             ), output_log_level=logging.DEBUG)
         ])
 
     @patch.object(lib, 'call')
     def test_update_different_branches(self, call_mock):
-        """ The git formula should call a clone to a git repo if the branches are different """
+        """ The git formula should call checkout if target branch is not the current branch """
         install_directory = self.directory.install_directory('update')
         os.makedirs(install_directory)
-        call_mock.return_value = (0, '')
+        call_mock.return_value = (0, 'git://github.com/toumorokoshi/sprinter.git')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call(
-            "git -C {dir} fetch origin develop".format(dir=install_directory),
-            output_log_level=logging.DEBUG,
-            cwd=install_directory
+            FETCH_BRANCH.format(dir=install_directory, branch='develop'),
+            output_log_level=logging.DEBUG
         )
         call_mock.assert_any_call(
-            "git -C {dir} checkout develop".format(dir=install_directory),
-            output_log_level=logging.DEBUG,
-            cwd=install_directory
+            CHECKOUT_BRANCH.format(dir=install_directory, branch='develop'),
+            output_log_level=logging.DEBUG
         )
 
     @patch.object(lib, 'call')
@@ -76,7 +75,7 @@ class TestGitFormula(FormulaTest):
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call(
-            "git clone {repo} {dir}".format(
+            CLONE_REPO.format(
                 repo=vals['repoA'],
                 dir=self.directory.install_directory('update')),
             output_log_level=logging.DEBUG)
