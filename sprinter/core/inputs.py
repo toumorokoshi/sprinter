@@ -111,7 +111,7 @@ class Inputs(object):
     def prompt_unset_inputs(self, force=False):
         """ Prompt for unset input values """
         for k, v in self._inputs.items():
-            if force or v.is_empty():
+            if force or v.is_empty(False):
                 self.get_input(k, force=force)
 
     def keys(self):
