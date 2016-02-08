@@ -4,7 +4,7 @@ Usage:
   sprinter update <environment_name> [-ravi -u <username> -p <password> --allow-bad-certificate]
   sprinter (remove | deactivate | activate) <environment_name> [-v]
   sprinter validate <environment_source> [-avi -u <username> -p <password> --allow-bad-certificate]
-  sprinter (environments | list)
+  sprinter (list)
   sprinter globals [-r]
   sprinter (-h | --help)
   sprinter (-V | --version)
@@ -146,7 +146,7 @@ def parse_args(argv, Environment=Environment):
             )
             env.activate()
 
-        elif options['environments'] or options['list']:
+        elif options['list']:
             for _env in os.listdir(env.root):
                 if _env != ".global":
                     print(_env)
