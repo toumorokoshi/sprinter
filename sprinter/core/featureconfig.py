@@ -5,6 +5,8 @@ import sys
 
 import sprinter.lib as lib
 
+EMPTY = object()
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,7 +23,7 @@ class FeatureConfig(object):
         self.manifest = manifest
         self.raw_dict = dict(manifest.items(feature_name))
 
-    def get(self, param, default=None):
+    def get(self, param, default=EMPTY):
         """
         Returns the param value, and returns the default if it doesn't exist.
         If default is none, an exception will be raised instead.
@@ -29,7 +31,7 @@ class FeatureConfig(object):
         the returned parameter will have been specialized against the global context
         """
         if not self.has(param):
-            if default is not None:
+            if default is not EMPTY:
                 return default
             raise ParamNotFoundException("value for %s not found" % param)
         context_dict = copy.deepcopy(self.manifest.get_context_dict())
