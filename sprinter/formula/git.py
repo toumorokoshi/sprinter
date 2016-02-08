@@ -70,11 +70,6 @@ class GitFormula(FormulaBase):
             self.__checkout_branch(target_directory, target_branch)
 
         else:
-            if not os.path.exists(target_directory):
-                self.logger.debug("No repository cloned. Re-cloning...")
-                self.__clone_repo(self.target.get('url'),
-                                  target_directory,
-                                  branch=target_branch)
             self.__fetch_merge_repo(target_directory, target_branch)
 
         FormulaBase.update(self)
