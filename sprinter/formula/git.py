@@ -100,16 +100,17 @@ class GitFormula(FormulaBase):
             raise GitException('Incorrect origin for local repo!')
 
         if current_remote != self.target.get('url'):
-            self.logger.debug("Detected new repository url. Updating local git origin...")
+            self.logger.debug("Updating origin url...")
             self.__git(UPDATE_ORIGIN, git_opts)
 
         if current_branch != target_branch:
+            # update using "fetch origin [branch]:[branch]"
             self.__git(UPDATE_OFFLINE_BRANCH, git_opts)
         else:
             self.__fetch_merge_repo(git_opts)
 
-        # update the branch if the manifest has changed
-        # don't update the branch if the user has changed branches
+        # change branches if the manifest has changed,
+        # don't change branches if the user has changed branches
         if current_branch == source_branch and current_branch != target_branch:
             self.__checkout_branch(git_opts)
 
