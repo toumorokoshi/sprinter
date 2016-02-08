@@ -257,11 +257,13 @@ class Manifest(object):
         # populate input schemas
         for s in self.manifest.sections():
             if self.has_option(s, 'inputs'):
-                input_object.add_inputs_from_inputstring(self.get(s, 'inputs'))
-        # add in values
-        for k, v in self.items('config'):
-            if input_object.is_input(s):
-                input_object.set_input(k, v)
+                added_inputs = input_object.add_inputs_from_inputstring(
+                    self.get(s, 'inputs'))
+                # add in values
+                for k, _ in added_inputs:
+                    if self.has_option('config', k):
+                        input_object.set_input(k, self.get('config', k))
+
         return input_object
 
     # custom equality method

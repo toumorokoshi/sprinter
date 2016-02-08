@@ -126,6 +126,7 @@ class Inputs(object):
         param_attributes = (self._parse_param_line(rp) for rp in raw_params if len(rp.strip(' \t')) > 0)
         for param, attributes in param_attributes:
             self.add_input(param, attributes)
+        return param_attributes
 
     def _parse_param_line(self, line):
         """ Parse a single param line. """
