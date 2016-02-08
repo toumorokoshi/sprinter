@@ -5,7 +5,7 @@ import os.path
 from mock import patch, call
 from sprinter.testtools import FormulaTest
 import sprinter.lib as lib
-from sprinter.formula.git import CLONE_REPO, CHECKOUT_BRANCH, FETCH_BRANCH, MERGE_BRANCH
+from sprinter.formula.git import CURRENT_REMOTE, CURRENT_BRANCH, CLONE_REPO, CHECKOUT_BRANCH, FETCH_BRANCH, MERGE_BRANCH, UPDATE_ORIGIN
 
 vals = {
     'repoA': 'git://github.com/toumorokoshi/sprinter.git'
@@ -58,7 +58,14 @@ class TestGitFormula(FormulaTest):
         """ The git formula should call checkout if target branch is not the current branch """
         install_directory = self.directory.install_directory('update')
         os.makedirs(install_directory)
-        call_mock.return_value = (0, 'git://github.com/toumorokoshi/sprinter.git')
+        call_count = 0
+        return_values = {
+            CURRENT_REMOTE.format(dir=install_directory):
+                'git://github.com/toumorokoshi/sprinter.git',
+            CURRENT_BRANCH.format(dir=install_directory):
+                'master'
+        }
+        call_mock.side_effect = lambda cmd, **kw: (0, return_values[cmd] if cmd in return_values else '')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call(
             FETCH_BRANCH.format(dir=install_directory, branch='develop'),
@@ -72,7 +79,7 @@ class TestGitFormula(FormulaTest):
     @patch.object(lib, 'call')
     def test_update_no_directory(self, call_mock):
         """ The git formula should re-clone a repo if the repo directory doesn't exist """
-        call_mock.return_value = (0, '')
+        call_mock.return_value = (0, 'git://github.com/toumorokoshi/sprinter.git')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call(
             CLONE_REPO.format(
