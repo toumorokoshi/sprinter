@@ -5,19 +5,16 @@ git repo. Git repos outside the sprinter project folders will
 not be deleted when the environment is removed. However, they
 will be updated appropriately.
 
-[config]
-inputs = project_git_root==~/code/my_project
-
 [my-project]
+inputs = project_git_root==~/code/my_project#{ 'type': 'file' }
 formula = sprinter.formula.git
 url = https://github.com/me/my_project.git
-path = %(config:project_git_root)s
+git_root = %(config:project_git_root)s
 branch = develop
 
 [sub]
 formula = sprinter.formula.git
 url = https://github.com/toumorokoshi/sub.git
-path = %(config:project_git_root)s
 branch = master
 rc = . %(sub:root_dir)s/libexec/sub-init
 """
@@ -45,22 +42,24 @@ class GitFormula(FormulaBase):
     """ A sprinter formula for git"""
 
     required_options = FormulaBase.required_options + ['url']
-    valid_options = FormulaBase.valid_options + ['branch', 'path']
+    valid_options = FormulaBase.valid_options + ['branch', 'git_root']
 
     def install(self):
         if not lib.which('git'):
             self.logger.warn("git is not installed! Please install git to install this feature.")
             return
         install_dir = self.directory.install_directory(self.feature_name)
-        target_path = self.target.get('path', None)
+        git_root = self.target.get('git_root', None)
+        target_path = git_root or install_dir
         target_branch = self.target.get('branch', 'master')
         git_opts = {
             'repo': self.target.get('url', None),
             'branch': target_branch,
-            'dir': target_path or install_dir
+            'dir': target_path
         }
         # no existing path is given or the path is not a git repo
-        if not target_path or not self.__git(CURRENT_BRANCH, git_opts)[1]:
+        if (not target_path or not os.path.exists(target_path) or
+                not self.__git(CURRENT_BRANCH, git_opts)[1]):
             self.__clone_repo(git_opts)
 
         # for an existing path, the git remote must match
@@ -76,14 +75,16 @@ class GitFormula(FormulaBase):
         if not lib.which('git'):
             self.logger.warn("git is not installed! Please install git to install this feature.")
             return
-        git_opts = {
-            'repo': self.target.get('url'),
-            'branch': self.target.get('branch', 'master'),
-            'dir': self.directory.install_directory(self.feature_name)
-        }
-        target_path = self.directory.install_directory(self.feature_name)
+        install_dir = self.directory.install_directory(self.feature_name)
+        git_root = self.target.get('git_root', None)
+        target_path = git_root or install_dir
         source_branch = self.source.get('branch', 'master')
         target_branch = self.target.get('branch', 'master')
+        git_opts = {
+            'repo': self.target.get('url'),
+            'branch': target_branch,
+            'dir': target_path
+        }
 
         # directory doesn't exist, or is not a git branch
         if (not target_path or not os.path.exists(target_path) or
@@ -125,7 +126,7 @@ class GitFormula(FormulaBase):
             self.logger.warning(output)
         else:
             self.logger.info(output)
-        return (error, output)
+        return (error, output.strip('\n \t'))
 
     def __checkout_branch(self, git_opts):
         self.logger.debug("Checking out branch {branch}...".format(**git_opts))
