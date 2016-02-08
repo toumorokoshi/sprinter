@@ -36,7 +36,7 @@ class TestInputs(object):
             prompt.assert_called_once_with("please enter your key", default=None, secret=False)
 
     def test_forced_prompt_unset_imputs(self):
-        """ Only all inputs should be prompted with prompt_unset_inputs and force=True """
+        """ All inputs should be prompted with prompt_unset_inputs and force=True """
         self.inputs.add_input('key')
         key_with_value = Input()
         key_with_value.value = 'value'
