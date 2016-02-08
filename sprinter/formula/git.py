@@ -71,10 +71,22 @@ class GitFormula(FormulaBase):
         FormulaBase.update(self)
         return True
 
+    def __git_branch(self, target_directory):
+        # git -C $nemesis_src_root rev-parse --abbrev-ref HEAD
+        error, output = lib.call("git -C {dir} rev-parse --abbrev-ref HEAD".format(
+            dir=target_directory), output_log_level=logging.DEBUG)
+        if error:
+            self.logger.info(output)
+            raise GitException("An error occurred while looking up the current git branch!")
+
     def __checkout_branch(self, target_directory, branch):
-        self.logger.debug("Checking out branch %s..." % branch)
-        for command in ("git fetch origin {0}".format(branch),
-                        "git checkout {0}".format(branch)):
+        git_opts = {
+            'branch': branch,
+            'dir': target_directory
+        }
+        self.logger.debug("Checking out branch {branch}...".format(**git_opts))
+        for command in ("git -C {dir} fetch origin {branch}".format(**git_opts),
+                        "git -C {dir} checkout {branch}".format(**git_opts)):
             error, output = lib.call(
                 command,
                 output_log_level=logging.DEBUG,
@@ -85,8 +97,13 @@ class GitFormula(FormulaBase):
                 raise GitException("An error occurred when checking out a branch!")
 
     def __clone_repo(self, repo_url, target_directory, branch):
-        self.logger.debug("Cloning repository %s into %s..." % (repo_url, target_directory))
-        error, output = lib.call("git clone %s %s" % (repo_url, target_directory),
+        git_opts = {
+            'url': repo_url,
+            'branch': branch,
+            'dir': target_directory
+        }
+        self.logger.debug("Cloning repository {url} into {dir}...".format(**git_opts))
+        error, output = lib.call("git clone {url} {dir}".format(**git_opts),
                                  output_log_level=logging.DEBUG)
         if error:
             self.logger.info(output)
@@ -94,18 +111,22 @@ class GitFormula(FormulaBase):
         self.__checkout_branch(target_directory, branch)
 
     def __fetch_merge_repo(self, target_directory, target_branch):
-        self.logger.debug("Fetching branch %s..." % target_branch)
-        os.chdir(target_directory)
+        git_opts = {
+            'branch': target_branch,
+            'dir': target_directory
+        }
+        self.logger.debug("Fetching branch {branch}...".format(**git_opts))
+        # os.chdir(target_directory)
 
-        error, output = lib.call("git fetch origin %s" % target_branch,
+        error, output = lib.call("git -C {dir} fetch origin {branch}".format(**git_opts),
                                  output_log_level=logging.DEBUG)
         if error:
             self.logger.info(output)
             raise GitException("An error occurred while fetching!")
 
         self.logger.info(output)
-        self.logger.debug("Merging branch %s..." % target_branch)
-        error, output = lib.call("git merge --ff-only origin/%s" % target_branch,
+        self.logger.debug("Merging branch {branch}...".format(**git_opts))
+        error, output = lib.call("git -C {dir} merge --ff-only origin/{branch}".format(**git_opts),
                                  output_log_level=logging.DEBUG)
         if error:
             #do not want to raise exception on merge failures/conflicts

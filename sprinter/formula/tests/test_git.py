@@ -42,30 +42,32 @@ class TestGitFormula(FormulaTest):
     @patch.object(lib, 'call')
     def test_simple_example(self, call_mock):
         """ The git formula should call a clone to a git repo """
+        install_directory = self.directory.install_directory('simple_example')
         call_mock.return_value = (0, '')
         self.environment.run_feature('simple_example', 'sync')
         call_mock.assert_has_calls([
             call("git clone {0} {1}".format(
                 vals['repoA'],
-                self.directory.install_directory('simple_example')
+                install_directory
             ), output_log_level=logging.DEBUG)
         ])
 
     @patch.object(lib, 'call')
     def test_update_different_branches(self, call_mock):
         """ The git formula should call a clone to a git repo if the branches are different """
-        os.makedirs(self.directory.install_directory('update'))
+        install_directory = self.directory.install_directory('update')
+        os.makedirs(install_directory)
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
         call_mock.assert_any_call(
-            "git fetch origin develop",
+            "git -C {dir} fetch origin develop".format(dir=install_directory),
             output_log_level=logging.DEBUG,
-            cwd=self.directory.install_directory('update')
+            cwd=install_directory
         )
         call_mock.assert_any_call(
-            "git checkout develop",
+            "git -C {dir} checkout develop".format(dir=install_directory),
             output_log_level=logging.DEBUG,
-            cwd=self.directory.install_directory('update')
+            cwd=install_directory
         )
 
     @patch.object(lib, 'call')
@@ -73,6 +75,8 @@ class TestGitFormula(FormulaTest):
         """ The git formula should re-clone a repo if the repo directory doesn't exist """
         call_mock.return_value = (0, '')
         self.environment.run_feature('update', 'sync')
-        call_mock.assert_any_call("git clone %s %s" % (vals['repoA'],
-                                                       self.directory.install_directory('update')),
-                                  output_log_level=logging.DEBUG)
+        call_mock.assert_any_call(
+            "git clone {repo} {dir}".format(
+                repo=vals['repoA'],
+                dir=self.directory.install_directory('update')),
+            output_log_level=logging.DEBUG)
