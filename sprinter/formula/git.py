@@ -44,7 +44,8 @@ class GitException(Exception):
 class GitFormula(FormulaBase):
     """ A sprinter formula for git"""
 
-    valid_options = FormulaBase.valid_options + ['url', 'branch', 'path']
+    required_options = FormulaBase.required_options + ['url']
+    valid_options = FormulaBase.valid_options + ['branch', 'path']
 
     def install(self):
         if not lib.which('git'):
