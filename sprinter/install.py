@@ -92,7 +92,7 @@ def parse_args(argv, Environment=Environment):
                 )
             env.target = target
             if options['--namespace']:
-                env.namespace = options['<namespace>']
+                env.namespace = options['--namespace']
             if options['--local']:
                 env.do_inject_environment_config = False
                 env.custom_directory_root = os.path.abspath(os.path.expanduser(options['--local']))
