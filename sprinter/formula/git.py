@@ -117,7 +117,6 @@ class GitFormula(FormulaBase):
         FormulaBase.update(self)
         return True
 
-
     def __git(self, command, git_opts):
         cmd = command.format(**git_opts)
         error, output = lib.call(cmd, output_log_level=logging.DEBUG)
@@ -143,4 +142,3 @@ class GitFormula(FormulaBase):
 
         self.logger.debug("Merging branch {branch}...".format(**git_opts))
         error, output = self.__git(MERGE_BRANCH, git_opts)
-
