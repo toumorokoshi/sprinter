@@ -1,10 +1,24 @@
 """
-Creates a git repository and places it at the install location.
+Clones a git repository and places it at the install location.
+When configured with a path option, will reference an existing
+git repo. Git repos outside the sprinter project folders will
+not be deleted when the environment is removed. However, they
+will be updated appropriately.
+
+[config]
+inputs = project_git_root==~/code/my_project
+
+[my-project]
+formula = sprinter.formula.git
+url = https://github.com/me/my_project.git
+path = %(config:project_git_root)s
+branch = develop
 
 [sub]
 formula = sprinter.formula.git
 url = https://github.com/toumorokoshi/sub.git
-branch = toumorokoshi
+path = %(config:project_git_root)s
+branch = master
 rc = . %(sub:root_dir)s/libexec/sub-init
 """
 from __future__ import unicode_literals
