@@ -97,7 +97,6 @@ class GitFormula(FormulaBase):
 
         # for an existing path, the git remote must match
         if current_remote != self.source.get('url'):
-            import pdb; pdb.set_trace();
             raise GitException('Incorrect origin for local repo!')
 
         if current_remote != self.target.get('url'):
