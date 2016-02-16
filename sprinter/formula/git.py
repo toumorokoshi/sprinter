@@ -96,10 +96,6 @@ class GitFormula(FormulaBase):
         current_branch = self.__git(CURRENT_BRANCH, git_opts)[1]
 
         # for an existing path, the git remote must match
-        if current_remote != self.source.get('url'):
-            import pdb; pdb.set_trace();
-            raise GitException('Incorrect origin for local repo!')
-
         if current_remote != self.target.get('url'):
             self.logger.debug("Updating origin url...")
             self.__git(UPDATE_ORIGIN, git_opts)
