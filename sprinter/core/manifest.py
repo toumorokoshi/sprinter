@@ -106,7 +106,8 @@ def _load_manifest_from_file(manifest, path):
     if not os.path.exists(path):
         raise ManifestException("Manifest does not exist at {0}!".format(path))
     manifest.read(path)
-    manifest.set('config', 'source', str(path))
+    if not manifest.has_option('config', 'source'):
+        manifest.set('config', 'source', str(path))
 
 
 class ManifestException(Exception):

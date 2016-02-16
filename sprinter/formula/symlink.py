@@ -51,8 +51,8 @@ class SymlinkFormula(FormulaBase):
             target_opts = self.__get_options(self.target)
             for k in self._required_options:
                 if k not in target_opts:
-                    error_message = "Required option {option} not present in feature {feature}!"
-                        .format(option=k, feature=self.feature_name)
+                    error_message = "Required option {option} not present in feature {feature}!".format(
+                        option=k, feature=self.feature_name)
                     if self.target.is_affirmative('fail_on_error', False):
                         self._log_error(error_message)
                     else:
