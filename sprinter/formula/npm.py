@@ -94,18 +94,20 @@ class NPMFormula(FormulaBase):
         return 'nvm use {version}'.format(
             version=config.get('node_version'))
 
-    def __run_command(self, command, config):
+    def __run_command(self, npm_command, config):
         npm_root = config.get('npm_root')
         shell = False
         # using depth 0, even though it's the default, to minimize npm's tree output
 
+        command = "npm {cmd} --depth 0".format(cmd=npm_command)
         if config.has('node_version'):
-            nvm_command = '{cmd} && '.format(cmd=self.__nvm_use(config=config))
+            command = "bash -i -c '{use} && {cmd}'".format(
+                use=self.__nvm_use(config=config),
+                cmd=command)
             shell = True
-        full_command = "{pre}npm {cmd} --depth 0".format(pre=nvm_command, cmd=command)
         # self.logger.debug("Running {cmd}...".format(cmd=full_command))
         stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
-        return_code, output = lib.call(full_command, shell=shell, stdout=stdout, cwd=npm_root)
+        return_code, output = lib.call(command, shell=shell, stdout=stdout, cwd=npm_root)
         if config.is_affirmative('fail_on_error', True) and return_code != 0:
             raise NPMFormulaException("npm returned a return code of {0}!".format(return_code))
         return True
