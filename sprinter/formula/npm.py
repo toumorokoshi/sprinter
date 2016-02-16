@@ -77,9 +77,13 @@ class NPMFormula(FormulaBase):
         FormulaBase.deactivate(self)
 
     def __run_command(self, command, config):
+        node_version = self.target.get('node_version')
         npm_root = self.target.get('npm_root')
         # using depth 0, even though it's the default, to minimize npm's tree output
-        full_command = "npm {cmd} --depth 0".format(cmd=command)
+        nvm_command = ''
+        if config.has('node_version'):
+            nvm_command = 'nvm use {version} && '.format(version=config.get('node_version'))
+        full_command = "{pre} npm {cmd} --depth 0".format(pre=nvm_command, cmd=command)
         # self.logger.debug("Running {cmd}...".format(cmd=full_command))
         stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
         return_code, output = lib.call(full_command, shell=False, stdout=stdout, cwd=npm_root)
