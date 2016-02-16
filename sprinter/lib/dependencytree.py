@@ -43,9 +43,11 @@ class DependencyTree(object):
                 # the tree must be invalid, as it was not possible to remove a node.
                 # it's hard to find all the errors, so just spit out the first one you can find.
                 invalid_node = remaining_nodes[0]
-                invalid_dependency = node_dict[invalid_node][0]
+                invalid_dependency = ', '.join(node_dict[invalid_node])
                 if invalid_dependency not in remaining_nodes:
-                    raise DependencyTreeException("The dependency list for %s is missing" % invalid_dependency)
+                    raise DependencyTreeException(
+                        "Missing dependency! One or more of ({dependency}) are missing for {dependant}.".format(
+                            dependant=invalid_node, dependency=invalid_dependency))
                 else:
                     raise DependencyTreeException("The dependency %s is cyclic or dependent on a cyclic dependency" % invalid_dependency)
         return valid_order
