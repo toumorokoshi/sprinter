@@ -64,10 +64,11 @@ class NPMFormula(FormulaBase):
         return FormulaBase.update(self)
 
     def activate(self):
-        namespace = self.target.get('namespace')
         npm_root = self.target.get('npm_root')
         modules_dir = os.path.join(npm_root, 'node_modules')
-        modules_restore = os.path.join(npm_root, 'node_modules.{ns}'.format(ns=namespace))
+        modules_restore = os.path.join(npm_root,
+                                       'node_modules.{ns}'.format(
+                                           ns=self.source.manifest.namespace))
         modules_bak = os.path.join(npm_root, 'node_modules.sv')
 
         if os.path.exists(modules_dir):
@@ -78,10 +79,11 @@ class NPMFormula(FormulaBase):
         FormulaBase.activate(self)
 
     def deactivate(self):
-        namespace = self.source.get('namespace')
         npm_root = self.source.get('npm_root')
         modules_dir = os.path.join(npm_root, 'node_modules')
-        modules_save = os.path.join(npm_root, 'node_modules.{ns}'.format(ns=namespace))
+        modules_save = os.path.join(npm_root,
+                                    'node_modules.{ns}'.format(
+                                        ns=self.source.manifest.namespace))
 
         if os.path.exists(modules_save):
             shutil.rmtree(modules_save)
