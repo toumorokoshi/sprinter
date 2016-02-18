@@ -78,8 +78,8 @@ class NPMFormula(FormulaBase):
         FormulaBase.activate(self)
 
     def deactivate(self):
-        namespace = self.target.get('namespace')
-        npm_root = self.target.get('npm_root')
+        namespace = self.source.get('namespace')
+        npm_root = self.source.get('npm_root')
         modules_dir = os.path.join(npm_root, 'node_modules')
         modules_save = os.path.join(npm_root, 'node_modules.{ns}'.format(ns=namespace))
 
