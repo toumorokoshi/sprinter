@@ -8,6 +8,7 @@ inputs = git_root==~/code/project
 formula = sprinter.formula.npm
 npm_root = %(config:git_root)s
 node_version = 4.3.0
+active_only = true
 list_outdated = true
 redirect_stdout_to_log = false
 """
@@ -29,7 +30,8 @@ class NPMFormulaException(FormulaException):
 class NPMFormula(FormulaBase):
 
     required_options = FormulaBase.required_options + ['npm_root']
-    valid_options = FormulaBase.valid_options + ['list_outdated', 'node_version']
+    valid_options = FormulaBase.valid_options + ['list_outdated', 'node_version',
+                                                 'active_only']
 
     def install(self):
         npm_root = self.target.get('npm_root')
@@ -64,30 +66,32 @@ class NPMFormula(FormulaBase):
         return FormulaBase.update(self)
 
     def activate(self):
-        npm_root = self.target.get('npm_root')
-        modules_dir = os.path.join(npm_root, 'node_modules')
-        modules_restore = os.path.join(npm_root,
-                                       'node_modules.{ns}'.format(
-                                           ns=self.source.manifest.namespace))
-        modules_bak = os.path.join(npm_root, 'node_modules.sv')
+        if self.source.is_affirmative('active_only', False):
+            npm_root = self.target.get('npm_root')
+            modules_dir = os.path.join(npm_root, 'node_modules')
+            modules_restore = os.path.join(npm_root,
+                                           'node_modules.{ns}'.format(
+                                               ns=self.source.manifest.namespace))
+            modules_bak = os.path.join(npm_root, 'node_modules.sv')
 
-        if os.path.exists(modules_dir):
-            if os.path.exists(modules_bak):
-                shutil.rmtree(modules_bak)
-            shutil.move(modules_dir, modules_bak)
-        shutil.move(modules_restore, modules_dir)
+            if os.path.exists(modules_dir):
+                if os.path.exists(modules_bak):
+                    shutil.rmtree(modules_bak)
+                shutil.move(modules_dir, modules_bak)
+            shutil.move(modules_restore, modules_dir)
         FormulaBase.activate(self)
 
     def deactivate(self):
-        npm_root = self.source.get('npm_root')
-        modules_dir = os.path.join(npm_root, 'node_modules')
-        modules_save = os.path.join(npm_root,
-                                    'node_modules.{ns}'.format(
-                                        ns=self.source.manifest.namespace))
+        if self.source.is_affirmative('active_only', False):
+            npm_root = self.source.get('npm_root')
+            modules_dir = os.path.join(npm_root, 'node_modules')
+            modules_save = os.path.join(npm_root,
+                                        'node_modules.{ns}'.format(
+                                            ns=self.source.manifest.namespace))
 
-        if os.path.exists(modules_save):
-            shutil.rmtree(modules_save)
-        shutil.move(modules_dir, modules_save)
+            if os.path.exists(modules_save):
+                shutil.rmtree(modules_save)
+            shutil.move(modules_dir, modules_save)
         FormulaBase.deactivate(self)
 
     def __nvm_use(self, config):
