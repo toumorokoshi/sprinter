@@ -43,7 +43,7 @@ class NPMFormula(FormulaBase):
         self.__run_command('install', self.target)
 
         if self.target.has('node_version'):
-            self.directory.add_to_env(self.__nvm_use(config=self.target))
+            self.directory.add_to_rc(self.__nvm_use(config=self.target))
 
         FormulaBase.install(self)
 
@@ -58,7 +58,7 @@ class NPMFormula(FormulaBase):
         self.__run_command('update', self.target)
 
         if self.target.has('node_version'):
-            self.directory.add_to_env(self.__nvm_use(config=self.target))
+            self.directory.add_to_rc(self.__nvm_use(config=self.target))
 
         if self.target.is_affirmative('list_outdated'):
             self.__run_command('outdated', self.target)
