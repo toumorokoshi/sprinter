@@ -37,9 +37,14 @@ class FeatureConfig(object):
         context_dict = copy.deepcopy(self.manifest.get_context_dict())
         for k, v in self.raw_dict.items():
             context_dict["%s:%s" % (self.feature_name, k)] = v
-        while True:
+        cur_value = self.raw_dict[param]
+        prev_value = None
+        max_depth = 5
+        # apply the context until doing so does not change the value
+        while cur_value != prev_value and max_depth > 0:
+            prev_value = cur_value
             try:
-                return str(self.raw_dict[param]) % context_dict
+                cur_value = str(prev_value) % context_dict
             except KeyError:
                 e = sys.exc_info()[1]
                 key = e.args[0]
@@ -51,6 +56,8 @@ class FeatureConfig(object):
                 else:
                     logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
                     return self.raw_dict[param]
+            max_depth -= 1
+        return cur_value
 
     def has(self, param):
         """ return true if the param exists """
