@@ -40,7 +40,10 @@ class NPMFormula(FormulaBase):
         if os.path.exists(modules_dir):
             shutil.rmtree(modules_dir)
 
-        self.__run_command('install', self.target)
+        if self.target.has('node_version'):
+            self.__install_nvm_version()
+
+        self.__run_npm_command('install', self.target)
 
         if self.target.has('node_version'):
             self.directory.add_to_rc(self.__nvm_use(config=self.target))
@@ -51,17 +54,26 @@ class NPMFormula(FormulaBase):
         source_npm_root = self.source.get('npm_root')
         target_npm_root = self.target.get('npm_root')
         modules_dir = os.path.join(target_npm_root, 'node_modules')
+        cur_version = self.source.get('node_version') if self.source.has('node_version') else None
+        next_version = self.target.get('node_version') if self.target.has('node_version') else None
 
         if target_npm_root != source_npm_root or not os.path.exists(modules_dir):
             return self.install()
 
-        self.__run_command('update', self.target)
+        if next_version is not None and next_version != cur_version:
+            self.__install_nvm_version()
+            if os.path.exists(modules_dir):
+                shutil.rmtree(modules_dir)
+
+            self.__run_npm_command('install', self.target)
+        else:
+            self.__run_npm_command('update', self.target)
 
         if self.target.has('node_version'):
             self.directory.add_to_rc(self.__nvm_use(config=self.target))
 
         if self.target.is_affirmative('list_outdated'):
-            self.__run_command('outdated', self.target)
+            self.__run_npm_command('outdated', self.target)
 
         return FormulaBase.update(self)
 
@@ -94,26 +106,41 @@ class NPMFormula(FormulaBase):
             shutil.move(modules_dir, modules_save)
         FormulaBase.deactivate(self)
 
-    def __nvm_use(self, config):
-        if not config.has('node_version'):
-            return ''
-        return 'nvm use {version}'.format(
-            version=config.get('node_version'))
+    def __install_nvm_version(self, config=None):
+        config = self.target if config is None else config
+        version = config.get('node_version')
+        self.__run_command('nvm install {version}'.format(version=version),
+                           interactive=True, config=config)
 
-    def __run_command(self, npm_command, config):
-        npm_root = config.get('npm_root')
-        shell = False
+    def __nvm_use(self, version):
+        if version is None:
+            return ''
+        return 'nvm use {version}'.format(version=version)
+
+    def __run_npm_command(self, npm_command, config):
+        root = config.get('npm_root')
+        node_version = config.get('node_version') if config.has('node_version') else None
+        interactive = False
         # using depth 0, even though it's the default, to minimize npm's tree output
 
         command = "npm {cmd} --depth 0".format(cmd=npm_command)
-        if config.has('node_version'):
-            command = "bash -i -c '{use} && {cmd}'".format(
-                use=self.__nvm_use(config=config),
+        if node_version is not None:
+            command = "{use} && {cmd}".format(
+                use=self.__nvm_use(version=node_version),
                 cmd=command)
+            interactive = True
+        self.__run_command(command, root=root, interactive=interactive, config=config)
+
+    def __run_command(self, command, root=None, interactive=False, config=None):
+        shell = interactive
+        # using depth 0, even though it's the default, to minimize npm's tree output
+
+        if interactive:
+            command = "bash -i -c '{cmd}'".format(cmd=command).format(cmd=command)
             shell = True
-        # self.logger.debug("Running {cmd}...".format(cmd=full_command))
-        stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
-        return_code, output = lib.call(command, shell=shell, stdout=stdout, cwd=npm_root)
+        suppress_output = config.is_affirmative('redirect_stdout_to_log', 'true') if config is not None else True
+        stdout = subprocess.PIPE if suppress_output else None
+        return_code, output = lib.call(command, shell=shell, stdout=stdout, cwd=root)
         if config.is_affirmative('fail_on_error', True) and return_code != 0:
             raise NPMFormulaException("npm returned a return code of {0}!".format(return_code))
         return True
