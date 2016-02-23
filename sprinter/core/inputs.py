@@ -21,6 +21,7 @@ class Input(object):
     """ struct to hold input information """
 
     value = EMPTY
+    prev_value = EMPTY
     default = EMPTY
     is_secret = False
     prompt = None
@@ -82,6 +83,7 @@ class Inputs(object):
     def add_input(self, key, input_instance=None):
         """ Add an input <input> with a possible <value>, and <is_secret>"""
         self._inputs[key] = input_instance or Input()
+        return self._inputs[key]
 
     def is_input(self, key):
         """ Returns true if <key> is a key """
@@ -97,6 +99,17 @@ class Inputs(object):
         if key not in self._inputs:
             raise InputException("Key {0} is not a valid input!".format(key))
         self._inputs[key].value = value
+
+    def set_input_prev(self, key, value):
+        if key not in self._inputs:
+            raise InputException("Key {0} is not a valid input!".format(key))
+        self._inputs[key].prev_value = value
+
+    def get_input_default(self, key):
+        if key in self._inputs and self._inputs[key].default is not EMPTY:
+            return self._inputs[key].default
+        else:
+            return None
 
     def get_input(self, key, force=False):
         """ Get the value of <key> if it already exists, or prompt for it if not """
@@ -114,10 +127,13 @@ class Inputs(object):
         if self._inputs[key].value is EMPTY or force:
 
             default_value = None
+            prev_value = None
             if self._inputs[key].default is not EMPTY:
                 default_value = self._inputs[key].default
             if self._inputs[key].value is not EMPTY:
                 default_value = self._inputs[key].value
+            if self._inputs[key].prev_value is not EMPTY:
+                prev_value = self._inputs[key].prev_value
 
             input_value = EMPTY
             while input_value is EMPTY or input_value == '?':
@@ -126,6 +142,7 @@ class Inputs(object):
                 input_value = lib.prompt(
                     prompt,
                     default=default_value,
+                    populated_default=prev_value,
                     bool_type=self._inputs[key].in_type,
                     secret=self._inputs[key].is_secret)
             self._inputs[key].value = input_value
@@ -164,10 +181,11 @@ class Inputs(object):
         main_branch==comp_main
         """
         raw_params = input_string.split('\n')
+        added_input_keys = []
         param_attributes = (self._parse_param_line(rp) for rp in raw_params if len(rp.strip(' \t')) > 0)
         for param, attributes in param_attributes:
-            self.add_input(param, attributes)
-        return param_attributes
+            added_input_keys.append((param, self.add_input(param, attributes)))
+        return added_input_keys
 
     def _parse_param_line(self, line):
         """ Parse a single param line. """

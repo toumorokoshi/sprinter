@@ -170,6 +170,10 @@ class Manifest(object):
             self.inputs.set_input(key, value)
         self.set('config', key, value)
 
+    def set_input_prev(self, key, value):
+        if self.inputs.is_input(key):
+            self.inputs.set_input_prev(key, value)
+
     def write(self, file_handle):
         """ write the current state to a file manifest """
         for k, v in self.inputs.write_values().items():
@@ -191,7 +195,8 @@ class Manifest(object):
             for k, v in self.manifest.items(s):
                 context_dict["%s:%s" % (s, k)] = v
         for k, v in self.inputs.values().items():
-            context_dict["config:{0}".format(k)] = v
+            input_value_key = "config:{input_key}".format(input_key=k)
+            context_dict[input_value_key] = v
         context_dict.update(self.additional_context_variables.items())
         context_dict.update(dict([("%s|escaped" % k, re.escape(str(v) or "")) for k, v in context_dict.items()]))
         return context_dict
@@ -258,8 +263,7 @@ class Manifest(object):
         # populate input schemas
         for s in self.manifest.sections():
             if self.has_option(s, 'inputs'):
-                added_inputs = input_object.add_inputs_from_inputstring(
-                    self.get(s, 'inputs'))
+                added_inputs = input_object.add_inputs_from_inputstring(self.get(s, 'inputs'))
                 # add in values
                 for k, _ in added_inputs:
                     if self.has_option('config', k):
