@@ -46,7 +46,7 @@ class NPMFormula(FormulaBase):
         self.__run_npm_command('install', self.target)
 
         if self.target.has('node_version'):
-            self.directory.add_to_rc(self.__nvm_use(config=self.target))
+            self.directory.add_to_rc(self.__nvm_use())
 
         FormulaBase.install(self)
 
@@ -62,6 +62,8 @@ class NPMFormula(FormulaBase):
 
         if next_version is not None and next_version != cur_version:
             self.__install_nvm_version()
+            self.logger.info('Node version change: {cur} to {next}'.format(cur=cur_version, next=next_version))
+            self.logger.info('...clearing and re-installing node_modules')
             if os.path.exists(modules_dir):
                 shutil.rmtree(modules_dir)
 
@@ -70,7 +72,7 @@ class NPMFormula(FormulaBase):
             self.__run_npm_command('update', self.target)
 
         if self.target.has('node_version'):
-            self.directory.add_to_rc(self.__nvm_use(config=self.target))
+            self.directory.add_to_rc(self.__nvm_use())
 
         if self.target.is_affirmative('list_outdated'):
             self.__run_npm_command('outdated', self.target)
@@ -112,21 +114,21 @@ class NPMFormula(FormulaBase):
         self.__run_command('nvm install {version}'.format(version=version),
                            interactive=True, config=config)
 
-    def __nvm_use(self, version):
-        if version is None:
-            return ''
-        return 'nvm use {version}'.format(version=version)
+    def __nvm_use(self, config=None):
+        config = self.target if config is None else config
+        if config.has('node_version'):
+            return 'nvm use {version}'.format(version=config.get('node_version'))
+        return ''
 
     def __run_npm_command(self, npm_command, config):
         root = config.get('npm_root')
-        node_version = config.get('node_version') if config.has('node_version') else None
         interactive = False
         # using depth 0, even though it's the default, to minimize npm's tree output
 
         command = "npm {cmd} --depth 0".format(cmd=npm_command)
-        if node_version is not None:
+        if config.has('node_version'):
             command = "{use} && {cmd}".format(
-                use=self.__nvm_use(version=node_version),
+                use=self.__nvm_use(config=config),
                 cmd=command)
             interactive = True
         self.__run_command(command, root=root, interactive=interactive, config=config)
