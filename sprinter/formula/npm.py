@@ -1,6 +1,11 @@
 """
 Maintains an npm package
 
+Can optionally manage nvm versions. When the node_version option is populated,
+this formula will add the appropriate `nvm use` call to the .rc for the environment.
+If the `node_version` option is set, this formula will clear the node_modules folder
+and run a clean `npm install`.
+
 [config]
 inputs = git_root==~/code/project
 
