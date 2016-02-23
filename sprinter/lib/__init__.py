@@ -6,6 +6,7 @@ features of the library.
 from __future__ import unicode_literals
 import logging
 import re
+import readline
 
 from getpass import getpass
 
@@ -29,7 +30,7 @@ from .module import get_subclass_from_module
 from .request import CertificateException, BadCredentialsException, authenticated_get, cleaned_request
 
 
-def prompt(prompt_string, default=None, secret=False, boolean=False, bool_type=None):
+def prompt(prompt_string, default=None, secret=False, boolean=False, bool_type=None, populated_default=None):
     """
     Prompt user for a string, with a default value
 
@@ -45,6 +46,12 @@ def prompt(prompt_string, default=None, secret=False, boolean=False, bool_type=N
     prompt_string += (default_msg.format(val=default) if default else ": ")
     if secret:
         val = getpass(prompt_string)
+    elif populated_default is not None:
+        readline.set_startup_hook(lambda: readline.insert_text(populated_default))
+        try:
+           val = raw_input(prompt_string)
+        finally:
+           readline.set_startup_hook()
     else:
         val = input(prompt_string)
     val = (val if val else default)
