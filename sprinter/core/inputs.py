@@ -6,6 +6,12 @@ from sprinter import lib
 
 EMPTY = object()
 
+bool_to_str = {
+    'bool': { True: 'true', False: 'false' },
+    't_f': { True: 't', False: 'f' },
+    'y_n': { True: 'y', False: 'n' },
+    'yes_no': { True: 'yes', False: 'no' }
+}
 
 class InputException(Exception):
     pass
@@ -18,10 +24,17 @@ class Input(object):
     default = EMPTY
     is_secret = False
     prompt = None
-    type = None
+    in_type = None
+    out_type = None
 
     def is_empty(self, with_defaults=True):
         return self.value is EMPTY and (not with_defaults or self.default is EMPTY)
+
+    def is_bool(self):
+        return (self.in_type == 'bool' or
+                self.in_type == 't_f' or
+                self.in_type == 'y_n' or
+                self.in_type == 'yes_no')
 
     def __str__(self):
         """ Return the string value, defaulting to default values """
@@ -31,10 +44,20 @@ class Input(object):
         elif self.default is not EMPTY:
             str_value = self.default
 
-        if self.type == 'file' or self.type == 'path':
+        if self.in_type == 'file' or self.in_type == 'path':
             return os.path.expanduser(str_value)
+        elif self.is_bool():
+            bool_value = None
+            if self.in_type == 'bool' or self.in_type == 'y_n':
+                bool_value = lib.is_affirmative(str_value)
+            elif self.in_type == 'yes_no':
+                bool_value = str_value.lower() == 'yes'
+
+            out_type = self.in_type if self.out_type is None else self.out_type
+            return bool_to_str[out_type][bool_value]
         else:
             return str_value
+
 
     def __eq__(self, other):
         for val in ('value', 'default', 'is_secret', 'prompt'):
@@ -77,11 +100,15 @@ class Inputs(object):
 
     def get_input(self, key, force=False):
         """ Get the value of <key> if it already exists, or prompt for it if not """
-        prompt = "please enter your {0}".format(key)
         if key not in self._inputs:
             raise InputException("Key {0} is not a valid input!".format(key))
+
         if self._inputs[key].prompt:
             prompt = self._inputs[key].prompt
+        elif self._inputs[key].is_bool():
+            prompt = "{0}?".format(key)
+        else:
+            prompt = "please enter your {0}".format(key)
         help_text = self._inputs[key].help if hasattr(self._inputs[key], 'help') else None
 
         if self._inputs[key].value is EMPTY or force:
@@ -99,6 +126,7 @@ class Inputs(object):
                 input_value = lib.prompt(
                     prompt,
                     default=default_value,
+                    bool_type=self._inputs[key].in_type,
                     secret=self._inputs[key].is_secret)
             self._inputs[key].value = input_value
 
@@ -159,7 +187,11 @@ class Inputs(object):
                 if 'help' in extra_attributes:
                     i.help = extra_attributes['help']
                 if 'type' in extra_attributes:
-                    i.type = extra_attributes['type']
+                    i.in_type = extra_attributes['type']
+                    if i.in_type.find('/') != -1:
+                        i.in_type, i.out_type = i.in_type.split('/')
+                if 'cast' in extra_attributes:
+                    i.out_type = extra_attributes['cast']
             if value.find('==') != -1:
                 value, default = value.split('==')
                 i.default = default

@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 DOMAIN_REGEX = re.compile("^https?://(\w+\.)?\w+\.\w+\/?")
 COMMAND_WHITELIST = ["cd"]
 BYTE_CHUNKS = 50
+BOOLEAN_DEFAULTS = {
+    'bool': { True: ' (TRUE|false): ', False: '(true|FALSE): ' },
+    'y_n': { True: ' (Y|n): ', False: ' (y|N): ' },
+    'yes_no': { True: ' (YES|no): ', False: ' (yes|NO): ' }
+}
 
 from .extract import extract_dmg, extract_targz, extract_zip, remove_path, ExtractException
 from .command import call, whitespace_smart_split, which, is_executable, CommandMissingException
@@ -24,14 +29,20 @@ from .module import get_subclass_from_module
 from .request import CertificateException, BadCredentialsException, authenticated_get, cleaned_request
 
 
-def prompt(prompt_string, default=None, secret=False, boolean=False):
+def prompt(prompt_string, default=None, secret=False, boolean=False, bool_type=None):
     """
     Prompt user for a string, with a default value
 
     * secret converts to password prompt
     * boolean converts return value to boolean, checking for starting with a Y
     """
-    prompt_string += (" (default %s): " % default if default else ": ")
+    if boolean or bool_type in BOOLEAN_DEFAULTS:
+        if bool_type is None:
+            bool_type = 'y_n'
+        default_msg = BOOLEAN_DEFAULTS[bool_type][is_affirmative(default)]
+    else:
+        default_msg = " (default {val}): "
+    prompt_string += (default_msg.format(val=default) if default else ": ")
     if secret:
         val = getpass(prompt_string)
     else:
