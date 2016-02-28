@@ -241,6 +241,17 @@ env_source_rc = False
             eq_(environment.target.get('config', 'my_custom_value'), 'foo')
             eq_(environment.target.get('config', 'non_custom_value'), 'baz')
 
+    # def test_source_to_target_with_changed_default_config(self):
+    #     """ On an update, inputs with changed defaults in target should not have their values preserved in config """
+
+    #     with MockEnvironment(test_input_source, test_changed_input_default_target) as environment:
+    #         environment.directory = Mock(spec=environment.directory)
+    #         environment.directory.root_dir = "/tmp/"
+    #         environment.directory.new = False
+    #         environment.update()
+    #         eq_(environment.target.get('config', 'my_custom_value'), 'faa')
+    #         eq_(environment.target.get('config', 'non_custom_value'), 'baz')
+
     @raises(SprinterException)
     def test_errors_fail_out_immediately(self):
         """ Failures in the update should fail out right then and there,
