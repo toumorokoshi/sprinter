@@ -10,7 +10,7 @@ INITIAL_DIR=`pwd`
 : ${SPRINTER_GITHUB_ACCOUNT:=toumorokoshi}
 : ${SPRINTER_GITHUB_BRANCH:=master}
 : ${SPRINTER_ENV_ROOT:=$HOME/.sprinter}
-SANDBOX_DIR=/tmp/sprinter-sandbox
+SANDBOX_DIR=/tmp/sprinter-sandbox-`whoami`
 if [[ -d $SANDBOX_DIR ]]; then
     rm -rf $SANDBOX_DIR
 fi
