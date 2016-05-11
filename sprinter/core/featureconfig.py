@@ -56,6 +56,13 @@ class FeatureConfig(object):
                 else:
                     logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
                     return self.raw_dict[param]
+            except ValueError:
+                # this is an esoteric error, and this implementation
+                # forces a terrible solution. Sorry.
+                # using the standard escaping syntax in python is a mistake.
+                # if a value has a "%" inside (e.g. a password), a ValueError
+                # is raised, causing an issue
+                return cur_value
             max_depth -= 1
         return cur_value
 
