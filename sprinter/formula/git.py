@@ -26,13 +26,14 @@ from sprinter.formula.base import FormulaBase
 import sprinter.lib as lib
 
 CURRENT_BRANCH = "git -C {dir} rev-parse --abbrev-ref HEAD"
-CURRENT_REMOTE = "git -C {dir} remote get-url origin"
+CURRENT_REMOTE = "git -C {dir} config --get remote.origin.url"
 CLONE_REPO = "git clone {repo} {dir}"
 CHECKOUT_BRANCH = "git -C {dir} checkout {branch}"
 FETCH_BRANCH = "git -C {dir} fetch origin {branch}"
 MERGE_BRANCH = "git -C {dir} merge --ff-only origin/{branch}"
 UPDATE_ORIGIN = "git -C {dir} remote set-url origin {repo}"
 UPDATE_OFFLINE_BRANCH = "git -C {dir} fetch origin {branch}:{branch}"
+
 
 class GitException(Exception):
     pass
