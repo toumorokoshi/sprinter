@@ -121,7 +121,7 @@ def _configure_shell(config):
         "What shells or environments would you like sprinter to work with?\n"
         "(Sprinter will not try to inject into environments not specified here.)\n"
         "If you specify 'gui', sprinter will attempt to inject it's state into graphical programs as well.\n"
-        "i.e. environment variables sprinter set will affect programs as well, not just shells"
+        "i.e. environment variables sprinter set will affect programs as well, not just shells\n"
         "WARNING: injecting into the GUI can be very dangerous. it usually requires a restart\n"
         " to modify any environmental configuration."
     )

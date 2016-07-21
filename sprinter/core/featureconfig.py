@@ -5,6 +5,8 @@ import sys
 
 import sprinter.lib as lib
 
+EMPTY = object()
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,7 +23,7 @@ class FeatureConfig(object):
         self.manifest = manifest
         self.raw_dict = dict(manifest.items(feature_name))
 
-    def get(self, param, default=None):
+    def get(self, param, default=EMPTY):
         """
         Returns the param value, and returns the default if it doesn't exist.
         If default is none, an exception will be raised instead.
@@ -29,15 +31,20 @@ class FeatureConfig(object):
         the returned parameter will have been specialized against the global context
         """
         if not self.has(param):
-            if default is not None:
+            if default is not EMPTY:
                 return default
             raise ParamNotFoundException("value for %s not found" % param)
         context_dict = copy.deepcopy(self.manifest.get_context_dict())
         for k, v in self.raw_dict.items():
             context_dict["%s:%s" % (self.feature_name, k)] = v
-        while True:
+        cur_value = self.raw_dict[param]
+        prev_value = None
+        max_depth = 5
+        # apply the context until doing so does not change the value
+        while cur_value != prev_value and max_depth > 0:
+            prev_value = cur_value
             try:
-                return str(self.raw_dict[param]) % context_dict
+                cur_value = str(prev_value) % context_dict
             except KeyError:
                 e = sys.exc_info()[1]
                 key = e.args[0]
@@ -49,6 +56,15 @@ class FeatureConfig(object):
                 else:
                     logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
                     return self.raw_dict[param]
+            except ValueError:
+                # this is an esoteric error, and this implementation
+                # forces a terrible solution. Sorry.
+                # using the standard escaping syntax in python is a mistake.
+                # if a value has a "%" inside (e.g. a password), a ValueError
+                # is raised, causing an issue
+                return cur_value
+            max_depth -= 1
+        return cur_value
 
     def has(self, param):
         """ return true if the param exists """

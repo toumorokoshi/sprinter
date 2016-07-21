@@ -1,8 +1,17 @@
 from __future__ import unicode_literals
+
+import os
+
 from sprinter import lib
 
 EMPTY = object()
 
+bool_to_str = {
+    'bool': { True: 'true', False: 'false' },
+    't_f': { True: 't', False: 'f' },
+    'y_n': { True: 'y', False: 'n' },
+    'yes_no': { True: 'yes', False: 'no' }
+}
 
 class InputException(Exception):
     pass
@@ -15,6 +24,40 @@ class Input(object):
     default = EMPTY
     is_secret = False
     prompt = None
+    in_type = None
+    out_type = None
+
+    def is_empty(self, with_defaults=True):
+        return self.value is EMPTY and (not with_defaults or self.default is EMPTY)
+
+    def is_bool(self):
+        return (self.in_type == 'bool' or
+                self.in_type == 't_f' or
+                self.in_type == 'y_n' or
+                self.in_type == 'yes_no')
+
+    def __str__(self):
+        """ Return the string value, defaulting to default values """
+        str_value = ''
+        if self.value is not EMPTY and self.value is not None:
+            str_value = self.value
+        elif self.default is not EMPTY:
+            str_value = self.default
+
+        if self.in_type == 'file' or self.in_type == 'path':
+            return os.path.expanduser(str_value)
+        elif self.is_bool():
+            bool_value = None
+            if self.in_type == 'bool' or self.in_type == 'y_n':
+                bool_value = lib.is_affirmative(str_value)
+            elif self.in_type == 'yes_no':
+                bool_value = str_value.lower() == 'yes'
+
+            out_type = self.in_type if self.out_type is None else self.out_type
+            return bool_to_str[out_type][bool_value]
+        else:
+            return str_value
+
 
     def __eq__(self, other):
         for val in ('value', 'default', 'is_secret', 'prompt'):
@@ -26,6 +69,8 @@ class Input(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    __repr__ = __str__
 
 
 class Inputs(object):
@@ -55,11 +100,15 @@ class Inputs(object):
 
     def get_input(self, key, force=False):
         """ Get the value of <key> if it already exists, or prompt for it if not """
-        prompt = "please enter your {0}".format(key)
         if key not in self._inputs:
             raise InputException("Key {0} is not a valid input!".format(key))
+
         if self._inputs[key].prompt:
             prompt = self._inputs[key].prompt
+        elif self._inputs[key].is_bool():
+            prompt = "{0}?".format(key)
+        else:
+            prompt = "please enter your {0}".format(key)
         help_text = self._inputs[key].help if hasattr(self._inputs[key], 'help') else None
 
         if self._inputs[key].value is EMPTY or force:
@@ -70,13 +119,14 @@ class Inputs(object):
             if self._inputs[key].value is not EMPTY:
                 default_value = self._inputs[key].value
 
-            input_value = None
-            while input_value is None or input_value == '?':
+            input_value = EMPTY
+            while input_value is EMPTY or input_value == '?':
                 if input_value == '?' and help_text:
                     print(help_text)
                 input_value = lib.prompt(
                     prompt,
                     default=default_value,
+                    bool_type=self._inputs[key].in_type,
                     secret=self._inputs[key].is_secret)
             self._inputs[key].value = input_value
 
@@ -84,16 +134,13 @@ class Inputs(object):
 
     def get_unset_inputs(self):
         """ Return a set of unset inputs """
-        return set([k for k, v in self._inputs.items() if v.value is EMPTY])
+        return set([k for k, v in self._inputs.items() if v.is_empty(False)])
 
     def prompt_unset_inputs(self, force=False):
         """ Prompt for unset input values """
-        if force:
-            for s in sorted(self._inputs):
-                self.get_input(s, force=True)
-        else:
-            for s in sorted(self.get_unset_inputs()):
-                self.get_input(s, force=force)
+        for k, v in self._inputs.items():
+            if force or v.is_empty(False):
+                self.get_input(k, force=force)
 
     def keys(self):
         """ Return a set of valid keys """
@@ -101,17 +148,11 @@ class Inputs(object):
 
     def values(self, with_defaults=True):
         """ Return the values dictionary, defaulting to default values """
-        return_dict = {}
-        for k, v in self._inputs.items():
-            if v.value is not EMPTY:
-                return_dict[k] = v.value
-            elif with_defaults and v.default is not EMPTY:
-                return_dict[k] = v.default
-        return return_dict
+        return dict(((k, str(v)) for k, v in self._inputs.items() if not v.is_empty(with_defaults)))
 
     def write_values(self):
         """ Return the dictionary with which to write values """
-        return dict(((k, v) for k, v in self.values().items() if not self._inputs[k].is_secret))
+        return dict(((k, v.value) for k, v in self._inputs.items() if not v.is_secret and not v.is_empty(False)))
 
     def add_inputs_from_inputstring(self, input_string):
         """
@@ -144,6 +185,12 @@ class Inputs(object):
                     i.prompt = extra_attributes['prompt']
                 if 'help' in extra_attributes:
                     i.help = extra_attributes['help']
+                if 'type' in extra_attributes:
+                    i.in_type = extra_attributes['type']
+                    if i.in_type.find('/') != -1:
+                        i.in_type, i.out_type = i.in_type.split('/')
+                if 'cast' in extra_attributes:
+                    i.out_type = extra_attributes['cast']
             if value.find('==') != -1:
                 value, default = value.split('==')
                 i.default = default

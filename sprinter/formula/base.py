@@ -17,6 +17,7 @@ class FormulaBase(object):
     valid_options = ['rc', 'env', 'gui',
                      'command', 'systems', 'depends', 'inputs']
     required_options = ['formula']
+    deprecated_options = []
 
     # these values will not carry over from source to target
     dont_carry_over_options = valid_options + required_options
@@ -132,11 +133,16 @@ class FormulaBase(object):
         """
         if self.target:
             for k in self.target.keys():
-                if k not in self.valid_options and k not in self.required_options:
+                if k in self.deprecated_options:
+                    self.logger.warn(
+                        self.deprecated_options[k].format(option=k, feature=self.feature_name))
+                elif (k not in self.valid_options and k not in self.required_options and
+                      '*' not in self.valid_options):
                     self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
             for k in self.required_options:
                 if not self.target.has(k):
-                    self._log_error("Required option %s not present in feature %s!" % (k, self.feature_name))
+                    self._log_error(
+                        "Required option %s not present in feature %s!" % (k, self.feature_name))
 
     # these methods are overwritten less often, and are not recommended to do so.
     def should_run(self):

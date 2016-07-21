@@ -25,12 +25,6 @@ Debian-Based (e.g. Ubuntu)::
     cd /tmp/; rm sandbox.sh; wget https://raw.githubusercontent.com/toumorokoshi/sprinter/master/scripts/sandbox.sh -O sandbox.sh; bash sandbox.sh
 
 
-You can also install sprinter using easy_install or pip (not recommended, it's easier to update with the standalone)::
-
-    (sudo) easy_install http://github.com/toumorokoshi/sprinter/tarball/master
-
-    (sudo) pip install http://github.com/toumorokoshi/sprinter/tarball/master
-
 What is it?
 -----------
 
