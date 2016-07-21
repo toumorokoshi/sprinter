@@ -14,8 +14,6 @@ sprinter
 Installation
 ------------
 
-It's recommended to use Sprinter's standalone installer:
-
 OSX::
 
     cd /tmp/; rm sprinter; curl -s https://raw.githubusercontent.com/toumorokoshi/sprinter/master/scripts/sandbox.sh > /tmp/sprinter; bash /tmp/sprinter
