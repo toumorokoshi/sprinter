@@ -42,7 +42,7 @@ class TestLifecycle(object):
 
     @httpretty.activate
     @patch('sprinter.lib.prompt')
-    def test_standalone_sprinter(self, prompt):
+    def _test_standalone_sprinter(self, prompt):
         """ The standalone sprinter lifecycle should install, update, and remove sprinter """
         prompt.return_value = "yes"
         temp_directory = tempfile.mkdtemp()
