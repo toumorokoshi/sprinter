@@ -33,7 +33,7 @@ def is_arch():
 
 def is_debian():
     """ returns true if the system is debian based """
-    return LINUX_DISTRO.lower() in ['ubuntu', 'debian']
+    return LINUX_DISTRO.lower() in ['ubuntu', 'debian', 'linuxmint']
 
 
 def is_fedora():
