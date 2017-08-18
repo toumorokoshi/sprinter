@@ -26,9 +26,9 @@ if [ -e $INITIAL_DIR/scripts/sandbox.sh ]; then
 else
     echo "Downloading sprinter..."
     if [[ `uname` == 'Linux' ]]; then
-        wget -O sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_ACCOUNT/sprinter/tarball/$SPRINTER_GITHUB_BRANCH
+        wget -O sprinter.tar.gz https://github.com/$SPRINTER_GITHUB_ACCOUNT/sprinter/tarball/$SPRINTER_GITHUB_BRANCH
     elif [[ `uname` == 'Darwin' ]]; then
-        curl -o sprinter.tar.gz http://github.com/$SPRINTER_GITHUB_ACCOUNT/sprinter/tarball/$SPRINTER_GITHUB_BRANCH -L
+        curl -o sprinter.tar.gz https://github.com/$SPRINTER_GITHUB_ACCOUNT/sprinter/tarball/$SPRINTER_GITHUB_BRANCH -L
     fi
     tar -xzvf sprinter.tar.gz --strip-components=1 &> /dev/null || error "Failure extracting sprinter targz!"
 fi
