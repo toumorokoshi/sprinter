@@ -137,6 +137,15 @@ class Manifest(object):
         self.namespace = namespace or self.__parse_namespace()
         self.dtree = self.__generate_dependency_tree()
 
+    @staticmethod
+    def from_dict(d):
+        config = configparser.RawConfigParser()
+        for section, values in d.items():
+            config.add_section(section)
+            for k, v in values.items():
+                config.set(section, k, v)
+        return Manifest(config)
+
     def formula_sections(self):
         """
         Return all sections related to a formula, re-ordered according to the "depends" section.

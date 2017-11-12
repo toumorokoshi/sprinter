@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from sprinter import lib
 from sprinter.exceptions import SprinterException, FormulaException
 from sprinter.external.pippuppet import Pip, PipException
+from sprinter.feature import Feature
 import sys
 import logging
 
@@ -51,7 +52,8 @@ class FeatureDict(dict):
             if key not in self:
                 try:
                     formula_class = self._get_formula_class(feature_config.get('formula'))
-                    self[key] = formula_class(self._environment, feature, **{kind: feature_config})
+                    formula_instance = formula_class(self._environment, feature, **{kind: feature_config})
+                    self[key] = Feature(formula_instance)
                     if self[key].should_run():
                         return key
                     else:

@@ -10,10 +10,10 @@ import pytest
 import shutil
 import tempfile
 
-
+from six.moves import configparser
 from sprinter.environment import Environment
 from sprinter.formula.base import FormulaBase
-from sprinter.core import PHASE, load_manifest, FeatureDict
+from sprinter.core import PHASE, load_manifest, FeatureDict, Manifest, FeatureConfig
 from sprinter.core.globals import create_default_config
 
 MOCK_GLOBAL_CONFIGURATION = """
@@ -58,7 +58,6 @@ def create_mock_environment(source_config=None, target_config=None,
                                                formula_dict=formula_dict)
         return environment, temp_directory
 
-
 def create_mock_formulabase():
     """ Generate a formulabase object that does nothing, and returns no errors """
     mock_formulabase = Mock(spec=FormulaBase)
@@ -66,10 +65,18 @@ def create_mock_formulabase():
     mock_formulabase.should_run.return_value = True
     mock_formulabase.resolve.return_value = None
     mock_formulabase.prompt.return_value = None
-    mock_formulabase.sync.return_value = None
-    mock_formulabase.target = True
+    manifest = Manifest(configparser.RawConfigParser())
+    mock_formulabase.target = Mock(spec=FeatureConfig)
+    mock_formulabase.target.has.return_value = False
     for phase in PHASE.values:
         setattr(mock_formulabase, phase.name, Mock(return_value=None))
+
+    mock_formulabase.logger = Mock()
+    mock_formulabase.directory = Mock()
+    mock_formulabase.directory.install_directory.return_value = ""
+    mock_formulabase.feature_name = ""
+    # mock_formulabase.sync = Mock()
+    # mock_formulabase.sync.return_value = None
 
     return mock_formulabase
 

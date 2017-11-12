@@ -11,6 +11,6 @@ def test(build):
     build.packages.install("pytest")
     build.packages.install("nose")
     build.executables.run(
-        ["py.test", os.path.join("sprinter", "tests"), "tests"]
+        ["py.test", "sprinter", "tests"]
         + build.options.args
     )

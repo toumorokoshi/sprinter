@@ -13,9 +13,37 @@ import sprinter.lib as lib
 
 
 class FormulaBase(object):
+    """
+    This is the base class for all Sprinter formulas. All classes
+    should extend from FormulaBase: it is used as part of the
+    package resolution scheme, and will not be recognized otherwise.
 
-    valid_options = ['rc', 'env', 'gui',
-                     'command', 'systems', 'depends', 'inputs']
+    All sprinter formulas should honor a default set of fields. Those
+    fields are:
+
+    * formula (required): read by sprinter to resolve the Formula to load.
+    * rc (str): a string to inject into the rc file of the shell environment
+    * env (str): a string to inject in to the profile file of the shell environment
+    * gui (str): a string to inject into the gui file of the os environment
+    * command (str): an optional command to run, after executing the formula
+    * systems (str):
+        a whitelist of the valid systems that this formula can be installed
+        in (no value means all systems)
+    * depends (List[str], comma separated):
+        a list of other formulas that must execute, before this formula.
+
+    Those options are:
+    """
+
+    valid_options = [
+        'rc',
+        'env',
+        'gui',
+        'command',
+        'systems',
+        'depends',
+        'inputs'
+    ]
     required_options = ['formula']
     deprecated_options = []
 
@@ -27,6 +55,8 @@ class FormulaBase(object):
         In most cases, it is not a good idea to override the formulabase
         init method. Sprinter calls it in a very specific fashion, and
         to set it up otherwise risks incompatibility
+
+        :param feature_name: the name of the feature being installed
         """
         self.logger = logging.getLogger("sprinter.formula." + type(self).__name__)
         self.feature_name = feature_name
@@ -35,8 +65,6 @@ class FormulaBase(object):
         self.environment = environment
         self.directory = environment.directory
         self.injections = environment.injections
-        if not (source or target):
-            raise FormulaException("A formula requires a source and/or a target!")
 
     def prompt(self):
         """
@@ -60,16 +88,7 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        install_directory = self.directory.install_directory(self.feature_name)
-        cwd = install_directory if os.path.exists(install_directory) else None
-        if self.target.has('env'):
-            self.directory.add_to_env(self.target.get('env'))
-        if self.target.has('rc'):
-            self.directory.add_to_rc(self.target.get('rc'))
-        if self.target.has('gui'):
-            self.directory.add_to_gui(self.target.get('gui'))
-        if self.target.has('command'):
-            lib.call(self.target.get('command'), shell=True, cwd=cwd)
+        return
 
     def update(self):
         """
@@ -79,7 +98,7 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        return FormulaBase.install(self)
+        return
 
     def remove(self):
         """
@@ -92,7 +111,6 @@ class FormulaBase(object):
 
         errors should either be reported via self._log_error(), or raise an exception
         """
-        self.directory.remove_feature(self.feature_name)
         return True
 
     def deactivate(self):
@@ -157,26 +175,6 @@ class FormulaBase(object):
                 if param in valid_systems and getattr(system, system_type)():
                     should_run = True
         return should_run
-
-    def sync_phase(self):
-        """ Says whether a sync is an install, update, or delete """
-        if not self.source:
-            return PHASE.INSTALL
-        if not self.target:
-            return PHASE.REMOVE
-        return PHASE.UPDATE
-
-    def sync(self):
-        """ Updates the state of the feature to what it should be """
-        phase = self.sync_phase()
-        self.logger.info("%s %s..." % (phase.verb.capitalize(), self.feature_name))
-        message = "...finished %s %s." % (phase.verb, self.feature_name)
-        result = getattr(self, phase.name)()
-        if result or phase in (PHASE.INSTALL, PHASE.REMOVE):
-            self.logger.info(message)
-        else:
-            self.logger.debug(message)
-        return result
 
     def resolve(self):
         """ Resolve differences between the target and the source configuration """
