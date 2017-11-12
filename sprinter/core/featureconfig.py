@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from six.moves import configparser
 import logging
 import copy
 import sys
@@ -25,7 +26,7 @@ class FeatureConfig(object):
 
     def get(self, param, default=EMPTY):
         """
-        Returns the param value, and returns the default if it doesn't exist.
+        Returns the nparam value, and returns the default if it doesn't exist.
         If default is none, an exception will be raised instead.
 
         the returned parameter will have been specialized against the global context

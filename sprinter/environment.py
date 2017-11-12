@@ -192,7 +192,7 @@ class Environment(object):
                 try:
                     self.run_action(feature, 'sync')
                 except FormulaException:
-                    # continue trying to removal any remaining features.
+                    # continue trying to remove any remaining features.
                     pass
             self.clear_all()
             self.directory.remove()
@@ -518,7 +518,7 @@ class Environment(object):
         try:
             getattr(instance, action)()
         # catch a generic exception within a feature
-        except Exception:
+        except Exception as e:
             e = sys.exc_info()[1]
             self.logger.info("An exception occurred with action %s in feature %s!" %
                              (action, feature))

@@ -50,70 +50,70 @@ class TestEnvironment(object):
         and still allow other features to run
         """
 
-    def test_feature_run_order_install(self):
+    def test_feature_run_order_install(self, mock_feature):
         """ A feature install should have it's methods run in the proper order """
-        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
+        with patch('sprinter.core.featuredict.Feature', new=lambda *args: mock_feature) as mock_call:
+            with MockEnvironment(test_source, test_target) as environment:
                 environment.install()
-                eq_(formulabase().method_calls, [call.should_run(),
-                                                 call.validate(),
-                                                 call.resolve(),
-                                                 call.prompt(),
-                                                 call.sync()])
+                eq_(mock_call().method_calls, [call.should_run(),
+                                                  call.validate(),
+                                                  call.resolve(),
+                                                  call.prompt(),
+                                                  call.sync()])
 
-    def test_feature_run_order_update(self):
+    def test_feature_run_order_update(self, mock_feature):
         """ A feature update should have it's methods run in the proper order """
-        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
+        with patch('sprinter.core.featuredict.Feature', new=lambda *args: mock_feature) as mock_call:
+            with MockEnvironment(test_source, test_target) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.root_dir = "/tmp/"
                 environment.directory.new = False
                 environment.update()
-                eq_(formulabase().method_calls, [call.should_run(),
-                                                 call.validate(),
-                                                 call.resolve(),
-                                                 call.prompt(),
-                                                 call.sync()])
+                eq_(mock_call().method_calls, [call.should_run(),
+                                               call.validate(),
+                                               call.resolve(),
+                                               call.prompt(),
+                                               call.sync()])
 
-    def test_feature_run_order_remove(self):
+    def test_feature_run_order_remove(self, mock_feature):
         """ A feature remove should have it's methods run in the proper order """
-        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
+        with patch('sprinter.core.featuredict.Feature', new=lambda *args: mock_feature) as mock_call:
+            with MockEnvironment(test_source, test_target) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
                 environment.remove()
-                eq_(formulabase().method_calls, [call.should_run(),
-                                                 call.validate(),
-                                                 call.resolve(),
-                                                 call.prompt(),
-                                                 call.sync()])
+                eq_(mock_call().method_calls, [call.should_run(),
+                                               call.validate(),
+                                               call.resolve(),
+                                               call.prompt(),
+                                               call.sync()])
 
-    def test_feature_run_order_deactivate(self):
+    def test_feature_run_order_deactivate(self, mock_feature):
         """ A feature deactivate should have it's methods run in the proper order """
-        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
+        with patch('sprinter.core.featuredict.Feature', new=lambda *args: mock_feature) as mock_call:
+            with MockEnvironment(test_source, test_target) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
                 environment.deactivate()
-                eq_(formulabase().method_calls, [call.should_run(),
-                                                 call.validate(),
-                                                 call.resolve(),
-                                                 call.prompt(),
-                                                 call.deactivate()])
+                eq_(mock_call().method_calls, [call.should_run(),
+                                               call.validate(),
+                                               call.resolve(),
+                                               call.prompt(),
+                                               call.deactivate()])
 
-    def test_feature_run_order_activate(self):
+    def test_feature_run_order_activate(self, mock_feature):
         """ A feature should have it's methods run in the proper order """
-        with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
+        with patch('sprinter.core.featuredict.Feature', new=lambda *args: mock_feature) as mock_call:
+            with MockEnvironment(test_source, test_target) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.root_dir = "/tmp/"
                 environment.directory.new = False
                 environment.activate()
-                eq_(formulabase().method_calls, [call.should_run(),
-                                                 call.validate(),
-                                                 call.resolve(),
-                                                 call.prompt(),
-                                                 call.activate()])
+                eq_(mock_call().method_calls, [call.should_run(),
+                                               call.validate(),
+                                               call.resolve(),
+                                               call.prompt(),
+                                               call.activate()])
 
     def test_global_shell_configuration_bash(self):
         """ The global shell should dictate what files are injected (bash, gui, no zsh)"""
@@ -257,7 +257,7 @@ env_source_rc = False
             raise a FeatureException that is handle in remove() """
 
         with patch('sprinter.formula.base.FormulaBase', new=create_mock_formulabase()) as formulabase:
-            formulabase.sync.side_effect = Exception
+            formulabase.remove.side_effect = Exception
             with MockEnvironment(test_source, test_target, mock_formulabase=formulabase) as environment:
                 environment.directory = Mock(spec=environment.directory)
                 environment.directory.new = False
