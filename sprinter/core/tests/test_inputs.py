@@ -33,10 +33,10 @@ class TestInputs(object):
         with patch.object(lib, 'prompt') as prompt:
             prompt.return_value = "yusuke"
             self.inputs.prompt_unset_inputs()
-            prompt.assert_called_once_with("please enter your key", default=None, secret=False, bool_type=None)
+            prompt.assert_called_once_with("please enter your key", default=None, secret=False, bool_type=None, populated_default=None)
 
     def test_forced_prompt_unset_imputs(self):
-        """ Only all inputs should be prompted with prompt_unset_inputs and force=True """
+        """ All inputs should be prompted with prompt_unset_inputs and force=True """
         self.inputs.add_input('key')
         key_with_value = Input()
         key_with_value.value = 'value'
@@ -45,8 +45,8 @@ class TestInputs(object):
             prompt.return_value = "yusuke"
             self.inputs.prompt_unset_inputs(force=True)
             prompt.assert_has_calls([
-                call("please enter your key", default=None, secret=False, bool_type=None),
-                call("please enter your key_with_value", default='value', secret=False, bool_type=None),
+                call("please enter your key", default=None, secret=False, bool_type=None, populated_default=None),
+                call("please enter your key_with_value", default='value', secret=False, bool_type=None, populated_default=None),
             ], any_order=True)
 
     def test_write_values(self):

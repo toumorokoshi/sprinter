@@ -231,7 +231,8 @@ env_source_rc = False
             ok_(environment.grab_inputs.called)
 
     def test_source_to_target_config(self):
-        """ On an update, values in the config section should be preserved """
+        """ On an update, inputs still in target should have their values preserved in the config section """
+
         with MockEnvironment(test_input_source, test_input_target) as environment:
             environment.directory = Mock(spec=environment.directory)
             environment.directory.root_dir = "/tmp/"
@@ -239,6 +240,17 @@ env_source_rc = False
             environment.update()
             eq_(environment.target.get('config', 'my_custom_value'), 'foo')
             eq_(environment.target.get('config', 'non_custom_value'), 'baz')
+
+    # def test_source_to_target_with_changed_default_config(self):
+    #     """ On an update, inputs with changed defaults in target should not have their values preserved in config """
+
+    #     with MockEnvironment(test_input_source, test_changed_input_default_target) as environment:
+    #         environment.directory = Mock(spec=environment.directory)
+    #         environment.directory.root_dir = "/tmp/"
+    #         environment.directory.new = False
+    #         environment.update()
+    #         eq_(environment.target.get('config', 'my_custom_value'), 'faa')
+    #         eq_(environment.target.get('config', 'non_custom_value'), 'baz')
 
     @raises(SprinterException)
     def test_errors_fail_out_immediately(self):
@@ -288,6 +300,7 @@ test_input_source = """
 [config]
 namespace = testsprinter
 my_custom_value = foo
+inputs = my_custom_value==fee
 """
 
 test_input_target = """
@@ -295,4 +308,12 @@ test_input_target = """
 namespace = testsprinter
 my_custom_value = bar
 non_custom_value = baz
+inputs = my_custom_value==fee
+"""
+
+test_changed_input_default_target = """
+[config]
+namespace = testsprinter
+non_custom_value = baz
+inputs = my_custom_value==faa
 """

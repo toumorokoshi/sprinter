@@ -162,13 +162,9 @@ class Environment(object):
             self.logger.info("Updating environment %s..." % self.namespace)
             self.install_sandboxes()
             self.instantiate_features()
-            # We don't grab inputs, only on install
-            # updates inputs are grabbed on demand
-            # self.grab_inputs(reconfigure=reconfigure)
-            if reconfigure:
-                self.grab_inputs(reconfigure=True)
-            else:
-                self._copy_source_to_target()
+            # prompt for all inputs when reconfiguring (-r),
+            # otherwise only prompt for inputs who's default values have changed
+            self.grab_inputs(reconfigure=reconfigure)
             self._specialize(reconfigure=reconfigure)
             for feature in self.features.run_order:
                 self.run_action(feature, 'sync')
@@ -573,9 +569,18 @@ class Environment(object):
     def _copy_source_to_target(self):
         """ copy source user configuration to target """
         if self.source and self.target:
-            for k, v in self.source.items('config'):
-                # always have source override target.
-                self.target.set_input(k, v)
+            # self.target.inputs.copy_values(self.source.inputs)
+            for k in self.target.inputs.keys():
+                if self.source.has_option('config', k):
+                    cur_val = self.source.get('config', k)
+                    cur_default = self.source.inputs.get_input_default(k)
+                    new_default = self.target.inputs.get_input_default(k)
+                    # don't copy the value if it is the default and the default has changed
+                    # causes a reprompt on update when defaults change
+                    if new_default == cur_default:
+                        self.target.set_input(k, cur_val)
+                    elif cur_val != cur_default:
+                        self.target.set_input_prev(k, cur_val)
 
     def grab_inputs(self, reconfigure=False):
         """ Resolve the source and target config section """
