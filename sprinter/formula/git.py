@@ -118,7 +118,8 @@ class GitFormula(FormulaBase):
     def __git(self, command, git_opts):
         cmd = command.format(**git_opts)
         error, output = lib.call(cmd, output_log_level=logging.DEBUG)
-        output = output.decode()
+        if isinstance(output, bytes):
+            output = output.decode()
         self.logger.info(output)
         if error:
             self.logger.warning(output)

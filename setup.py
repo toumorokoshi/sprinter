@@ -16,7 +16,6 @@ setup(name='sprinter',
       install_requires=[
           'clint>=0.3.3',
           'docopt>=0.6.1',
-          'pex==1.3.1',
           'pip==9.0.1',
           'requests>=2.3.0',
           'six>=1.4.1',
@@ -39,4 +38,4 @@ setup(name='sprinter',
       },
       tests_require=['mock>=1.0.1', 'nose>=1.3.0', 'httpretty==0.6.5'],
       test_suite='nose.collector'
-)
+      )
