@@ -19,7 +19,7 @@ setup(name='sprinter',
           'pip==9.0.1',
           'requests>=2.3.0',
           'six>=1.4.1',
-          'virtualenv>=15.1.0',
+          'virtualenv>=15.1.0,<16',
       ],
       classifiers=[
           'Development Status :: 5 - Production/Stable',
