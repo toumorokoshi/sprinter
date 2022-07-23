@@ -25,33 +25,35 @@ class CommandFormulaException(FormulaException):
 
 class CommandFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['install',
-                                                 'update',
-                                                 'remove',
-                                                 'activate',
-                                                 'deactivate',
-                                                 'fail_on_error',
-                                                 'shell',
-                                                 'redirect_stdout_to_log']
+    valid_options = FormulaBase.valid_options + [
+        "install",
+        "update",
+        "remove",
+        "activate",
+        "deactivate",
+        "fail_on_error",
+        "shell",
+        "redirect_stdout_to_log",
+    ]
 
     def install(self):
-        self.__run_command('install', 'target')
+        self.__run_command("install", "target")
         FormulaBase.install(self)
 
     def update(self):
-        value = self.__run_command('update', 'target')
+        value = self.__run_command("update", "target")
         return value or FormulaBase.update(self)
 
     def remove(self):
-        self.__run_command('remove', 'source')
+        self.__run_command("remove", "source")
         FormulaBase.remove(self)
 
     def activate(self):
-        self.__run_command('activate', 'source')
+        self.__run_command("activate", "source")
         FormulaBase.activate(self)
 
     def deactivate(self):
-        self.__run_command('deactivate', 'source')
+        self.__run_command("deactivate", "source")
         FormulaBase.deactivate(self)
 
     def __run_command(self, command_type, manifest_type):
@@ -59,9 +61,15 @@ class CommandFormula(FormulaBase):
         if config.has(command_type):
             command = config.get(command_type)
             self.logger.debug("Running %s..." % command)
-            shell = config.has('shell') and config.is_affirmative('shell')
-            stdout = subprocess.PIPE if config.is_affirmative('redirect_stdout_to_log', 'true') else None
+            shell = config.has("shell") and config.is_affirmative("shell")
+            stdout = (
+                subprocess.PIPE
+                if config.is_affirmative("redirect_stdout_to_log", "true")
+                else None
+            )
             return_code, output = lib.call(command, shell=shell, stdout=stdout)
-            if config.is_affirmative('fail_on_error', True) and return_code != 0:
-                raise CommandFormulaException("Command returned a return code of {0}!".format(return_code))
+            if config.is_affirmative("fail_on_error", True) and return_code != 0:
+                raise CommandFormulaException(
+                    "Command returned a return code of {0}!".format(return_code)
+                )
             return True

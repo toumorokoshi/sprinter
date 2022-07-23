@@ -15,12 +15,12 @@ from sprinter.exceptions import FormulaException
 
 
 class PackageFormulaException(FormulaException):
-    """ Errors with the package formula """
+    """Errors with the package formula"""
 
 
 class PackageFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['apt-get', 'brew', 'yum', 'pacman']
+    valid_options = FormulaBase.valid_options + ["apt-get", "brew", "yum", "pacman"]
 
     def install(self):
         self.__get_package_manager()
@@ -34,7 +34,9 @@ class PackageFormula(FormulaBase):
         if self.package_manager and self.target.has(self.package_manager):
             if not self.source.has(self.package_manager):
                 install_package = True
-            if self.source.get(self.package_manager) != self.target.get(self.package_manager):
+            if self.source.get(self.package_manager) != self.target.get(
+                self.package_manager
+            ):
                 install_package = True
         if install_package:
             self.__install_package(self.target)
@@ -74,8 +76,10 @@ class PackageFormula(FormulaBase):
             package_manager = "pacman"
             args = " --noconfirm -S"
         if lib.which(package_manager) is None:
-            self.logger.warn("Package manager %s not installed! Packages will not be installed."
-                             % package_manager)
+            self.logger.warn(
+                "Package manager %s not installed! Packages will not be installed."
+                % package_manager
+            )
             self.package_manager = None
         self.package_manager = package_manager
         self.sudo_required = sudo_required

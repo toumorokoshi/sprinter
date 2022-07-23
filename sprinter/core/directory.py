@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class DirectoryException(Exception):
-    """ An exception to specify it's a directory """
+    """An exception to specify it's a directory"""
 
 
 class Directory(object):
@@ -25,16 +25,14 @@ class Directory(object):
     manifest_path = None  # path to the manifest file
     new = False  # determines if the directory is for a new environment or not
     rewrite_config = True  # if set to false, the existing rc and env files will be
-                           # preserved, and will not be modifiable
+    # preserved, and will not be modifiable
     rc_file = None  # file handler for rc file
     env_file = None  # file handler for env file
     shell_util_path = None  # the path to the shell utils file
     logger = logger
 
-    def __init__(self, root_dir,
-                 rewrite_config=True,
-                 shell_util_path=None):
-        """ takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
+    def __init__(self, root_dir, rewrite_config=True, shell_util_path=None):
+        """takes in a namespace directory to initialize, defaults to .sprinter otherwise."""
         self.root_dir = root_dir
         self.new = not os.path.exists(self.root_dir)
         self.manifest_path = os.path.join(self.root_dir, "manifest.cfg")
@@ -48,10 +46,12 @@ class Directory(object):
             self.env_file.close()
 
     def initialize(self):
-        """ Generate the root directory root if it doesn't already exist """
+        """Generate the root directory root if it doesn't already exist"""
         if not os.path.exists(self.root_dir):
             os.makedirs(self.root_dir)
-        assert os.path.isdir(self.root_dir), "%s is not a directory! Please move or remove it." % self.root_dir
+        assert os.path.isdir(self.root_dir), (
+            "%s is not a directory! Please move or remove it." % self.root_dir
+        )
         for d in ["bin", "lib", "include"]:
             target_path = os.path.join(self.root_dir, d)
             if not os.path.exists(target_path):
@@ -61,14 +61,14 @@ class Directory(object):
         self.new = False
 
     def finalize(self):
-        """ finalize any open file handles """
+        """finalize any open file handles"""
         if self.rc_file:
             self.rc_file.close()
         if self.env_file:
             self.env_file.close()
 
     def remove(self):
-        """ Removes the sprinter directory, if it exists """
+        """Removes the sprinter directory, if it exists"""
         if self.rc_file:
             self.rc_file.close()
         if self.env_file:
@@ -76,54 +76,57 @@ class Directory(object):
         shutil.rmtree(self.root_dir)
 
     def symlink_to_bin(self, name, path):
-        """ Symlink an object at path to name in the bin folder. """
+        """Symlink an object at path to name in the bin folder."""
         self.__symlink_dir("bin", name, path)
-        os.chmod(os.path.join(self.root_dir, "bin", name), os.stat(path).st_mode | stat.S_IXUSR | stat.S_IRUSR)
+        os.chmod(
+            os.path.join(self.root_dir, "bin", name),
+            os.stat(path).st_mode | stat.S_IXUSR | stat.S_IRUSR,
+        )
 
     def remove_from_bin(self, name):
-        """ Remove an object from the bin folder. """
+        """Remove an object from the bin folder."""
         self.__remove_path(os.path.join(self.root_dir, "bin", name))
 
     def remove_from_lib(self, name):
-        """ Remove an object from the bin folder. """
+        """Remove an object from the bin folder."""
         self.__remove_path(os.path.join(self.root_dir, "lib", name))
 
     def remove_feature(self, feature_name):
-        """ Remove an feature from the environment root folder. """
+        """Remove an feature from the environment root folder."""
         self.clear_feature_symlinks(feature_name)
         if os.path.exists(self.install_directory(feature_name)):
             self.__remove_path(self.install_directory(feature_name))
 
     def symlink_to_lib(self, name, path):
-        """ Symlink an object at path to name in the lib folder. """
+        """Symlink an object at path to name in the lib folder."""
         self.__symlink_dir("lib", name, path)
 
     def symlink_to_include(self, name, path):
-        """ Symlink an object at path to name in the lib folder. """
+        """Symlink an object at path to name in the lib folder."""
         self.__symlink_dir("include", name, path)
 
     def bin_path(self):
-        """ return the bin directory path """
+        """return the bin directory path"""
         return os.path.join(self.root_dir, "bin")
 
     def lib_path(self):
-        """ return the lib directory path """
+        """return the lib directory path"""
         return os.path.join(self.root_dir, "lib")
 
     def include_path(self):
-        """ return the include directory path """
+        """return the include directory path"""
         return os.path.join(self.root_dir, "include")
 
     def clear_feature_symlinks(self, feature_name):
-        """ Clear the symlinks for a feature in the symlinked path """
+        """Clear the symlinks for a feature in the symlinked path"""
         logger.debug("Clearing feature symlinks for %s" % feature_name)
         feature_path = self.install_directory(feature_name)
-        for d in ('bin', 'lib'):
+        for d in ("bin", "lib"):
             if os.path.exists(os.path.join(self.root_dir, d)):
                 for link in os.listdir(os.path.join(self.root_dir, d)):
                     path = os.path.join(self.root_dir, d, link)
                     if feature_path in os.path.realpath(path):
-                        getattr(self, 'remove_from_%s' % d)(link)
+                        getattr(self, "remove_from_%s" % d)(link)
 
     def install_directory(self, feature_name):
         """
@@ -136,33 +139,39 @@ class Directory(object):
         add content to the env script.
         """
         if not self.rewrite_config:
-            raise DirectoryException("Error! Directory was not intialized w/ rewrite_config.")
+            raise DirectoryException(
+                "Error! Directory was not intialized w/ rewrite_config."
+            )
         if not self.env_file:
             self.env_path, self.env_file = self.__get_env_handle(self.root_dir)
-        self.env_file.write(content + '\n')
+        self.env_file.write(content + "\n")
 
     def add_to_rc(self, content):
         """
         add content to the rc script.
         """
         if not self.rewrite_config:
-            raise DirectoryException("Error! Directory was not intialized w/ rewrite_config.")
+            raise DirectoryException(
+                "Error! Directory was not intialized w/ rewrite_config."
+            )
         if not self.rc_file:
             self.rc_path, self.rc_file = self.__get_rc_handle(self.root_dir)
-        self.rc_file.write(content + '\n')
+        self.rc_file.write(content + "\n")
 
     def add_to_gui(self, content):
         """
         add content to the gui script.
         """
         if not self.rewrite_config:
-            raise DirectoryException("Error! Directory was not intialized w/ rewrite_config.")
+            raise DirectoryException(
+                "Error! Directory was not intialized w/ rewrite_config."
+            )
         if not self.gui_file:
             self.gui_path, self.gui_file = self.__get_gui_handle(self.root_dir)
-        self.gui_file.write(content + '\n')
+        self.gui_file.write(content + "\n")
 
     def __remove_path(self, path):
-        """ Remove an object """
+        """Remove an object"""
         curpath = os.path.abspath(os.curdir)
         if not os.path.exists(path):
             logger.warn("Attempted to remove a non-existent path %s" % path)
@@ -185,28 +194,27 @@ class Directory(object):
             raise DirectoryException("Unable to remove object at path %s" % path)
 
     def __get_env_handle(self, root_dir):
-        """ get the filepath and filehandle to the .env file for the environment """
-        env_path = os.path.join(root_dir, '.env')
-        gui_path = os.path.join(root_dir, '.gui')
+        """get the filepath and filehandle to the .env file for the environment"""
+        env_path = os.path.join(root_dir, ".env")
+        gui_path = os.path.join(root_dir, ".gui")
         fh = open(env_path, "w+")
         # .env will source utils.sh if it hasn't already
         fh.write(source_template % (gui_path, gui_path))
-        fh.write(source_template % (self.shell_util_path,
-                                    self.shell_util_path))
+        fh.write(source_template % (self.shell_util_path, self.shell_util_path))
         return (env_path, fh)
 
     def __get_rc_handle(self, root_dir):
-        """ get the filepath and filehandle to the rc file for the environment """
-        rc_path = os.path.join(root_dir, '.rc')
-        env_path = os.path.join(root_dir, '.env')
+        """get the filepath and filehandle to the rc file for the environment"""
+        rc_path = os.path.join(root_dir, ".rc")
+        env_path = os.path.join(root_dir, ".env")
         fh = open(rc_path, "w+")
         # .rc will always source .env
         fh.write(source_template % (env_path, env_path))
         return (rc_path, fh)
 
     def __get_gui_handle(self, root_dir):
-        """ get the filepath and filehandle to the .env file for the environment """
-        gui_path = os.path.join(root_dir, '.gui')
+        """get the filepath and filehandle to the .env file for the environment"""
+        gui_path = os.path.join(root_dir, ".gui")
         fh = open(gui_path, "w+")
         return (gui_path, fh)
 
@@ -223,6 +231,8 @@ class Directory(object):
             if os.path.islink(target_path):
                 os.remove(target_path)
             else:
-                logger.warn("%s is not a symlink! please remove it manually." % target_path)
+                logger.warn(
+                    "%s is not a symlink! please remove it manually." % target_path
+                )
                 return
         os.symlink(path, target_path)

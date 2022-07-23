@@ -11,8 +11,7 @@ from mock import call, patch, Mock
 from sprinter.install import parse_args, parse_domain
 from sprinter.core.manifest import Manifest
 
-TEST_MANIFEST = \
-    """
+TEST_MANIFEST = """
 [config]
 inputs = stashroot==~/p4
          username
@@ -38,60 +37,68 @@ client = perforce.local:1666
 
 
 class TestInstall(unittest.TestCase):
-
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.temp_file_path = os.path.join(self.temp_dir, "test.cfg")
-        fh = open(self.temp_file_path, 'w+')
+        fh = open(self.temp_file_path, "w+")
         fh.write(TEST_MANIFEST)
         fh.close()
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
-    @patch('sprinter.environment.Environment')
+    @patch("sprinter.environment.Environment")
     def test_install_environment(self, environment):
-        """ Test if install calls the proper methods """
-        with patch('sprinter.core.manifest.load_manifest') as load_manifest:
+        """Test if install calls the proper methods"""
+        with patch("sprinter.core.manifest.load_manifest") as load_manifest:
             load_manifest.return_value = Mock(spec=Manifest)
-            args = ['install', 'http://www.google.com']
-            calls = [call(logging_level=logging.INFO, ignore_errors=False),
-                     call().install()]
+            args = ["install", "http://www.google.com"]
+            calls = [
+                call(logging_level=logging.INFO, ignore_errors=False),
+                call().install(),
+            ]
             parse_args(args, Environment=environment)
             environment.assert_has_calls(calls)
 
-    @patch('sprinter.environment.Environment')
+    @patch("sprinter.environment.Environment")
     def test_install_environment_bad_certificate(self, environment):
-        """ Test if install calls the proper methods """
-        with patch('sprinter.core.manifest.load_manifest') as load_manifest:
+        """Test if install calls the proper methods"""
+        with patch("sprinter.core.manifest.load_manifest") as load_manifest:
             load_manifest.return_value = Mock(spec=Manifest)
-            args = ['install', 'http://www.google.com', '--allow-bad-certificate']
-            calls = [call(logging_level=logging.INFO, ignore_errors=False),
-                     call().install()]
+            args = ["install", "http://www.google.com", "--allow-bad-certificate"]
+            calls = [
+                call(logging_level=logging.INFO, ignore_errors=False),
+                call().install(),
+            ]
             parse_args(args, Environment=environment)
             load_manifest.assert_called_with(
-                'http://www.google.com',
-                verify_certificate=False)
+                "http://www.google.com", verify_certificate=False
+            )
             environment.assert_has_calls(calls)
 
-    @patch('sprinter.environment.Environment')
+    @patch("sprinter.environment.Environment")
     def test_errors(self, environment):
-        """ Test if validate catches an invalid manifest """
-        config = {'validate_manifest.return_value': ['this is funky']}
+        """Test if validate catches an invalid manifest"""
+        config = {"validate_manifest.return_value": ["this is funky"]}
         environment.configure_mock(**config)
-        args = ['validate', self.temp_file_path]
-        calls = [call(logging_level=logging.INFO, ignore_errors=False),
-                 call().validate()]
+        args = ["validate", self.temp_file_path]
+        calls = [
+            call(logging_level=logging.INFO, ignore_errors=False),
+            call().validate(),
+        ]
         parse_args(args, Environment=environment)
         environment.assert_has_calls(calls)
 
     def test_parse_domain(self):
-        """ Test if domains are properly parsed """
+        """Test if domains are properly parsed"""
         match_tuples = [
             ("http://github.com/antehuantuehton", "http://github.com/"),
-            ("https://github.com", "https://github.com")
+            ("https://github.com", "https://github.com"),
         ]
         for in_string, out_string in match_tuples:
-            self.assertEqual(parse_domain(in_string), out_string,
-                             "%s did not result in %s! Resulted in %s instead."
-                             % (in_string, out_string, parse_domain(in_string)))
+            self.assertEqual(
+                parse_domain(in_string),
+                out_string,
+                "%s did not result in %s! Resulted in %s instead."
+                % (in_string, out_string, parse_domain(in_string)),
+            )

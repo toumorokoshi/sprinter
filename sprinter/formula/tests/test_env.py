@@ -25,22 +25,27 @@ e = fgh
 
 
 class TestEnvFormula(FormulaTest):
-    """ Tests for the env formula """
+    """Tests for the env formula"""
 
     def setup(self):
-        super(TestEnvFormula, self).setup(source_config=source_config,
-                                          target_config=target_config)
+        super(TestEnvFormula, self).setup(
+            source_config=source_config, target_config=target_config
+        )
 
     def test_simple_example(self):
-        """ The env formula should set environment variables """
+        """The env formula should set environment variables"""
         self.environment.directory.add_to_env = Mock()
         self.environment.run_feature("simple_example", "sync")
-        self.environment.directory.add_to_env.assert_any_call("export USER=toumorokoshi")
-        self.environment.directory.add_to_env.assert_any_call("export MAVEN_HOME=~/bin/mvn")
+        self.environment.directory.add_to_env.assert_any_call(
+            "export USER=toumorokoshi"
+        )
+        self.environment.directory.add_to_env.assert_any_call(
+            "export MAVEN_HOME=~/bin/mvn"
+        )
         self.environment.directory.add_to_env.assert_any_call("export M2_PATH=~/.m2/")
 
     def test_simple_update(self):
-        """ The env formula should set environment variables on update """
+        """The env formula should set environment variables on update"""
         self.environment.directory.add_to_env = Mock()
         self.environment.run_feature("simple_update", "sync")
         self.environment.directory.add_to_env.assert_any_call("export A=b")

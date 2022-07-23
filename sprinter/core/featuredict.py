@@ -9,17 +9,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 # legacy mappings for renames
-LEGACY_MAPPINGS = {
-    'sprinter.formulabase': 'sprinter.formula.base'
-}
+LEGACY_MAPPINGS = {"sprinter.formulabase": "sprinter.formula.base"}
+
 
 class FeatureDict(dict):
     """
     Dictionary which contains instances of features, formulas with a specific configuration
     """
 
-    def __init__(self, environment, source_manifest, target_manifest, pip_install_path, formula_dict=None):
-        """ generate a feature dict from Manifests <source_manifest> and <target_manifest> """
+    def __init__(
+        self,
+        environment,
+        source_manifest,
+        target_manifest,
+        pip_install_path,
+        formula_dict=None,
+    ):
+        """generate a feature dict from Manifests <source_manifest> and <target_manifest>"""
         self._environment = environment
         self._run_order = []  # the order with which these features should run
         self._formula_dict = formula_dict or {}  # a dictionary to hold formula classes
@@ -29,13 +35,17 @@ class FeatureDict(dict):
 
         if target_manifest:
             for feature in target_manifest.sections():
-                feature_key = self._instantiate_feature(feature, target_manifest, 'target')
+                feature_key = self._instantiate_feature(
+                    feature, target_manifest, "target"
+                )
                 if feature_key:
                     self._run_order.append(feature_key)
 
         if source_manifest:
             for feature in source_manifest.sections():
-                feature_key = self._instantiate_feature(feature, source_manifest, 'source')
+                feature_key = self._instantiate_feature(
+                    feature, source_manifest, "source"
+                )
                 if feature_key:
                     self._run_order.append(feature_key)
 
@@ -47,22 +57,28 @@ class FeatureDict(dict):
         if feature == "config":
             return None
         feature_config = manifest.get_feature_config(feature)
-        if feature_config.has('formula'):
-            key = (feature, feature_config.get('formula'))
+        if feature_config.has("formula"):
+            key = (feature, feature_config.get("formula"))
             if key not in self:
                 try:
-                    formula_class = self._get_formula_class(feature_config.get('formula'))
-                    formula_instance = formula_class(self._environment, feature, **{kind: feature_config})
+                    formula_class = self._get_formula_class(
+                        feature_config.get("formula")
+                    )
+                    formula_instance = formula_class(
+                        self._environment, feature, **{kind: feature_config}
+                    )
                     self[key] = Feature(formula_instance)
                     if self[key].should_run():
                         return key
                     else:
-                        del(self[key])
+                        del self[key]
                 except SprinterException:
                     logger.debug("Exception details", exc_info=sys.exc_info())
                     raise FormulaException(
                         "ERROR: Invalid formula {0} for {1} feature {2}!".format(
-                            feature_config.get('formula'), kind, feature))
+                            feature_config.get("formula"), kind, feature
+                        )
+                    )
             else:
                 setattr(self[key], kind, feature_config)
         else:
@@ -75,7 +91,9 @@ feature "{0}" has no formula! Each feature requires an option
 [myfeature]
 formula = sprinter.formula.env
 -----------------------------------------------------------------------
-                """.format(feature)
+                """.format(
+                    feature
+                )
             )
         return None
 
@@ -86,23 +104,32 @@ formula = sprinter.formula.env
         """
         # recursive import otherwise
         from sprinter.formula.base import FormulaBase
+
         if formula in LEGACY_MAPPINGS:
             formula = LEGACY_MAPPINGS[formula]
         formula_class, formula_url = formula, None
-        if ':' in formula:
+        if ":" in formula:
             formula_class, formula_url = formula.split(":", 1)
         if formula_class not in self._formula_dict:
             try:
-                self._formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
+                self._formula_dict[formula_class] = lib.get_subclass_from_module(
+                    formula_class, FormulaBase
+                )
             except (SprinterException, ImportError):
                 logger.info("Downloading %s..." % formula_class)
                 try:
                     self._pip.install_egg(formula_url or formula_class)
                     try:
-                        self._formula_dict[formula_class] = lib.get_subclass_from_module(formula_class, FormulaBase)
+                        self._formula_dict[
+                            formula_class
+                        ] = lib.get_subclass_from_module(formula_class, FormulaBase)
                     except ImportError:
-                        logger.debug("FeatureDict import Error", exc_info=sys.exc_info())
-                        raise SprinterException("Error: Unable to retrieve formula %s!" % formula_class)
+                        logger.debug(
+                            "FeatureDict import Error", exc_info=sys.exc_info()
+                        )
+                        raise SprinterException(
+                            "Error: Unable to retrieve formula %s!" % formula_class
+                        )
                 except PipException:
                     logger.error("ERROR: Unable to download %s!" % formula_class)
         return self._formula_dict[formula_class]

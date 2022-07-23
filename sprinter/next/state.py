@@ -15,7 +15,6 @@ class StateException(SprinterException):
 
 
 class SprinterState(object):
-
     def __init__(self, config):
         self._validate(config)
 

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def install_brew(target_path):
-    """ Install brew to the target path """
+    """Install brew to the target path"""
     if not os.path.exists(target_path):
         try:
             os.makedirs(target_path)

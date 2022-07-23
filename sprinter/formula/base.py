@@ -35,16 +35,8 @@ class FormulaBase(object):
     Those options are:
     """
 
-    valid_options = [
-        'rc',
-        'env',
-        'gui',
-        'command',
-        'systems',
-        'depends',
-        'inputs'
-    ]
-    required_options = ['formula']
+    valid_options = ["rc", "env", "gui", "command", "systems", "depends", "inputs"]
+    required_options = ["formula"]
     deprecated_options = []
 
     # these values will not carry over from source to target
@@ -153,40 +145,46 @@ class FormulaBase(object):
             for k in self.target.keys():
                 if k in self.deprecated_options:
                     self.logger.warn(
-                        self.deprecated_options[k].format(option=k, feature=self.feature_name))
-                elif (k not in self.valid_options and k not in self.required_options and
-                      '*' not in self.valid_options):
+                        self.deprecated_options[k].format(
+                            option=k, feature=self.feature_name
+                        )
+                    )
+                elif (
+                    k not in self.valid_options
+                    and k not in self.required_options
+                    and "*" not in self.valid_options
+                ):
                     self.logger.warn("Unused option %s in %s!" % (k, self.feature_name))
             for k in self.required_options:
                 if not self.target.has(k):
                     self._log_error(
-                        "Required option %s not present in feature %s!" % (k, self.feature_name))
+                        "Required option %s not present in feature %s!"
+                        % (k, self.feature_name)
+                    )
 
     # these methods are overwritten less often, and are not recommended to do so.
     def should_run(self):
-        """ Returns true if the feature should run """
+        """Returns true if the feature should run"""
         should_run = True
         config = self.target or self.source
-        if config.has('systems'):
+        if config.has("systems"):
             should_run = False
-            valid_systems = [s.lower() for s in config.get('systems').split(",")]
-            for system_type, param in [('is_osx', 'osx'),
-                                       ('is_debian', 'debian')]:
+            valid_systems = [s.lower() for s in config.get("systems").split(",")]
+            for system_type, param in [("is_osx", "osx"), ("is_debian", "debian")]:
                 if param in valid_systems and getattr(system, system_type)():
                     should_run = True
         return should_run
 
     def resolve(self):
-        """ Resolve differences between the target and the source configuration """
+        """Resolve differences between the target and the source configuration"""
         if self.source and self.target:
             for key in self.source.keys():
-                if (key not in self.dont_carry_over_options
-                        and not self.target.has(key)):
+                if key not in self.dont_carry_over_options and not self.target.has(key):
                     self.target.set(key, self.source.get(key))
 
     def _log_error(self, message):
-        """ Log an error for the feature """
-        key = (self.feature_name, self.target.get('formula'))
+        """Log an error for the feature"""
+        key = (self.feature_name, self.target.get("formula"))
         self.environment.log_feature_error(key, "ERROR: " + message)
 
     def _prompt_value(self, key, prompt_string, default=None, only_if_empty=True):
@@ -207,9 +205,7 @@ class FormulaBase(object):
         if self.source and self.source.has(key):
             prompt_default = self.source.get(key)
 
-        main_manifest.set(key,
-                          lib.prompt(prompt_string,
-                                     default=prompt_default))
+        main_manifest.set(key, lib.prompt(prompt_string, default=prompt_default))
 
     # utility methods
     def _install_directory(self):

@@ -27,20 +27,24 @@ class Injections(object):
     inject_dict = {}  # dictionary holding the injection object
     clear_set = set()  # list holding the filenames to clear injection from
 
-    def __init__(self, wrapper, override=None, logger='sprinter'):
+    def __init__(self, wrapper, override=None, logger="sprinter"):
         wrapper = _unicode(wrapper)
         if override:
-            self.override_match = re.compile("(\n?#%s\n.*#%s\n)" % (override, override), re.DOTALL)
+            self.override_match = re.compile(
+                "(\n?#%s\n.*#%s\n)" % (override, override), re.DOTALL
+            )
         else:
             self.override_match = None
-        self.wrapper = u"#%s" % wrapper
-        self.wrapper_match = re.compile("\n?#%s\n.*#%s\n" % (wrapper, wrapper), re.DOTALL)
+        self.wrapper = "#%s" % wrapper
+        self.wrapper_match = re.compile(
+            "\n?#%s\n.*#%s\n" % (wrapper, wrapper), re.DOTALL
+        )
         self.logger = logging.getLogger(logger)
         self.inject_dict = {}
         self.clear_set = set()
 
     def inject(self, filename, content):
-        """ add the injection content to the dictionary """
+        """add the injection content to the dictionary"""
         # ensure content always has one trailing newline
         content = _unicode(content).rstrip() + "\n"
         if filename not in self.inject_dict:
@@ -48,16 +52,16 @@ class Injections(object):
         self.inject_dict[filename] += content
 
     def clear(self, filename):
-        """ add the file to the list of files to clear """
+        """add the file to the list of files to clear"""
         self.clear_set.add(filename)
 
     def clear_all(self):
-        """ Clear all files that are currently prepped to be injected """
+        """Clear all files that are currently prepped to be injected"""
         for filename in self.inject_dict:
             self.clear_set.add(filename)
 
     def commit(self):
-        """ commit the injections desired, overwriting any previous injections in the file. """
+        """commit the injections desired, overwriting any previous injections in the file."""
         self.logger.debug("Starting injections...")
         self.logger.debug("Injections dict is:")
         self.logger.debug(self.inject_dict)
@@ -72,11 +76,11 @@ class Injections(object):
             self.destructive_clear(filename)
 
     def injected(self, filename):
-        """ Return true if the file has already been injected before. """
+        """Return true if the file has already been injected before."""
         full_path = os.path.expanduser(filename)
         if not os.path.exists(full_path):
             return False
-        with codecs.open(full_path, 'r+', encoding="utf-8") as fh:
+        with codecs.open(full_path, "r+", encoding="utf-8") as fh:
             contents = fh.read()
         return self.wrapper_match.search(contents) is not None
 
@@ -89,9 +93,9 @@ class Injections(object):
         content = _unicode(content)
         backup_file(filename)
         full_path = self.__generate_file(filename)
-        with codecs.open(full_path, 'r', encoding="utf-8") as f:
+        with codecs.open(full_path, "r", encoding="utf-8") as f:
             new_content = self.inject_content(f.read(), content)
-        with codecs.open(full_path, 'w+', encoding="utf-8") as f:
+        with codecs.open(full_path, "w+", encoding="utf-8") as f:
             f.write(new_content)
 
     def destructive_clear(self, filename):
@@ -99,9 +103,9 @@ class Injections(object):
         if not os.path.exists(os.path.expanduser(filename)):
             return
         full_path = self.__generate_file(filename)
-        with codecs.open(full_path, 'r', encoding="utf-8") as f:
+        with codecs.open(full_path, "r", encoding="utf-8") as f:
             new_content = self.clear_content(f.read())
-        with codecs.open(full_path, 'w+', encoding="utf-8") as f:
+        with codecs.open(full_path, "w+", encoding="utf-8") as f:
             f.write(new_content)
 
     def __generate_file(self, file_path):
@@ -111,17 +115,19 @@ class Injections(object):
         """
         file_path = os.path.expanduser(file_path)
         if not os.path.exists(os.path.dirname(file_path)):
-            self.logger.debug("Directories missing! Creating directories for %s..." % file_path)
+            self.logger.debug(
+                "Directories missing! Creating directories for %s..." % file_path
+            )
             os.makedirs(os.path.dirname(file_path))
         if not os.path.exists(file_path):
             open(file_path, "w+").close()
         return file_path
 
     def in_noninjected_file(self, file_path, content):
-        """ Checks if a string exists in the file, sans the injected """
+        """Checks if a string exists in the file, sans the injected"""
         if os.path.exists(file_path):
             file_content = codecs.open(file_path, encoding="utf-8").read()
-            file_content = self.wrapper_match.sub(u"", file_content)
+            file_content = self.wrapper_match.sub("", file_content)
         else:
             file_content = ""
         return file_content.find(content) != -1
@@ -146,7 +152,11 @@ class Injections(object):
 %s
 %s
 %s
-""" % (self.wrapper, inject_string.rstrip(), self.wrapper)
+""" % (
+            self.wrapper,
+            inject_string.rstrip(),
+            self.wrapper,
+        )
         if self.override_match:
             content += sprinter_overrides.rstrip() + "\n"
         return content
@@ -160,7 +170,7 @@ class Injections(object):
 
 
 def backup_file(filename):
-    """ create a backup of the file desired """
+    """create a backup of the file desired"""
     if not os.path.exists(filename):
         return
 
