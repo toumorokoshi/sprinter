@@ -33,46 +33,58 @@ apt-get = gitB
 
 
 class TestPackageFormula(FormulaTest):
-
     def setup(self):
-        super(TestPackageFormula, self).setup(source_config=source_config,
-                                              target_config=target_config)
+        super(TestPackageFormula, self).setup(
+            source_config=source_config, target_config=target_config
+        )
         self.which_original = lib.which
         lib.which = Mock(return_value=True)
 
     def teardown(self):
         lib.which = self.which_original
 
-    @patch.object(lib, 'call')
+    @patch.object(lib, "call")
     def test_simple_example_osx(self, call):
-        """ A brew package should install on osx """
+        """A brew package should install on osx"""
         with set_os_types(osx=True):
-            self.environment.run_feature('simple_example', 'sync')
-            call.assert_called_with("brew install git", output_log_level=logging.DEBUG, stdout=None)
+            self.environment.run_feature("simple_example", "sync")
+            call.assert_called_with(
+                "brew install git", output_log_level=logging.DEBUG, stdout=None
+            )
 
-    @patch.object(lib, 'call')
+    @patch.object(lib, "call")
     def test_simple_example_debian(self, call):
-        """ An apt-get package should install on debian """
+        """An apt-get package should install on debian"""
         with set_os_types(debian=True):
-            self.environment.run_feature('simple_example', 'sync')
-            call.assert_called_with("sudo apt-get -y install git-core", output_log_level=logging.DEBUG, stdout=None)
+            self.environment.run_feature("simple_example", "sync")
+            call.assert_called_with(
+                "sudo apt-get -y install git-core",
+                output_log_level=logging.DEBUG,
+                stdout=None,
+            )
 
-    @patch.object(lib, 'call')
+    @patch.object(lib, "call")
     def test_simple_example_fedora(self, call):
-        """ A yum package should install properly on fedora """
+        """A yum package should install properly on fedora"""
         with set_os_types(fedora=True):
-            self.environment.run_feature('simple_example', 'sync')
-            call.assert_called_with("sudo yum install git-core", output_log_level=logging.DEBUG, stdout=None)
+            self.environment.run_feature("simple_example", "sync")
+            call.assert_called_with(
+                "sudo yum install git-core", output_log_level=logging.DEBUG, stdout=None
+            )
 
-    @patch.object(lib, 'call')
+    @patch.object(lib, "call")
     def test_no_update(self, call):
-        """ An unchanged formula should not be updated """
-        self.environment.run_feature('no_update', 'sync')
+        """An unchanged formula should not be updated"""
+        self.environment.run_feature("no_update", "sync")
         assert not call.called, "Update was called!"
 
-    @patch.object(lib, 'call')
+    @patch.object(lib, "call")
     def test_update_different_package(self, call):
-        """ An feature with a new formula """
+        """An feature with a new formula"""
         with set_os_types(debian=True):
-            self.environment.run_feature('update_new_package', 'sync')
-            call.assert_called_with("sudo apt-get -y install gitB", output_log_level=logging.DEBUG, stdout=None)
+            self.environment.run_feature("update_new_package", "sync")
+            call.assert_called_with(
+                "sudo apt-get -y install gitB",
+                output_log_level=logging.DEBUG,
+                stdout=None,
+            )

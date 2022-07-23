@@ -1,18 +1,20 @@
 from ..core import PHASE
 from .common import execute_commmon_functionality
 
+
 class Feature(object):
     """
     A feature is effectively a parameterized Formula. This class
     exists to ensure some common functionality across all formulas.
     """
+
     def __init__(self, formula_instance):
         # remove once setattr no longer needed to be overriden.
         self.__dict__["_formula_instance"] = formula_instance
 
     @property
     def instance(self):
-        """ return the formula instance """
+        """return the formula instance"""
         return self._formula_instance
 
     def install(self):
@@ -46,7 +48,7 @@ class Feature(object):
         return result
 
     def __getattr__(self, key):
-        """ fallback behavior to formula instance """
+        """fallback behavior to formula instance"""
         return getattr(self._formula_instance, key)
 
     def __setattr__(self, key, value):
@@ -59,7 +61,6 @@ class Feature(object):
         passed in to the constructor, or a separate config object.
         """
         return setattr(self._formula_instance, key, value)
-
 
 
 def _get_phase(formula_instance):

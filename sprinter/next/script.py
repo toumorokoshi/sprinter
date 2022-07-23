@@ -25,9 +25,7 @@ import sys
 from .sprinter import Sprinter
 
 LOGGING_NAMES = ["sprinter"]
-VALID_COMMANDS = [
-    "install", "update", "validate", "remove", "deactivate", "activate"
-]
+VALID_COMMANDS = ["install", "update", "validate", "remove", "deactivate", "activate"]
 CONSUMED_BY_SCRIPT = ["--verbose", "--version"]
 PRINTER = pprint.PrettyPrinter(indent=4)
 
@@ -43,12 +41,12 @@ def main(argv=sys.argv[1:]):
 
 
 def _run(argv):
-    options = docopt.docopt(__doc__,  argv=argv, options_first=True)
+    options = docopt.docopt(__doc__, argv=argv, options_first=True)
     logging_level = logging.DEBUG if options["--verbose"] else logging.INFO
     _create_stdout_logger(logging_level)
     home_directory = os.path.expanduser("~")
     sprinter = Sprinter(home_directory)
-    kwargs = dict((k,v) for k,v in options.items() if k not in CONSUMED_BY_SCRIPT)
+    kwargs = dict((k, v) for k, v in options.items() if k not in CONSUMED_BY_SCRIPT)
     for command in VALID_COMMANDS:
         if options[command]:
             PRINTER.pprint(getattr(sprinter, command)(**kwargs))
@@ -65,9 +63,7 @@ def _create_stdout_logger(logging_level):
     of module we would like to log information on.
     """
     out_hdlr = logging.StreamHandler(sys.stdout)
-    out_hdlr.setFormatter(logging.Formatter(
-        '[%(asctime)s] %(message)s', "%H:%M:%S"
-    ))
+    out_hdlr.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%H:%M:%S"))
     out_hdlr.setLevel(logging_level)
     for name in LOGGING_NAMES:
         log = logging.getLogger(name)

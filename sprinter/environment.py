@@ -9,8 +9,20 @@ from functools import wraps
 from collections import defaultdict
 
 import sprinter.lib as lib
-from sprinter.core import PHASE, load_global_config, Directory, Injections, Manifest, load_manifest, FeatureDict
-from sprinter.core.templates import shell_utils_template, source_template, warning_template
+from sprinter.core import (
+    PHASE,
+    load_global_config,
+    Directory,
+    Injections,
+    Manifest,
+    load_manifest,
+    FeatureDict,
+)
+from sprinter.core.templates import (
+    shell_utils_template,
+    source_template,
+    warning_template,
+)
 from sprinter.core.messages import REMOVE_WARNING, INVALID_MANIFEST
 from sprinter.lib import system
 from sprinter.exceptions import SprinterException, FormulaException
@@ -18,41 +30,37 @@ from sprinter.external import brew
 
 
 def warmup(f):
-    """ Decorator to run warmup before running a command """
+    """Decorator to run warmup before running a command"""
 
     @wraps(f)
     def wrapped(self, *args, **kwargs):
         if not self.warmed_up:
             self.warmup()
         return f(self, *args, **kwargs)
+
     return wrapped
 
 
 def install_required(f):
-    """ Return an exception if the namespace is not already installed """
+    """Return an exception if the namespace is not already installed"""
 
     @wraps(f)
     def wrapped(self, *args, **kwargs):
         if self.directory.new:
-            raise SprinterException("Namespace %s is not yet installed!" % self.namespace)
+            raise SprinterException(
+                "Namespace %s is not yet installed!" % self.namespace
+            )
         return f(self, *args, **kwargs)
+
     return wrapped
+
 
 # http://www.gnu.org/software/bash/manual/bashref.html#Bash-Startup-Files
 # http://zsh.sourceforge.net/Guide/zshguide02.html
 SHELL_CONFIG = {
-    'bash': {
-        'rc': ['.bashrc'],
-        'env': ['.bash_profile', '.bash_login', '.profile']
-    },
-    'zsh': {
-        'rc': ['.zshrc'],
-        'env': ['.zprofile', '.zlogin']
-    },
-    'gui': {
-        'debian': ['.profile'],
-        'osx': lib.insert_environment_osx
-    }
+    "bash": {"rc": [".bashrc"], "env": [".bash_profile", ".bash_login", ".profile"]},
+    "zsh": {"rc": [".zshrc"], "env": [".zprofile", ".zlogin"]},
+    "gui": {"debian": [".profile"], "osx": lib.insert_environment_osx},
 }
 
 # for now, they are all still dealt with en masse
@@ -60,17 +68,21 @@ RC_FILES = []
 ENV_FILES = []
 
 for shell, shell_config in SHELL_CONFIG.items():
-    if shell != 'gui':
-        RC_FILES += shell_config['rc']
-        ENV_FILES += shell_config['env']
+    if shell != "gui":
+        RC_FILES += shell_config["rc"]
+        ENV_FILES += shell_config["env"]
 
 CONFIG_FILES = RC_FILES + ENV_FILES
 
 
 class Environment(object):
 
-    source = None  # the path to the source handle, the handle itself, or a manifest instance
-    target = None  # the path to the target handle, the handle itself, or a manifest instance
+    source = (
+        None  # the path to the source handle, the handle itself, or a manifest instance
+    )
+    target = (
+        None  # the path to the target handle, the handle itself, or a manifest instance
+    )
     namespace = None  # the namespace of the environment
     custom_directory_root = None  # the root to install directories too
     do_inject_environment_config = True  # inject configuration into shells
@@ -91,13 +103,15 @@ class Environment(object):
     global_config = None  # configuration file, which defaults to loading from SPRINTER_ROOT/.global/config.cfg
     ignore_errors = False  # ignore errors in features
 
-    def __init__(self,
-                 logger=None,
-                 logging_level=logging.INFO,
-                 root=None,
-                 sprinter_namespace=None,
-                 global_config=None,
-                 ignore_errors=False):
+    def __init__(
+        self,
+        logger=None,
+        logging_level=logging.INFO,
+        root=None,
+        sprinter_namespace=None,
+        global_config=None,
+        ignore_errors=False,
+    ):
 
         # base logging object to log instances
         self.logger = logger or self._build_logger(level=logging_level)
@@ -105,17 +119,21 @@ class Environment(object):
             self.logger.info("Starting in debug mode...")
 
         # the sprinter namespace
-        self.sprinter_namespace = sprinter_namespace or 'sprinter'
+        self.sprinter_namespace = sprinter_namespace or "sprinter"
 
         # the root directory which sprinter installs sandboxable files too
-        self.root = root or os.path.expanduser(os.path.join("~", ".%s" % self.sprinter_namespace))
+        self.root = root or os.path.expanduser(
+            os.path.join("~", ".%s" % self.sprinter_namespace)
+        )
 
         self.ignore_errors = ignore_errors
 
         # path to the directory to install global files
         self.global_path = os.path.join(self.root, ".global")
         self.global_config_path = os.path.join(self.global_path, "config.cfg")
-        self.global_config = global_config or load_global_config(self.global_config_path)
+        self.global_config = global_config or load_global_config(
+            self.global_config_path
+        )
 
         self.shell_util_path = os.path.join(self.global_path, "utils.sh")
         self.main_manifest = None
@@ -126,7 +144,7 @@ class Environment(object):
 
     @warmup
     def install(self):
-        """ Install the environment """
+        """Install the environment"""
         self.phase = PHASE.INSTALL
         if not self.directory.new:
             self.logger.info("Namespace %s directory already exists!" % self.namespace)
@@ -140,7 +158,7 @@ class Environment(object):
             self.grab_inputs()
             self._specialize()
             for feature in self.features.run_order:
-                self.run_action(feature, 'sync')
+                self.run_action(feature, "sync")
             self.inject_environment_config()
             self._finalize()
         except Exception:
@@ -156,7 +174,7 @@ class Environment(object):
     @warmup
     @install_required
     def update(self, reconfigure=False):
-        """ update the environment """
+        """update the environment"""
         try:
             self.phase = PHASE.UPDATE
             self.logger.info("Updating environment %s..." % self.namespace)
@@ -171,7 +189,7 @@ class Environment(object):
                 self._copy_source_to_target()
             self._specialize(reconfigure=reconfigure)
             for feature in self.features.run_order:
-                self.run_action(feature, 'sync')
+                self.run_action(feature, "sync")
             self.inject_environment_config()
             self._finalize()
         except Exception:
@@ -182,7 +200,7 @@ class Environment(object):
     @warmup
     @install_required
     def remove(self):
-        """ remove the environment """
+        """remove the environment"""
         try:
             self.phase = PHASE.REMOVE
             self.logger.info("Removing environment %s..." % self.namespace)
@@ -190,7 +208,7 @@ class Environment(object):
             self._specialize()
             for feature in self.features.run_order:
                 try:
-                    self.run_action(feature, 'sync')
+                    self.run_action(feature, "sync")
                 except FormulaException:
                     # continue trying to remove any remaining features.
                     pass
@@ -208,7 +226,7 @@ class Environment(object):
     @warmup
     @install_required
     def deactivate(self):
-        """ deactivate the environment """
+        """deactivate the environment"""
         try:
             self.phase = PHASE.DEACTIVATE
             self.logger.info("Deactivating environment %s..." % self.namespace)
@@ -217,7 +235,7 @@ class Environment(object):
             self._specialize()
             for feature in self.features.run_order:
                 self.logger.info("Deactivating %s..." % feature[0])
-                self.run_action(feature, 'deactivate')
+                self.run_action(feature, "deactivate")
             self.clear_all()
             self._finalize()
         except Exception:
@@ -228,7 +246,7 @@ class Environment(object):
     @warmup
     @install_required
     def activate(self):
-        """ activate the environment """
+        """activate the environment"""
         try:
             self.phase = PHASE.ACTIVATE
             self.logger.info("Activating environment %s..." % self.namespace)
@@ -237,7 +255,7 @@ class Environment(object):
             self._specialize()
             for feature in self.features.run_order:
                 self.logger.info("Activating %s..." % feature[0])
-                self.run_action(feature, 'activate')
+                self.run_action(feature, "activate")
             self.inject_environment_config()
             self._finalize()
         except Exception:
@@ -247,7 +265,7 @@ class Environment(object):
 
     @warmup
     def validate(self):
-        """ Validate the target environment """
+        """Validate the target environment"""
         self.phase = PHASE.VALIDATE
         self.logger.info("Validating %s..." % self.namespace)
         self.instantiate_features()
@@ -255,11 +273,11 @@ class Environment(object):
         if self.target:
             for s in self.target.formula_sections():
                 context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
-                context_dict['config:root_dir'] = self.directory.root_dir
-                context_dict['config:node'] = system.NODE
+                context_dict["config:root_dir"] = self.directory.root_dir
+                context_dict["config:node"] = system.NODE
                 self.target.add_additional_context(context_dict)
         for feature in self.features.run_order:
-            self.run_action(feature, 'validate', run_if_error=True)
+            self.run_action(feature, "validate", run_if_error=True)
 
     @warmup
     def inject_environment_config(self):
@@ -267,37 +285,58 @@ class Environment(object):
             return
 
         for shell in SHELL_CONFIG:
-            if shell == 'gui':
+            if shell == "gui":
                 if system.is_debian():
-                    self._inject_config_source(".gui", SHELL_CONFIG['gui']['debian'])
+                    self._inject_config_source(".gui", SHELL_CONFIG["gui"]["debian"])
             else:
-                if (self.global_config.has_option('shell', shell)
-                   and lib.is_affirmative(self.global_config.get('shell', shell))):
+                if self.global_config.has_option("shell", shell) and lib.is_affirmative(
+                    self.global_config.get("shell", shell)
+                ):
 
-                    rc_file, rc_path = self._inject_config_source(".rc", SHELL_CONFIG[shell]['rc'])
-                    env_file, env_path = self._inject_config_source(".env", SHELL_CONFIG[shell]['env'])
+                    rc_file, rc_path = self._inject_config_source(
+                        ".rc", SHELL_CONFIG[shell]["rc"]
+                    )
+                    env_file, env_path = self._inject_config_source(
+                        ".env", SHELL_CONFIG[shell]["env"]
+                    )
                     # If an rc file is sourced by an env file, we should alert the user.
-                    if (self.phase is PHASE.INSTALL
-                       and self.injections.in_noninjected_file(env_path, rc_file)
-                       and self.global_injections.in_noninjected_file(env_path, rc_file)):
-                        self.logger.info("You appear to be sourcing %s from inside %s." % (rc_file, env_file))
-                        self.logger.info("Please ensure it is wrapped in a #SPRINTER_OVERRIDES block " +
-                                         "to avoid repetitious operations!")
+                    if (
+                        self.phase is PHASE.INSTALL
+                        and self.injections.in_noninjected_file(env_path, rc_file)
+                        and self.global_injections.in_noninjected_file(
+                            env_path, rc_file
+                        )
+                    ):
+                        self.logger.info(
+                            "You appear to be sourcing %s from inside %s."
+                            % (rc_file, env_file)
+                        )
+                        self.logger.info(
+                            "Please ensure it is wrapped in a #SPRINTER_OVERRIDES block "
+                            + "to avoid repetitious operations!"
+                        )
                     full_rc_path = os.path.expanduser(os.path.join("~", rc_file))
                     full_env_path = os.path.expanduser(os.path.join("~", env_file))
-                    if lib.is_affirmative(self.global_config.get('global', 'env_source_rc')):
+                    if lib.is_affirmative(
+                        self.global_config.get("global", "env_source_rc")
+                    ):
                         self.global_injections.inject(
                             full_env_path,
-                            source_template % (full_rc_path, full_rc_path))
+                            source_template % (full_rc_path, full_rc_path),
+                        )
                     else:
-                        self.global_injections.inject(full_env_path, '')
-                    if system.is_osx() and not self.injections.in_noninjected_file(env_path, rc_file):
+                        self.global_injections.inject(full_env_path, "")
+                    if system.is_osx() and not self.injections.in_noninjected_file(
+                        env_path, rc_file
+                    ):
                         if self.phase is PHASE.INSTALL:
-                            self.logger.info("On OSX, login shell are the default, which only source config files")
+                            self.logger.info(
+                                "On OSX, login shell are the default, which only source config files"
+                            )
 
     @warmup
     def clear_all(self):
-        """ clear all files that were to be injected """
+        """clear all files that were to be injected"""
         self.injections.clear_all()
         for config_file in CONFIG_FILES:
             self.injections.clear(os.path.join("~", config_file))
@@ -305,27 +344,35 @@ class Environment(object):
     def install_sandboxes(self):
         if self.target:
             if system.is_osx():
-                if not self.target.is_affirmative('config', 'use_global_packagemanagers'):
-                    self._install_sandbox('brew', brew.install_brew)
-                elif lib.which('brew') is None:
+                if not self.target.is_affirmative(
+                    "config", "use_global_packagemanagers"
+                ):
+                    self._install_sandbox("brew", brew.install_brew)
+                elif lib.which("brew") is None:
                     install_brew = lib.prompt(
-                        "Looks like you don't have brew, " +
-                        "which is sprinter's package manager of choice for OSX.\n"
+                        "Looks like you don't have brew, "
+                        + "which is sprinter's package manager of choice for OSX.\n"
                         "Would you like sprinter to install brew for you?",
-                        default="yes", boolean=True)
+                        default="yes",
+                        boolean=True,
+                    )
                     if install_brew:
-                        lib.call("sudo mkdir -p /usr/local/", stdout=None,
-                                 output_log_level=logging.DEBUG)
-                        lib.call("sudo chown -R %s /usr/local/" % getpass.getuser(),
-                                 output_log_level=logging.DEBUG, stdout=None)
-                        brew.install_brew('/usr/local')
+                        lib.call(
+                            "sudo mkdir -p /usr/local/",
+                            stdout=None,
+                            output_log_level=logging.DEBUG,
+                        )
+                        lib.call(
+                            "sudo chown -R %s /usr/local/" % getpass.getuser(),
+                            output_log_level=logging.DEBUG,
+                            stdout=None,
+                        )
+                        brew.install_brew("/usr/local")
 
     def instantiate_features(self):
-        if hasattr(self, 'features') and self.features:
+        if hasattr(self, "features") and self.features:
             return
-        self.features = FeatureDict(self,
-                                    self.source, self.target,
-                                    self.global_path)
+        self.features = FeatureDict(self, self.source, self.target, self.global_path)
 
     def run_feature(self, feature, action):
         for k in self.features.run_order:
@@ -333,38 +380,38 @@ class Environment(object):
                 self.run_action(k, action, run_if_error=True)
 
     def write_debug_log(self, file_path):
-        """ Write the debug log to a file """
+        """Write the debug log to a file"""
         with open(file_path, "wb+") as fh:
-            fh.write(system.get_system_info().encode('utf-8'))
+            fh.write(system.get_system_info().encode("utf-8"))
             # writing to debug stream
             self._debug_stream.seek(0)
-            fh.write(self._debug_stream.read().encode('utf-8'))
-            fh.write("The following errors occured:\n".encode('utf-8'))
+            fh.write(self._debug_stream.read().encode("utf-8"))
+            fh.write("The following errors occured:\n".encode("utf-8"))
             for error in self._errors:
-                fh.write((error + "\n").encode('utf-8'))
+                fh.write((error + "\n").encode("utf-8"))
             for k, v in self._error_dict.items():
                 if len(v) > 0:
-                    fh.write(("Error(s) in %s with formula %s:\n" % k).encode('utf-8'))
+                    fh.write(("Error(s) in %s with formula %s:\n" % k).encode("utf-8"))
                     for error in v:
-                        fh.write((error + "\n").encode('utf-8'))
+                        fh.write((error + "\n").encode("utf-8"))
 
     def write_manifest(self):
-        """ Write the manifest to the file """
+        """Write the manifest to the file"""
         if os.path.exists(self.directory.manifest_path):
             self.main_manifest.write(open(self.directory.manifest_path, "w+"))
 
     def message_failure(self):
-        """ return a failure message, if one exists """
+        """return a failure message, if one exists"""
         if not isinstance(self.main_manifest, Manifest):
             return None
-        return self.main_manifest.get('config', 'message_failure', default=None)
+        return self.main_manifest.get("config", "message_failure", default=None)
 
     def message_success(self):
-        """ return a success message, if one exists """
-        return self.main_manifest.get('config', 'message_success', default=None)
+        """return a success message, if one exists"""
+        return self.main_manifest.get("config", "message_success", default=None)
 
     def warmup(self):
-        """ initialize variables necessary to perform a sprinter action """
+        """initialize variables necessary to perform a sprinter action"""
         self.logger.debug("Warming up...")
 
         try:
@@ -378,7 +425,7 @@ class Environment(object):
             self.logger.error(str(e))
             raise SprinterException("Fatal error! Bad credentials to grab manifest!")
 
-        if not getattr(self, 'namespace', None):
+        if not getattr(self, "namespace", None):
             if self.target:
                 self.namespace = self.target.namespace
             elif not self.namespace and self.source:
@@ -392,19 +439,23 @@ class Environment(object):
             if not self.directory_root:
                 self.directory_root = os.path.join(self.root, self.namespace)
 
-            self.directory = Directory(self.directory_root,
-                                       shell_util_path=self.shell_util_path)
+            self.directory = Directory(
+                self.directory_root, shell_util_path=self.shell_util_path
+            )
 
         if not self.injections:
-            self.injections = Injections(wrapper="%s_%s" % (self.sprinter_namespace.upper(),
-                                                            self.namespace),
-                                         override="SPRINTER_OVERRIDES")
+            self.injections = Injections(
+                wrapper="%s_%s" % (self.sprinter_namespace.upper(), self.namespace),
+                override="SPRINTER_OVERRIDES",
+            )
         if not self.global_injections:
-            self.global_injections = Injections(wrapper="%s" % self.sprinter_namespace.upper() + "GLOBALS",
-                                                override="SPRINTER_OVERRIDES")
+            self.global_injections = Injections(
+                wrapper="%s" % self.sprinter_namespace.upper() + "GLOBALS",
+                override="SPRINTER_OVERRIDES",
+            )
         # append the bin, in the case sandboxes are necessary to
         # execute commands further down the sprinter lifecycle
-        os.environ['PATH'] = self.directory.bin_path() + ":" + os.environ['PATH']
+        os.environ["PATH"] = self.directory.bin_path() + ":" + os.environ["PATH"]
         self.warmed_up = True
 
     def _inject_config_source(self, source_filename, files_to_inject):
@@ -414,7 +465,9 @@ class Environment(object):
         """
         # src_path = os.path.join(self.directory.root_dir, source_filename)
         # src_exec = "[ -r %s ] && . %s" % (src_path, src_path)
-        src_exec = "[ -r {0} ] && . {0}".format(os.path.join(self.directory.root_dir, source_filename))
+        src_exec = "[ -r {0} ] && . {0}".format(
+            os.path.join(self.directory.root_dir, source_filename)
+        )
         # The ridiculous construction above is necessary to avoid failing tests(!)
 
         for config_file in files_to_inject:
@@ -425,25 +478,39 @@ class Environment(object):
         else:
             config_file = files_to_inject[0]
             config_path = os.path.expanduser(os.path.join("~", config_file))
-            self.logger.info("No config files found to source %s, creating ~/%s!" % (source_filename, config_file))
+            self.logger.info(
+                "No config files found to source %s, creating ~/%s!"
+                % (source_filename, config_file)
+            )
             self.injections.inject(config_path, src_exec)
 
         return (config_file, config_path)
 
     def _finalize(self):
-        """ command to run at the end of sprinter's run """
+        """command to run at the end of sprinter's run"""
         self.logger.info("Finalizing...")
         self.write_manifest()
 
         if self.directory.rewrite_config:
             # always ensure .rc is written (sourcing .env)
-            self.directory.add_to_rc('')
+            self.directory.add_to_rc("")
             # prepend brew for global installs
-            if system.is_osx() and self.main_manifest.is_affirmative('config', 'use_global_packagemanagers'):
-                self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % '/usr/local/bin')
-            self.directory.add_to_env('__sprinter_prepend_path "%s" PATH' % self.directory.bin_path())
-            self.directory.add_to_env('__sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path())
-            self.directory.add_to_env('__sprinter_prepend_path "%s" C_INCLUDE_PATH' % self.directory.include_path())
+            if system.is_osx() and self.main_manifest.is_affirmative(
+                "config", "use_global_packagemanagers"
+            ):
+                self.directory.add_to_env(
+                    '__sprinter_prepend_path "%s" PATH' % "/usr/local/bin"
+                )
+            self.directory.add_to_env(
+                '__sprinter_prepend_path "%s" PATH' % self.directory.bin_path()
+            )
+            self.directory.add_to_env(
+                '__sprinter_prepend_path "%s" LIBRARY_PATH' % self.directory.lib_path()
+            )
+            self.directory.add_to_env(
+                '__sprinter_prepend_path "%s" C_INCLUDE_PATH'
+                % self.directory.include_path()
+            )
             self.directory.finalize()
 
         self.injections.commit()
@@ -454,7 +521,7 @@ class Environment(object):
             os.makedirs(os.path.join(self.root, ".global"))
 
         self.logger.debug("Writing shell util file...")
-        with open(self.shell_util_path, 'w+') as fh:
+        with open(self.shell_util_path, "w+") as fh:
             fh.write(shell_utils_template)
 
         if self.error_occured:
@@ -464,25 +531,28 @@ class Environment(object):
             self.logger.info(self.message_success())
 
         self.logger.info("Done!")
-        self.logger.info("NOTE: Please remember to open new shells/terminals to use the modified environment")
+        self.logger.info(
+            "NOTE: Please remember to open new shells/terminals to use the modified environment"
+        )
 
     def _install_sandbox(self, name, call, kwargs={}):
-        if (self.target.is_affirmative('config', name) and
-           (not self.source or not self.source.is_affirmative('config', name))):
+        if self.target.is_affirmative("config", name) and (
+            not self.source or not self.source.is_affirmative("config", name)
+        ):
             self.logger.info("Installing %s..." % name)
             call(self.directory.root_dir, **kwargs)
 
     def _build_logger(self, level=logging.INFO):
-        """ return a logger. if logger is none, generate a logger from stdout """
+        """return a logger. if logger is none, generate a logger from stdout"""
         self._debug_stream = StringIO()
-        logger = logging.getLogger('sprinter')
+        logger = logging.getLogger("sprinter")
         # stdout log
         out_hdlr = logging.StreamHandler(sys.stdout)
         out_hdlr.setLevel(level)
         logger.addHandler(out_hdlr)
         # debug log
         debug_hdlr = logging.StreamHandler(self._debug_stream)
-        debug_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+        debug_hdlr.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
         debug_hdlr.setLevel(logging.DEBUG)
         logger.addHandler(debug_hdlr)
         logger.setLevel(logging.DEBUG)
@@ -502,14 +572,12 @@ class Environment(object):
         self.log_error(error_message)
 
     def get_error_value(self, feature):
-        """ get the error value for a feature """
+        """get the error value for a feature"""
         if feature not in self._error_dict:
-            self._error_dict1               #
+            self._error_dict1  #
 
-    def run_action(self, feature, action,
-                   run_if_error=False,
-                   raise_exception=True):
-        """ Run an action, and log it's output in case of errors """
+    def run_action(self, feature, action, run_if_error=False, raise_exception=True):
+        """Run an action, and log it's output in case of errors"""
         if len(self._error_dict[feature]) > 0 and not run_if_error:
             return
 
@@ -520,8 +588,10 @@ class Environment(object):
         # catch a generic exception within a feature
         except Exception as e:
             e = sys.exc_info()[1]
-            self.logger.info("An exception occurred with action %s in feature %s!" %
-                             (action, feature))
+            self.logger.info(
+                "An exception occurred with action %s in feature %s!"
+                % (action, feature)
+            )
             self.logger.debug("Exception", exc_info=sys.exc_info())
             error = str(e)
             self.log_feature_error(feature, str(e))
@@ -529,7 +599,11 @@ class Environment(object):
         # from the remove() method in which case continue the rest of the
         # feature removal from there
         if error is not None and raise_exception:
-            exception_msg = "%s action failed for feature %s: %s" % (action, feature, error)
+            exception_msg = "%s action failed for feature %s: %s" % (
+                action,
+                feature,
+                error,
+            )
             if self.phase == PHASE.REMOVE:
                 raise FormulaException(exception_msg)
             else:
@@ -539,8 +613,9 @@ class Environment(object):
     def _validate_manifest(self):
         errors = {}
         for feature in self.features.run_order:
-            error = self.run_action(feature, 'validate', run_if_error=True,
-                                    raise_exception=False)
+            error = self.run_action(
+                feature, "validate", run_if_error=True, raise_exception=False
+            )
             if error:
                 errors[feature] = error
         if errors:
@@ -551,34 +626,36 @@ class Environment(object):
             raise SprinterException("invalid manifest!")
 
     def _specialize(self, reconfigure=False):
-        """ Add variables and specialize contexts """
+        """Add variables and specialize contexts"""
         # add in the 'root_dir' directories to the context dictionaries
         for manifest in [self.source, self.target]:
             context_dict = {}
             if manifest:
                 for s in manifest.formula_sections():
-                    context_dict["%s:root_dir" % s] = self.directory.install_directory(s)
-                    context_dict['config:root_dir'] = self.directory.root_dir
-                    context_dict['config:node'] = system.NODE
+                    context_dict["%s:root_dir" % s] = self.directory.install_directory(
+                        s
+                    )
+                    context_dict["config:root_dir"] = self.directory.root_dir
+                    context_dict["config:node"] = system.NODE
                 manifest.add_additional_context(context_dict)
         self._validate_manifest()
         for feature in self.features.run_order:
             if not reconfigure:
-                self.run_action(feature, 'resolve')
+                self.run_action(feature, "resolve")
             # if a target doesn't exist, no need to prompt.
             instance = self.features[feature]
             if instance.target:
-                self.run_action(feature, 'prompt')
+                self.run_action(feature, "prompt")
 
     def _copy_source_to_target(self):
-        """ copy source user configuration to target """
+        """copy source user configuration to target"""
         if self.source and self.target:
-            for k, v in self.source.items('config'):
+            for k, v in self.source.items("config"):
                 # always have source override target.
                 self.target.set_input(k, v)
 
     def grab_inputs(self, reconfigure=False):
-        """ Resolve the source and target config section """
+        """Resolve the source and target config section"""
         self._copy_source_to_target()
         if self.target:
             self.target.grab_inputs(force=reconfigure)

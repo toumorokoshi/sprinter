@@ -40,32 +40,37 @@ class GitException(Exception):
 
 
 class GitFormula(FormulaBase):
-    """ A sprinter formula for git"""
+    """A sprinter formula for git"""
 
-    required_options = FormulaBase.required_options + ['url']
-    valid_options = FormulaBase.valid_options + ['branch', 'git_root']
+    required_options = FormulaBase.required_options + ["url"]
+    valid_options = FormulaBase.valid_options + ["branch", "git_root"]
 
     def install(self):
-        if not lib.which('git'):
-            self.logger.warn("git is not installed! Please install git to install this feature.")
+        if not lib.which("git"):
+            self.logger.warn(
+                "git is not installed! Please install git to install this feature."
+            )
             return
         install_dir = self.directory.install_directory(self.feature_name)
-        git_root = self.target.get('git_root', None)
+        git_root = self.target.get("git_root", None)
         target_path = git_root or install_dir
-        target_branch = self.target.get('branch', 'master')
+        target_branch = self.target.get("branch", "master")
         git_opts = {
-            'repo': self.target.get('url', None),
-            'branch': target_branch,
-            'dir': target_path
+            "repo": self.target.get("url", None),
+            "branch": target_branch,
+            "dir": target_path,
         }
         # no existing path is given or the path is not a git repo
-        if (not target_path or not os.path.exists(target_path) or
-                not self.__git(CURRENT_BRANCH, git_opts)[1]):
+        if (
+            not target_path
+            or not os.path.exists(target_path)
+            or not self.__git(CURRENT_BRANCH, git_opts)[1]
+        ):
             self.__clone_repo(git_opts)
 
         # for an existing path, the git remote must match
-        elif self.__git(CURRENT_REMOTE, git_opts)[1] != self.target.get('url'):
-            raise GitException('Incorrect origin for local repo!')
+        elif self.__git(CURRENT_REMOTE, git_opts)[1] != self.target.get("url"):
+            raise GitException("Incorrect origin for local repo!")
 
         if self.__git(CURRENT_BRANCH, git_opts)[1] != target_branch:
             self.__checkout_branch(git_opts)
@@ -73,23 +78,28 @@ class GitFormula(FormulaBase):
         FormulaBase.install(self)
 
     def update(self):
-        if not lib.which('git'):
-            self.logger.warn("git is not installed! Please install git to install this feature.")
+        if not lib.which("git"):
+            self.logger.warn(
+                "git is not installed! Please install git to install this feature."
+            )
             return
         install_dir = self.directory.install_directory(self.feature_name)
-        git_root = self.target.get('git_root', None)
+        git_root = self.target.get("git_root", None)
         target_path = git_root or install_dir
-        source_branch = self.source.get('branch', 'master')
-        target_branch = self.target.get('branch', 'master')
+        source_branch = self.source.get("branch", "master")
+        target_branch = self.target.get("branch", "master")
         git_opts = {
-            'repo': self.target.get('url'),
-            'branch': target_branch,
-            'dir': target_path
+            "repo": self.target.get("url"),
+            "branch": target_branch,
+            "dir": target_path,
         }
 
         # directory doesn't exist, or is not a git branch
-        if (not target_path or not os.path.exists(target_path) or
-                not self.__git(CURRENT_BRANCH, git_opts)[1]):
+        if (
+            not target_path
+            or not os.path.exists(target_path)
+            or not self.__git(CURRENT_BRANCH, git_opts)[1]
+        ):
             self.logger.debug("No repository cloned. Re-cloning...")
             self.__clone_repo(git_opts)
 
@@ -97,7 +107,7 @@ class GitFormula(FormulaBase):
         current_branch = self.__git(CURRENT_BRANCH, git_opts)[1]
 
         # for an existing path, the git remote must match
-        if current_remote != self.target.get('url'):
+        if current_remote != self.target.get("url"):
             self.logger.debug("Updating origin url...")
             self.__git(UPDATE_ORIGIN, git_opts)
 
@@ -125,7 +135,7 @@ class GitFormula(FormulaBase):
             self.logger.warning(output)
         else:
             self.logger.info(output)
-        return (error, output.strip('\n \t'))
+        return (error, output.strip("\n \t"))
 
     def __checkout_branch(self, git_opts):
         self.logger.debug("Checking out branch {branch}...".format(**git_opts))

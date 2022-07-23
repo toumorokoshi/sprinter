@@ -28,31 +28,42 @@ formula = sprinter.formula.unpack
 url = %(zip)s
 type = zip
 target = /testpath
-""" % {'targz': TEST_TARGZ, 'dmg': TEST_DMG, 'zip': TEST_ZIP}
+""" % {
+    "targz": TEST_TARGZ,
+    "dmg": TEST_DMG,
+    "zip": TEST_ZIP,
+}
 
 
 class TestUnpackFormula(FormulaTest):
-    """ Tests for the unpack formula """
+    """Tests for the unpack formula"""
 
     def setup(self):
-        super(TestUnpackFormula, self).setup(source_config=source_config,
-                                             target_config=target_config)
+        super(TestUnpackFormula, self).setup(
+            source_config=source_config, target_config=target_config
+        )
 
-    @patch.object(lib, 'extract_zip')
+    @patch.object(lib, "extract_zip")
     def test_zip_with_target(self, extract_zip):
-        """ Test the zip extracting to a specific target """
-        self.environment.run_feature("zip_with_target", 'sync')
-        extract_zip.assert_called_with(TEST_ZIP, '/testpath', remove_common_prefix=False)
+        """Test the zip extracting to a specific target"""
+        self.environment.run_feature("zip_with_target", "sync")
+        extract_zip.assert_called_with(
+            TEST_ZIP, "/testpath", remove_common_prefix=False
+        )
 
-    @patch.object(lib, 'extract_dmg')
+    @patch.object(lib, "extract_dmg")
     def test_dmg_with_target(self, extract_dmg):
-        """ Test the dmg extracting to a specific target """
+        """Test the dmg extracting to a specific target"""
         with set_os_types(osx=True):
-            self.environment.run_feature("dmg_with_target", 'sync')
-            extract_dmg.assert_called_with(TEST_DMG, '/testpath', remove_common_prefix=False)
+            self.environment.run_feature("dmg_with_target", "sync")
+            extract_dmg.assert_called_with(
+                TEST_DMG, "/testpath", remove_common_prefix=False
+            )
 
-    @patch.object(lib, 'extract_targz')
+    @patch.object(lib, "extract_targz")
     def test_targz_with_target(self, extract_targz):
-        """ Test the targz extracting to a specific target """
-        self.environment.run_feature("targz_with_target", 'sync')
-        extract_targz.assert_called_with(TEST_TARGZ, '/testpath', remove_common_prefix=False)
+        """Test the targz extracting to a specific target"""
+        self.environment.run_feature("targz_with_target", "sync")
+        extract_targz.assert_called_with(
+            TEST_TARGZ, "/testpath", remove_common_prefix=False
+        )

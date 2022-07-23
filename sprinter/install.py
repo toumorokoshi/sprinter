@@ -37,6 +37,7 @@ from sprinter.exceptions import SprinterException
 from sprinter.lib.request import BadCredentialsException
 from sprinter.core.globals import print_global_config, configure_config, write_config
 
+
 def signal_handler(signal, frame):
     print("\nShutting down sprinter...")
     sys.exit(0)
@@ -62,13 +63,17 @@ def error(message):
 
 
 def parse_args(argv, Environment=Environment):
-    options = docopt(__doc__, argv=argv, version= pkg_resources.get_distribution('sprinter').version)
-    logging_level = logging.DEBUG if options['--verbose'] else logging.INFO
+    options = docopt(
+        __doc__, argv=argv, version=pkg_resources.get_distribution("sprinter").version
+    )
+    logging_level = logging.DEBUG if options["--verbose"] else logging.INFO
     # start processing commands
-    env = Environment(logging_level=logging_level, ignore_errors=options['--ignore-errors'])
+    env = Environment(
+        logging_level=logging_level, ignore_errors=options["--ignore-errors"]
+    )
     try:
-        if options['install']:
-            target = options['<environment_source>']
+        if options["install"]:
+            target = options["<environment_source>"]
 
             def handle_install_shutdown(signal, frame):
                 if env.phase == PHASE.INSTALL:
@@ -76,98 +81,107 @@ def parse_args(argv, Environment=Environment):
                     env.directory.remove()
                     env.clear_all()
                 signal_handler(signal, frame)
+
             signal.signal(signal.SIGINT, handle_install_shutdown)
-            if options['--username'] or options['--auth']:
+            if options["--username"] or options["--auth"]:
                 options = get_credentials(options, parse_domain(target))
                 target = manifest.load_manifest(
                     target,
-                    username=options['<username>'],
-                    password=options['<password>'],
-                    verify_certificate=(not options['--allow-bad-certificate'])
+                    username=options["<username>"],
+                    password=options["<password>"],
+                    verify_certificate=(not options["--allow-bad-certificate"]),
                 )
             else:
                 target = manifest.load_manifest(
-                    target,
-                    verify_certificate=(not options['--allow-bad-certificate'])
+                    target, verify_certificate=(not options["--allow-bad-certificate"])
                 )
             env.target = target
-            if options['--namespace']:
-                env.namespace = options['--namespace']
-            if options['--local']:
+            if options["--namespace"]:
+                env.namespace = options["--namespace"]
+            if options["--local"]:
                 env.do_inject_environment_config = False
-                env.custom_directory_root = os.path.abspath(os.path.expanduser(options['--local']))
+                env.custom_directory_root = os.path.abspath(
+                    os.path.expanduser(options["--local"])
+                )
             env.install()
 
-        elif options['update']:
-            target = options['<environment_name>']
-            env.directory = Directory(os.path.join(env.root, target),
-                                      shell_util_path=env.shell_util_path)
+        elif options["update"]:
+            target = options["<environment_name>"]
+            env.directory = Directory(
+                os.path.join(env.root, target), shell_util_path=env.shell_util_path
+            )
             env.source = manifest.load_manifest(
                 env.directory.manifest_path, do_inherit=False
             )
-            use_auth = options['--username'] or options['--auth']
+            use_auth = options["--username"] or options["--auth"]
             if use_auth:
                 options = get_credentials(options, target)
             env.target = manifest.load_manifest(
                 env.source.source(),
-                username=options['<username>'] if use_auth else None,
-                password=options['<password>'] if use_auth else None,
-                verify_certificate=(not options['--allow-bad-certificate'])
+                username=options["<username>"] if use_auth else None,
+                password=options["<password>"] if use_auth else None,
+                verify_certificate=(not options["--allow-bad-certificate"]),
             )
-            env.update(reconfigure=options['--reconfigure'])
+            env.update(reconfigure=options["--reconfigure"])
 
         elif options["remove"]:
-            env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
-                                      shell_util_path=env.shell_util_path)
+            env.directory = Directory(
+                os.path.join(env.root, options["<environment_name>"]),
+                shell_util_path=env.shell_util_path,
+            )
             env.source = manifest.load_manifest(
                 env.directory.manifest_path,
-                namespace=options['<environment_name>'],
-                do_inherit=False
+                namespace=options["<environment_name>"],
+                do_inherit=False,
             )
             env.remove()
 
-        elif options['deactivate']:
-            env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
-                                      shell_util_path=env.shell_util_path)
+        elif options["deactivate"]:
+            env.directory = Directory(
+                os.path.join(env.root, options["<environment_name>"]),
+                shell_util_path=env.shell_util_path,
+            )
             env.source = manifest.load_manifest(
                 env.directory.manifest_path,
-                namespace=options['<environment_name>'],
-                do_inherit=False
+                namespace=options["<environment_name>"],
+                do_inherit=False,
             )
             env.deactivate()
 
-        elif options['activate']:
-            env.directory = Directory(os.path.join(env.root, options['<environment_name>']),
-                                      shell_util_path=env.shell_util_path)
+        elif options["activate"]:
+            env.directory = Directory(
+                os.path.join(env.root, options["<environment_name>"]),
+                shell_util_path=env.shell_util_path,
+            )
             env.source = manifest.load_manifest(
                 env.directory.manifest_path,
-                namespace=options['<environment_name>'],
-                do_inherit=False
+                namespace=options["<environment_name>"],
+                do_inherit=False,
             )
             env.activate()
 
-        elif options['list']:
+        elif options["list"]:
             for _env in os.listdir(env.root):
                 if _env != ".global":
                     print(_env)
 
-        elif options['validate']:
-            if options['--username'] or options['--auth']:
+        elif options["validate"]:
+            if options["--username"] or options["--auth"]:
                 options = get_credentials(options, parse_domain(target))
                 target = manifest.load_manifest(
-                    options['<environment_source>'],
-                    username=options['<username>'],
-                    password=options['<password>'],
-                    verify_certificate=(not options['--allow-bad-certificate'])
+                    options["<environment_source>"],
+                    username=options["<username>"],
+                    password=options["<password>"],
+                    verify_certificate=(not options["--allow-bad-certificate"]),
                 )
-            env.target = options['<environment_source>']
+            env.target = options["<environment_source>"]
             env.validate()
             if not env.error_occured:
                 print("No errors! Manifest is valid!")
             else:
                 "Manifest is invalid! Please see errors above."
-        elif options['globals']:
-            if options['--reconfigure']:
+        elif options["globals"]:
+            if options["--reconfigure"]:
                 configure_config(env.global_config, reconfigure=True)
                 write_config(env.global_config, env.global_config_path)
             else:
@@ -184,34 +198,43 @@ def parse_args(argv, Environment=Environment):
     except Exception:
         e = sys.exc_info()[1]
         env.log_error(str(e))
-        env.logger.info("""
+        env.logger.info(
+            """
 =====================================================================
 the sprinter action failed! Writing debug output to /tmp/sprinter.log
-        """)
+        """
+        )
         env.write_debug_log("/tmp/sprinter.log")
         if env.message_failure():
             env.logger.info(env.message_failure())
-        env.logger.info("""
+        env.logger.info(
+            """
 =====================================================================
-        """.strip())
+        """.strip()
+        )
         raise
 
 
 def parse_domain(url):
-    """ parse the domain from the url """
+    """parse the domain from the url"""
     domain_match = lib.DOMAIN_REGEX.match(url)
     if domain_match:
         return domain_match.group()
 
 
 def get_credentials(options, environment):
-    """ Get credentials or prompt for them from options """
-    if options['--username'] or options['--auth']:
-        if not options['--username']:
-            options['<username>'] = lib.prompt("Please enter the username for %s..." % environment)
-        if not options['--password']:
-            options['<password>'] = lib.prompt("Please enter the password for %s..." % environment, secret=True)
+    """Get credentials or prompt for them from options"""
+    if options["--username"] or options["--auth"]:
+        if not options["--username"]:
+            options["<username>"] = lib.prompt(
+                "Please enter the username for %s..." % environment
+            )
+        if not options["--password"]:
+            options["<password>"] = lib.prompt(
+                "Please enter the password for %s..." % environment, secret=True
+            )
     return options
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

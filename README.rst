@@ -2,14 +2,15 @@
 sprinter
 ========
 
+Deprecation!
+------------
 
-.. image:: https://travis-ci.org/toumorokoshi/sprinter.png
-   :alt: build status
-   :target: https://travis-ci.org/toumorokoshi/sprinter
+Note: this package is now deprecated and is not actively updating.
 
-.. image:: https://d2weczhvl823v0.cloudfront.net/toumorokoshi/sprinter/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
+It is currently using and outdated, insecure version of pip (9.0.1). Use at your own risk.
+
+For those interested in an alternative, check out provisioning tools such as Chef (https://chef.io), or
+look at https://github.com/toumorokoshi/ytlaces for a similar example in Puppet.
 
 Installation
 ------------

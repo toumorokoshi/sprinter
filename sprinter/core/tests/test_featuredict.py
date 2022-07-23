@@ -32,8 +32,8 @@ formula = sprinter.formula.base
 """.strip()
 
 
-class TestFeatureDict():
-    """ Tests for the featuredict """
+class TestFeatureDict:
+    """Tests for the featuredict"""
 
     def setup(self):
         source_rawconfig = configparser.RawConfigParser()
@@ -44,15 +44,21 @@ class TestFeatureDict():
         target_rawconfig.readfp(StringIO(target_config))
         self.target_manifest = Manifest(target_rawconfig)
 
-        self.feature_dict = FeatureDict(Mock(),
-                                        self.source_manifest,
-                                        self.target_manifest,
-                                        "dummy_path")
+        self.feature_dict = FeatureDict(
+            Mock(), self.source_manifest, self.target_manifest, "dummy_path"
+        )
 
     def test_run_order(self):
-        """ run_order should return the order in which features should run """
-        eq_(set(self.feature_dict.run_order), set([('install_with_rc', 'sprinter.formula.base'),
-                                                   ('install_with_command', 'sprinter.formula.base'),
-                                                   ('osx', 'sprinter.formula.base'),
-                                                   ('osx2', 'sprinter.formula.base'),
-                                                   ('debian', 'sprinter.formula.base')]))
+        """run_order should return the order in which features should run"""
+        eq_(
+            set(self.feature_dict.run_order),
+            set(
+                [
+                    ("install_with_rc", "sprinter.formula.base"),
+                    ("install_with_command", "sprinter.formula.base"),
+                    ("osx", "sprinter.formula.base"),
+                    ("osx2", "sprinter.formula.base"),
+                    ("debian", "sprinter.formula.base"),
+                ]
+            ),
+        )

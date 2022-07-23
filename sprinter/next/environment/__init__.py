@@ -1,10 +1,6 @@
 from ..exceptions import SprinterException
 
-EXAMPLE_CONFIG = {
-    "ssh": {
-        "formula": "sprinter.formula.command"
-    }
-}
+EXAMPLE_CONFIG = {"ssh": {"formula": "sprinter.formula.command"}}
 
 
 class EnvironmentException(SprinterException):
@@ -12,7 +8,6 @@ class EnvironmentException(SprinterException):
 
 
 class Environment(object):
-
     def __init__(self, config):
         validate(config)
         pass

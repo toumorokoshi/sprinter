@@ -30,24 +30,23 @@ class TestPerforceFormula(FormulaTest):
     """
     Tests for the command formula.
     """
+
     def setup(self):
         self.temp_dir = tempfile.mkdtemp()
         super(TestPerforceFormula, self).setup(
             source_config=source_config,
-            target_config=target_config.format(
-                tmpdir=self.temp_dir
-            )
+            target_config=target_config.format(tmpdir=self.temp_dir),
         )
 
     def teardown(self):
-        del(self.environment)
+        del self.environment
         shutil.rmtree(self.temp_dir)
 
-    @attr('full')
+    @attr("full")
     def test_install(self):
-        with patch('sprinter.lib.extract_targz') as extract_targz:
+        with patch("sprinter.lib.extract_targz") as extract_targz:
             with set_os_types(debian=True):
-                with patch('sprinter.lib.call') as call:
-                    self.environment.run_feature("install", 'sync')
+                with patch("sprinter.lib.call") as call:
+                    self.environment.run_feature("install", "sync")
                     ok_(extract_targz.called)
                     # ok_(call.called)

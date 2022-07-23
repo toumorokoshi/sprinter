@@ -1,8 +1,8 @@
 import os
 from .state import SprinterState
 
-class Sprinter(object):
 
+class Sprinter(object):
     def __init__(self, root, state_file="state.yaml"):
         # typically, the root is the user's
         # home directory.

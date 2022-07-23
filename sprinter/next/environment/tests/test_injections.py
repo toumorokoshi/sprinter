@@ -42,7 +42,7 @@ def injections():
 
 
 def test_backup_file_created(test_file, injections):
-    """ test a backup file is created. """
+    """test a backup file is created."""
     injections.inject(test_file.strpath, TEST_INJECTION)
     injections.commit()
     assert os.path.exists(test_file.strpath + ".sprinter.bak")
@@ -53,21 +53,26 @@ def test_backup_file_created(test_file, injections):
 
 
 def test_injection(test_file, injections):
-    """ test a complete injection workflow. """
+    """test a complete injection workflow."""
     injections.inject(test_file.strpath, TEST_INJECTION)
     injections.commit()
-    assert test_file.read().count(TEST_INJECTION) > 0,\
-        "Injection was not injected properly!"
-    assert test_file.read().count(TEST_INJECTION) == 1,\
-        "Multiple injections were found!"
-    assert test_file.read().find(PERMANENT_STRING) != -1,\
-        "Permanent string was removed on inject!"
+    assert (
+        test_file.read().count(TEST_INJECTION) > 0
+    ), "Injection was not injected properly!"
+    assert (
+        test_file.read().count(TEST_INJECTION) == 1
+    ), "Multiple injections were found!"
+    assert (
+        test_file.read().find(PERMANENT_STRING) != -1
+    ), "Permanent string was removed on inject!"
     injections.clear(test_file.strpath)
     injections.commit()
-    assert test_file.read().find(TEST_INJECTION) == -1,\
-        "Injection was not cleared properly!"
-    assert test_file.read().find(PERMANENT_STRING) != -1,\
-        "Permanent string was removed on clear!"
+    assert (
+        test_file.read().find(TEST_INJECTION) == -1
+    ), "Injection was not cleared properly!"
+    assert (
+        test_file.read().find(PERMANENT_STRING) != -1
+    ), "Permanent string was removed on clear!"
 
 
 def test_similar_injectionname(test_file, injections):
@@ -77,39 +82,42 @@ def test_similar_injectionname(test_file, injections):
     i_similiar = Injections("testinjectionsagain")
     i_similiar.inject(test_file.strpath, SIMILAR_INJECTION)
     i_similiar.commit()
-    assert test_file.read().count(SIMILAR_INJECTION) > 0,\
-        "Similar injection was removed!"
-    assert test_file.read().count(SIMILAR_INJECTION) == 1,\
-        "Multiple injections were found!"
+    assert (
+        test_file.read().count(SIMILAR_INJECTION) > 0
+    ), "Similar injection was removed!"
+    assert (
+        test_file.read().count(SIMILAR_INJECTION) == 1
+    ), "Multiple injections were found!"
     injections.clear(test_file.strpath)
     injections.commit()
-    assert test_file.read().find(TEST_INJECTION) == -1,\
-        "Injection was not cleared properly!"
-    assert test_file.read().find(SIMILAR_INJECTION) > 0,\
-        "Similar Injection was incorrectly cleared!"
+    assert (
+        test_file.read().find(TEST_INJECTION) == -1
+    ), "Injection was not cleared properly!"
+    assert (
+        test_file.read().find(SIMILAR_INJECTION) > 0
+    ), "Similar Injection was incorrectly cleared!"
 
 
 def test_override(injections):
-    """ Test the override functionality """
+    """Test the override functionality"""
     c = injections.inject_content(TEST_CONTENT, "injectme")
-    assert c == TEST_OVERRIDE_CONTENT,\
-        "Override result is different from expected."
+    assert c == TEST_OVERRIDE_CONTENT, "Override result is different from expected."
 
 
 def test_unicode():
-    """ Test the unicode functionality """
+    """Test the unicode functionality"""
     i = Injections("\xf0\x9f\x86\x92", override="OVERRIDE")
     i.inject_content(TEST_CONTENT, "injectme")
 
 
 def test_injected(test_file, injections):
-    """ Test the injected method to determine if a file has already been injected..."""
-    assert not injections.injected(test_file.strpath),\
-        "Injected check returned true when not injected yet."
+    """Test the injected method to determine if a file has already been injected..."""
+    assert not injections.injected(
+        test_file.strpath
+    ), "Injected check returned true when not injected yet."
     injections.inject(test_file.strpath, TEST_INJECTION)
     injections.commit()
-    assert injections.injected(test_file.strpath),\
-        "Injected check returned false"
+    assert injections.injected(test_file.strpath), "Injected check returned false"
 
 
 def test_in_noninjected_file(test_file, injections):
@@ -117,8 +125,9 @@ def test_in_noninjected_file(test_file, injections):
     in_noninjected_file should return true if a string exists
     non-injected and false it only exists in injected
     """
-    assert not injections.injected(test_file.strpath),\
-        "Injected check returned true when not injected yet."
+    assert not injections.injected(
+        test_file.strpath
+    ), "Injected check returned true when not injected yet."
     injections.inject(test_file.strpath, TEST_INJECTION)
     injections.commit()
     assert injections.in_noninjected_file(test_file.strpath, PERMANENT_STRING)
@@ -145,7 +154,7 @@ non-override content
 
 
 def test_created(tmpdir, injections):
-    """ Test the injection creates a file if it does not exist """
+    """Test the injection creates a file if it does not exist"""
     new_file = os.path.join(tmpdir.strpath, "testcreated")
     injections.inject(new_file, TEST_INJECTION)
     injections.commit()
@@ -153,7 +162,7 @@ def test_created(tmpdir, injections):
 
 
 def test_clear_nonexistent_file(tmpdir):
-    """ clear should not create a file """
+    """clear should not create a file"""
     i = Injections("testinjection")
     new_file = os.path.join(tmpdir.strpath, "dontcreateme")
     i.clear(new_file)

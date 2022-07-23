@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ParamNotFoundException(Exception):
-    """ Exception for a parameter not being found """
+    """Exception for a parameter not being found"""
 
 
 class FeatureConfig(object):
@@ -49,13 +49,15 @@ class FeatureConfig(object):
             except KeyError:
                 e = sys.exc_info()[1]
                 key = e.args[0]
-                if key.startswith('config:'):
-                    missing_key = key.split(':')[1]
+                if key.startswith("config:"):
+                    missing_key = key.split(":")[1]
                     if self.manifest.inputs.is_input(missing_key):
                         val = self.manifest.inputs.get_input(missing_key)
                         context_dict[key] = val
                 else:
-                    logger.warn("Could not specialize %s! Error: %s" % (self.raw_dict[param], e))
+                    logger.warn(
+                        "Could not specialize %s! Error: %s" % (self.raw_dict[param], e)
+                    )
                     return self.raw_dict[param]
             except ValueError:
                 # this is an esoteric error, and this implementation
@@ -68,38 +70,38 @@ class FeatureConfig(object):
         return cur_value
 
     def has(self, param):
-        """ return true if the param exists """
+        """return true if the param exists"""
         return param in self.raw_dict
 
     def set(self, param, value):
-        """ sets the param to the value provided """
+        """sets the param to the value provided"""
         self.raw_dict[param] = value
         self.manifest.set(self.feature_name, param, value)
 
     def remove(self, param):
-        """ Remove a parameter from the manifest """
+        """Remove a parameter from the manifest"""
         if self.has(param):
-            del(self.raw_dict[param])
+            del self.raw_dict[param]
             self.manifest.remove_option(self.feature_name, param)
 
     def keys(self):
-        """ return all of the keys in the config """
+        """return all of the keys in the config"""
         return self.raw_dict.keys()
 
     def is_affirmative(self, param, default=None):
         return lib.is_affirmative(self.get(param, default=default))
 
     def set_if_empty(self, param, default):
-        """ Set the parameter to the default if it doesn't exist """
+        """Set the parameter to the default if it doesn't exist"""
         if not self.has(param):
             self.set(param, default)
 
     def to_dict(self):
-        """ Returns the context, fully specialized, as a dictionary """
+        """Returns the context, fully specialized, as a dictionary"""
         return dict((k, str(self.get(k))) for k in self.raw_dict)
 
     def write_to_manifest(self):
-        """ Overwrites the section of the manifest with the featureconfig's value """
+        """Overwrites the section of the manifest with the featureconfig's value"""
         self.manifest.remove_section(self.feature_name)
         self.manifest.add_section(self.feature_name)
         for k, v in self.raw_dict.items():

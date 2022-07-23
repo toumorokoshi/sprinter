@@ -10,7 +10,6 @@ class FormulaException(SprinterException):
 
 
 class Formula(object):
-
     def __init__(self, config):
         pass
 

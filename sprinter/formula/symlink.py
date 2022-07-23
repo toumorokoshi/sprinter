@@ -14,18 +14,19 @@ from sprinter.exceptions import FormulaException
 
 import os
 
+
 class SymlinkFormulaException(FormulaException):
     pass
 
 
 class SymlinkFormula(FormulaBase):
 
-    valid_options = FormulaBase.valid_options + ['source', 'target']
+    valid_options = FormulaBase.valid_options + ["source", "target"]
     # validated internally, until the deprecated options are removed
-    _required_options = ['source', 'target']
+    _required_options = ["source", "target"]
     deprecated_options = {
-        'src': 'Option "src" in {feature} has been deprecated, use "source" instead',
-        'dest': 'Option "dest" in {feature} has been deprecated, use "target" instead'
+        "src": 'Option "src" in {feature} has been deprecated, use "source" instead',
+        "dest": 'Option "dest" in {feature} has been deprecated, use "target" instead',
     }
 
     def install(self):
@@ -38,8 +39,10 @@ class SymlinkFormula(FormulaBase):
         target_opts = self.__get_options(self.target)
 
         # compare old and new link source and link target
-        if (source_opts['source'] != target_opts['source'] or
-            source_opts['target'] != target_opts['target']):
+        if (
+            source_opts["source"] != target_opts["source"]
+            or source_opts["target"] != target_opts["target"]
+        ):
             self.__remove_symlink(**source_opts)
             self.__create_symlink(**target_opts)
 
@@ -52,8 +55,9 @@ class SymlinkFormula(FormulaBase):
             for k in self._required_options:
                 if k not in target_opts:
                     error_message = "Required option {option} not present in feature {feature}!".format(
-                        option=k, feature=self.feature_name)
-                    if self.target.is_affirmative('fail_on_error', False):
+                        option=k, feature=self.feature_name
+                    )
+                    if self.target.is_affirmative("fail_on_error", False):
                         self._log_error(error_message)
                     else:
                         self.logger.error(error_message)
@@ -71,23 +75,23 @@ class SymlinkFormula(FormulaBase):
 
     def deactivate(self):
         source_opts = self.__get_options(self.source)
-        if self.source.is_affirmative('active_only', True):
+        if self.source.is_affirmative("active_only", True):
             self.__remove_symlink(**source_opts)
         FormulaBase.deactivate(self)
 
     def __get_options(self, config):
-        fail_on_error = config.is_affirmative('fail_on_error', False)
-        if config.has('source'):
+        fail_on_error = config.is_affirmative("fail_on_error", False)
+        if config.has("source"):
             return {
-                'source': config.get('source'),
-                'target': config.get('target'),
-                'fail_on_error': config.is_affirmative('fail_on_error', False)
+                "source": config.get("source"),
+                "target": config.get("target"),
+                "fail_on_error": config.is_affirmative("fail_on_error", False),
             }
         else:
             return {
-                'source': config.get('src'),
-                'target': config.get('dest'),
-                'fail_on_error': config.is_affirmative('fail_on_error', False)
+                "source": config.get("src"),
+                "target": config.get("dest"),
+                "fail_on_error": config.is_affirmative("fail_on_error", False),
             }
 
     def __create_symlink(self, source, target, fail_on_error):
@@ -100,12 +104,16 @@ class SymlinkFormula(FormulaBase):
         if os.path.islink(link_source):
             os.unlink(link_source)
 
-        self.logger.debug("Creating symbolic link {0}@ > {1}".format(link_source, link_target))
+        self.logger.debug(
+            "Creating symbolic link {0}@ > {1}".format(link_source, link_target)
+        )
         try:
             # os.symlink's documentation calls the link target source :/
             os.symlink(link_source, link_target)
         except OSError:
-            error_message = "Failed trying to create symlink {source}!".format(source=link_source)
+            error_message = "Failed trying to create symlink {source}!".format(
+                source=link_source
+            )
             if fail_on_error:
                 raise SymlinkFormulaException(error_message)
             else:
@@ -117,7 +125,9 @@ class SymlinkFormula(FormulaBase):
         link_target = os.path.expanduser(target)
 
         if os.path.islink(link_source):
-            self.logger.debug("Removing symbolic link {0}@ > {1}".format(link_source, link_target))
+            self.logger.debug(
+                "Removing symbolic link {0}@ > {1}".format(link_source, link_target)
+            )
             if os.path.islink(link_source):
                 os.unlink(link_source)
         return True

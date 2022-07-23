@@ -9,6 +9,7 @@ from sprinter.feature import Feature
 def directory(tmpdir):
     return Directory(tmpdir.dirname)
 
+
 @pytest.fixture
 def environment(directory):
     mock = Mock()
@@ -19,6 +20,7 @@ def environment(directory):
 @pytest.fixture
 def formula_base(environment):
     return FormulaBase(environment, "foo")
+
 
 @pytest.fixture
 def feature(formula_base):
