@@ -17,7 +17,7 @@ setup(
     install_requires=[
         "clint>=0.3.3",
         "docopt>=0.6.1",
-        "pip==9.0.1",
+        "pip==21.1",
         "requests>=2.3.0",
         "six>=1.4.1",
         "virtualenv>=15.1.0,<16",
