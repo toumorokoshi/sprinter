@@ -5,12 +5,16 @@ sprinter
 Deprecation!
 ------------
 
-Note: this package is now deprecated and is not actively updating.
+Note: this package is now deprecated and is not actively updating. This repo is
+now archived.
 
 It is currently using and outdated, insecure version of pip (9.0.1). Use at your own risk.
 
 For those interested in an alternative, check out provisioning tools such as Chef (https://chef.io), or
 look at https://github.com/toumorokoshi/ytlaces for a similar example in Puppet.
+
+Feel free to reach out to @toumorokoshi if you have any issues that would
+require the repo be unarchived.
 
 Installation
 ------------
